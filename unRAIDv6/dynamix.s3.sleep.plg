@@ -7,11 +7,8 @@
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.s3.sleep.plg">
 ]>
 
-<PLUGIN  name="&name;"
-         author="&author;"
-         version="&version;"
-         pluginURL="&pluginURL;"
->
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+
 <!--
 Copyright 2014, Bergware International
 Dynamix S3 Sleep - Manual and automatic sleep mode

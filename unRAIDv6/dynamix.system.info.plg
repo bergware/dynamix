@@ -7,11 +7,8 @@
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.info.plg">
 ]>
 
-<PLUGIN  name="&name;"
-         author="&author;"
-         version="&version;"
-         pluginURL="&pluginURL;"
->
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+
 <!--
 Copyright 2014, Bergware International
 Dynamix System Information - System hardware and BIOS details

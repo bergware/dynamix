@@ -7,11 +7,8 @@
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.cache.dirs.plg">
 ]>
 
-<PLUGIN  name="&name;"
-         author="&author;"
-         version="&version;"
-         pluginURL="&pluginURL;"
->
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+
 <!--
 Copyright 2014, Bergware International
 Dynamix Folder Caching - Store names in memory to avoid disk spin-ups. Makes use of cache_dirs script written by Joe L.
