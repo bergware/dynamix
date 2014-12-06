@@ -31,7 +31,7 @@ rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version
 The 'source' file.
 -->
 <FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;-&version;.txz</URL>
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
 </FILE>
 
 <!--
