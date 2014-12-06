@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="Mover Settings"
+Menu="ShareSettingsMenu:3"
+Type="php"
+Cond="(($var['shareUser']!='-')&&(isset($disks['cache']))&&($disks['cache']['status']!='DISK_NP')&&($var['shareCacheEnabled']=='yes'))"

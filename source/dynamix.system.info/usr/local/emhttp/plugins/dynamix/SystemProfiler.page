@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="System Profiler"
+Menu="SystemInformation"
+Icon="images/dynamix.system.info.png"
+Type="php"

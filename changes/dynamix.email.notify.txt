@@ -1,0 +1,26 @@
+Release notes v2.1.3
+====================
+- Changed: no error email when none-present disk
+
+Release notes v2.1.2
+====================
+- Added: warning when user enters password with # character
+- Fixed: unRAID notification system
+
+Release notes v2.1.1
+====================
+Updated: openssl version
+
+Release notes v2.1.0
+====================
+Aligned unRAID v5/v6 release
+Fixed: PHP code run in version 5.2, 5.3 and 5.4
+Added: DONE button on SMTP settings page
+
+Release notes v2.0.1
+====================
+Public release
+
+Release notes v2.0.0
+====================
+Initial release

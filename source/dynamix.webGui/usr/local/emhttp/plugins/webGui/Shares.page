@@ -1,0 +1,5 @@
+Author="Bergware"
+Version="1.2.1"
+Menu="Tasks:2"
+Type="xmenu"
+Cond="($var['shareUser']=='e')"

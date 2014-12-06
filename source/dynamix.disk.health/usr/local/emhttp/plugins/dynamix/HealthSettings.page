@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="Disk Health"
+Menu="Utilities"
+Icon="images/dynamix.disk.health.png"
+Type="php"

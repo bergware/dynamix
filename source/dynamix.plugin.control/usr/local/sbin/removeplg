@@ -1,0 +1,47 @@
+#!/usr/bin/php
+<?PHP
+// Plugin removal script.
+// 2013-12-31 Bergware International
+
+function remove_plugin($plugin_file) {
+  $plugin_name = basename($plugin_file, ".plg");
+  echo "Removing plugin: $plugin_name", PHP_EOL;
+  // parase plugin definition XML file
+  $xml = simplexml_load_file($plugin_file, NULL, LIBXML_NOCDATA);
+  if ($xml === FALSE) {
+    echo " xml parse error", PHP_EOL;
+    return FALSE;
+  }
+  foreach ($xml->FILE as $file) {
+    $name = $file->attributes()->Name;
+    if ($file->LOCAL) {
+      echo "Removing LOCAL file: $name - ";
+      if (is_file($name)) {if (unlink($name)) echo "success", PHP_EOL; else echo "failed", PHP_EOL;}
+    }
+    else if ($file->INLINE) {
+      echo "Removing INLINE file: $name - ";
+      if (is_file($name)) {if (unlink($name)) echo "success", PHP_EOL; else echo "failed", PHP_EOL;}
+    }
+    else if ($file->attributes()->Run) {
+      system("removepkg $name", $retval);
+    }
+    else if ($file->URL) {
+      echo "Removing file: $name - ";
+      if (is_file($name)) {if (unlink($name)) echo "success", PHP_EOL; else echo "failed", PHP_EOL;}
+    }
+  }
+  echo "Plugin successfully removed ...", PHP_EOL;
+  return TRUE;
+}
+
+$usage = <<<EOF
+Usage: removeplg <plugin_filename>
+
+removeplg is used to remove a .plg plugin xml file.
+
+EOF;
+
+// Gittyup
+if ($argc != 2) echo $usage;
+else            remove_plugin( $argv[1]);
+?>

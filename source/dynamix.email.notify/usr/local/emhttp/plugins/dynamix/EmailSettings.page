@@ -1,0 +1,5 @@
+Author="Bergware"
+Version="1.2.1"
+Menu="EmailSettingsMenu:1"
+Title="Email Settings"
+Type="php"

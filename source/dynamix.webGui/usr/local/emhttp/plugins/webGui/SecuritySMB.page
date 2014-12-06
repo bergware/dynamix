@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="SMB Security Settings"
+Menu="Cache Data Flash Share"
+Type="php"
+Cond="(($var['shareSMBEnabled']=='yes') && (isset($name)?array_key_exists($name,$sec):0))"

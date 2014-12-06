@@ -1,0 +1,26 @@
+Release notes v2.1.1
+====================
+Fixed: problem that s3_sleep -ED fails when no cache is present (thanks to SlrG)
+Fixed: problem that set idle threshold was not displayed in settings dialog (thanks to SlrG)
+
+Release notes v2.1.0
+====================
+Aligned unRAID v5/v6 release
+Fixed: PHP code run in version 5.2, 5.3 and 5.4
+
+Release notes v2.0.3
+====================
+Fixed: typo in include/exclude list generation
+
+Release notes v2.0.2
+====================
+Added: possibility in include/exclude drive outside array (SlrG)
+
+Public release
+Release notes v2.0.1
+====================
+Public release
+
+Release notes v2.0.0
+====================
+Initial release

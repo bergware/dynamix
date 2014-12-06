@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<head>
+<title></title>
+<link type="text/css" rel="stylesheet" href="/plugins/webGui/fonts/dynamix.css">
+<style>
+.logLine {font-family:bitstream,courier,monospace;font-size:10px;color:#505050;}
+</style>
+<script>
+function addLog(logLine) {
+  document.body.innerHTML += logLine;
+  window.scrollTo(0,document.body.scrollHeight);
+}
+function addCloseButton() {
+  addLog("<p><button class='logLine' type='button' onclick='window.close()'>close</button>");
+}
+</script>
+</head>
+<body class="logLine" onload="addCloseButton()">
+</body>
+</html>

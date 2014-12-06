@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="DNS Server"
+Menu="NetworkServices:999"
+Icon="images/dynamix.dns.server.png"
+Type="php"

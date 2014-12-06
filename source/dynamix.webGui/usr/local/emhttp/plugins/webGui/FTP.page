@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="FTP Server"
+Menu="NetworkServices:999"
+Icon="images/ftp-server.png"
+Type="php"

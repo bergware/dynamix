@@ -1,0 +1,100 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY plugin "dynamix.active.streams">
+<!ENTITY version "2.0.4">
+<!ENTITY pkg "/boot/packages">
+<!ENTITY rom "/boot/config/plugins/dynamix">
+<!ENTITY img "/boot/config/plugins/images">
+<!ENTITY gui "/usr/local/emhttp/plugins">
+<!ENTITY log "/var/log/packages">
+<!ENTITY reg "/var/log/plugins">
+<!ENTITY src "https://raw.github.com/bergware/dynamix/master/download">
+]>
+
+<PLUGIN>
+<!--
+Copyright 2013, Bergware International
+Dynamix Active Streams - Real-time monitoring of SMB shares
+
+Version history:
+ 2014-01-19 - version 2.0.4 : Point release
+ 2014-01-14 - version 2.0.3 : Point release
+ 2013-12-27 - version 2.0.2 : Point release
+ 2013-12-21 - version 2.0.1 : Public release
+ 2013-12-01 - version 2.0.0 : Initial release
+
+Plugin file locations:
+ /boot/config/plugins/dynamix.active.streams-0.0.0-noarch-bergware.plg    # this file
+ /boot/config/plugins/dynamix/dynamix.active.streams-0.0.0-i486-1.txz     # executable code
+ /boot/config/plugins/images/dynamix.active.streams.png                   # icon file
+ /boot/config/plugins/dynamix/dynamix.active.streams.cfg                  # non-volatile settings
+ /var/log/plugins/dynamix.active.streams                                  # plugin registration
+-->
+
+<FILE Name="/tmp/plugin-startup" Run="/bin/bash">
+<INLINE>
+if [ -f /var/log/plugins/dynamix.webGui ]; then
+# Prepare plugin
+  rm -f $(ls &rom;/&plugin;*.t[xg]z 2>/dev/null | grep -v '&version;')
+  rm -f &reg;/&plugin;
+  rm -f /tmp/plugin-install
+# Proceed
+  code=0
+else
+# Dynamix webGui not present
+  echo "missing Dynamix webGui plugin !!!"
+# Terminate
+  code=1
+fi
+# Remove this script
+rm -f /tmp/plugin-startup
+exit $code
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;.cfg">
+<INLINE>
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;-&version;-i486-1.txz" Run="upgradepkg --install-new">
+<URL>--no-check-certificate &src;/&plugin;-&version;-i486-1.txz</URL>
+</FILE>
+
+<FILE Name="&img;/&plugin;.png">
+<URL>--no-check-certificate &src;/&plugin;.png</URL>
+</FILE>
+
+<FILE Name="&gui;/dynamix/images/&plugin;.png">
+<LOCAL>&img;/&plugin;.png</LOCAL>
+</FILE>
+
+<FILE Name="/tmp/plugin-install" Run="/bin/bash">
+<INLINE>
+ini="&rom;/&plugin;.cfg"
+echo "executing !"
+
+# Update file access mode
+chmod 600 $(awk '/(\.htm$|\.php$|\.js$|\.page$|\.css$|\.png$|\.gif$)/ {print "/"$0}' &log;/&plugin;-&version;-i486-1)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &plugin; has been installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2013, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+
+# Remove this install file - we are done!
+rm -f /tmp/plugin-install
+</INLINE>
+</FILE>
+
+<FILE Name="&reg;/&plugin;">
+<INLINE>
+&plugin; v&version;
+</INLINE>
+</FILE>
+</PLUGIN>

@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="NFS Security Settings"
+Menu="Cache Data Share"
+Type="php"
+Cond="(($var['shareNFSEnabled']=='yes') && (isset($name)?array_key_exists($name,$sec_nfs):0))"

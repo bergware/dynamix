@@ -1,0 +1,151 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY plugin "dynamix.system.stats">
+<!ENTITY version "2.0.3">
+<!ENTITY pkg "/boot/packages">
+<!ENTITY rom "/boot/config/plugins/dynamix">
+<!ENTITY img "/boot/config/plugins/images">
+<!ENTITY gui "/usr/local/emhttp/plugins">
+<!ENTITY log "/var/log/packages">
+<!ENTITY reg "/var/log/plugins">
+<!ENTITY src "https://raw.github.com/bergware/dynamix/master/download">
+]>
+
+<PLUGIN>
+<!--
+Copyright 2013, Bergware International
+Dynamix System Stats - disk and system usage graphs
+
+Version history:
+ 2014-01-03 - version 2.0.3 : Point release
+ 2013-12-27 - version 2.0.2 : Point release
+ 2013-12-21 - version 2.0.1 : Public release
+ 2013-12-01 - version 2.0.0 : Initial release
+
+Plugin file locations:
+ /boot/config/plugins/dynamix.system.stats-0.0.0-noarch-bergware.plg      # this file
+ /boot/config/plugins/dynamix/dynamix.system.stats-0.0.0-i486-1.txz       # executable code
+ /boot/config/plugins/images/dynamix.system.stats.png                     # icon file
+ /boot/config/plugins/dynamix/dynamix.system.stats.cfg                    # non-volatile settings
+ /var/log/plugins/dynamix.system.stats                                    # plugin registration
+
+ /etc/rc.d/rc.sysstat                                                     # control script
+-->
+
+<FILE Name="/tmp/plugin-startup" Run="/bin/bash">
+<INLINE>
+if [ -f /var/log/plugins/dynamix.webGui ]; then
+# Prepare plugin
+  rm -f $(ls &rom;/&plugin;*.t[xg]z 2>/dev/null | grep -v '&version;')
+  rm -f &reg;/&plugin;
+  rm -f /tmp/plugin-install
+  rm -f /etc/rc.d/rc.sysstat
+# Proceed
+  code=0
+else
+# Dynamix webGui not present
+  echo "missing Dynamix webGui plugin !!!"
+# Terminate
+  code=1
+fi
+# Remove this script
+rm -f /tmp/plugin-startup
+exit $code
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;.cfg">
+<INLINE>
+critical="90"
+warning="70"
+text="left"
+cols="1"
+show="cpu,ram,com,hdd"
+port="eth0"
+unit="b"
+graph="0"
+frame="150"
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;-&version;-i486-1.txz" Run="upgradepkg --install-new">
+<URL>--no-check-certificate &src;/&plugin;-&version;-i486-1.txz</URL>
+</FILE>
+
+<FILE Name="&img;/&plugin;.png">
+<URL>--no-check-certificate &src;/&plugin;.png</URL>
+</FILE>
+
+<FILE Name="&gui;/dynamix/images/&plugin;.png">
+<LOCAL>&img;/&plugin;.png</LOCAL>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.sysstat" Mode="0770">
+<INLINE>
+#!/bin/sh
+RETVAL=0
+SYSCONFIG_DIR=/etc/sysstat
+SADC_options="-S DISK"
+
+case "$1" in
+'start')
+  exitCodeIndicator="$(mktemp /tmp/sysstat-XXXXXX)" || exit 1
+  echo -n "Calling the system activity data collector (sadc): "
+  /usr/lib/sa/sa1 --boot ${SADC_options} || rm -f ${exitCodeIndicator}
+
+# Try to guess if sadc was successfully launched. The difficulty
+# here is that the exit code is lost when the above command is
+# run via "su foo -c ..."
+  if [ -f "${exitCodeIndicator}" ]; then
+    rm -f ${exitCodeIndicator}
+  else
+    RETVAL=1
+  fi
+  echo
+;;
+'stop')
+;;
+*)
+  echo "Usage: $(basename $0) start|stop"
+esac
+exit ${RETVAL}
+</INLINE>
+</FILE>
+
+<FILE Name="/tmp/plugin-install" Run="/bin/bash">
+<INLINE>
+ini="&rom;/&plugin;.cfg"
+echo "executing !"
+
+# Create cron entry
+cron=/tmp/sa1.tmp
+crontab -l | grep -v '# System data' | grep -v '/sa/sa1' > $cron
+echo '# System data collection - poll every minute' >> $cron
+echo '*/1 * * * * /usr/lib/sa/sa1 1 1 &amp; 1>/dev/null 2>&amp;1' >> $cron
+crontab $cron
+rm -f $cron
+
+# Update file access mode
+chmod 600 $(awk '/(\.htm$|\.php$|\.js$|\.page$|\.css$|\.png$|\.gif$)/ {print "/"$0}' &log;/&plugin;-&version;-i486-1)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &plugin; has been installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2013, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+
+# Remove this install file - we are done!
+rm -f /tmp/plugin-install
+</INLINE>
+</FILE>
+
+<FILE Name="&reg;/&plugin;">
+<INLINE>
+&plugin; v&version;
+</INLINE>
+</FILE>
+</PLUGIN>

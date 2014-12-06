@@ -1,0 +1,5 @@
+Author="Bergware"
+Version="1.2.1"
+Title="Boot Device"
+Menu="Main:2"
+Type="php"

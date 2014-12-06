@@ -1,0 +1,20 @@
+#menuDiv{width:100%;padding:0;margin:0;text-align:left;}
+#headerDiv{height:40px;}
+#SystemProfilerStyleSidebar{width:19%;text-align:left;margin-top:4px;margin-left:0;padding-left:0;float:left;border-radius:5px;border:1px solid #808080;}
+#SystemProfilerStyleSidebar a{text-decoration:none;color:#787878;}
+#SystemProfilerStyleSidebar li{padding-top:5px;padding-bottom:5px;list-style:none;list-style-type:none;text-indent:10px;border-radius:5px;}
+#SystemProfilerStyleSidebar li span{width:100%;cursor:pointer;}
+#mainContent{width:80%;height:100%;margin-top:-20px;float:right;}
+#pagebody{clear:both;}
+.label{margin-top:23px;margin-bottom:23px;height:28px;line-height:28px;}
+.label span.left{font-size:14px;font-weight:bold;padding-left:8px;float:left;}
+.label span.right{font-size:10px;font-weight:normal;padding-right:0;float:right;}
+.current{background:#d8dfee;font-weight:bold;}
+.hoverClass{background:#edeff5;}
+.loadingIco{float:right;margin-right:10px;}
+table.health{width:auto;text-align:center;margin-top:2px;margin-bottom:6px;}
+table.health td{width:52px;}
+table.list{padding:10px;text-align:left;color:#787878;}
+table.list td:first-child{font-weight:600;width:30%;}
+table.list td{padding:2px 0;}
+table.list td.port{font-size:14px;font-weight:bold;color:#787878;}

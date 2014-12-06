@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="Cache Settings"
+Menu="ShareSettingsMenu:2"
+Type="php"
+Cond="(isset($disks['cache']))"

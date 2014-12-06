@@ -1,0 +1,39 @@
+Release notes v2.1.1
+====================
+Changed: remove timezone setting
+
+Release notes v2.1.0
+====================
+Aligned unRAID v5/v6 release
+Fixed: PHP code run in version 5.2, 5.3 and 5.4
+Fixed: not all disk shares were included
+
+Release notes v2.0.6
+====================
+Changed: external commands to PHP equivalents
+
+Release notes v2.0.5
+====================
+Added: support for Plex streams
+Fixed: duration of same file opened by different users
+
+Release notes v2.0.4
+====================
+Fixed: user/disk share display of streams
+
+Release notes v2.0.3
+====================
+Fixed: user names in active streams
+
+Release notes v2.0.2
+====================
+Fixed: column width of IP address
+Fixed: list of user names
+
+Release notes v2.0.1
+====================
+Public release
+
+Release notes v2.0.0
+====================
+Initial release

@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="Network Settings"
+Menu="OtherSettings"
+Icon="images/network-settings.png"
+Type="php"

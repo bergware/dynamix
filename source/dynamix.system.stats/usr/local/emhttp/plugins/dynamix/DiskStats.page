@@ -1,0 +1,5 @@
+Author="Bergware"
+Version="1.2.1"
+Menu="Stats:1"
+Title="Disk Stats"
+Type="php"

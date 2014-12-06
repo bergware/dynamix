@@ -1,0 +1,246 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY plugin "dynamix.email.notify">
+<!ENTITY version "2.1.0">
+<!ENTITY pkg "/boot/packages">
+<!ENTITY rom "/boot/config/plugins/dynamix">
+<!ENTITY img "/boot/config/plugins/images">
+<!ENTITY gui "/usr/local/emhttp/plugins">
+<!ENTITY log "/var/log/packages">
+<!ENTITY reg "/var/log/plugins">
+<!ENTITY src "https://raw.github.com/bergware/dynamix/master/download">
+<!ENTITY url "http://slackware.cs.utah.edu/pub/slackware">
+<!ENTITY dir "13.37">   <!-- select slackware version for packages, see list below -->
+<!ENTITY prune "false"> <!-- set prune to "true" to activate pruning -->
+]>
+
+<PLUGIN>
+<!--
+Copyright 2014, Bergware International
+Dynamix Email Notification - Automatic email reporting on critical conditions
+
+Version history:
+ 2014-01-23 - version 2.1.0 : unRAID v5/v6 alignment
+ 2013-12-27 - version 2.0.2 : Point release
+ 2013-12-21 - version 2.0.1 : Public release
+ 2013-12-01 - version 2.0.0 : Initial release
+
+Plugin file locations:
+ /boot/config/plugins/dynamix.email.notify-0.0.0-noarch-bergware.plg      # this file
+ /boot/config/plugins/dynamix/dynamix.email.notify-0.0.0-i486-1.txz       # executable code
+ /boot/config/plugins/images/dynamix.email.notify.png                     # icon file
+ /boot/config/plugins/dynamix/dynamix.email.notify.cfg                    # non-volatile settings
+ /var/log/plugins/dynamix.email.notify                                    # plugin registration
+
+ /boot/packages/*multiple-packages*                                       # supporting libraries
+ /etc/rc.d/rc.emailnotify                                                 # control script
+ /etc/unraid_notify.conf                                                  # email settings
+ /etc/ssmtp_config.conf                                                   # ssmtp settings
+ /etc/ssmtp_revaliases.conf                                               # alias settings
+-->
+
+<FILE Name="/tmp/plugin-startup" Run="/bin/bash">
+<INLINE>
+if [ -f /var/log/plugins/dynamix.webGui ]; then
+# Prepare plugin
+  rm -f $(ls &rom;/&plugin;*.t[xg]z 2>/dev/null | grep -v '&version;')
+  rm -f &reg;/&plugin;
+  rm -f /tmp/plugin-install
+  rm -f /etc/rc.d/rc.emailnotify
+# Prepare packages
+  rm -f /tmp/plugin-packages
+# Stop service
+  process="/usr/bin/unraid_notify"
+  pid=$(pidof -s -x $process)
+  if [ -n "$pid" ]; then
+    pkill -f $process 1>/dev/null 2>&amp;1
+  fi
+# Proceed
+  code=0
+else
+# Dynamix webGui not present
+  echo "missing Dynamix webGui plugin !!!"
+# Terminate
+  code=1
+fi
+# Remove this script
+rm -f /tmp/plugin-startup
+exit $code
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;.cfg">
+<INLINE>
+[email]
+service="0"
+[ssmtp]
+[alias]
+</INLINE>
+</FILE>
+
+<FILE Name="/tmp/plugin-packages">
+<INLINE>
+# Mandatory packages     13.1                13.37             14.0              14.1
+a openssl-solibs  txz    0.9.8y-i486-1       0.9.8y-i486-1     1.0.1e-i486-1     1.0.1e-i486-1     do-install    # openssl library
+n openssl         txz    0.9.8y-i486-1       0.9.8y-i486-1     1.0.1e-i486-1     1.0.1e-i486-1     do-install    # openssl library
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;-&version;-i486-1.txz" Run="upgradepkg --install-new">
+<URL>--no-check-certificate &src;/&plugin;-&version;-i486-1.txz</URL>
+</FILE>
+
+<FILE Name="&img;/&plugin;.png">
+<URL>--no-check-certificate &src;/&plugin;.png</URL>
+</FILE>
+
+<FILE Name="&gui;/dynamix/images/&plugin;.png">
+<LOCAL>&img;/&plugin;.png</LOCAL>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.emailnotify" Mode="0770">
+<INLINE>
+#!/bin/sh
+program="unraid_notify"
+execute="/usr/bin/$program"
+options="/etc/unraid_notify.conf"
+pid=$(pidof -s -x $execute)
+
+case "$1" in
+'start')
+  if [ -z "$pid" ]; then
+    $execute start 1>/dev/null 2>&amp;1
+    echo "$program started"
+  else
+    echo "$program already running!"
+  fi
+;;
+'stop')
+  if [ -n "$pid" ]; then
+    pkill -f $execute 1>/dev/null 2>&amp;1
+    timer=5
+    until [ -z "$(pidof -s -x $execute)" ] || [ $timer -eq 0 ]; do
+      timer=$((timer-1))
+      sleep 1
+    done
+    echo "$program stopped"
+  else
+    echo "$program not running!"
+  fi
+;;
+*)
+  echo "Usage: $(basename $0) start|stop"
+esac
+</INLINE>
+</FILE>
+
+<FILE Name="/tmp/plugin-install" Run="/bin/bash">
+<INLINE>
+cfg="&rom;/&plugin;.cfg"
+echo "executing !"
+
+install(){
+  while read -ra data; do
+    lc=${data[0]:0:1}
+    if [ -n "$lc" ] &amp;&amp; [ "$lc" != "#" ]; then
+      if [ "${data[7]}" != "no-install" ]; then
+        case "&dir;" in
+           '13.1') version=${data[3]} ;;
+          '13.37') version=${data[4]} ;;
+           '14.0') version=${data[5]} ;;
+           '14.1') version=${data[6]} ;;
+        esac
+        path=&url;/slackware-&dir;/slackware/${data[0]}
+        file=${data[1]}-${version}.${data[2]}
+        wget -q --spider $path/$file
+        if [ $? -ne 0 ]; then
+          path=&url;/slackware-&dir;/patches/packages
+          file=${data[1]}-${version}_slack&dir;.${data[2]}
+        fi
+        if [ ! -s "&pkg;/$file" ]; then
+          wget -nv -O &pkg;/$file $path/$file
+        fi
+        if [ -s "&pkg;/$file" ]; then
+          upgradepkg --install-new &pkg;/$file
+          # prune
+          if [ "$2" == "true" ]; then
+            rm -rf $(awk -F'/' '/^usr\/(doc|include|info|man)\/./ &amp;&amp; NF&lt;5 {print "/"$1"/"$2"/"$3}' &log;/${file%.*} | uniq)
+          fi
+        else
+          echo "Package $file failed to install!"
+        fi
+      fi
+    fi
+  done &lt;$1
+  rm -f $1
+}
+
+create(){
+  tmp="/tmp/create.tmp"
+  sed -n "/^\[$1\]/,/^\[/p" $cfg | grep -v '^\[' > $tmp
+  while read line; do
+    key=$(echo $line | cut -d'=' -f1)
+    val=$(echo $line | cut -d'"' -f2)
+    if [ $(expr index "$val" /) -eq 0 ]; then
+      sed -i "s/^$key=.*/$key=$val/" $2
+    else
+      sed -i "s:^$key=.*:$key=$val:" $2
+    fi
+  done &lt;$tmp
+  rm -f $tmp
+}
+
+# Make sure packages directory exists
+mkdir -p &pkg;
+# Install external packages
+install /tmp/plugin-packages &prune;
+
+# SSMTP linkage
+rm -f /etc/ssmtp/ssmtp.*
+ln -sf /etc/ssmtp_config.conf /etc/ssmtp/ssmtp.conf
+rm -f /etc/ssmtp/revaliases.*
+ln -sf /etc/ssmtp_revaliases.conf /etc/ssmtp/revaliases.conf
+
+# SSL linkage (workaround)
+if [ "&dir;" == "13.1" -o "&dir;" == "13.37" ]; then
+  rm -rf /lib/libcrypto.so.1
+  ln -sf /lib/libcrypto.so.0.9.8 /lib/libcrypto.so.1
+  rm -rf /lib/libssl.so.1
+  ln -sf /lib/libssl.so.0.9.8 /lib/libssl.so.1
+fi
+
+# Create configuration files
+create 'email' '/etc/unraid_notify.conf'
+create 'ssmtp' '/etc/ssmtp_config.conf'
+create 'alias' '/etc/ssmtp_revaliases.conf'
+
+# Start service
+enable=$(grep "^service=" $cfg | cut -d'"' -f2)
+if [ "$enable" == "1" ]; then
+  /etc/rc.d/rc.emailnotify start >/dev/null
+fi
+
+# Update file access mode
+chmod 600 $(awk '/(\.htm$|\.php$|\.js$|\.page$|\.css$|\.png$|\.gif$)/ {print "/"$0}' &log;/&plugin;-&version;-i486-1)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &plugin; has been installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2014, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+
+# Remove this install file - we are done!
+rm -f /tmp/plugin-install
+</INLINE>
+</FILE>
+
+<FILE Name="&reg;/&plugin;">
+<INLINE>
+&plugin; v&version;
+</INLINE>
+</FILE>
+</PLUGIN>

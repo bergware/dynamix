@@ -1,0 +1,240 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY plugin "dynamix.s3.sleep">
+<!ENTITY version "2.1.1">
+<!ENTITY pkg "/boot/packages">
+<!ENTITY rom "/boot/config/plugins/dynamix">
+<!ENTITY img "/boot/config/plugins/images">
+<!ENTITY gui "/usr/local/emhttp/plugins">
+<!ENTITY log "/var/log/packages">
+<!ENTITY reg "/var/log/plugins">
+<!ENTITY src "https://raw.github.com/bergware/dynamix/master/download">
+]>
+
+<PLUGIN>
+<!--
+Copyright 2014, Bergware International
+Dynamix S3 Sleep - Manual and automatic sleep mode
+
+Version history:
+ 2014-05-30 - version 2.1.1 : SlrG fixes
+ 2014-01-23 - version 2.1.0 : unRAID v5/v6 alignment
+ 2014-01-05 - version 2.0.3 : Point release
+ 2013-12-29 - version 2.0.2 : SlrG added feature to include/exclude drives outside of array
+ 2013-12-21 - version 2.0.1 : Public release
+ 2013-12-01 - version 2.0.0 : Initial release
+
+Plugin file locations:
+ /boot/config/plugins/dynamix.s3.sleep-0.0.0-noarch-bergware.plg          # this file
+ /boot/config/plugins/dynamix/dynamix.s3.sleep-0.0.0-i486-1.txz           # executable code
+ /boot/config/plugins/images/dynamix.s3.sleep.png                         # icon file
+ /boot/config/plugins/dynamix/dynamix.s3.sleep.cfg                        # non-volatile settings
+ /var/log/plugins/dynamix.s3.sleep                                        # plugin registration
+
+ /usr/local/emhttp/plugins/dynamix/event/disks_mounted.s3.sleep           # emhttp event script
+ /usr/local/emhttp/plugins/dynamix/event/unmounting_disks.s3.sleep        # emhttp event script
+ /etc/rc.d/rc.s3sleep                                                     # control script
+ /etc/s3_sleep.conf                                                       # script settings
+-->
+
+<FILE Name="/tmp/plugin-startup" Run="/bin/bash">
+<INLINE>
+append(){
+  if [ ! -f &rom;/&plugin;.cfg ]; then
+    return
+  fi
+  key=$(echo $1|cut -d'=' -f1)
+  end=$(wc -l &lt;&rom;/&plugin;.cfg)
+  if [ -z "$2" ]; then
+    if [ $(grep "^$key=" &rom;/&plugin;.cfg|wc -l) -eq 0 ]; then
+      sed -i "$end a $1" &rom;/&plugin;.cfg
+    fi
+    return
+  fi
+  if [ $(sed -n "/^\[$2\]/,/^\[/p" &rom;/&plugin;.cfg|grep "^$key="|wc -l) -eq 0 ]; then
+    row=$(sed -n "/^\[$2\]/,/^\[/=" &rom;/&plugin;.cfg|tail -1)
+    if [ $row == $end ]; then
+      sed -i "$end a $1" &rom;/&plugin;.cfg
+    else
+      sed -i "$row i $1" &rom;/&plugin;.cfg
+    fi
+  fi
+}
+
+if [ -f /var/log/plugins/dynamix.webGui ]; then
+# Prepare plugin
+  rm -f $(ls &rom;/&plugin;*.t[xg]z 2>/dev/null | grep -v '&version;')
+  rm -f &reg;/&plugin;
+  rm -f /tmp/plugin-install
+  rm -f /etc/rc.d/rc.s3sleep
+  rm -f &gui;/dynamix/event/disks_mounted.&plugin;
+  rm -f &gui;/dynamix/event/unmounting_disks.&plugin;
+# Append new entries (if not existing)
+  append 'exclude=""'
+  append 'excludeList=""'
+# Stop service
+  process=/usr/local/sbin/s3_sleep
+  pid=$(pidof -s -x $process)
+  if [ -n "$pid" ]; then
+    $process -q 1>/dev/null 2>&amp;1
+  fi
+# Proceed
+  code=0
+else
+# Dynamix webGui not present
+  echo "missing Dynamix webGui plugin !!!"
+# Terminate
+  code=1
+fi
+# Remove this script
+rm -f /tmp/plugin-startup
+exit $code
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;.cfg">
+<INLINE>
+service="0"
+checkHDD="-a"
+timeout="30"
+interval="3"
+port="eth0"
+checkTCP=""
+idle="0"
+login=""
+pingIP=""
+stopDay=""
+stopHour=""
+dhcpRenew=""
+forceGb=""
+setWol=""
+preRun=""
+postRun=""
+debug="0"
+exclude=""
+excludeList=""
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;-&version;-i486-1.txz" Run="upgradepkg --install-new">
+<URL>--no-check-certificate &src;/&plugin;-&version;-i486-1.txz</URL>
+</FILE>
+
+<FILE Name="&img;/&plugin;.png">
+<URL>--no-check-certificate &src;/&plugin;.png</URL>
+</FILE>
+
+<FILE Name="&gui;/dynamix/images/&plugin;.png">
+<LOCAL>&img;/&plugin;.png</LOCAL>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.s3sleep" Mode="0770">
+<INLINE>
+#!/bin/sh
+program="s3_sleep"
+execute="/usr/local/sbin/$program"
+options="/etc/s3_sleep.conf"
+pid=$(pidof -s -x $execute)
+
+case "$1" in
+'start')
+  if [ -z "$pid" ]; then
+    $execute $(cat $options) 1>/dev/null 2>&amp;1
+    echo "$program started"
+  else
+    echo "$program already running!"
+  fi
+;;
+'stop')
+  if [ -n "$pid" ]; then
+    $execute -q 1>/dev/null 2>&amp;1
+    timer=5
+    until [ -z "$(pidof -s -x $execute)" ] || [ $timer -eq 0 ]; do
+      timer=$((timer-1))
+      sleep 1
+    done
+    echo "$program stopped"
+  else
+    echo "$program not running!"
+  fi
+;;
+*)
+  echo "Usage: $(basename $0) start|stop"
+esac
+</INLINE>
+</FILE>
+
+<FILE Name="&gui;/dynamix/event/disks_mounted.&plugin;" Mode="0770">
+<INLINE>
+#!/bin/bash
+cfg="&rom;/&plugin;.cfg"
+conf="/etc/s3_sleep.conf"
+enable=$(grep "^service=" $cfg | cut -d'"' -f2)
+if [ "$enable" == "1" -o "$enable" == "2" ]; then
+  if [ ! -f $conf ]; then
+    grep "^options=" $cfg | cut -d'"' -f2 | tr -d "\n" > $conf
+  fi
+  /etc/rc.d/rc.s3sleep start >/dev/null
+fi
+</INLINE>
+</FILE>
+
+<FILE Name="&gui;/dynamix/event/unmounting_disks.&plugin;" Mode="0770">
+<INLINE>
+#!/bin/bash
+cfg="&rom;/&plugin;.cfg"
+enable=$(grep "^service=" $cfg | cut -d'"' -f2)
+if [ "$enable" == "1" -o "$enable" == "2" ]; then
+  /etc/rc.d/rc.s3sleep stop >/dev/null
+fi
+</INLINE>
+</FILE>
+
+<FILE Name="/tmp/plugin-install" Run="/bin/bash">
+<INLINE>
+cfg="&rom;/&plugin;.cfg"
+echo "executing !"
+
+#string decoder
+urldecode(){
+  echo -e "$(sed 's/+/ /g;s/%0D//g;s/%/\\x/g')"
+}
+
+# Create preRun and postRun files (if existing)
+bin="/usr/local/bin"
+bash="#!/bin/bash\n"
+preRun=$(grep "^preRun=" $cfg | cut -d'"' -f2)
+if [ -n "$preRun" ]; then
+  echo "${bash}${preRun}" | urldecode > $bin/preRun
+  chmod u+x $bin/preRun
+fi
+postRun=$(grep "^postRun=" $cfg | cut -d'"' -f2)
+if [ -n "$postRun" ]; then
+  echo "${bash}${postRun}" | urldecode > $bin/postRun
+  chmod u+x $bin/postRun
+fi
+
+# Update file access mode
+chmod 600 $(awk '/(\.htm$|\.php$|\.js$|\.page$|\.css$|\.png$|\.gif$)/ {print "/"$0}' &log;/&plugin;-&version;-i486-1)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &plugin; has been installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2014, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+
+# Remove this install file - we are done!
+rm -f /tmp/plugin-install
+</INLINE>
+</FILE>
+
+<FILE Name="&reg;/&plugin;">
+<INLINE>
+&plugin; v&version;
+</INLINE>
+</FILE>
+</PLUGIN>

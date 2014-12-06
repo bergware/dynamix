@@ -1,0 +1,389 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY plugin "dynamix.web.server">
+<!ENTITY version "2.1.0">
+<!ENTITY pkg "/boot/packages">
+<!ENTITY rom "/boot/config/plugins/dynamix">
+<!ENTITY img "/boot/config/plugins/images">
+<!ENTITY gui "/usr/local/emhttp/plugins">
+<!ENTITY log "/var/log/packages">
+<!ENTITY reg "/var/log/plugins">
+<!ENTITY src "https://raw.github.com/bergware/dynamix/master/download">
+<!ENTITY url "http://slackware.cs.utah.edu/pub/slackware">
+<!ENTITY dir "13.37">   <!-- select slackware version for packages, see list below -->
+<!ENTITY prune "false"> <!-- set prune to "true" to activate pruning -->
+]>
+
+<PLUGIN>
+<!--
+Copyright 2014, Bergware International
+Dynamix Web Server - Lighttpd 1.4.33 & PHP 5.3.27
+
+Version history:
+ 2014-01-23 - version 2.1.0 : unRAID v5/v6 alignment
+ 2013-12-27 - version 2.0.2 : Point release
+ 2013-12-21 - version 2.0.1 : Public release
+ 2013-12-01 - version 2.0.0 : Initial release
+
+Plugin file locations:
+ /boot/config/plugins/dynamix.web.server-0.0.0-noarch-bergware.plg        # this file
+ /boot/config/plugins/dynamix/dynamix.web.server-0.0.0-i486-1.txz         # executable code
+ /boot/config/plugins/images/dynamix.web.server.png                       # icon file
+ /boot/config/plugins/dynamix/dynamix.web.server.cfg                      # non-volatile settings
+ /var/log/plugins/dynamix.web.server                                      # plugin registration
+
+ /usr/local/emhttp/plugins/dynamix/event/disks_mounted.web.server         # emhttp event script
+ /usr/local/emhttp/plugins/dynamix/event/unmounting_disks.web.server      # emhttp event script
+ /etc/rc.d/rc.lighttpd                                                    # control script
+ /etc/rc.d/rc.snmpd                                                       # control script
+ /etc/lighttpd.conf                                                       # web server settings
+ /etc/lighttpd.include.conf                                               # web server GUI settings (built from dynamix.web.server.cfg)
+ /etc/mod_php.conf                                                        # PHP Apache mod (not used)
+ /boot/packages/*multiple-packages*                                       # supporting libraries
+ /boot/config/plugins/dynamix/dynamix.lighttpd.cfg                        # web server custom settings
+ /boot/config/plugins/dynamix/dynamix.php.cfg                             # PHP configuration file
+ /tmp/web/index.html                                                      # initial web page
+-->
+
+<FILE Name="/tmp/plugin-startup" Run="/bin/bash">
+<INLINE>
+if [ -f /var/log/plugins/dynamix.webGui ]; then
+# Prepare plugin
+  rm -f $(ls &rom;/&plugin;*.t[xg]z 2>/dev/null | grep -v '&version;')
+  rm -f &reg;/&plugin;
+  rm -f /tmp/plugin-install
+  rm -f /etc/rc.d/rc.lighttpd
+  rm -f /etc/rc.d/rc.snmpd
+  rm -f &gui;/dynamix/event/disks_mounted.&plugin;
+  rm -f &gui;/dynamix/event/unmounting_disks.&plugin;
+# Prepare packages
+  rm -f /tmp/plugin-packages
+# Stop service
+  process="/usr/sbin/lighttpd"
+  pid=$(pidof -s -x $process)
+  if [ -n "$pid" ]; then
+    pkill -f $process 1>/dev/null 2>&amp;1
+  fi  
+# Proceed
+  code=0
+else
+# Dynamix webGui not present
+  echo "missing Dynamix webGui plugin !!!"
+# Terminate
+  code=1
+fi
+# Remove this script
+rm -f /tmp/plugin-startup
+exit $code
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;.cfg">
+<INLINE>
+service="0"
+path="/tmp/web"
+port="81"
+phpError="On"
+error="0"
+access="0"
+</INLINE>
+</FILE>
+
+<FILE Name="/tmp/plugin-packages">
+<INLINE>
+# Mandatory packages     13.1                13.37             14.0              14.1
+a openssl-solibs  txz    0.9.8y-i486-1       0.9.8y-i486-1     1.0.1e-i486-1     1.0.1e-i486-1     do-install    # openssl library
+n openssl         txz    0.9.8y-i486-1       0.9.8y-i486-1     1.0.1e-i486-1     1.0.1e-i486-1     do-install    # openssl library
+d libtool         txz    2.2.6b-i486-2       2.4-i486-1        2.4.2-i486-1      2.4.2-i486-2      do-install    # tools library
+d m4              txz    1.4.14-i486-1       1.4.16-i486-1     1.4.16-i486-1     1.4.17-i486-1     do-install    # m4 library
+l libmcrypt       txz    2.5.8-i486-1        2.5.8-i486-1      2.5.8-i486-1      2.5.8-i486-1      do-install    # mcrypt library
+l pcre            txz    8.02-i486-1         8.12-i486-1       8.12-i486-1       8.33-i486-1       do-install    # pcre library
+
+# Recommended packages   13.1                13.37             14.0              14.1
+ap sqlite         txz    3.6.23.1-i486-1     3.7.5-i486-1      3.7.14.1-i486-1   3.7.17-i486-1     do-install    # sqlite library (used by SQLITE extension)
+l libzip          txz    0.9-i486-2          0.9.3-i486-1      0.9.3-i486-1      0.10.1-i486-1     do-install    # zip library (used by ZIP extension)
+l freetype        txz    2.4.11-i486-1       2.4.11-i486-1     2.4.11-i486-1     2.5.0.1-i486-1    do-install    # freetype library (used by GD extension)
+l libjpeg         txz    v8a-i486-2          v8a-i486-2        v8a-i486-2        v8a-i486-2        do-install    # jpeg library (used by GD extension)
+l libpng          txz    1.4.12-i486-1       1.4.12-i486-1     1.4.12-i486-1     1.4.12-i486-1     do-install    # png library (used by GD extension)
+l t1lib           txz    5.1.2-i486-2        5.1.2-i486-3      5.1.2-i486-3      5.1.2-i486-3      do-install    # t1 library (used by GD extension)
+x libxcb          txz    1.6-i486-1          1.7-i486-1        1.8.1-i486-1      1.9.1-i486-1      do-install    # xcb library (used by GD extension)
+x libX11          txz    1.3.3-i486-1        1.4.3-i486-2      1.5.0-i486-1      1.6.2-i486-1      do-install    # x11 library (used by GD extension)
+x libXau          txz    1.0.5-i486-1        1.0.6-i486-1      1.0.7-i486-1      1.0.8-i486-1      do-install    # xau library (used by GD extension)
+x libXdmcp        txz    1.0.3-i486-1        1.1.0-i486-1      1.1.1-i486-1      1.1.1-i486-1      do-install    # xdmcp library (used by GD extension)
+x libXpm          txz    3.5.8-i486-1        3.5.9-i486-1      3.5.10-i486-1     3.5.11-i486-1     do-install    # xpm library (used by GD extension)
+
+# Optional packages      13.1                13.37             14.0              14.1
+l aspell          txz    0.60.5-i486-2       0.60.6-i486-1     0.60.6-i486-1     0.60.6-i486-1     no-install    # spelling library (used by PSPELL extension)
+l enchant         txz    1.5.0-i486-1        1.5.0-i486-1      1.5.0-i486-1      1.6.0-i486-1      no-install    # enchant library (used by ENCHANT extension)
+l libxslt         txz    1.1.26-i486-1       1.1.26-i486-1     1.1.26-i486-2     1.1.28-i486-1     no-install    # xslt library (used by XSL extension)
+a xz              tgz    4.999.9beta-i486-1  5.0.2-i486-1      5.0.4-i486-1      xz-5.0.5-i486-1   no-install    # xz utility (used by XSL extension)
+n curl            txz    7.20.1-i486-2       7.21.4-i486-2     7.29.0-i486-3     7.31.0-i486-1     no-install    # curl library (used by CURL extension)
+n net-snmp        txz    5.5-i486-2          5.6.1-i486-1      5.6.1-i486-5      5.7.2-i486-2      no-install    # snmp library (used by SNMP extension)
+</INLINE>
+</FILE>
+
+<FILE Name="&rom;/&plugin;-&version;-i486-1.txz" Run="upgradepkg --install-new">
+<URL>--no-check-certificate &src;/&plugin;-&version;-i486-1.txz</URL>
+</FILE>
+
+<FILE Name="&img;/&plugin;.png">
+<URL>--no-check-certificate &src;/&plugin;.png</URL>
+</FILE>
+
+<FILE Name="&gui;/dynamix/images/&plugin;.png">
+<LOCAL>&img;/&plugin;.png</LOCAL>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.lighttpd" Mode="0770">
+<INLINE>
+#!/bin/sh
+program="lighttpd"
+execute="/usr/sbin/$program"
+options="-f /etc/lighttpd.conf"
+pid=$(pidof -s -x $execute)
+
+case "$1" in
+'start')
+  if [ -z "$pid" ]; then
+    $execute $options 1>/dev/null 2>&amp;1
+    echo "$program started"
+  else
+    echo "$program already running!"
+  fi
+;;
+'stop')
+  if [ -n "$pid" ]; then
+    pkill -f $execute 1>/dev/null 2>&amp;1
+    timer=5
+    until [ -z "$(pidof -s -x $execute)" ] || [ $timer -eq 0 ]; do
+      timer=$((timer-1))
+      sleep 1
+    done
+    echo "$program stopped"
+  else
+    echo "$program not running!"
+  fi
+;;
+*)
+  echo "Usage: $(basename $0) start|stop"
+esac
+</INLINE>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.snmpd" Mode="0770">
+<INLINE>
+#!/bin/sh
+program="snmpd"
+execute="/usr/sbin/$program"
+options="-A -p /var/run/snmpd -a -c /etc/snmpd.conf"
+
+case "$1" in
+'start')
+  if [ -z "$(pidof -s -x $execute)" ]; then
+    $execute $options 1>/dev/null 2>&amp;1
+    echo "$program started"
+  else
+    echo "$program already running!"
+  fi
+;;
+'stop')
+  if [ -n "$(pidof -s -x $execute)" ]; then
+    pkill -f $execute 1>/dev/null 2>&amp;1
+    timer=$(($(date +%s)+5))
+    until [ -z "$(pidof -s -x $execute)" ] || [ $(($(date +%s)-timer)) -ge 0 ]; do
+      sleep 1
+    done
+    echo "$program stopped"
+  else
+    echo "$program not running!"
+  fi
+;;
+*)
+  echo "Usage: $(basename $0) start|stop"
+esac
+</INLINE>
+</FILE>
+
+<FILE Name="&gui;/dynamix/event/disks_mounted.&plugin;" Mode="0770">
+<INLINE>
+#!/bin/bash
+cfg="&rom;/&plugin;.cfg"
+enable=$(grep "^service=" $cfg | cut -d'"' -f2)
+path=$(grep "^path=" $cfg | cut -d'"' -f2)
+timer=30
+while [ ! -d "$path" ] &amp;&amp; [ $timer -gt 0 ]; do
+  timer=$((timer-1))
+  sleep 1
+done
+if [[ "$path" =~ "/mnt/" ]] &amp;&amp; [ "$enable" == "1" ]; then
+  /etc/rc.d/rc.lighttpd start >/dev/null
+fi
+</INLINE>
+</FILE>
+
+<FILE Name="&gui;/dynamix/event/unmounting_disks.&plugin;" Mode="0770">
+<INLINE>
+#!/bin/bash
+cfg="&rom;/&plugin;.cfg"
+path=$(grep "^path=" $cfg | cut -d'"' -f2)
+if [[ "$path" =~ "/mnt/" ]]; then
+  /etc/rc.d/rc.lighttpd stop >/dev/null
+fi
+</INLINE>
+</FILE>
+
+<FILE Name="/tmp/web/index.html">
+<INLINE>
+<![CDATA[
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<body>
+<h1>CHANGE</h1>
+Please change the "Web root directory" setting to a permanent location !<br><br>
+You can either use the flash drive (/boot) or your hard drives (/mnt/disk).<br><br>
+Any changes to the current location will be lost upon a system reboot.<br><br>
+<b>You have been warned !</b>
+</body>
+</html>
+]]>
+</INLINE>
+</FILE>
+
+<FILE Name="/tmp/plugin-install" Run="/bin/bash">
+<INLINE>
+cfg="&rom;/&plugin;.cfg"
+echo "executing !"
+
+install(){
+  while read -ra data; do
+    lc=${data[0]:0:1}
+    if [ -n "$lc" ] &amp;&amp; [ "$lc" != "#" ]; then
+      if [ "${data[7]}" != "no-install" ]; then
+        case "&dir;" in
+           '13.1') version=${data[3]} ;;
+          '13.37') version=${data[4]} ;;
+           '14.0') version=${data[5]} ;;
+           '14.1') version=${data[6]} ;;
+        esac
+        path=&url;/slackware-&dir;/slackware/${data[0]}
+        file=${data[1]}-${version}.${data[2]}
+        wget -q --spider $path/$file
+        if [ $? -ne 0 ]; then
+          path=&url;/slackware-&dir;/patches/packages
+          file=${data[1]}-${version}_slack&dir;.${data[2]}
+        fi
+        if [ ! -s "&pkg;/$file" ]; then
+          wget -nv -O &pkg;/$file $path/$file
+        fi
+        if [ -s "&pkg;/$file" ]; then
+          upgradepkg --install-new &pkg;/$file
+          # prune
+          if [ "$2" == "true" ]; then
+            rm -rf $(awk -F'/' '/^usr\/(doc|include|info|man)\/./ &amp;&amp; NF&lt;5 {print "/"$1"/"$2"/"$3}' &log;/${file%.*} | uniq)
+          fi
+        else
+          echo "Package $file failed to install!"
+        fi
+      fi
+    fi
+  done &lt;$1
+  rm -f $1
+}
+
+# Make sure packages directory exists
+mkdir -p &pkg;
+# Install external packages
+install /tmp/plugin-packages &prune;
+
+# Create PHP configuration files
+php="&rom;/dynamix.php.cfg"
+tmp="/etc/php.conf"
+if [ ! -f $php ]; then
+  zone=$(ls -o /etc/localtime-copied-* | cut -d'>' -f2 | cut -d'/' -f5-)
+  if [ -n "$zone" ]; then
+    sed -i "s:\(^date.timezone =\).*:\1 \"$zone\":" $tmp
+  fi
+  mv -f $tmp $php
+else
+  rm -f $tmp
+fi
+rm -f /etc/httpd/php.ini
+ln -sf $php /etc/httpd/php.ini
+rm -f /etc/httpd/mod_php.conf
+ln -sf /etc/mod_php.conf /etc/httpd/mod_php.conf
+rm -rf /usr/bin/phar
+ln -sf /usr/bin/phar.phar /usr/bin/phar
+
+# PCRE linkage (workaround)
+if [ "&dir;" != "14.1" ]; then
+  rm -rf /usr/lib/libpcre.so.1
+  ln -sf /usr/lib/libpcre.so.0.0.1 /usr/lib/libpcre.so.1
+fi
+
+# SSL linkage (workaround)
+if [ "&dir;" == "13.1" -o "&dir;" == "13.37" ]; then
+  rm -rf /lib/libcrypto.so.1
+  ln -sf /lib/libcrypto.so.0.9.8 /lib/libcrypto.so.1
+  rm -rf /lib/libssl.so.1
+  ln -sf /lib/libssl.so.0.9.8 /lib/libssl.so.1
+fi
+
+# Create user customization conf file
+rom="&rom;/dynamix.lighttpd.cfg"
+if [ ! -f $rom ]; then
+  echo "# User customizations" > $rom
+  echo "# Add your own settings here. These won't get overwritten upon reboot" >> $rom
+  echo "#" >> $rom
+fi
+
+# Create WEB custom configuration file
+web="/etc/lighttpd.include.conf"
+echo -n > $web
+path=$(grep "^path=" $cfg | cut -d'"' -f2)
+if [ -n "$path" ]; then
+  echo "server.document-root = \"$path\"" >> $web
+fi
+port=$(grep "^port=" $cfg | cut -d'"' -f2)
+if [ -n "$port" ]; then
+  echo "server.port = \"$port\"" >> $web
+fi
+error=$(grep "^error=" $cfg | cut -d'"' -f2)
+if [ "$error" == "1" ]; then
+  echo "server.errorlog = \"/var/log/lighttpd/error.log\"" >> $web
+fi
+access=$(grep "^access=" $cfg | cut -d'"' -f2)
+if [ "$access" == "1" ]; then
+  echo "accesslog.filename = \"/var/log/lighttpd/portal.log\"" >> $web
+fi
+
+# Start service
+enable=$(grep "^service=" $cfg | cut -d'"' -f2)
+path=$(grep "^path=" $cfg | cut -d'"' -f2)
+if [[ ! "$path" =~ "/mnt/" ]] &amp;&amp; [ "$enable" == "1" ]; then
+  /etc/rc.d/rc.lighttpd start >/dev/null
+fi
+
+# Update file access mode
+chmod 600 $(awk '/(\.htm$|\.php$|\.js$|\.page$|\.css$|\.png$|\.gif$)/ {print "/"$0}' &log;/&plugin;-&version;-i486-1)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &plugin; has been installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2014, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+
+# Remove this install file - we are done!
+rm -f /tmp/plugin-install
+</INLINE>
+</FILE>
+
+<FILE Name="&reg;/&plugin;">
+<INLINE>
+&plugin; v&version;
+</INLINE>
+</FILE>
+</PLUGIN>

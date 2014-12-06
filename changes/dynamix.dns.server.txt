@@ -1,0 +1,12 @@
+Release notes v2.1.0
+====================
+Aligned unRAID v5/v6 release
+Fixed: PHP code run in version 5.2, 5.3 and 5.4
+
+Release notes v2.0.1
+====================
+Public release
+
+Release notes v2.0.0
+====================
+Initial release

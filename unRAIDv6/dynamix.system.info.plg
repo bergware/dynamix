@@ -1,0 +1,86 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.system.info">
+<!ENTITY author    "Bergware">
+<!ENTITY version   "2014.11.28">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.info.plg">
+]>
+
+<PLUGIN  name="&name;"
+         author="&author;"
+         version="&version;"
+         pluginURL="&pluginURL;"
+>
+<!--
+Copyright 2014, Bergware International
+Dynamix System Information - System hardware and BIOS details
+-->
+
+<!--
+The 'pre-install' script.
+-->
+<FILE Run="/bin/bash">
+<INLINE>
+cfg="/boot/config/plugins/dynamix/dynamix.cfg"
+
+add_key(){
+  key=$(echo $2|cut -d'=' -f1)
+  if [ $(sed -n "/^\[$1\]/,/^\[/p" $cfg|grep "^$key="|wc -l) -eq 0 ]; then
+    row=$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1)
+    sed -i "$row i $2" $cfg
+  fi
+}
+
+# Add sysinfo setting
+add_key 'display' 'sysinfo="/Tools/SystemProfiler"'
+
+# Remove old 'source' files
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+</INLINE>
+</FILE>
+
+<!--
+The 'source' file.
+-->
+<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+</FILE>
+
+<!--
+The 'post-install' script.
+-->
+<FILE Run="/bin/bash">
+<INLINE>
+# Update file access mode
+chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &name; has been installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2014, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+# Delete sysinfo setting
+sed -i '/^sysinfo=/d' /boot/config/plugins/webGui/webGui.cfg
+
+# Remove plugin related files
+rm -rf /boot/config/plugins/&name;
+rm -f /tmp/plugins/&name;.plg
+
+# Uninstall the 'source' package
+removepkg &name;-&version;
+</INLINE>
+</FILE>
+
+</PLUGIN>

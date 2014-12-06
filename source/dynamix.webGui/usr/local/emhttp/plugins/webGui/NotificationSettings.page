@@ -1,0 +1,5 @@
+Author="Bergware"
+Version="1.2.1"
+Title="Notification Settings"
+Menu="Notifications:1"
+Type="php"

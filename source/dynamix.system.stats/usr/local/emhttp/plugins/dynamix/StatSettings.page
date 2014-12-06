@@ -1,0 +1,6 @@
+Author="Bergware"
+Version="1.2.1"
+Title="Stats Settings"
+Menu="Utilities"
+Icon="images/dynamix.system.stats.png"
+Type="php"

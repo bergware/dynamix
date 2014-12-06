@@ -1,0 +1,147 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.s3.sleep">
+<!ENTITY author    "Bergware">
+<!ENTITY version   "2014.12.03">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.s3.sleep.plg">
+]>
+
+<PLUGIN  name="&name;"
+         author="&author;"
+         version="&version;"
+         pluginURL="&pluginURL;"
+>
+<!--
+Copyright 2014, Bergware International
+Dynamix S3 Sleep - Manual and automatic sleep mode
+-->
+
+<!--
+The 'pre-install' script.
+-->
+<FILE Run="/bin/bash">
+<INLINE>
+cfg="/boot/config/plugins/dynamix/dynamix.cfg"
+
+add_key(){
+  key=$(echo $2|cut -d'=' -f1)
+  section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
+  if [ -z "$section" ]; then
+    echo "[$1]\n$2\n" >> $cfg
+  else
+    if [ $(echo $section|grep "$key="|wc -l) -eq 0 ]; then
+      sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
+    fi
+  fi
+}
+
+# Add sleep settings
+if [ -e $cfg ]; then
+  add_key 'confirm' 'sleep="1"'
+  add_key 'display' 'sleep="plugins/&name;/Sleep.php"'
+else
+  echo "[confirm]\nsleep=\"1\"\n" > $cfg
+  echo "[display]\nsleep=\"plugins/&name;/Sleep.php\"\n" >> $cfg
+fi
+
+# Stop service
+/etc/rc.d/rc.s3sleep stop 2>/dev/null
+
+# Remove old 'source' files
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+</INLINE>
+</FILE>
+
+<!--
+The 'source' file.
+-->
+<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+</FILE>
+
+<!--
+Workaround to start service.
+-->
+<FILE Name="/tmp/start_service">
+<INLINE>
+#!/bin/bash
+/etc/rc.d/rc.s3sleep start
+</INLINE>
+</FILE>
+
+<!--
+The 'post-install' script.
+-->
+<FILE Run="/bin/bash">
+<INLINE>
+bin="/usr/local/bin"
+cfg="/boot/config/plugins/&name;/&name;.cfg"
+if [ ! -e "$cfg" ]; then
+  cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
+fi
+
+#string decoder
+urldecode(){
+  echo -e "$(sed 's/+/ /g;s/%0D//g;s/%/\\x/g')"
+}
+
+# Create preRun and postRun files (if existing)
+bash="#!/bin/bash\n"
+preRun=$(grep "^preRun=" $cfg|cut -d'"' -f2)
+if [ -n "$preRun" ]; then
+  echo "${bash}${preRun}"|urldecode > $bin/preRun
+  chmod u+x $bin/preRun
+fi
+postRun=$(grep "^postRun=" $cfg|cut -d'"' -f2)
+if [ -n "$postRun" ]; then
+  echo "${bash}${postRun}"|urldecode > $bin/postRun
+  chmod u+x $bin/postRun
+fi
+
+# Start service
+enable=$(grep "^service=" $cfg|cut -d'"' -f2)
+conf="/etc/s3_sleep.conf"
+if [ "$enable" == "1" ]; then
+  if [ ! -e $conf ]; then
+    grep "^options=" $cfg|cut -d'"' -f2-|sed 's:"$::'|tr -d "\n" > $conf
+  fi
+  at -M -f /tmp/start_service now 2>/dev/null
+fi
+rm -f /tmp/start_service
+
+# Update file access mode
+chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " &name; has been installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2014, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+# Delete sleep settings
+sed -i '/^sleep=/d' /boot/config/plugins/dynamix/dynamix.cfg
+
+# Stop service
+/etc/rc.d/rc.s3sleep stop
+
+# Remove plugin related files
+rm -rf /boot/config/plugins/&name;
+rm -f /tmp/plugins/&name;.plg
+
+# Uninstall the 'source' package
+removepkg &name;-&version;
+</INLINE>
+</FILE>
+
+</PLUGIN>

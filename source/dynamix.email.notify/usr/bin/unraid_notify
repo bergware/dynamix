@@ -1,0 +1,624 @@
+#!/bin/bash
+#
+# Title: unraid_notify
+# Version: 2.56
+# Published under the GNU General Public License V.2
+
+# Summary:
+# The purpose of this script is to check the status of the unRAID
+# array by searching the /proc/mdcmd file for known bad states.
+# This script was originally created by Joe. L for use with Yak
+# and has been modified by kenshin (twelston) on 08-17-2007 to add smtp
+# functionality, and increase the information transmitted by the script
+# (i.e. adding ip, date, and the output of the /proc/mdcmd file if
+# elected by the user).
+
+# Changes: [2.56] 09-16-2012, (unRAID user: bonienl):
+# - Changed config file location to '/etc/unraid_notify.conf'
+# - Adapted for use as add-on of Dynamix webGui
+#
+# Changes: [2.55] 12-31-2009, (unRAID user: stchas):
+# - Updated "mail" command to v0.4, addeding ErrorRcptTo as alternate
+#   RcptTo; made misc bug fixes to correctly enable socat/SSL logic.
+#
+# Changes: [2.54] 12-28-2009, (unRAID user: brainbone):
+# - Removed improper line termnation conversion when using SSL/socat
+#
+# Changes: [2.53] 12-17-2009, (unRAID user: brainbone):
+# - Updated mail command to use /root/.forward file
+#
+# Changes: [2.51/2.52] 12-16-2009, (unRAID user: brainbone):
+# - Updated bashmail to terminate lines with CRLF instead of LF
+#
+# Changes: [2.50] 11-18-2009, (unRAID user: brainbone):
+# - Back-ported changes by jbuszkie (2.31 & 2.32)
+# - Spin-down function disabled by default (unRAID handled this now)
+# - Changed how config file is read (copy to ram disk)
+#
+# Changes: [2.40] 01-27-2009, (unRAID user: brainbone):
+# - Further fix of multiple recipients bug
+# - Fixed tab characters not showing up in sent mail
+#
+# Changes: [2.32] 05-01-2009, (unRAID user: jbuszkie):
+# - Added support for cache disks
+#
+# Changes: [2.31] 03-04-2009, (unRAID user: jbuszkie):
+# - Added support to not send status if one or more disks are spun down
+# - Send report if no disks are spun up.  If True then Status report will onlt be sent if one or more disks are not
+#   spun up.  If all disks are not spun up, then no report will be sent if this variable is set to true.
+# - New variable added to cfg - NoReportIfAllSpunDown
+#
+# Changes: [2.30] 01-21-2009, (unRAID user: brainbone):
+# - Modified To: line in header to better respect RFC2822
+# - Fixed bug with multiple recipients
+#
+# Changes: [2.20] 10-01-2008, (unRAID user: brainbone):
+# - Added support for SSL (secure smtp)
+#   Note: SSL requires openssl and socat
+# - Released under GPL
+#
+# Changes: [2.11] 09-21-2008, (unRAID user: brainbone):
+# - Changed the field unraid_notify uses for getting disk
+#   temperature from smartctl in attempt to fix report of
+#   incorrect disk temp being reported.
+#
+# Changes: [2.10] 09-18-2008, (unRAID user: brainbone):
+# - Added "SpinDownTime" in unraind_notify.cfg
+# - unraid_notify will now monitor disk activity using vmstat -d
+#   and spin down disks after n min. of inactivity.
+#   This is needed because the default mechanism unRAID uses for
+#   spins down is defeated by the way unraid_notify scans for
+#   disk status
+#
+# Changes: [2.00] 09-18-2008, (unRAID user: brainbone):
+# - Removed need for socat or netcat (thanks to WeeboTech)
+# - added "bashmail" (a replacement for my "socatmail" in 1.00)
+# - Added Smart Health Check (more thanks to WeeboTech)
+#
+# Changes: [1.00] 09-11-2008, (unRAID user: brainbone):
+# - Changed script name to "unraid_notify"
+# - TCP comunications moved to socat instead of netcat allowing for more
+#   robust communication with the mail server.
+# - Added SMTP AUTH (AUTH LOGIN)
+# - Moved parameters to /boot/config/unraid_notify.cfg, added some
+#   additional user configurable parameters (see unraid_notify.cfg)
+# - Changed email message header to be more RFC 2822 compliant
+#   adding greater compatibility with MUAs
+# - Moved SMTP communications to socatmail
+# - Changed SMTP envelope communications to be RFC 2822 compliant
+#   adding greater compatibility with more strict SMTP servers
+# - Added checking and reporting of disk temperature
+# - Script now runs more like a daemon (enless loop) instead of
+#   running from crontab.  This allows better granularity for scanning
+#   operations, and faster response to error conditions.
+#   "unraid_notify start" will start this mode.
+# - Execute external command based on disk temp. threshold
+# - Built slackware package to ease installation and distribution
+#
+# ToDo:
+# - Clean up code for readability, consistancy and spelling
+# - HTML email notification output
+# - Periodic logging of disk temp. and other disk properties
+# - Cache config file instead of re-reading it on each loop
+#
+# If you have any questions or problems while using this script
+# please post them to the unRaid forum:
+#
+# http://support.lime-technology.com/forum/
+#
+# DISCLAIMER:
+# Your use of this script is at your sole risk. This script is provided
+#  "as-is", without any warranty
+#
+# Further, the authors of this script shall not be liable for any damages
+# you may sustain by using this information, whether direct, indirect,
+# special, incidental or consequential, even if they have been advised of
+# the possibility of such damages.
+
+# Read command line parameters
+sParameters=""
+sStartService="False"
+sStopService="False"
+bForceErrorLevel="False"
+bForceSendNotification="False"
+tLastConfigModTime="0"
+while [ "$1" ]; do
+  case "$1" in
+  # Force the sending of notification?
+  -f) bForceSendNotification="True"; sParameters+="$1 "; shift;;
+  # Force an error condition
+  -e) bForceErrorLevel="True"; sParameters+="$1 "; shift;;
+  # Turn on debug output
+  -d) bDebug="True"; sParameters+="$1 "; shift;;
+  *) break;;
+  esac
+done
+
+# Initialize some variables outside of loop
+declare -a iLastDiskRead
+declare -a iLastDiskWrite
+declare -a dLastDiskActivity
+
+sServiceFilePfx="/var/tmp/unraid_notify_service_"
+sServiceFileSfx=".tmp"
+sServiceFile="$sServiceFilePfx`date +%s_%N`$sServiceFileSfx"
+
+sNewline=$'\n'
+sTab=$'\t'
+
+if [ "$1" = "stop" ]
+then
+  rm -f $sServiceFilePfx*
+  echo "unraid_notify stopped"
+  exit 0
+fi
+
+if [ "$1" = "run_service" ]
+then
+  rm -f $sServiceFilePfx*
+  echo "running" > $sServiceFile
+fi
+
+if [ "$1" = "start" ]
+then
+  sServicePID=`unraid_notify $sParameters run_service >/dev/null 2>&1 &`
+  echo "unraid_notify started"
+  exit 0
+fi
+
+# Return the system uptime in seconds
+get_uptime(){
+  cat /proc/uptime|awk '{print $1}' FS="[ .]"
+}
+
+# Function to load parameters from an "ini" formatted file
+get_param(){
+  awk '$1=="["s"]"{f++}f&&$1~p{split($1,a,m);gsub("[\t ]*$","",a[2]);print a[2];exit}' s="$2" p="^[\t ]*$3" m="^[\t ]*$3[\t ]*=[\t ]*" FS="\$^" "$1"
+}
+
+# Function to get the temperature and smart health of a disk
+get_disk_status(){
+  # Check if disk is spun down
+  hdparm -C /dev/$1|egrep "(sleep)|(standby)" >/dev/null 2>&1
+  if [ ! $? = 0 ]
+  then
+    device_type="-d ata"
+    # first, try without a device type.
+    sm_out=`smartctl -a /dev/$1`
+    smartstat=$(($? & 7))
+    if [ "$smartstat" = "0" ]
+    then
+      device_type=""
+    fi
+    # Disk is not spun down, try to get the disk temp
+    diskTemp=`smartctl $device_type -A /dev/$1|awk '{if($2~"Temperature_Celsius"){print $10}}' 2>/dev/null`
+    [ -z "$diskTemp" ] && diskTemp="Not-Reported"
+    smartHealth=`smartctl $device_type -H /dev/$1|awk '{if($3~"self-assessment"){print $6}}' 2>/dev/null`
+    [ -z "$smartHealth" ] && smartHealth="Not-Reported"
+  else
+    diskTemp="Spun-Down"
+    smartHealth="Spun-Down"
+
+  fi
+  diskReadWrite=`vmstat -d |awk '{if($1==d){print $2 " " $6}}' d="$1" 2>/dev/null`
+  echo "$diskTemp $smartHealth $diskReadWrite"
+}
+
+# Date/Time functions
+modtime (){
+  date -r "$1" +%s
+}
+
+date2stamp (){
+  date --utc --date "$1 $2" +%s
+}
+
+stamp2date (){
+  date --utc --date "1970-01-01 $1 sec" "+%Y-%m-%d %T"
+}
+
+dateDiff (){
+  case $1 in
+  -s)   sec=1;      shift;;
+  -m)   sec=60;     shift;;
+  -h)   sec=3600;   shift;;
+  -d)   sec=86400;  shift;;
+   *)   sec=86400;;
+  esac
+  dte1=$(date2stamp $1 $2)
+  dte2=$(date2stamp $3 $4)
+  diffSec=$((dte2-dte1))
+  if [ $diffSec -lt 0 ]; then abs=-1; else abs=1; fi
+  echo $(($diffSec / $sec * $abs))
+}
+
+# If in service mode, loop all the following code forever, else execute loop one
+iNonServiceLoop=1
+[ "$1" = "run_service" ] && iNonServiceLoop=0
+[ -f $sServiceFile ] && iNonServiceLoop=0
+while [ -f $sServiceFile ] || [ $iNonServiceLoop -gt 0 ]
+do
+
+# Read parameters from config file
+# Note: config files adapted for Dynamix webGui
+# Was the config file on flash drive modified?           
+# !! revised !! sConfigFile="/var/tmp/unraid_notify_tmp1.cfg"
+# !! revised !! sConfigFileOrig="/boot/config/email/unraid_notify.cfg"
+sConfigFile="/etc/unraid_notify.conf"
+
+# If so, copy it to ram drive, converting dos EOL if needed
+# !! revised !! tCurrentConfigModTime="$(modtime $sConfigFileOrig)"
+tCurrentConfigModTime="$(modtime $sConfigFile)"
+if  [ $tCurrentConfigModTime -ne $tLastConfigModTime ]
+then
+# !! revised !! fromdos < $sConfigFileOrig > $sConfigFile
+  tLastConfigModTime=$tCurrentConfigModTime
+fi
+
+sRcptTo="$(get_param $sConfigFile Email RcptTo)"
+sErrorRcptTo="$(get_param $sConfigFile Email ErrorRcptTo)"
+sSubject="$(get_param $sConfigFile Email Subject)"
+sMailFrom="$(get_param $sConfigFile Email MailFrom)"
+bAppendStatus="$(get_param $sConfigFile Email AppendStatus)"
+sSetEmailPriority="$(get_param $sConfigFile Email SetEmailPriority)"
+bIncludeMdcmd="$(get_param $sConfigFile Options IncludeMdcmd)"
+iMaxDiskTemp="$(get_param $sConfigFile Options MaxDiskTemp)"
+iNotifyDelay="$(get_param $sConfigFile Options NotifyDelay)"
+bUseFahrenheit="$(get_param $sConfigFile Options DisplayFahrenheit)"
+iRescanDelay="$(get_param $sConfigFile Options RescanDelay)"
+iStartScanDelay="$(get_param $sConfigFile Options StartScanDelay)"
+iCriticalDiskTemp="$(get_param $sConfigFile Options CriticalDiskTemp)"
+sCriticalDiskCommand="$(get_param $sConfigFile Options CriticalDiskCommand)"
+iSpinDownTime="$(get_param $sConfigFile Options SpinDownTime)"
+bDoSpinDown="$(get_param $sConfigFile Options DoSpinDown)"
+bNoReportIfAllSpunDown="$(get_param $sConfigFile Options NoReportIfAllSpunDown)"
+
+# Set/Reset default variables
+[ -z "$iRescanDelay" ] && iRescanDelay="30"
+[ $iRescanDelay -lt 10 ] && iRescanDelay="10"
+[ -z "$bDoSpinDown" ] && bDoSpinDown="False"
+[ -z "$iSpinDownTime" ] && iSpinDownTime="60"
+[ -z "$bNoReportIfAllSpunDown" ] && bNoReportIfAllSpunDown="False"
+bAllSpunDown="True"
+iErrorLevel="0"
+[ "$bForceErrorLevel" = "True" ] && iErrorLevel="1"
+scriptStartTime=`date "+%Y-%m-%d %T"`
+bSendNotification="False"
+[ "$bForceSendNotification" = "True" ] && bSendNotification="True"
+sSubStatus=""
+emsg=""
+sDiskTempStatus=""
+sEmailMessage=""
+sRcptParam=""
+bExecCriticalCommand="False"
+
+# Set defaults for timming
+if [ -z "$UNRAID_NOTIFY_SENT" ]
+then
+  UNRAID_NOTIFY_SENT=`date -d "$iNotifyDelay min ago" "+%Y-%m-%d %T"`
+  UNRAID_NOTIFY_ERRORLEVEL=$iErrorLevel
+fi
+iMinSinceLastSend="$(dateDiff -m $UNRAID_NOTIFY_SENT $scriptStartTime)"
+
+# request that status be updated
+echo "status" >/proc/mdcmd
+# now check the status and report as needed
+# Even if the contents of /proc/mdcmd are not normally included if all is OK,
+# include it if something is wrong by setting the flag to True.
+grep "mdState=STARTED" /proc/mdcmd >/dev/null 2>&1
+if [ $? != 0 ]
+then
+  emsg+="Status: unRaid array not started.$sNewline"
+  sSubStatus+=": Array not started"
+  bIncludeMdcmd="True"
+  iErrorLevel="1"
+fi
+
+egrep "=DISK_INVALID|=DISK_DSBL" /proc/mdcmd >/dev/null 2>&1
+if [ $? = 0 ]
+then
+  emsg+="Status: The unRaid array needs attention. One or more disks are disabled or invalid.$sNewline"
+  sSubStatus+=": Array fault"
+  bIncludeMdcmd="True"
+  iErrorLevel="1"
+fi
+
+# Check and report disk temps and health
+# Pull disk information into arrays
+declare -a diskList=(`cat /proc/mdcmd|awk '{if($1~"rdevName.[0-9]+"){printf "%s", $2 " "}}' FS="=" 2>/dev/null`)
+declare -a diskNumber=(`cat /proc/mdcmd|awk '{if($1~"diskNumber.[0-9]+"){printf "%s", $2 " "}}' FS="=" 2>/dev/null`)
+declare -a diskId=(`cat /proc/mdcmd|awk '{if($1~"diskId.[0-9]+"){printf "%s", $2 " "}}' FS="=" 2>/dev/null`)
+
+#check for cache disk
+declare count=${#diskList[@]} #get current disk count
+declare cache=`mount |awk '{if($3~"/mnt/cache"){printf "%s", $1}}' | awk '{printf "%s", $3}' FS="/" 2>/dev/null`
+
+#add cache disk to array, if it exists
+if [ -n "$cache" ]
+then
+    #get device
+    diskList[${#diskList[@]}]=`mount |awk '{if($3~"/mnt/cache"){printf "%s", $1}}' | awk '{printf "%s", $3}' FS="/" 2>/dev/null`
+    #get Model number
+    diskId[$count]=`hdparm -I /dev/${diskList[${count}]} |awk '{if($1~"Model Number"){printf "%s", $2}}' FS=":" |sed -r 's/^[ ]+//'|sed -r 's/[ ]+/_/g'  2>/dev/null`
+    #concatenate Serial number
+    diskId[$count]+=`hdparm -I /dev/${diskList[${count}]} |awk '{if($1~"Serial Number"){printf "%s", $2}}' FS=":" |sed -r 's/^[ ]+//'|sed -r 's/[ ]+/_/g'  2>/dev/null`
+    #assign disk 100 to be cache disk
+    diskNumber[${#diskNumber[@]}]=100
+fi
+
+sDiskTempStatus="Disk Temperature Status$sNewline"
+sDiskTempStatus+="-----------------------------------------------------------------$sNewline"
+
+sDiskHealthStatus="Disk SMART Health Status$sNewline"
+sDiskHealthStatus+="-----------------------------------------------------------------$sNewline"
+
+# Loop over each disk, checking and reporting temp, and checking if a disk should be spun down.
+for ((i=0; i<${#diskList[@]}; i++))
+do
+  if [ ${diskNumber[$i]} -gt 0 ]
+  then
+    if [ ${diskNumber[$i]} -eq 100 ]
+    then
+      sDiskName="Cache Disk"
+    else
+      sDiskName="Disk ${diskNumber[$i]}"
+    fi
+  else
+    sDiskName="Parity Disk"
+  fi
+
+  declare -a diskStatus=(`echo $(get_disk_status ${diskList[$i]})`)
+  diskTemp="${diskStatus[0]}"
+  smartHealth="${diskStatus[1]}"
+  diskRead="${diskStatus[2]}"
+  diskWrite="${diskStatus[3]}"
+  diskCheckDate="`date +%s`"
+
+  [ -z "${iLastDiskRead[$i]}" ] && iLastDiskRead[$i]="0"
+  [ -z "${iLastDiskWrite[$i]}" ] && iLastDiskWrite[$i]="0"
+  [ -z "${iLastDiskActivity[$i]}" ] && iLastDiskActivity[$i]="`date +%s`"
+
+  if [ $diskTemp -eq $diskTemp 2>/dev/null ]
+  then
+    # We have a numeric response.
+    # At least one drive is spun up
+    bAllSpunDown="False"
+    # Get rid of the leading "0"
+    diskTemp=$((10#$diskTemp + 0))
+    # Is the disk above the "critical temp"?
+    sCriticalMsg=""
+    if [ ! -z "$iCriticalDiskTemp" ]
+    then
+      [ $iCriticalDiskTemp -lt $iMaxDiskTemp ] && iCriticalDiskTemp=$iMaxDiskTemp
+      if [ $diskTemp -gt $iCriticalDiskTemp ]
+      # Disk is getting way too hot. Execute specified command after sending error
+      then
+        bExecCriticalCommand="True"
+        sCriticalMsg=" Critical"
+      fi
+    fi
+    # Convert to Fahrenheit?
+    if [ "$bUseFahrenheit" = "True" ]
+    then
+      diskTemp=$(((($diskTemp * 9) / 5 ) + 32))
+      iMaxDiskTemp=$(((($iMaxDiskTemp * 9) / 5 ) + 32))
+      sDegree="F"
+    else
+      sDegree="C"
+    fi
+    sDiskTemp="$diskTemp$sDegree"
+    if [ $diskTemp -ge $iMaxDiskTemp ]
+    then
+      # Disk is over temp.  Report error
+      emsg+="Status: $sDiskName$sCriticalMsg Overheat! $sDiskTemp (DiskId: ${diskId[$i]})$sNewline"
+      sSubStatus+=": $sDiskName$sCriticalMsg Overheat! ($sDiskTemp) "
+      bIncludeMdcmd="True"
+      iErrorLevel="2"
+    fi
+  else
+    # Text response
+    sDiskTemp=$diskTemp
+  fi
+  sDiskTempStatus+="$sDiskName [${diskList[$i]}]: $sDiskTemp (DiskId: ${diskId[$i]})$sNewline"
+
+  if [ "$smartHealth" = "FAILED" ]
+  then
+    emsg+="Status: $sDiskName $smartHealth (DiskId: ${diskId[$i]})$sNewline"
+    sSubStatus+=": $sDiskName $smartHealth "
+    bIncludeMdcmd="True"
+    iErrorLevel="3"
+  fi
+  sDiskHealthStatus+="$sDiskName $smartHealth (DiskId: ${diskId[$i]})$sNewline"
+
+  # Check if the disk should be spun-down
+  if [ $diskRead -ne ${iLastDiskRead[$i]} ] || [ $diskWrite -ne ${iLastDiskWrite[$i]} ]
+  then
+    # There has been reads or writes since our last check.  Record it.
+    iLastDiskActivity[$i]=$diskCheckDate
+    iLastDiskRead[$i]=$diskRead
+    iLastDiskWrite[$i]=$diskWrite
+  else
+    # How long has it been since we've seen disk activity?
+    secSinceLastCheck=$((($diskCheckDate-${iLastDiskActivity[$i]})))
+    minSinceLastCheck=$((($diskCheckDate-${iLastDiskActivity[$i]})/60))
+    if [ $minSinceLastCheck -ge $iSpinDownTime ] && [ $bDoSpinDown = "True" ]
+    then
+      # Its been over "SpinDownTime" min. since last disk check
+      # Is the drive already spun down?
+      if [ ! "$smartHealth" = "Spun-Down" ]
+      then
+        # Spin down the drive
+        hdparm -y /dev/${diskList[$i]} >/dev/null 2>&1
+      fi
+    fi
+    # echo "Min Since: $minSinceLastCheck"
+    # echo "Sec Since: $secSinceLastCheck"
+  fi
+done
+
+# If no error message was set, set a default message
+if [ -z "$emsg" ]
+then
+  emsg="Status: unRaid is OK$sNewline"
+  sSubStatus+=": unRaid is OK"
+  allok="true"
+fi
+
+# Calculate if notification should be sent
+
+iUptime="$(get_uptime)"
+
+# Check if we need to skip scanning, due to linux still loading
+if [ $iUptime -ge $iStartScanDelay ] || [ $iNonServiceLoop -gt 0 ]
+then
+  # If error level has changed since last check, send notification
+  if [ $iErrorLevel -ne $UNRAID_NOTIFY_ERRORLEVEL ]
+  then
+    bSendNotification="True"
+  fi
+  # Has enough time passed since last send of notification?
+  if [ $iMinSinceLastSend -ge $iNotifyDelay ]
+  then
+    # If an error has been reported, it's time to send it again
+    [ $iErrorLevel -gt 0 ] && bSendNotification="True"
+    # Any recipients of pereodic notifications (both error and status)?
+    [ ! -z "$sRcptTo" ] && [ "$bAllSpunDown" = "False" ] && bSendNotification="True"
+    [ ! -z "$sRcptTo" ] && [ "$bNoReportIfAllSpunDown" = "False" ] && bSendNotification="True"
+  fi
+fi
+
+# Send status notification
+if [ "$bSendNotification" = "True" ]
+then
+  # Message header
+
+  # Add sender to header
+  sEmailMessage+="From: $sMailFrom$sNewline"
+
+  # Begin "To:" header
+  sEmailMessage+="To: "
+
+  # Add each recipient to the message header
+  a=0
+  for i in $sRcptTo
+  do
+    if [ $a -gt 0 ]
+    then
+      sEmailMessage+=",\r"
+      sEmailMessage+=$sTab
+    fi
+    sEmailMessage+="$i"
+    sRcptParam+="--rcpt $i "
+    ((a++))
+  done
+
+  # If there has been an error, add recipients that only receive error notifications.
+  if [ $iErrorLevel -gt 0 ] || [ $iErrorLevel -ne $UNRAID_NOTIFY_ERRORLEVEL ]
+  then
+    if [ ! -z "$sErrorRcptTo" ]
+    then
+      for i in $sErrorRcptTo
+      do
+        if [ $a -gt 0 ]
+        then
+          sEmailMessage+=",\r"
+          sEmailMessage+=$sTab
+        fi
+        sEmailMessage+="$i"
+        sRcptParam+="--rcpt $i "
+      ((a++))
+      done
+      # Terminate "To:" header
+      sEmailMessage+="$sNewline"
+    fi
+    # Set the email x-priority header, if requested
+    if [ "$sSetEmailPriority" = "True" ]
+    then
+      sEmailMessage+="X-Priority: 1 (highest)$sNewline"
+      sEmailMessage+="X-Mms-Priority: High$sNewline"
+    fi
+  else
+    # Terminate "To:" header
+    sEmailMessage+="$sNewline"
+  fi
+
+  # echo $sRcptParam
+
+  # Add Message Date to header
+  sEmailMessage+="Date: `date --rfc-2822 2>/dev/null`$sNewline"
+
+  # Add Message Subject to header
+  sEmailMessage+="Subject: $sSubject"
+  if [ "$bAppendStatus" = "True" ]
+  then
+    sEmailMessage+="$sSubStatus"
+  fi
+  sEmailMessage+="$sNewline"
+
+  # End Message Header
+  sEmailMessage+="$sNewline"
+
+  # Message Body (You can change this to look how you want.  Just
+  # to include $sNewline at the end of each line.)
+  sEmailMessage+="This message is a status update for unRAID  $HOSTNAME $sNewline"
+  sEmailMessage+="-----------------------------------------------------------------$sNewline"
+  sEmailMessage+="Server Name: $HOSTNAME $sNewline"
+  sEmailMessage+="IP: `ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'`$sNewline"
+  sEmailMessage+="$emsg"
+  sEmailMessage+="Date: `date 2>/dev/null`$sNewline"
+  sEmailMessage+="$sNewline"
+  sEmailMessage+="$sDiskTempStatus"
+  sEmailMessage+="$sNewline"
+  sEmailMessage+="$sDiskHealthStatus"
+
+  # Add the contents of /proc/mdcmd if elected by the user
+  if [ "$bIncludeMdcmd" = "True" ]
+  then
+    sEmailMessage+="$sNewline"
+    sEmailMessage+="Output of /proc/mdcmd:$sNewline"
+    sEmailMessage+="-----------------------------------------------------------------$sNewline"
+
+    # Add <CRLF> to each line
+    file=/proc/mdcmd
+    sEmailMessage+=`todos < $file`
+    sEmailMessage+="$sNewline"
+  fi
+
+  if [ "$iErrorLevel" == "1" ]; then
+    importance=default
+  fi
+
+  if [ "$iErrorLevel" == "2" ]; then
+    importance=warning
+  fi
+
+  if [ "$iErrorLevel" == "3" ]; then
+    importance=alert
+  fi
+
+  echo -e "$sEmailMessage" | ssmtp $sMailFrom
+
+  if [ ! "$allok" == "true" ]; then
+    emsg=$(echo -e $emsg | sed 's/\(\s\|[^_)A-Za-z0-9-]\)/\ /g' | sed 's/)/\<br\>/g' | sed 's/Status//g' | sed 's/DiskId/-/g')
+    /bin/bash /usr/local/emhttp/plugins/webGui/include/Notify.sh -plugin "unRAID" -subject "$sSubject" -description "$emsg" -importance "$importance"
+  fi
+
+  UNRAID_NOTIFY_SENT=$scriptStartTime
+  UNRAID_NOTIFY_ERRORLEVEL=$iErrorLevel
+fi
+
+# Were we instructed to execute a critical disk overheat command?
+if [ "$bExecCriticalCommand" = "True" ]
+then
+  eval $sCriticalDiskCommand
+fi
+
+# end of do while loop (once if not service, forever if is service)
+# If we're doing a non-service run, only allow one loop
+iNonServiceLoop=0
+if [ -f $sServiceFile ]
+then
+  sleep $iRescanDelay
+fi
+
+done
