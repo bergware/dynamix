@@ -9,6 +9,12 @@
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
+<CHANGES>
+This section gives a summary of the changes in this version.
+It may also include a version history.
+Perhaps a format example should be included.
+</CHANGES>
+
 <!--
 Copyright 2014, Bergware International
 Dynamix Active Streams - Real-time monitoring of SMB shares
