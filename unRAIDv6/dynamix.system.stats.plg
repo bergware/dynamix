@@ -10,7 +10,7 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
-**Version 2014.12.06**
+**Version 2014.12.05**
 
 - use global disk utilization thresholds
 - fixed cron error message about sa1
