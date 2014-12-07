@@ -10,9 +10,15 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
-This section gives a summary of the changes in this version.
-It may also include a version history.
-Perhaps a format example should be included.
+Summary of changes from 2014.12.05 to 2014.12.06
+-------------------------------------------------
+- fixed wrong placement of config file
+- fixed regression error in names list
+
+Summary of changes from 2014.12.01 to 2014.12.05
+-------------------------------------------------
+- fixed file size display
+- fixed compatability with unRAID v6
 </CHANGES>
 
 <!--
