@@ -11,12 +11,15 @@
 
 <CHANGES>
 **Version 2014.12.05**
+
 - changed stop event to 'stopping_svcs'
 
 **Version 2014.12.03**
+
 - fixed failed download of cache_dirs upon reboot
 
 **Version 2014.11.28**
+
 - initial release for unRAID v6
 </CHANGES>
 
