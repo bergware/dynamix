@@ -1,10 +1,10 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.plugins.notify">
+<!ENTITY name      "dynamix.plugin.notify">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2014.12.07">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.plugins.notify.plg">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.plugin.notify.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -16,7 +16,7 @@
 
 <!--
 Copyright 2014, Bergware International
-Dynamix Plugins Notification - Check automatically for newer versions of the installed plugins
+Dynamix Plugin Notification - Check automatically for newer versions of the installed plugins
 -->
 
 <!--
