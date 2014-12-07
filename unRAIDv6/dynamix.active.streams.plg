@@ -10,13 +10,16 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
-### Changes from 2014.12.05 to 2014.12.06
+**Version 2014.12.06**
 - fixed wrong placement of config file
 - fixed regression error in names list
 
-### Changes from 2014.12.01 to 2014.12.05
-- fixed file size display
-- fixed compatability with unRAID v6
+**Version 2014.12.05**
+- fixed wrong file size display
+- fixed compatability issue with unRAID v6
+
+**Version 2014.11.28**
+- initial release for unRAID v6
 </CHANGES>
 
 <!--

@@ -9,6 +9,11 @@
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
+<CHANGES>
+**Version 2014.11.28**
+- initial release for unRAID v6
+</CHANGES>
+
 <!--
 Copyright 2014, Bergware International
 Dynamix System Information - System hardware and BIOS details
