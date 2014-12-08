@@ -10,6 +10,9 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2014.12.08
+- changed to cron job solution for complete background operation
+
 ###2014.12.07
 - initial release for unRAID v6
 </CHANGES>
