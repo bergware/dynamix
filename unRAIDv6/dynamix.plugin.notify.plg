@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.plugin.notify">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.12.07">
+<!ENTITY version   "2014.12.08">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.plugin.notify.plg">
 ]>
 
@@ -41,6 +41,17 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Create symlink
+ln -sf /usr/local/emhttp/plugins/dynamix.plugin.notify/scripts/plugincheck /usr/local/sbin/plugincheck
+
+# Create cron entry
+cron=/tmp/plugincheck.tmp
+crontab -l|grep -v '# Plugin version check'|grep -v '/usr/local/sbin/plugincheck' >$cron
+echo '# Plugin version check - run every 6 hours' >>$cron
+echo '15 */6 * * * /usr/local/sbin/plugincheck &amp; 1>/dev/null 2>&amp;1' >>$cron
+crontab $cron
+rm -f $cron
+
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
 
@@ -60,6 +71,15 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
+# Remove cron entry
+cron=/tmp/plugincheck.tmp
+crontab -l|grep -v '# Plugin version check'|grep -v '/usr/local/sbin/plugincheck' >$cron
+crontab $cron
+rm -f $cron
+
+# Remove symlink
+unlink /usr/local/sbin/plugincheck
+
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
 rm -f /tmp/plugins/&name;.plg
