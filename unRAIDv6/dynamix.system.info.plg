@@ -3,13 +3,16 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.12.07">
+<!ENTITY version   "2015.01.22">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.info.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2015.01.22
+- version update for webGui 2015.01.21
+
 ###2014.12.07
 - fixed addition of info settings
 
