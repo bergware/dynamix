@@ -3,13 +3,17 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.12.06">
+<!ENTITY version   "2014.12.08">
+<!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.active.streams.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2014.12.08
+- adjusted table to new css styling
+
 ###2014.12.06
 - fixed wrong placement of config file
 - fixed regression error in names list

@@ -3,13 +3,16 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.11.28a">
+<!ENTITY version   "2014.12.07">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.info.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2014.12.07
+- fixed addition of info settings
+
 ###2014.11.28
 - initial release for unRAID v6
 </CHANGES>
@@ -28,14 +31,22 @@ cfg="/boot/config/plugins/dynamix/dynamix.cfg"
 
 add_key(){
   key=$(echo $2|cut -d'=' -f1)
-  if [ $(sed -n "/^\[$1\]/,/^\[/p" $cfg|grep "^$key="|wc -l) -eq 0 ]; then
-    row=$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1)
-    sed -i "$row i $2" $cfg
+  section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
+  if [ -z "$section" ]; then
+    echo -e "[$1]\n$2" >> $cfg
+  else
+    if [ $(echo $section|grep "$key="|wc -l) -eq 0 ]; then
+      sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
+    fi
   fi
 }
 
 # Add sysinfo setting
-add_key 'display' 'sysinfo="/Tools/SystemProfiler"'
+if [ -e $cfg ]; then
+  add_key 'display' 'sysinfo="/Tools/SystemProfiler"'
+else
+  echo -e "[display]\nsysinfo=\"/Tools/SystemProfiler\"" > $cfg
+fi
 
 # Remove old 'source' files
 rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')

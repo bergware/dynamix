@@ -3,14 +3,15 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.12.05">
+<!ENTITY version   "2014.12.07">
+<!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.cache.dirs.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
-###2014.12.05
+###2014.12.07
 - changed stop event to 'stopping_svcs'
 
 ###2014.12.03

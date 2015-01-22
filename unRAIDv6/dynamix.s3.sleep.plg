@@ -3,13 +3,19 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.12.03">
+<!ENTITY version   "2014.12.07">
+<!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.s3.sleep.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2014.12.07
+- new s3_sleep version 3.0.0
+- fixed addition of sleep settings
+- fixed unassigned devices
+
 ###2014.12.03
 - fixed sleep button not added to Array Operation page
 
@@ -33,7 +39,7 @@ add_key(){
   key=$(echo $2|cut -d'=' -f1)
   section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
   if [ -z "$section" ]; then
-    echo "[$1]\n$2\n" >> $cfg
+    echo -e "[$1]\n$2" >> $cfg
   else
     if [ $(echo $section|grep "$key="|wc -l) -eq 0 ]; then
       sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
@@ -46,8 +52,8 @@ if [ -e $cfg ]; then
   add_key 'confirm' 'sleep="1"'
   add_key 'display' 'sleep="plugins/&name;/Sleep.php"'
 else
-  echo "[confirm]\nsleep=\"1\"\n" > $cfg
-  echo "[display]\nsleep=\"plugins/&name;/Sleep.php\"\n" >> $cfg
+  echo -e "[confirm]\nsleep=\"1\"" > $cfg
+  echo -e "[display]\nsleep=\"plugins/&name;/Sleep.php\"" >> $cfg
 fi
 
 # Stop service
