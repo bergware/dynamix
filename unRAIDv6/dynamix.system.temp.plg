@@ -3,13 +3,18 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.01.22">
+<!ENTITY version   "2015.01.31">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.temp.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2015.01.22
+- added display of array fan
+- added settings page (contributed by jfgardim)
+- changed icons
+
 ###2015.01.22
 - version update for webGui 2015.01.21
 
@@ -47,11 +52,6 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Copy custom sensors file
-if [ -e "/boot/config/sensors.conf" ]; then
-  cp -f /boot/config/sensors.conf /etc/sensors.d
-fi
-
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
 
