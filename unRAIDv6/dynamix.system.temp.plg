@@ -10,7 +10,7 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
-###2015.01.22
+###2015.01.31
 - added display of array fan
 - added settings page (contributed by jfgardim)
 - changed icons
