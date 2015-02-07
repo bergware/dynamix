@@ -61,7 +61,7 @@ if [ ! -e $cfg ]; then
 fi
 
 # Start service
-enable=$(awk -F'"' '/^service={print $2}' $cfg)
+enable=$(awk -F'"' '/^service=/{print $2}' $cfg)
 if [ "$enable" == "1" ]; then
   at -M -f /tmp/start_service now 2>/dev/null
 fi
