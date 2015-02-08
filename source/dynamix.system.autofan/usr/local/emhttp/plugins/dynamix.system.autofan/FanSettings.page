@@ -1,0 +1,114 @@
+Menu="Utilities"
+Title="Fan Auto Control"
+Icon="dynamix.system.autofan.png"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * Plugin development contribution by gfjardim
+ */
+?>
+<?
+$plugin = "dynamix.system.autofan";
+$cfg    = parse_plugin_cfg($plugin);
+$sName  = "autofan";
+$fName  = "/usr/local/sbin/$sName";
+
+function temp_val($val) {
+  global $display;
+  return $display['unit']=='C' ? $val : round(9/5*$val+32);
+}
+
+function scan_dir($dir, $type = "") {
+  $out = array();
+  foreach (array_slice(scandir($dir), 2) as $entry){
+    $sep   = (preg_match("/\/$/", $dir)) ? "" : "/";
+    $out[] = $dir.$sep.$entry ;
+  }
+  return $out;
+}
+
+function list_pwm() {
+  $out = array();
+  foreach (scan_dir('/sys/class/hwmon/') as $chip) {
+    $name = is_file($chip."/name") ? file_get_contents($chip."/name") : "";
+    foreach (preg_grep("/pwm\d+$/", scan_dir($chip)) as $pwm) {
+      $out[] = array('chip'=>$name, 'name'=>end(split('/',$pwm)), 'sensor'=>$pwm );
+    }
+  }
+  return $out;
+}
+?>
+<script>
+function detectFan() {
+  $("#fan").html('Detecting ...');
+  var pwm = $("select[name=controller] option:selected").val();
+  $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'detect', pwm:pwm},function(data) {
+    $("input[name=fan]").val(data);
+    $("#fan").html('Detect');
+  });
+}
+
+function detectFanLow() {
+  var pwm = $("select[name=controller] option:selected").val();
+  var fan = $("input[name=fan]").val();
+  if (pwm && fan) {
+    $("#pwm").html('Detecting ...');
+    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'pwm', pwm:pwm,fan:fan},function(data) {
+      $("input[name=pwm]").val(data);
+      $("#pwm").html('Detect');
+    });
+  }
+}
+
+$(function() {
+  showStatus('<?=$sName?>');
+});
+</script>
+
+<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file"    value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#include" value="update.autofan.php">
+<input type="hidden" name="#prefix"  value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m">
+
+<span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
+
+Fan control function:
+: <select name="service" size="1">
+  <?=mk_option($cfg['service'], "0", "Disabled")?>
+  <?=mk_option($cfg['service'], "1", "Enabled")?>
+  </select>
+
+PWM controller:
+: <select name="controller" size="1">
+  <?=mk_option($cfg['controller'], "", "None")?>
+  <?foreach (list_pwm() as $pwm):?>
+  <?=mk_option($cfg['controller'], $pwm['sensor'], "{$pwm['chip']} - {$pwm['name']}")?>
+  <?endforeach;?>
+  </select>
+
+PWM fan:
+: <input type="text" name="fan" value="<?=$cfg['fan']?>"><button type="button" onclick="detectFan();" id="fan" style="margin-top:0">Detect</button>
+
+Minimun PWM value:
+: <input type="text" name="pwm" value="<?=$cfg['pwm']?>"><button type="button" onclick="detectFanLow();" id="pwm" style="margin-top:0">Detect</button>
+
+Low temperature threshold (&deg;<?=$display['unit']?>):
+: <input type="number" min="0" max="300" name="low" value="<?=temp_val($cfg['low'])?>" class="narrow">
+
+High temperature threshold (&deg;<?=$display['unit']?>):
+: <input type="number" min="0" max="300" name="high" value="<?=temp_val($cfg['high'])?>" class="narrow">
+
+Refresh interval (minutes):
+: <input type="text" name="interval" value="<?=$cfg['interval']?>" class="narrow">
+
+&nbsp;
+: <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button>
+</form>
