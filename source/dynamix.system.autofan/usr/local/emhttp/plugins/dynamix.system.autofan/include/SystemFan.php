@@ -72,13 +72,13 @@ if (is_file( $_GET['pwm']) && is_file( $_GET['fan'])) {
   foreach (range(0, 20) as $i) {
     $val=$i*5;
     file_put_contents($pwm, $val);
-    sleep(1);
-    if ((file_get_contents($fan) - $min_rpm)>10) {
-      sleep(10);
-      if ((file_get_contents($fan) - $min_rpm)>10) {
-        echo $val;
-        break;
+    sleep(2);
+    if ((file_get_contents($fan) - $min_rpm) > 15) {
+      # Debounce
+      for ($i=0; $i <= 10; $i++) { 
+        if (file_get_contents($fan) == 0) {$is_lowest = FALSE; break;} else {$is_lowest = TRUE; sleep(1);};
       }
+      if ($is_lowest) {echo $val; break;}
     }
   }
   file_put_contents($pwm, $default_pwm);
