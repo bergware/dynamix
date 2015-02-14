@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.01.22">
+<!ENTITY version   "2015.02.14">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.s3.sleep.plg">
 ]>
@@ -11,6 +11,9 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2015.02.14
+- fixed s3_sleep startup after system reboot
+
 ###2015.01.22
 - version update for webGui 2015.01.21
 
@@ -41,17 +44,17 @@ cfg="/boot/config/plugins/dynamix/dynamix.cfg"
 add_key(){
   key=$(echo $2|cut -d'=' -f1)
   section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
-  if [ -z "$section" ]; then
+  if [[ -z $section ]]; then
     echo -e "[$1]\n$2" >> $cfg
   else
-    if [ $(echo $section|grep "$key="|wc -l) -eq 0 ]; then
+    if [[ $(echo $section|grep "$key="|wc -l) -eq 0 ]]; then
       sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
     fi
   fi
 }
 
 # Add sleep settings
-if [ -e $cfg ]; then
+if [[ -e $cfg ]]; then
   add_key 'confirm' 'sleep="1"'
   add_key 'display' 'sleep="plugins/&name;/Sleep.php"'
 else
@@ -91,24 +94,29 @@ The 'post-install' script.
 <INLINE>
 bin="/usr/local/bin"
 cfg="/boot/config/plugins/&name;/&name;.cfg"
-if [ ! -e "$cfg" ]; then
+if [[ ! -e $cfg ]]; then
   cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
 fi
 
-#string decoder
+# string decoder
 urldecode(){
   echo -e "$(sed 's/+/ /g;s/%0D//g;s/%/\\x/g')"
+}
+
+# get variable
+getvar(){
+  awk -F= '/^'$1'=/{print $2}' /proc/mdcmd
 }
 
 # Create preRun and postRun files (if existing)
 bash="#!/bin/bash\n"
 preRun=$(grep "^preRun=" $cfg|cut -d'"' -f2)
-if [ -n "$preRun" ]; then
+if [[ -n $preRun ]]; then
   echo "${bash}${preRun}"|urldecode > $bin/preRun
   chmod u+x $bin/preRun
 fi
 postRun=$(grep "^postRun=" $cfg|cut -d'"' -f2)
-if [ -n "$postRun" ]; then
+if [[ -n $postRun ]]; then
   echo "${bash}${postRun}"|urldecode > $bin/postRun
   chmod u+x $bin/postRun
 fi
@@ -116,11 +124,13 @@ fi
 # Start service
 enable=$(grep "^service=" $cfg|cut -d'"' -f2)
 conf="/etc/s3_sleep.conf"
-if [ "$enable" == "1" ]; then
-  if [ ! -e $conf ]; then
+if [[ $enable -eq 1 ]]; then
+  if [[ ! -e $conf ]]; then
     grep "^options=" $cfg|cut -d'"' -f2-|sed 's:"$::'|tr -d "\n" > $conf
   fi
-  at -M -f /tmp/start_service now 2>/dev/null
+  if [[ $(getvar mdState) == STARTED ]]; then
+    at -M -f /tmp/start_service now 2>/dev/null
+  fi
 fi
 rm -f /tmp/start_service
 

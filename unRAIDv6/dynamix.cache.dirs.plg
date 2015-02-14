@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.01.22">
+<!ENTITY version   "2015.02.14">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.cache.dirs.plg">
 ]>
@@ -11,6 +11,9 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2015.02.14
+- fixed cache_dirs startup after system reboot
+
 ###2015.01.22
 - version update for webGui 2015.01.21
 
@@ -65,15 +68,20 @@ The 'post-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 cfg="/boot/config/plugins/&name;/&name;.cfg"
-if [ ! -e $cfg ]; then
+if [[ ! -e $cfg ]]; then
   cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
 fi
 
+# get variable
+getvar(){
+  awk -F= '/^'$1'=/{print $2}' /proc/mdcmd
+}
+
 # Install cache_dirs script
-if [ ! -e /boot/config/plugins/&name;/cache_dirs.zip ]; then
+if [[ ! -e /boot/config/plugins/&name;/cache_dirs.zip ]]; then
   echo -n " downloading cache_dirs script ... "
   wget -q -O /boot/config/plugins/&name;/cache_dirs.zip "http://lime-technology.com/forum/index.php?action=dlattach;topic=4500.0;attach=21431"
-  if [ $? == 0 ]; then
+  if [[ $? -eq 0 ]]; then
     echo "done"
   else
     echo "failed"
@@ -87,11 +95,13 @@ chmod +x /usr/local/sbin/cache_dirs
 # Start service
 enable=$(grep "^service=" $cfg|cut -d'"' -f2)
 conf="/etc/cache_dirs.conf"
-if [ "$enable" == "1" ]; then
-  if [ ! -e $conf ]; then
+if [[ $enable -eq 1 ]]; then
+  if [[ ! -e $conf ]]; then
     grep "^options=" $cfg|cut -d'"' -f2-|sed 's:"$::'|tr -d "\n" > $conf
   fi
-  at -M -f /tmp/start_service now 2>/dev/null
+  if [[ $(getvar mdState) == STARTED ]]; then
+    at -M -f /tmp/start_service now 2>/dev/null
+  fi
 fi
 rm -f /tmp/start_service
 
