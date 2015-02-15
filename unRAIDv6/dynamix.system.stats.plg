@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.01.22">
+<!ENTITY version   "2015.02.15">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.stats.plg">
 ]>
@@ -11,6 +11,9 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+###2015.02.15
+- workaround to restore /var/log permissions
+
 ###2015.01.22
 - version update for webGui 2015.01.21
 
@@ -60,6 +63,9 @@ echo '# System data collection - poll every minute' >>$cron
 echo '*/1 * * * * /usr/lib/sa/sa1 1 1 1>/dev/null 2>&amp;1' >>$cron
 crontab $cron
 rm -f $cron
+
+# Restore /var/log permissions (workaround)
+chmod 755 /var/log
 
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
