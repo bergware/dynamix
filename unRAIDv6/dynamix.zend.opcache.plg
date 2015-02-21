@@ -14,15 +14,15 @@ The README file.
 -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
 <INLINE>
-**Dynamix Zend OpCache**
+**Dynamix Zend OPcache**
 
-Dynamix Zend OpCache speeds up PHP execution by opcode caching and optimization. It stores precompiled script bytecode in shared memory.
+Dynamix Zend OPcache speeds up PHP execution by opcode caching and optimization. It stores precompiled script bytecode in shared memory.
 This eliminates the stages of reading code from the source and compiling it on future access.
 </INLINE>
 </FILE>
 
 <!--
-The 'zend opcache' image.
+The 'zend OPcache' image.
 -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
 <INLINE>
@@ -75,7 +75,7 @@ MzozMjowNi0wNjowMA8idi0AAAAASUVORK5CYII=
 </FILE>
 
 <!--
-The 'zend opcache' binary.
+The 'zend OPcache' binary.
 -->
 <FILE Name="/boot/packages/zendopcache-php-7.0.3-x86_64-1bw.txz" Run="upgradepkg --install-new">
 <URL>https://raw.github.com/bergware/dynamix/master/archive/zendopcache-php-7.0.3-x86_64-1bw.txz</URL>
@@ -91,7 +91,7 @@ rm -rf /usr/local/emhttp/plugins/&name;
 rm -f /tmp/plugins/&name;.plg
 rm -f /boot/packages/zendopcache-php-7.0.3-x86_64-1bw.txz
 
-# Uninstall the 'zend opcache' package
+# Uninstall the 'zend OPcache' package
 removepkg zendopcache-php-7.0.3-x86_64-1bw
 </INLINE>
 </FILE>
