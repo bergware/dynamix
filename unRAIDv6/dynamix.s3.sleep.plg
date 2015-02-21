@@ -107,7 +107,9 @@ urldecode(){
 
 # get variable
 getvar(){
-  awk -F= '/^'$1'=/{print $2}' /proc/mdcmd 2>/dev/null
+  if [[ -e /proc/mdcmd ]]; then
+    awk -F= '/^'$1'=/{print $2}' /proc/mdcmd
+  fi
 }
 
 # Create preRun and postRun files (if existing)
