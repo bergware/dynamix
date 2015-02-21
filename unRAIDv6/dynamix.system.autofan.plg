@@ -5,12 +5,14 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.02.07">
 <!ENTITY launch    "Settings/FanSettings">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.autofan.plg">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+##&name;
+
 ###2015.02.07
 - initial release for unRAID v6
 </CHANGES>
@@ -56,13 +58,13 @@ The 'post-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 cfg="/boot/config/plugins/&name;/&name;.cfg"
-if [ ! -e $cfg ]; then
+if [[ ! -e $cfg ]]; then
   cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
 fi
 
 # Start service
 enable=$(awk -F'"' '/^service=/{print $2}' $cfg)
-if [ "$enable" == "1" ]; then
+if [[ $enable -eq 1 ]]; then
   at -M -f /tmp/start_service now 2>/dev/null
 fi
 rm -f /tmp/start_service

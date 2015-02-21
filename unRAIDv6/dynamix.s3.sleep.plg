@@ -5,12 +5,14 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.02.14">
 <!ENTITY launch    "Settings/SleepSettings">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.s3.sleep.plg">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+##&name;
+
 ###2015.02.14
 - fixed s3_sleep startup after system reboot
 

@@ -1,0 +1,99 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.zend.opcache">
+<!ENTITY author    "Bergware">
+<!ENTITY version   "2015.02.21">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;">
+]>
+
+<PLUGIN  name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+
+<!--
+The README file.
+-->
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<INLINE>
+**Dynamix Zend OpCache**
+
+Dynamix Zend OpCache speeds up PHP execution by opcode caching and optimization. It stores precompiled script bytecode in shared memory.
+This eliminates the stages of reading code from the source and compiling it on future access.
+</INLINE>
+</FILE>
+
+<!--
+The 'zend opcache' image.
+-->
+<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
+<INLINE>
+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
+1/S18pqg1SJq6wKgeXieoFIRYLcQtIOEQ2GisRiJRJx76oLcUx+mJh4jo9eQzeaRbgXhueCWEUr6
+4g0nKJ97CUIxhFKEctNYQrFpw7rTp0+ffvhzGWx5npcbGRk53N//5sErl0cbF254u5x8DRvvXcPC
+YhZPr0XXTeLxBOFIGEM3CIZChA1FNBygqyXG/eYsrZUJxtIOriNRTh4hJcorU7n6FihokhksTbFj
+25aF/v7+e1dkMpdKpXoHBk4dHH5n6OpsKrfPLWmB+9a2073tPja313FPU4JNa5pobq5jemoK0wzw
+0x98k6a16yiXPDZHCtwXmCNUyTCz5OKUCpjzwzy8JoEq56mNxwaPHz++bsVHi+l0evDs2bO/HRgY
+OLIwP/fwlXeGGgxN0NzYSMi2iFoGl96/hi6gpaWZdY0Jdm1Zj6OZWKEIzfEAuxo8umNZdnYkmE9N
+Ui7mRy5cuLB1xUeLH3qg0jR73/59Jzas37B9586dPPbYNzj6r0G8SgmlFJWlRbZ0b2d7VyfT6Tx9
+J4ZwHQevUuDoXw9zY2bG6X+rP3BXZqN3TKeuxzo7O3/e07P3Vx0dHex8YDdzN1K4jlvVkySSqIV4
+G4Wyx98O/Z7LI0NjIyMj6+/acPfjWltb+4979u79TWtba3NPTw+O45DL5W7ff+WVV3j30qVrIxcv
+rr2r0+lP/JfPMOqefPLJy7FYrG7Pnj20JJM8/4fnmE5Nc+bMmbsxvPt8zLKs9t27d7/87LPPqmQy
+OfHFfaOi67VCCHP13dKqrdqqrdqqrRrwb6Wz8ut+6ynrAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDEw
+LTAyLTEwVDExOjE3OjQ3LTA2OjAwWH/iggAAACV0RVh0ZGF0ZTptb2RpZnkAMjAwOC0wMy0wNFQy
+MzozMjowNi0wNjowMA8idi0AAAAASUVORK5CYII=
+</INLINE>
+</FILE>
+
+<!--
+The 'zend opcache' binary.
+-->
+<FILE Name="/boot/packages/zendopcache-php-7.0.3-x86_64-1bw.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/zendopcache-php-7.0.3-x86_64-1bw.txz</URL>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+# Remove plugin related files
+rm -rf /usr/local/emhttp/plugins/&name;
+rm -f /tmp/plugins/&name;.plg
+rm -f /boot/packages/zendopcache-php-7.0.3-x86_64-1bw.txz
+
+# Uninstall the 'zend opcache' package
+removepkg zendopcache-php-7.0.3-x86_64-1bw
+</INLINE>
+</FILE>
+
+</PLUGIN>

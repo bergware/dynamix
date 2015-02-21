@@ -11,6 +11,8 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+##&name;
+
 ###2015.02.07
 - replaced 'add to startup/remove from startup' with automatic loading by plugin
 - changed 'detect' and 'save' buttons are made permanent

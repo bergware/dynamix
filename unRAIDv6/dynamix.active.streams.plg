@@ -5,12 +5,14 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.01.22">
 <!ENTITY launch    "Tools/ActiveStreams">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.active.streams.plg">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+##&name;
+
 ###2015.01.22
 - version update for webGui 2015.01.21
 

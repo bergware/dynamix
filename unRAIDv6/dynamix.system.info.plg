@@ -5,12 +5,14 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.02.01">
 <!ENTITY launch    "Tools/SystemProfiler">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.info.plg">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+##&name;
+
 ###2015.02.01
 - fixed wrong display of system overview information. In certain cases.
 
@@ -39,17 +41,17 @@ cfg="/boot/config/plugins/dynamix/dynamix.cfg"
 add_key(){
   key=$(echo $2|cut -d'=' -f1)
   section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
-  if [ -z "$section" ]; then
+  if [[ -z $section ]]; then
     echo -e "[$1]\n$2" >> $cfg
   else
-    if [ $(echo $section|grep "$key="|wc -l) -eq 0 ]; then
+    if [[ $(echo $section|grep "$key="|wc -l) -eq 0 ]]; then
       sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
     fi
   fi
 }
 
 # Add sysinfo setting
-if [ -e $cfg ]; then
+if [[ -e $cfg ]]; then
   add_key 'display' 'sysinfo="/Tools/SystemProfiler"'
 else
   echo -e "[display]\nsysinfo=\"/Tools/SystemProfiler\"" > $cfg

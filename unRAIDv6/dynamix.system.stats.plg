@@ -3,14 +3,19 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.02.15">
+<!ENTITY version   "2015.02.21">
 <!ENTITY launch    "Settings/StatSettings">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/dynamix.system.stats.plg">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+##&name;
+
+###2015.02.21
+- support of new cron mechanism
+
 ###2015.02.15
 - workaround to restore /var/log permissions
 
@@ -41,6 +46,8 @@ The 'pre-install' script.
 <INLINE>
 # Remove old 'source' files
 rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+# Remove legacy cron entry (if existing)
+crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 </INLINE>
 </FILE>
 
@@ -56,16 +63,16 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Create cron entry
-cron=/tmp/sa1.tmp
-crontab -l|grep -v '# System data'|grep -v '/sa/sa1' >$cron
-echo '# System data collection - poll every minute' >>$cron
-echo '*/1 * * * * /usr/lib/sa/sa1 1 1 1>/dev/null 2>&amp;1' >>$cron
-crontab $cron
-rm -f $cron
+# Create sa directory (workaround)
+mkdir -p /var/log/sa
 
-# Restore /var/log permissions (workaround)
-chmod 755 /var/log
+# Create cron entry
+cron=/boot/config/plugins/&name;/sysstats.cron
+if [[ ! -f $cron ]]; then
+  echo '# Generated system data collection schedule:' > $cron
+  echo -e '*/1 * * * * /usr/lib/sa/sa1 1 1 &amp;> /dev/null\n' >>$cron
+  /usr/local/sbin/update_cron
+fi
 
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
