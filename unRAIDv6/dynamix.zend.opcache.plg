@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.zend.opcache">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.02.21">
+<!ENTITY version   "2015.02.22">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;">
 ]>
 
@@ -124,8 +124,8 @@ EsTRCzLo70EcPQLnDqQSL0g9x9Mw7jw1BsbHiQTm90J7V0J7l0F77yGtzwbzHIiCDC6Cc+tizWGY
 <!--
 The 'zend OPcache' binary.
 -->
-<FILE Name="/boot/packages/zendopcache-php-7.0.3-x86_64-1bw.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/zendopcache-php-7.0.3-x86_64-1bw.txz</URL>
+<FILE Name="/boot/packages/zendopcache-php-7.0.4-x86_64-1bw.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/zendopcache-php-7.0.4-x86_64-1bw.txz</URL>
 </FILE>
 
 <!--
@@ -136,10 +136,10 @@ The 'remove' script.
 # Remove plugin related files
 rm -rf /usr/local/emhttp/plugins/&name;
 rm -f /tmp/plugins/&name;.plg
-rm -f /boot/packages/zendopcache-php-7.0.3-x86_64-1bw.txz
+rm -f /boot/packages/zendopcache-php-7.0.4-x86_64-1bw.txz
 
 # Uninstall the 'zend OPcache' package
-removepkg zendopcache-php-7.0.3-x86_64-1bw
+removepkg zendopcache-php-7.0.4-x86_64-1bw
 </INLINE>
 </FILE>
 
