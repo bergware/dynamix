@@ -4,7 +4,7 @@
 <!ENTITY name      "dynamix.zend.opcache">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.02.22">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
 <PLUGIN  name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
