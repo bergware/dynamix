@@ -28,7 +28,6 @@ foreach ($_POST as $key => $value) {
   }
 }
 exec("/etc/rc.d/rc.autofan stop >/dev/null");
-$options = trim($options);
-$keys['options'] = $options;
+$keys['options'] = trim($options);
 if ($enable) $command = "/etc/rc.d/rc.autofan start >/dev/null";
 ?>

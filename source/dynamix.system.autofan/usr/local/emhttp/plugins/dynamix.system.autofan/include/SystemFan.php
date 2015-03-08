@@ -21,7 +21,7 @@ function scan_dir($dir, $type = "") {
 }
 function list_fan() {
   $out = array();
-  exec("dirname $(find /sys/devices -iname \"fan[0-9]_input\")", $chips);
+  exec("dirname $(find /sys/devices -iname 'fan[0-9]_input')", $chips);
   foreach (array_unique($chips) as $chip) {
     $name = is_file($chip."/name") ? file_get_contents($chip."/name") : "";
     foreach (preg_grep("/fan\d+_input/", scan_dir($chip)) as $fan) {
