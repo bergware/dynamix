@@ -37,7 +37,8 @@ function scan_dir($dir, $type = "") {
 
 function list_pwm() {
   $out = array();
-  foreach (scan_dir('/sys/class/hwmon/') as $chip) {
+  exec("dirname $(find /sys/devices -iname \"pwm[0-9]\")", $chips);
+  foreach (array_unique($chips) as $chip) {
     $name = is_file($chip."/name") ? file_get_contents($chip."/name") : "";
     foreach (preg_grep("/pwm\d+$/", scan_dir($chip)) as $pwm) {
       $out[] = array('chip'=>$name, 'name'=>end(split('/',$pwm)), 'sensor'=>$pwm );

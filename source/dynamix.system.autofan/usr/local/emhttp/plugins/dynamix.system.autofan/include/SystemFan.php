@@ -14,16 +14,15 @@
 <?
 function scan_dir($dir, $type = "") {
   $out = array();
-  foreach (array_slice(scandir($dir), 2) as $entry){
-    $sep   = (preg_match("/\/$/", $dir)) ? "" : "/";
-    $out[] = $dir.$sep.$entry ;
+  foreach (array_diff(scandir($dir), array('.','..')) as $f){
+    $out[] = realpath($dir).'/'.$f ;
   }
   return $out;
 }
-
 function list_fan() {
   $out = array();
-  foreach (scan_dir('/sys/class/hwmon/') as $chip) {
+  exec("dirname $(find /sys/devices -iname \"fan[0-9]_input\")", $chips);
+  foreach (array_unique($chips) as $chip) {
     $name = is_file($chip."/name") ? file_get_contents($chip."/name") : "";
     foreach (preg_grep("/fan\d+_input/", scan_dir($chip)) as $fan) {
       $out[] = array('chip'=>$name, 'name'=>end(split('/',$fan)), 'sensor'=>$fan , 'rpm'=>file_get_contents($fan));
