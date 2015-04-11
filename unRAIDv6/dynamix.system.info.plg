@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.02.01">
+<!ENTITY version   "2015.04.11">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -12,6 +12,9 @@
 
 <CHANGES>
 ##&name;
+
+###2015.04.11
+- version update for new webGui
 
 ###2015.02.01
 - fixed wrong display of system overview information. In certain cases.
@@ -27,7 +30,7 @@
 </CHANGES>
 
 <!--
-Copyright 2014, Bergware International
+Copyright 2015, Bergware International
 Dynamix System Information - System hardware and BIOS details
 -->
 
@@ -79,9 +82,9 @@ chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /v
 
 echo ""
 echo "-----------------------------------------------------------"
-echo " &name; has been installed."
+echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2014, Bergware International"
+echo " Copyright 2015, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -98,7 +101,6 @@ sed -i '/^sysinfo=/d' /boot/config/plugins/webGui/webGui.cfg
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
-rm -f /tmp/plugins/&name;.plg
 
 # Uninstall the 'source' package
 removepkg &name;-&version;

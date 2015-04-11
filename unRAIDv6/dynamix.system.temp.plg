@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.02.07">
+<!ENTITY version   "2015.04.11">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -12,6 +12,9 @@
 
 <CHANGES>
 ##&name;
+
+###2015.04.11
+- included online help information
 
 ###2015.02.07
 - replaced 'add to startup/remove from startup' with automatic loading by plugin
@@ -94,7 +97,7 @@ chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /v
 
 echo ""
 echo "-----------------------------------------------------------"
-echo " &name; has been installed."
+echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
 echo " Copyright 2015, Bergware International"
 echo " Version: &version;"
@@ -110,7 +113,6 @@ The 'remove' script.
 <INLINE>
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
-rm -f /tmp/plugins/&name;.plg
 
 # Uninstall the 'source' package
 removepkg &name;-&version;

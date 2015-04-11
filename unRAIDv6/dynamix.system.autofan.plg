@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.02.07">
+<!ENTITY version   "2015.04.11">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -12,6 +12,9 @@
 
 <CHANGES>
 ##&name;
+
+###2015.04.11
+- improved pwm scanning (thanks to gfjardim)
 
 ###2015.02.07
 - initial release for unRAID v6
@@ -74,7 +77,7 @@ chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /v
 
 echo ""
 echo "-----------------------------------------------------------"
-echo " &name; has been installed."
+echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
 echo " Copyright 2015, Bergware International"
 echo " Version: &version;"
@@ -93,7 +96,6 @@ The 'remove' script.
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
-rm -f /tmp/plugins/&name;.plg
 
 # Uninstall the 'source' package
 removepkg &name;-&version;

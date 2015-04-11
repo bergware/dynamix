@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.01.22">
+<!ENTITY version   "2015.04.11">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -12,6 +12,10 @@
 
 <CHANGES>
 ##&name;
+
+###2015.04.11
+- included online help information
+- better support for Plex streams
 
 ###2015.01.22
 - version update for webGui 2015.01.21
@@ -32,7 +36,7 @@
 </CHANGES>
 
 <!--
-Copyright 2014, Bergware International
+Copyright 2015, Bergware International
 Dynamix Active Streams - Real-time monitoring of SMB shares
 -->
 
@@ -63,9 +67,9 @@ chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /v
 
 echo ""
 echo "-----------------------------------------------------------"
-echo " &name; has been installed."
+echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2014, Bergware International"
+echo " Copyright 2015, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -79,7 +83,6 @@ The 'remove' script.
 <INLINE>
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
-rm -f /tmp/plugins/&name;.plg
 
 # Uninstall the 'source' package
 removepkg &name;-&version;

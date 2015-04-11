@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.02.14">
+<!ENTITY version   "2015.04.11">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -12,6 +12,10 @@
 
 <CHANGES>
 ##&name;
+
+###2015.04.11
+- included online help information
+- removed 'All' option from excluded/included folder selection
 
 ###2015.02.14
 - fixed cache_dirs startup after system reboot
@@ -30,7 +34,7 @@
 </CHANGES>
 
 <!--
-Copyright 2014, Bergware International
+Copyright 2015, Bergware International
 Dynamix Folder Caching - Store names in memory to avoid disk spin-ups. Makes use of cache_dirs script written by Joe L.
 -->
 
@@ -114,9 +118,9 @@ chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /v
 
 echo ""
 echo "-----------------------------------------------------------"
-echo " &name; has been installed."
+echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2014, Bergware International"
+echo " Copyright 2015, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -133,7 +137,6 @@ The 'remove' script.
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
-rm -f /tmp/plugins/&name;.plg
 
 # Uninstall the 'source' package
 removepkg &name;-&version;
