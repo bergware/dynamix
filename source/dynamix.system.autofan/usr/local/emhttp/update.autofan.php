@@ -11,6 +11,7 @@
  * Plugin development contribution by gfjardim
  */
 ?>
+
 <?
 foreach ($_POST as $key => $value) {
   if (!strlen($value)) continue;

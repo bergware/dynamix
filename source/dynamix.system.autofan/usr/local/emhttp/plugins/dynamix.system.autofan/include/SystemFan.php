@@ -11,6 +11,7 @@
  * Plugin development contribution by gfjardim
  */
 ?>
+
 <?
 function scan_dir($dir, $type = "") {
   $out = array();
@@ -21,9 +22,9 @@ function scan_dir($dir, $type = "") {
 }
 function list_fan() {
   $out = array();
-  exec("find /sys/devices -type f -iname 'fan[0-9]_input' -exec dirname \"{}\" +", $chips);
-  foreach (array_unique($chips) as $chip) {
-    $name = is_file($chip."/name") ? file_get_contents($chip."/name") : "";
+  exec("find /sys/devices -type f -iname 'fan[0-9]_input' -exec dirname \"{}\" +|uniq", $chips);
+  foreach ($chips as $chip) {
+    $name = is_file("$chip/name") ? file_get_contents("$chip/name") : "";
     foreach (preg_grep("/fan\d+_input/", scan_dir($chip)) as $fan) {
       $out[] = array('chip'=>$name, 'name'=>end(split('/',$fan)), 'sensor'=>$fan , 'rpm'=>file_get_contents($fan));
     }
@@ -57,11 +58,11 @@ break;
 case 'pwm':
 if (is_file( $_GET['pwm']) && is_file( $_GET['fan'])) {
   exec("/etc/rc.d/rc.autofan stop >/dev/null");
-  $pwm     = $_GET['pwm'];
-  $fan     = $_GET['fan'];
+  $pwm = $_GET['pwm'];
+  $fan = $_GET['fan'];
   $fan_min = split("_", $_GET['fan'])[0]."_min";
-  $default_method  = file_get_contents($pwm."_enable");
-  $default_pwm     = file_get_contents($pwm);
+  $default_method = file_get_contents($pwm."_enable");
+  $default_pwm = file_get_contents($pwm);
   $default_fan_min = file_get_contents($fan_min);
   file_put_contents($pwm."_enable", "1");
   file_put_contents($fan_min, "0");

@@ -15,6 +15,7 @@ Icon="dynamix.system.autofan.png"
  * Plugin development contribution by gfjardim
  */
 ?>
+
 <?
 $plugin = "dynamix.system.autofan";
 $cfg    = parse_plugin_cfg($plugin);
@@ -37,16 +38,17 @@ function scan_dir($dir, $type = "") {
 
 function list_pwm() {
   $out = array();
-  exec("find /sys/devices -type f -iname 'pwm[0-9]' -exec dirname \"{}\" +", $chips);
-  foreach (array_unique($chips) as $chip) {
-    $name = is_file($chip."/name") ? file_get_contents($chip."/name") : "";
+  exec("find /sys/devices -type f -iname 'pwm[0-9]' -exec dirname \"{}\" +|uniq", $chips);
+  foreach ($chips as $chip) {
+    $name = is_file("$chip/name") ? file_get_contents("$chip/name") : "";
     foreach (preg_grep("/pwm\d+$/", scan_dir($chip)) as $pwm) {
-      $out[] = array('chip'=>$name, 'name'=>end(split('/',$pwm)), 'sensor'=>$pwm );
+      $out[] = array('chip'=>$name, 'name'=>end(split('/',$pwm)), 'sensor'=>$pwm);
     }
   }
   return $out;
 }
 ?>
+
 <script>
 function detectFan() {
   $("#fan").html('Detecting ...');
@@ -62,7 +64,7 @@ function detectFanLow() {
   var fan = $("input[name=fan]").val();
   if (pwm && fan) {
     $("#pwm").html('Detecting ...');
-    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'pwm', pwm:pwm,fan:fan},function(data) {
+    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'pwm',pwm:pwm,fan:fan},function(data) {
       $("input[name=pwm]").val(data);
       $("#pwm").html('Detect');
     });
@@ -78,7 +80,6 @@ $(function() {
 <input type="hidden" name="#file"    value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="update.autofan.php">
 <input type="hidden" name="#prefix"  value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m">
-
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
 Fan control function:
