@@ -1,0 +1,32 @@
+[
+  {
+    "name": "python",
+    "version": "-2.7.5-x86_64-1.txz",
+    "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/d/python-2.7.5-x86_64-1.txz",
+    "md5": "9b37a33a41b263c945fddb58949386f0"
+  },
+  {
+    "name": "perl",
+    "version": "-5.18.1-x86_64-1.txz",
+    "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/d/perl-5.18.1-x86_64-1.txz",
+    "md5": ""
+  },
+  {
+    "name": "zlib",
+    "version": "-1.2.8-x86_64-1.txz",
+    "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/l/zlib-1.2.8-x86_64-1.txz",
+    "md5": "9c91095f98fdd2e899d46acd6bf3c482"
+  },
+  {
+    "name": "libffi",
+    "version": "-3.0.13-x86_64-2.txz",
+    "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/l/libffi-3.0.13-x86_64-2.txz",
+    "md5": "ffb02e5decdc081bf5f0846bcf0ac6b6"
+  },
+  {
+    "name": "sqlite",
+    "version": "-3.7.17-x86_64-1.txz",
+    "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/ap/sqlite-3.7.17-x86_64-1.txz",
+    "md5": "730417ec4d8158c6bb5862417107b9f4"
+  }
+]
