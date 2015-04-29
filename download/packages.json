@@ -55,57 +55,57 @@
     "md5": "d3e815ed032f3f58adab842daa0d6a17"
   },
   {
-    "name": "libjpeg"
+    "name": "libjpeg",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/l/libjpeg-v8a-x86_64-1.txz",
     "md5": "cf9375768249cc1335d23f8e886b8513"
   },
   {
-    "name": "libpng"
+    "name": "libpng",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/l/libpng-1.4.12-x86_64-1.txz",
     "md5": "1b546573b17ac7df03773856cc081692"
   },
   {
-    "name": "libtiff"
+    "name": "libtiff",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/l/libtiff-3.9.7-x86_64-1.txz",
     "md5": "77b0fa68c52be40b5d9a1037a8925f70"
   },
   {
-    "name": "libX11"
+    "name": "libX11",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/libX11-1.6.2-x86_64-1.txz",
     "md5": "7b5b1e41b08f415c0eccd3a699812094"
   },
   {
-    "name": "libXau"
+    "name": "libXau",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/libXau-1.0.8-x86_64-1.txz",
     "md5": "b09a959ee01a1ea1d31600999b05dfef"
   },
   {
-    "name": "libxcb"
+    "name": "libxcb",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/libxcb-1.9.1-x86_64-1.txz",
     "md5": "0cafa8ea2cbc1c95998cee80f5f00c2e"
   },
   {
-    "name": "libXdmcp"
+    "name": "libXdmcp",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/libXdmcp-1.1.1-x86_64-1.txz",
     "md5": "90ebfe2eb0c4e18604695d0b97205564"
   },
   {
-    "name": "libXext"
+    "name": "libXext",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/libXext-1.3.2-x86_64-1.txz",
     "md5": "7d29dd013cc688c2ec5bf0d699322560"
   },
   {
-    "name": "libXft"
+    "name": "libXft",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/libXft-2.3.1-x86_64-1.txz",
     "md5": "5aab9fe9d8666ae173c9461304badfaf"
   },
   {
-    "name": "libXrender"
+    "name": "libXrender",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/libXrender-0.9.8-x86_64-1.txz",
     "md5": "67db8c162a323e0a355d56987d8fefb7"
   },
   {
-    "name": "lzo"
+    "name": "lzo",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/l/lzo-2.03-x86_64-1.txz",
     "md5": "d55f381c25cda96b274f36cf41be1575"
   },
@@ -115,7 +115,7 @@
     "md5": "608903367d86c1760b88182ddfc2053f"
   },
   {
-    "name": "pixman"
+    "name": "pixman",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/x/pixman-0.30.2-x86_64-1.txz",
     "md5": "b8678cd45aeb5f1e175d393ac869bf32"
   },
