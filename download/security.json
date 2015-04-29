@@ -135,8 +135,7 @@
     "md5": "9c91095f98fdd2e899d46acd6bf3c482"
   }
 ],
-"whitelist": [
-  { "url": "https://raw.github.com/limetech/" },
-  { "url": "https://s3.amazonaws.com/dnld.lime-technology.com/" },
-  { "url": "https://raw.github.com/bergware/" }
+"blacklist": [
+  { "url": "https://raw.github.com/untrusted/" },
+  { "url": "https://untrusted.com/" }
 ]}
