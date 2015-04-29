@@ -1,4 +1,4 @@
-{ "packages": [
+{ "package": [
   {
     "name": "binutils",
     "url": "http://slackware.cs.utah.edu/pub/slackware/slackware64-14.1/slackware64/d/binutils-2.23.52.0.1-x86_64-2.txz",
@@ -136,8 +136,7 @@
   }
 ],
 "whitelist": [
-  { "url": "https://github.com/limetech" },
-  { "url": "https://raw.github.com/limetech" },
-  { "url": "https://github.com/bergware" },
-  { "url": "https://raw.github.com/bergware" }
+  { "url": "https://raw.github.com/limetech/" },
+  { "url": "https://s3.amazonaws.com/dnld.lime-technology.com/" },
+  { "url": "https://raw.github.com/bergware/" }
 ]}
