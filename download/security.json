@@ -138,5 +138,5 @@
 "whitelist": [
   { "url": "https://raw.github.com/limetech/" },
   { "url": "https://s3.amazonaws.com/dnld.lime-technology.com/" },
-  { "url": "https://raw.github.com/bergware2/" }
+  { "url": "https://raw.github.com/bergware/" }
 ]}
