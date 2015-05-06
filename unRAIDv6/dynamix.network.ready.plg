@@ -123,7 +123,7 @@ The 'install' script.
 timer=30
 while [[ $timer -gt 0 ]]; do
   gw=$(route -n|awk '/^0.0.0.0/{print $2}')
-  if [[ -n $gw && $(ping -qnc1 $gw|awk '/received/{print $4}') -eq 1 ]]; then
+  if [[ -n $gw &amp;&amp; $(ping -qnc1 $gw|awk '/received/{print $4}') -eq 1 ]]; then
     break
   fi
   ((timer--))
