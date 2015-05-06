@@ -17,7 +17,7 @@ The README file.
 **Dynamix Network Ready**
 
 The Dynamix Network Ready plugin installs as system plugin to ensure it is loaded before any other plugin.
-It will wait until the network is ready by pinging the default gateway and overcome connectivity delays with DHCP.
+It will wait until the network is ready by pinging an external IP address and overcome connectivity delays with DHCP.
 </INLINE>
 </FILE>
 
