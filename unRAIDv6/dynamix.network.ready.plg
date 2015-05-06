@@ -148,7 +148,6 @@ The 'remove' script.
 <INLINE>
 # Remove plugin related files
 rm -rf /usr/local/emhttp/plugins/&name;
-rm -rf /boot/plugins
 </INLINE>
 </FILE>
 
