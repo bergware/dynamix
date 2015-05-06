@@ -124,11 +124,12 @@ The 'install' script.
 # Create plugins folder if not existing
 mkdir -p /boot/plugins
 
+# IP address to ping and verify connectivity
+ip=8.8.4.4
 # Wait for network connectivity
 timer=30
 while [[ $timer -gt 0 ]]; do
-  gw=$(route -n|awk '/^0.0.0.0/{print $2}')
-  if [[ -n $gw && $(ping -qnc1 $gw|awk '/received/{print $4}') -eq 1 ]]; then
+  if [[ -n $(route -n|awk '/^0.0.0.0/{print $2}') && $(ping -qnc1 $ip|awk '/received/{print $4}') -eq 1 ]]; then
     break
   fi
   ((timer--))
