@@ -121,6 +121,10 @@ The 'install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 <![CDATA[
+# Create plugins folder if not existing
+mkdir -p /boot/plugins
+
+# Wait for network connectivity
 timer=30
 while [[ $timer -gt 0 ]]; do
   gw=$(route -n|awk '/^0.0.0.0/{print $2}')
