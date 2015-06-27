@@ -81,7 +81,7 @@ rm -rf /usr/local/emhttp/plugins/&name;
 rm -f /boot/packages/zendopcache-php-7.0.4-x86_64-1bw.txz
 
 # Uninstall the 'zend OPcache' package
-removepkg zendopcache-php-7.0.4-x86_64-1bw
+removepkg zendopcache-php-7.0.5-x86_64-1bw
 </INLINE>
 </FILE>
 
