@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.04.23">
+<!ENTITY version   "2015.06.27">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,11 @@
 ##&name;
 
 ###&version;
+- new logo (thanks Zonediver)
+- changed display of information to multiple pages
+- fixed incorrect maximum memory size reporting
+
+###2015.04.23
 - fixed memory display and calculation under 'System Overview'
 
 ###2015.04.11
@@ -100,7 +105,7 @@ The 'remove' script.
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Delete sysinfo setting
-sed -i '/^sysinfo=/d' /boot/config/plugins/webGui/webGui.cfg
+sed -i '/^sysinfo=/d' /boot/config/plugins/dynamix/dynamix.cfg
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
