@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.zend.opcache">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.04.11">
+<!ENTITY version   "2015.05.26">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -67,8 +67,8 @@ VG/o53E5ZZN5Ng5B+B+/0lr6BOJwegAAAABJRU5ErkJggg==
 <!--
 The 'zend OPcache' binary.
 -->
-<FILE Name="/boot/packages/zendopcache-php-7.0.4-x86_64-1bw.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/zendopcache-php-7.0.4-x86_64-1bw.txz</URL>
+<FILE Name="/boot/packages/zendopcache-php-7.0.5-x86_64-1bw.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/zendopcache-php-7.0.5-x86_64-1bw.txz</URL>
 </FILE>
 
 <!--
