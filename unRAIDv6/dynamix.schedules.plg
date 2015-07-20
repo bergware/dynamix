@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.schedules">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.07.19">
+<!ENTITY version   "2015.07.20">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- Added scheduled tasks list
+
+###2015.07.19
 - initial release for unRAID v6
 </CHANGES>
 
