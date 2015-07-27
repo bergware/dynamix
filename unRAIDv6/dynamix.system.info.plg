@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.06.27">
+<!ENTITY version   "2015.07.27">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- fixed incorrect display of memory under system overview
+
+###2015.06.27
 - new logo (thanks Zonediver)
 - changed display of information to multiple pages
 - fixed incorrect maximum memory size reporting
