@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.01c">
+<!ENTITY version   "2015.08.02">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- Added confirmation of commands (default is OFF)
+
+###2015.08.01c
 - Fixed typo
 
 ###2015.08.01b
@@ -62,6 +65,15 @@ The 'post-install' script.
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
 
+# Create new Confirmations.page
+if [[ ! -f /usr/local/emhttp/webGui/Confirmations.page- ]]; then
+  source /etc/unraid-version
+  v=${version:0:3}
+  mv -f /usr/local/emhttp/webGui/Confirmations.page /usr/local/emhttp/webGui/Confirmations.page-
+  mv -f /tmp/Confirmations.$v /usr/local/emhttp/webGui/Confirmations.page
+fi
+rm -f /tmp/Confirmations.*
+
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
@@ -83,6 +95,11 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;-&version;
+
+# Restore Confirmations.page
+if [[ -f /usr/local/emhttp/webGui/Confirmations.page- ]]; then
+  mv -f /usr/local/emhttp/webGui/Confirmations.page- /usr/local/emhttp/webGui/Confirmations.page
+fi
 </INLINE>
 </FILE>
 
