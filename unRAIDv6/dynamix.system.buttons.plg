@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.07">
+<!ENTITY version   "2015.08.07a">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- Fixed regression error
+
+###2015.08.07
 - Added menu commands are prohibited when parity operation or mover is running
 - Added CTRL + mouse click to do a forced system shutdown or system reboot (requires powerdown plugin)
 - Added system sleep indicator
