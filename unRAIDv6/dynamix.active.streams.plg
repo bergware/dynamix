@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.04.28">
+<!ENTITY version   "2015.06.27">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,13 @@
 ##&name;
 
 ###&version;
+- new logo (thanks Zonediver)
+- removed Reset button (now controlled by Dynamix webGui)
+- enable/Disable Apply button when changes are made
+- replaced halt image for awesome font symbol
+- added Done button on active streams page
+
+###2015.04.28
 - added Reset button on User Names page
 
 ###2015.04.18
