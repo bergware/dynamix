@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.08">
+<!ENTITY version   "2015.08.13">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- Adhere new security policies in V6.1
+
+###2015.08.08
 - Make plugin compatible with unRAID version 6.0 and 6.1
 
 ###2015.06.27
@@ -83,7 +86,7 @@ else
 fi
 
 # Stop service
-/etc/rc.d/rc.s3sleep stop 2>/dev/null
+/usr/local/emhttp/plugins/&name;/scripts/rc.s3sleep stop 2>/dev/null
 
 # Remove old 'source' files
 rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
@@ -103,7 +106,7 @@ Workaround to start service.
 <FILE Name="/tmp/start_service">
 <INLINE>
 #!/bin/bash
-/etc/rc.d/rc.s3sleep start
+/usr/local/emhttp/plugins/&name;/scripts/rc.s3sleep start
 </INLINE>
 </FILE>
 
@@ -179,7 +182,7 @@ The 'remove' script.
 sed -i '/^sleep=/d' /boot/config/plugins/dynamix/dynamix.cfg
 
 # Stop service
-/etc/rc.d/rc.s3sleep stop
+/usr/local/emhttp/plugins/&name;/scripts/rc.s3sleep stop
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
