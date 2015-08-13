@@ -154,6 +154,7 @@ The 'remove' script.
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
+rm -f /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
 
 # Uninstall the 'source' package
 removepkg &name;-&version;
