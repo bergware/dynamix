@@ -14,7 +14,7 @@
 ##&name;
 
 ###&version;
-- Adhere new security policies in V6.1
+- Adhere new security policy in unRAID v6.1 (please reboot after upgrade)
 
 ###2015.08.08
 - Make plugin compatible with unRAID version 6.0 and 6.1
