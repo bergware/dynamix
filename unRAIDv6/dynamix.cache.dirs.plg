@@ -61,7 +61,7 @@ The 'pre-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 # Stop service
-/etc/rc.d/rc.cachedirs stop 2>/dev/null
+/usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs stop 2>/dev/null
 
 # Remove old 'source' files
 rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
@@ -81,7 +81,7 @@ Workaround to start service.
 <FILE Name="/tmp/start_service">
 <INLINE>
 #!/bin/bash
-/etc/rc.d/rc.cachedirs start
+/usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs start
 </INLINE>
 </FILE>
 
@@ -150,7 +150,7 @@ The 'remove' script.
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Stop service
-/etc/rc.d/rc.cachedirs stop
+/usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs stop
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
