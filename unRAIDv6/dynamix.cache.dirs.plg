@@ -114,8 +114,8 @@ if [[ ! -e /boot/config/plugins/&name;/cache_dirs.zip ]]; then
     exit 1
   fi
 fi
-unzip -o -q /boot/config/plugins/&name;/cache_dirs.zip -d /usr/local/sbin
-chmod +x /usr/local/sbin/cache_dirs
+unzip -o -q /boot/config/plugins/&name;/cache_dirs.zip -d /usr/local/emhttp/plugins/&name;/scripts
+chmod +x /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
 
 # Start service
 enable=$(grep "^service=" $cfg|cut -d'"' -f2)
