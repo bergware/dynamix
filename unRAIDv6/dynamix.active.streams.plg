@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.06.27">
+<!ENTITY version   "2015.08.13">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- Fixed regression error (missing tools header file)
+
+###2015.06.27
 - new logo (thanks Zonediver)
 - removed Reset button (now controlled by Dynamix webGui)
 - enable/Disable Apply button when changes are made
