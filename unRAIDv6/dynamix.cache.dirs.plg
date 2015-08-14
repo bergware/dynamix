@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.13">
+<!ENTITY version   "2015.08.14">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- Correct regression error in cache_dirs script path reference
+
+###2015.08.13
 - Adhere new security policy in unRAID v6.1 (please reboot after upgrade)
 
 ###2015.08.08
