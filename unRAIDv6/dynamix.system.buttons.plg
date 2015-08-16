@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.08">
+<!ENTITY version   "2015.08.16">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- Textual adjustments
+
+###2015.08.08
 - Code optimizations
 
 ###2015.08.07a
