@@ -14,7 +14,7 @@
 ##&name;
 
 ###&version;
-- Moved location of pre- and post commands to scripts folder (please re-apply settings)
+- Moved location of pre-sleep and post-sleep commands to scripts folder (please re-apply settings)
 
 ###2015.08.18
 - Corrected regression error is sleep button
