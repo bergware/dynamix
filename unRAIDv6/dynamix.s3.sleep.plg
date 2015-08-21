@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.18a">
+<!ENTITY version   "2015.08.18b">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- Corrected script location installation in PLG file
+
+###2015.08.18a
 - Moved location of pre-sleep and post-sleep commands to scripts folder (please re-apply settings)
 
 ###2015.08.18
@@ -121,7 +124,7 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-bin="/usr/local/bin"
+bin="/usr/local/emhttp/plugins/&name;/scripts"
 cfg="/boot/config/plugins/&name;/&name;.cfg"
 if [[ ! -e $cfg ]]; then
   cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
