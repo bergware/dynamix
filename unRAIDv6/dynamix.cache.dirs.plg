@@ -14,7 +14,7 @@
 ##&name;
 
 ###&version;
-- correct missing folder selection for include & exclude list
+- correct missing folder selection for include and exclude list
 
 ###2015.08.14
 - correct regression error in cache_dirs script path reference
