@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.16">
+<!ENTITY version   "2015.09.12">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- Changed shutdown and reboot execution. When the powerdown plugin is installed, it will be used instead of the standard webGUI commands.
+
+###2015.08.16
 - Textual adjustments
 
 ###2015.08.08
