@@ -95,6 +95,8 @@ if [[ -f /usr/local/emhttp/webGui/include/DefaultPageLayout.php- ]]; then
   mv -f /usr/local/emhttp/webGui/include/DefaultPageLayout.php- /usr/local/emhttp/webGui/include/DefaultPageLayout.php
 fi
 
+# Remove setting
+sed -i '/^monitor=/d' /boot/config/plugins/dynamix/dynamix.cfg
 # Update cron
 rm -f /boot/config/plugins/dynamix/localmaster.cron
 /usr/local/sbin/update_cron
