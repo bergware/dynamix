@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.09.05">
+<!ENTITY version   "2015.09.26">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,10 @@
 ##&name;
 
 ###&version;
+- added: enable/disable election monitoring
+- changed: display of elected local master browser
+
+###2015.09.05
 - test release for unRAID v6.1 only
 </CHANGES>
 
@@ -54,23 +58,10 @@ The 'source' file.
 </FILE>
 
 <!--
-The 'cron' file.
--->
-<FILE Name="/boot/config/plugins/dynamix/localmaster.cron">
-<INLINE>
-# Generated local master browser check:
-*/1 * * * * /usr/local/emhttp/plugins/dynamix/scripts/localmaster &amp;> /dev/null
-</INLINE>
-</FILE>
-
-<!--
 The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Update cron
-/usr/local/sbin/update_cron
-
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/{print "/"$0}' /var/log/packages/&name;-&version;)
 
