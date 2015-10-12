@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.09.26">
+<!ENTITY version   "2015.10.12">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,10 @@
 ##&name;
 
 ###&version;
+- fixed timer pause/resume function
+- changed file extension of temporary file to avoid conflict with diagnostics
+
+###2015.09.26
 - added: enable/disable election monitoring
 - changed: display of elected local master browser
 
