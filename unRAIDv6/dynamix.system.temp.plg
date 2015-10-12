@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.06.27">
+<!ENTITY version   "2015.10.12">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- fixed incorrect timer pause/resume function
+
+###2015.06.27
 - new logo (thanks Zonediver)
 - removed utilities page (now standard included with Dynamix webGui)
 - removed Reset button (now controlled by Dynamix webGui)
@@ -78,6 +81,13 @@ fi
 </FILE>
 
 <!--
+External packages, list is maintained by Limetech.
+-->
+<FILE Name="/boot/packages" Run="upgradepkg --install-new">
+<URL>limetech:perl</URL>
+</FILE>
+
+<!--
 The 'source' file.
 -->
 <FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
@@ -125,6 +135,9 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;-&version;
+
+# Uninstall the external package
+#removepkg limetech:perl
 </INLINE>
 </FILE>
 
