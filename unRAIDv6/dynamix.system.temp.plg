@@ -81,13 +81,6 @@ fi
 </FILE>
 
 <!--
-External packages, list is maintained by Limetech.
--->
-<FILE Name="/boot/packages" Run="upgradepkg --install-new">
-<URL>limetech:perl</URL>
-</FILE>
-
-<!--
 The 'source' file.
 -->
 <FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
