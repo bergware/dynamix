@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.09.26">
+<!ENTITY version   "2015.11.07">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,10 @@
 ##&name;
 
 ###&version;
+- fixed truncated rows in some cases
+- code optimization
+
+###2015.09.26
 - fixed display when more than one ethernet port is present
 
 ###2015.07.27
