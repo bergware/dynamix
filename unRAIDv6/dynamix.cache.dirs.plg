@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.09.04">
+<!ENTITY version   "2015.12.09">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,12 @@
 ##&name;
 
 ###&version;
+- improved stopping of cache_dirs script (thanks dlandon)
+
+###2015.09.23
+- correction in PLG file
+
+###2015.09.04
 - correct missing folder selection for include and exclude list
 
 ###2015.08.14
@@ -84,7 +90,7 @@ The 'source' file.
 <!--
 Workaround to start service.
 -->
-<FILE Name="/tmp/start_service">
+<FILE Name="/tmp/start_service" Mode="0770">
 <INLINE>
 #!/bin/bash
 /usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs start
