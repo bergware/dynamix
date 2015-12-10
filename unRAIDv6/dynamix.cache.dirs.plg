@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.09">
+<!ENTITY version   "2015.12.10">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- kill child processes as needed when cache_dirs script is stopped
+
+###2015.12.09
 - improved stopping of cache_dirs script (thanks dlandon)
 
 ###2015.09.23
