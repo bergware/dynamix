@@ -1,12 +1,12 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.system.stats">
+<!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13c">
-<!ENTITY launch    "Settings/StatSettings">
+<!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY MD5       "f0df44b005042f9ae3d8f7322dde5cf2">
+<!ENTITY MD5       "06f1280196db86d4707baf461ded7000">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -17,41 +17,39 @@
 ###&version;
 - changed .txz file naming to support consistent package upgrading
 
-###2015.08.17
-- adhere new security policy in unRAID v6.1
+###2015.08.13
+- fixed regression error (missing tools header file)
 
 ###2015.06.27
 - introduced new logo (thanks Zonediver)
-- removed utilities page (now standard included with Dynamix webGui)
 - removed Reset button (now controlled by Dynamix webGui)
-- changed behavior of Default button (immediate reset)
-- fixed missing disks when these are in data rebuild
+- enable/Disable Apply button when changes are made
+- replaced halt image for awesome font symbol
+- added Done button on active streams page
 
 ###2015.04.28
-- added Reset button on settings page
+- added Reset button on User Names page
 
 ###2015.04.18
-- fixed top field position
+- improved IP/Users list
 
 ###2015.04.11
 - included online help information
-
-###2015.02.21
-- support of new cron mechanism
-
-###2015.02.15
-- workaround to restore /var/log permissions
+- better support for Plex streams
 
 ###2015.01.22
 - version update for webGui 2015.01.21
 
-###2014.12.05
-- used global disk utilization thresholds
-- fixed cron error message about sa1
-- fixed display error when array in maintenance mode
+###2014.12.08
+- adjusted table to new css styling
 
-###2014.12.01
-- fixed cache disk pool display in Disk Stats.
+###2014.12.06
+- fixed wrong placement of config file
+- fixed regression error in names list
+
+###2014.12.05
+- fixed wrong file size display
+- fixed compatability issue with unRAID v6
 
 ###2014.11.28
 - initial release for unRAID v6
@@ -59,7 +57,7 @@
 
 <!--
 Copyright 2015, Bergware International
-Dynamix System Stats - disk and system usage graphs
+Dynamix Active Streams - Real-time monitoring of SMB shares
 -->
 
 <!--
@@ -71,11 +69,8 @@ The 'pre-install' script.
 file=/boot/config/plugins/&name;/&name;
 MD5=$(md5sum ${file}.txz|grep -Po '^\S+')
 if [[ $MD5 -ne &MD5; ]]; then
-  rm -f "${file}*.txz"
+  rm -f ${file}*.txz
 fi
-
-# Remove legacy cron entry (if existing)
-crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 </INLINE>
 </FILE>
 
@@ -92,17 +87,6 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Create sa directory (workaround)
-mkdir -p /var/log/sa
-
-# Create cron entry
-cron=/boot/config/plugins/&name;/sysstats.cron
-if [[ ! -f $cron ]]; then
-  echo '# Generated system data collection schedule:' > $cron
-  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
-  /usr/local/sbin/update_cron
-fi
-
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 

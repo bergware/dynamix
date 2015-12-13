@@ -77,7 +77,7 @@ The 'pre-install' script.
 file=/boot/config/plugins/&name;/&name;
 MD5=$(md5sum ${file}.txz|grep -Po '^\S+')
 if [[ $MD5 -ne &MD5; ]]; then
-  rm -f "${file}*.txz"
+  rm -f ${file}*.txz
 fi
 
 # Restore Confirmations.page
