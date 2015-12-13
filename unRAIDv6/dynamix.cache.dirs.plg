@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13a">
+<!ENTITY version   "2015.12.13b">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -89,8 +89,9 @@ The 'pre-install' script.
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 plugin=&version;
+plugin=${plugin:0:10}
 version=$(stat -c %Y ${file}.txz 2>/dev/null)
-if [[ -z $version || $(date -d @$version +%Y.%m.%d) != ${plugin:0:10} ]]; then
+if [[ "$version" -lt "$(date -d ${plugin//./-} +%s)" ]]; then
   rm -f ${file}*.txz
 fi
 </INLINE>
@@ -132,7 +133,9 @@ getvar(){
 
 # Install cache_dirs script
 zip="/boot/config/plugins/&name;/cache_dirs.zip"
-if [[ ! -e $zip || $(stat -c %Y $zip) -lt $(date -d "2015-12-01" +%s) ]]; then
+version=$(stat -c %Y $zip 2>/dev/null)
+replace=$(date -d "2015-12-13" +%s)
+if [[ "$version" -lt "$replace" ]]; then
   echo -n " downloading cache_dirs script ... "
   wget -q -O $zip "https://raw.github.com/dlandon/cache_dirs/master/cache_dirs.zip"
   if [[ $? -eq 0 ]]; then
