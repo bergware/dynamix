@@ -4,26 +4,25 @@
 <!ENTITY name      "dynamix.zend.opcache">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.05.26">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY OPcache   "zendopcache-php-7.0.5-x86_64-1bw">
+<!ENTITY MD5       "dfb7fc7cf079e336baed45232d1367a8">
 ]>
 
 <PLUGIN  name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
-<!--
-The README file.
--->
+<!-- README FILE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
 <INLINE>
 **Dynamix Zend OPcache**
 
-Dynamix Zend OPcache speeds up PHP execution by opcode caching and optimization. It stores precompiled script bytecode in shared memory.
-This eliminates the stages of reading code from the source and compiling it on future access.
+The Zend OPcache provides faster PHP execution through opcode caching and optimization. It improves PHP performance by storing precompiled script
+bytecode in the shared memory. This eliminates the stages of reading code from the disk and compiling it on future access.
+In addition, it applies a few bytecode optimization patterns that make code execution faster.
 </INLINE>
 </FILE>
 
-<!--
-The 'zend OPcache' image.
--->
+<!-- ZEND OPcache IMAGE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
 <INLINE>
 iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACx
@@ -64,24 +63,20 @@ VG/o53E5ZZN5Ng5B+B+/0lr6BOJwegAAAABJRU5ErkJggg==
 </INLINE>
 </FILE>
 
-<!--
-The 'zend OPcache' binary.
--->
-<FILE Name="/boot/packages/zendopcache-php-7.0.5-x86_64-1bw.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/zendopcache-php-7.0.5-x86_64-1bw.txz</URL>
+<!-- ZEND OPcache BINARY -->
+<FILE Name="/boot/packages/&OPcache;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&OPcache;.txz</URL>
+<MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Remove plugin related files
 rm -rf /usr/local/emhttp/plugins/&name;
-rm -f /boot/packages/zendopcache-php-7.0.4-x86_64-1bw.txz
 
 # Uninstall the 'zend OPcache' package
-removepkg zendopcache-php-7.0.5-x86_64-1bw
+removepkg &OPcache;
 </INLINE>
 </FILE>
 
