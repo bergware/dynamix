@@ -129,7 +129,7 @@ getvar(){
 
 # Install cache_dirs script
 zip="/boot/config/plugins/&name;/cache_dirs.zip"
-if [[ ! -e $zip ]]; then
+if [[ ! -e $zip || $(stat -c %Y $zip) -lt $(date -d "2015-12-01" +%s) ]]; then
   echo -n " downloading cache_dirs script ... "
   wget -q -O $zip "https://raw.github.com/dlandon/cache_dirs/master/cache_dirs.zip"
   if [[ $? -eq 0 ]]; then
