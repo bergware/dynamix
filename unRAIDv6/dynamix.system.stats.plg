@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13">
+<!ENTITY version   "2015.12.13a">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -68,8 +68,9 @@ The 'pre-install' script.
 <INLINE>
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
+plugin=&version;
 version=$(stat -c %Y ${file}.txz 2>/dev/null)
-if [[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]]; then
+if [[ -z $version || $(date -d @$version +%Y.%m.%d) != ${plugin:0:10} ]]; then
   rm -f ${file}*.txz
 fi
 
@@ -102,7 +103,7 @@ if [[ ! -f $cron ]]; then
 fi
 
 # Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
+chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 
 echo ""
 echo "-----------------------------------------------------------"
