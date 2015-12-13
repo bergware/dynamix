@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13c">
+<!ENTITY version   "2015.12.13d">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "bff0f07efb6cc7b4321f69b70b1e441f">
 ]>

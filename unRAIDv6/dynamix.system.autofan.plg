@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2015.12.13c">
+<!ENTITY version   "2015.12.13d">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "a2cb1fc0e2cfbcb174f19241a2716004">
