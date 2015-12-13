@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2015.08.13">
+<!ENTITY version   "2015.12.13">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,11 +14,15 @@
 ##&name;
 
 ###&version;
-- Adhere new security policy in unRAID v6.1 (please reboot after upgrade)
-- Correction in display of detection progress
+- changed .txz file naming to support consistent package upgrading
+- updated rc.autofan script (start | stop | restart)
+
+###2015.08.13
+- adhere new security policy in unRAID v6.1 (please reboot after upgrade)
+- correction in display of detection progress
 
 ###2015.08.08
-- Make plugin compatible with unRAID version 6.0 and 6.1
+- made plugin compatible for unRAID version 6.0 and 6.1
 
 ###2015.06.27
 - removed utilities page (now standard included with Dynamix webGui)
@@ -49,15 +53,15 @@ The 'pre-install' script.
 /usr/local/emhttp/plugins/&name;/scripts/rc.autofan stop 2>/dev/null
 
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 </INLINE>
 </FILE>
 
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -113,7 +117,7 @@ The 'remove' script.
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 </INLINE>
 </FILE>
 

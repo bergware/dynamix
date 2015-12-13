@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.11.07">
+<!ENTITY version   "2015.12.13">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- changed .txz file naming to support consistent package upgrading
+
+###2015.11.07
 - fixed truncated rows in some cases
 - code optimization
 
@@ -24,7 +27,7 @@
 - fixed incorrect display of memory under system overview
 
 ###2015.06.27
-- new logo (thanks Zonediver)
+- introduced new logo (thanks Zonediver)
 - changed display of information to multiple pages
 - fixed incorrect maximum memory size reporting
 
@@ -79,15 +82,15 @@ else
 fi
 
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 </INLINE>
 </FILE>
 
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -121,7 +124,7 @@ sed -i '/^sysinfo=/d' /boot/config/plugins/dynamix/dynamix.cfg
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 </INLINE>
 </FILE>
 

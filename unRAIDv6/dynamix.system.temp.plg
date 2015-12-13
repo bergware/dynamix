@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.10.12">
+<!ENTITY version   "2015.12.13">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,10 +14,13 @@
 ##&name;
 
 ###&version;
+- changed .txz file naming to support consistent package upgrading
+
+###2015.10.12
 - fixed incorrect timer pause/resume function
 
 ###2015.06.27
-- new logo (thanks Zonediver)
+- introduced new logo (thanks Zonediver)
 - removed utilities page (now standard included with Dynamix webGui)
 - removed Reset button (now controlled by Dynamix webGui)
 - fixed intermittent non-display
@@ -53,7 +56,7 @@
 - version update for webGui 2015.01.21
 
 ###2014.12.05
-- use function showFooter()
+- used function showFooter()
 
 ###2014.11.28
 - initial release for unRAID v6
@@ -70,7 +73,7 @@ The 'pre-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 # Remove legacy config file
 rm -f /boot/config/plugins/&name;/&name;.cfg
 # Remove legacy commands from 'go' file
@@ -83,8 +86,8 @@ fi
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -127,7 +130,7 @@ The 'remove' script.
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 
 # Uninstall the external package
 #removepkg limetech:perl

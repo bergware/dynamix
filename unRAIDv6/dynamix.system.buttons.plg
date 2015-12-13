@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.09.12">
+<!ENTITY version   "2015.12.13">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,47 +13,50 @@
 ##&name;
 
 ###&version;
-- Changed shutdown and reboot execution. When the powerdown plugin is installed, it will be used instead of the standard webGUI commands.
+- changed .txz file naming to support consistent package upgrading
+
+###2015.09.12
+- changed shutdown and reboot execution. When the powerdown plugin is installed, it will be used instead of the standard webGUI commands.
 
 ###2015.08.16
-- Textual adjustments
+- textual adjustments
 
 ###2015.08.08
-- Code optimizations
+- code optimizations
 
 ###2015.08.07a
-- Fixed regression error
+- fixed regression error
 
 ###2015.08.07
-- Added menu commands are prohibited when parity operation or mover is running
-- Added CTRL + mouse click to do a forced system shutdown or system reboot (requires powerdown plugin)
-- Added system sleep indicator
+- added menu commands are prohibited when parity operation or mover is running
+- added CTRL + mouse click to do a forced system shutdown or system reboot (requires powerdown plugin)
+- added system sleep indicator
 
 ###2015.08.06a
-- Use same confirmations for popup window as for Array Operations page
+- used same confirmations for popup window as for Array Operations page
 
 ###2015.08.06
-- Added array start/stop buttons
+- added array start/stop buttons
 
 ###2015.08.02
-- Added confirmation of commands (default is OFF)
-- Fixed improper command execution on some systems
+- added confirmation of commands (default is OFF)
+- fixed improper command execution on some systems
 
 ###2015.08.01c
-- Fixed typo
+- fixed typo
 
 ###2015.08.01b
-- Corrected reference to javascript file for version 6.0.x
+- corrected reference to javascript file for version 6.0.x
 
 ###2015.08.01a
-- Made it part of the Dynamix family
+- made it part of the Dynamix family
 
 ###2015.08.01
-- Changed to single button with context menu
-- Added sleep action (avalaible when Dynamix S3 sleep plugin is installed)
+- changed to single button with context menu
+- added sleep action (avalaible when Dynamix S3 sleep plugin is installed)
 
 ###2015.07.22a
-- Remove close button from shadowbox
+- removed close button from shadowbox
 
 ###2015.07.22
 - initial release for unRAID v6
@@ -70,7 +73,7 @@ The 'pre-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 
 # Restore Confirmations.page
 if [[ -f /usr/local/emhttp/webGui/Confirmations.page- ]]; then
@@ -82,8 +85,8 @@ fi
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -114,7 +117,7 @@ The 'remove' script.
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 
 </INLINE>
 </FILE>

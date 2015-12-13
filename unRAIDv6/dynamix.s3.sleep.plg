@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.09.16">
+<!ENTITY version   "2015.12.13">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,27 +14,34 @@
 ##&name;
 
 ###&version;
-- Corrected preRun and postRun scripts calling with immediate sleep
-- Added debug information with immediate sleep
-- Updated s3_sleep script to version 3.0.1
+- changed .txz file naming to support consistent package upgrading
+- updated rc.s3_sleep script (start | stop | restart)
+
+###2015.09.23
+- correction in PLG file
+
+###2015.09.16
+- corrected preRun and postRun scripts calling with immediate sleep
+- added debug information with immediate sleep
+- updated s3_sleep script to version 3.0.1
 
 ###2015.08.18b
-- Corrected script location installation in PLG file
+- corrected script location installation in PLG file
 
 ###2015.08.18a
-- Moved location of pre-sleep and post-sleep commands to scripts folder (please re-apply settings)
+- moved location of pre-sleep and post-sleep commands to scripts folder (please re-apply settings)
 
 ###2015.08.18
-- Corrected regression error is sleep button
+- corrected regression error is sleep button
 
 ###2015.08.13
-- Adhere new security policy in unRAID v6.1 (please reboot after upgrade)
+- adhere new security policy in unRAID v6.1 (please reboot after upgrade)
 
 ###2015.08.08
-- Make plugin compatible with unRAID version 6.0 and 6.1
+- make plugin compatible with unRAID version 6.0 and 6.1
 
 ###2015.06.27
-- new logo (thanks Zonediver)
+- introduced new logo (thanks Zonediver)
 - removed utilities page (now standard included with Dynamix webGui)
 - removed Reset button (now controlled by Dynamix webGui)
 - changed behavior of Default button (immediate reset)
@@ -103,21 +110,21 @@ fi
 /usr/local/emhttp/plugins/&name;/scripts/rc.s3sleep stop 2>/dev/null
 
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 </INLINE>
 </FILE>
 
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
 Workaround to start service.
 -->
-<FILE Name="/tmp/start_service">
+<FILE Name="/tmp/start_service" Mode="0770">
 <INLINE>
 #!/bin/bash
 /usr/local/emhttp/plugins/&name;/scripts/rc.s3sleep start
@@ -202,7 +209,7 @@ sed -i '/^sleep=/d' /boot/config/plugins/dynamix/dynamix.cfg
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 </INLINE>
 </FILE>
 

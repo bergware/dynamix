@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.schedules">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.09.13">
+<!ENTITY version   "2015.12.13">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,19 +13,22 @@
 ##&name;
 
 ###&version;
-- Changed styling
+- changed .txz file naming to support consistent package upgrading
+
+###2015.09.13
+- changed styling
 
 ###2015.08.13
-- Adhere new security policy in unRAID v6.1 (please reboot after upgrade)
+- adhere new security policy in unRAID v6.1 (please reboot after upgrade)
 
 ###2015.08.08
-- Make plugin compatible with unRAID version 6.0 and 6.1
+- make plugin compatible with unRAID version 6.0 and 6.1
 
 ###2015.07.20
-- Added scheduled tasks list
+- added scheduled tasks list
 
 ###2015.07.19
-- Initial release for unRAID v6
+- initial release for unRAID v6
 </CHANGES>
 
 <!--
@@ -39,15 +42,15 @@ The 'pre-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 </INLINE>
 </FILE>
 
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -91,7 +94,7 @@ The 'remove' script.
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 </INLINE>
 </FILE>
 

@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.ssd.trim">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.10.24">
+<!ENTITY version   "2015.12.13">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- changed .txz file naming to support consistent package upgrading
+
+###2015.10.24
 - initial release for unRAID v6.1 only
 </CHANGES>
 
@@ -28,21 +31,21 @@ The 'pre-install' script.
 <INLINE>
 # Check unRAID version
 source /etc/unraid-version
-if [[ ${version:0:3} != 6.1 ]]; then
-  echo "unRAID version 6.1 is required"
+if [[ ${version:0:3} == 6.0 ]]; then
+  echo "unRAID version 6.1 or higher is required"
   exit 1
 fi
 
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 </INLINE>
 </FILE>
 
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -73,7 +76,7 @@ The 'remove' script.
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 
 # Remove cron entry
 rm -f /boot/config/plugins/dynamix/ssd-trim.cron

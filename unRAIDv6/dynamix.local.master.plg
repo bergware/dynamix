@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.10.12">
+<!ENTITY version   "2015.12.13">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- changed .txz file naming to support consistent package upgrading
+
+###2015.10.12
 - fixed timer pause/resume function
 - changed file extension of temporary file to avoid conflict with diagnostics
 
@@ -36,13 +39,13 @@ The 'pre-install' script.
 <INLINE>
 # Check unRAID version
 source /etc/unraid-version
-if [[ ${version:0:3} != 6.1 ]]; then
-  echo "unRAID version 6.1 is required"
+if [[ ${version:0:3} == 6.0 ]]; then
+  echo "unRAID version 6.1 or higher is required"
   exit 1
 fi
 
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 
 # Rename original files
 if [[ ! -f /usr/local/emhttp/webGui/SMBWorkGroup.page- ]]; then
@@ -57,8 +60,8 @@ fi
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -89,7 +92,7 @@ The 'remove' script.
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 
 # Restore original files
 if [[ -f /usr/local/emhttp/webGui/SMBWorkGroup.page- ]]; then

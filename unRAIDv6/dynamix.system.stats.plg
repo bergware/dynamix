@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.08.17">
+<!ENTITY version   "2015.12.13">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -14,10 +14,13 @@
 ##&name;
 
 ###&version;
-- Adhere new security policy in unRAID v6.1
+- changed .txz file naming to support consistent package upgrading
+
+###2015.08.17
+- adhere new security policy in unRAID v6.1
 
 ###2015.06.27
-- new logo (thanks Zonediver)
+- introduced new logo (thanks Zonediver)
 - removed utilities page (now standard included with Dynamix webGui)
 - removed Reset button (now controlled by Dynamix webGui)
 - changed behavior of Default button (immediate reset)
@@ -42,7 +45,7 @@
 - version update for webGui 2015.01.21
 
 ###2014.12.05
-- use global disk utilization thresholds
+- used global disk utilization thresholds
 - fixed cron error message about sa1
 - fixed display error when array in maintenance mode
 
@@ -64,7 +67,7 @@ The 'pre-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 # Remove legacy cron entry (if existing)
 crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 </INLINE>
@@ -73,8 +76,8 @@ crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 <!--
 The 'source' file.
 -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
 </FILE>
 
 <!--
@@ -87,7 +90,7 @@ mkdir -p /var/log/sa
 
 # Create cron entry
 cron=/boot/config/plugins/&name;/sysstats.cron
-if [[ ! -f $cron || &version; == 2015.08.17 ]]; then
+if [[ ! -f $cron ]]; then
   echo '# Generated system data collection schedule:' > $cron
   echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
   /usr/local/sbin/update_cron
@@ -112,17 +115,11 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-# Remove cron entry
-cron=/tmp/sa1.tmp
-crontab -l|grep -v '# System data'|grep -v '/sa/sa1' > $cron
-crontab $cron
-rm -f $cron
-
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;-&version;
+removepkg &name;
 </INLINE>
 </FILE>
 
