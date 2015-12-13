@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13a">
+<!ENTITY version   "2015.12.13b">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
@@ -69,8 +69,9 @@ The 'pre-install' script.
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 plugin=&version;
+plugin=${plugin:0:10}
 version=$(stat -c %Y ${file}.txz 2>/dev/null)
-if [[ -z $version || $(date -d @$version +%Y.%m.%d) != ${plugin:0:10} ]]; then
+if [[ "$version" -lt "$(date -d ${plugin//./-} +%s)" ]]; then
   rm -f ${file}*.txz
 fi
 
