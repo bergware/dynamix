@@ -128,10 +128,11 @@ if [[ ! -e $cfg ]]; then
   cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
 fi
 
-# get variable
-getvar(){
+# get unRAID key
+getkey(){
   if [[ -e /proc/mdcmd ]]; then
-    awk -F= '/^'$1'=/{print $2}' /proc/mdcmd
+    local key=$1
+    grep -Po "^$key=\K.*" /proc/mdcmd
   fi
 }
 
@@ -153,13 +154,13 @@ unzip -o -q $zip -d /usr/local/emhttp/plugins/&name;/scripts
 chmod +x /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
 
 # Start service
-enable=$(grep "^service=" $cfg|cut -d'"' -f2)
-conf="/etc/cache_dirs.conf"
+enable=$(grep -Po '^service="\K[^"]+' $cfg)
+conf=/etc/cache_dirs.conf
 if [[ $enable -eq 1 ]]; then
   if [[ ! -e $conf ]]; then
-    grep "^options=" $cfg|cut -d'"' -f2-|sed 's:"$::'|tr -d "\n" > $conf
+    grep -Po '^options="\K.*' $cfg|sed -n 'G;s:"\n$::;p' > $conf
   fi
-  if [[ $(getvar mdState) == STARTED ]]; then
+  if [[ $(getkey mdState) == STARTED ]]; then
     at -M -f /tmp/start_service now 2>/dev/null
   fi
 fi

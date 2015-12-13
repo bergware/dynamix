@@ -156,34 +156,35 @@ urldecode(){
   echo -e "$(sed 's/+/ /g;s/%0D//g;s/%/\\x/g')"
 }
 
-# get variable
-getvar(){
+# get unRAID key
+getkey(){
   if [[ -e /proc/mdcmd ]]; then
-    awk -F= '/^'$1'=/{print $2}' /proc/mdcmd
+    local key=$1
+    grep -Po "^$key=\K.*" /proc/mdcmd
   fi
 }
 
 # Create preRun and postRun files (if existing)
 bash="#!/bin/bash\n"
-preRun=$(grep "^preRun=" $cfg|cut -d'"' -f2)
+preRun=$(grep -Po '^preRun="\K[^"]+' $cfg)
 if [[ -n $preRun ]]; then
   echo "${bash}${preRun}"|urldecode > $bin/preRun
   chmod u+x $bin/preRun
 fi
-postRun=$(grep "^postRun=" $cfg|cut -d'"' -f2)
+postRun=$(grep -Po '^postRun="\K[^"]+' $cfg)
 if [[ -n $postRun ]]; then
   echo "${bash}${postRun}"|urldecode > $bin/postRun
   chmod u+x $bin/postRun
 fi
 
 # Start service
-enable=$(grep "^service=" $cfg|cut -d'"' -f2)
-conf="/etc/s3_sleep.conf"
+enable=$(grep -Po '^service="\K[^"]+' $cfg)
+conf=/etc/s3_sleep.conf
 if [[ $enable -eq 1 ]]; then
   if [[ ! -e $conf ]]; then
-    grep "^options=" $cfg|cut -d'"' -f2-|sed 's:"$::'|tr -d "\n" > $conf
+    grep -Po '^options="\K.*' $cfg|sed -n 'G;s:"\n$::;p' > $conf
   fi
-  if [[ $(getvar mdState) == STARTED ]]; then
+  if [[ $(getkey mdState) == STARTED ]]; then
     at -M -f /tmp/start_service now 2>/dev/null
   fi
 fi
