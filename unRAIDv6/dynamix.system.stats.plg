@@ -1,10 +1,10 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.system.info">
+<!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13">
-<!ENTITY launch    "Tools/SystemProfiler">
+<!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -16,35 +16,41 @@
 ###&version;
 - changed .txz file naming to support consistent package upgrading
 
-###2015.11.07
-- fixed truncated rows in some cases
-- code optimization
-
-###2015.09.26
-- fixed display when more than one ethernet port is present
-
-###2015.07.27
-- fixed incorrect display of memory under system overview
+###2015.08.17
+- adhere new security policy in unRAID v6.1
 
 ###2015.06.27
 - introduced new logo (thanks Zonediver)
-- changed display of information to multiple pages
-- fixed incorrect maximum memory size reporting
+- removed utilities page (now standard included with Dynamix webGui)
+- removed Reset button (now controlled by Dynamix webGui)
+- changed behavior of Default button (immediate reset)
+- fixed missing disks when these are in data rebuild
 
-###2015.04.23
-- fixed memory display and calculation under 'System Overview'
+###2015.04.28
+- added Reset button on settings page
+
+###2015.04.18
+- fixed top field position
 
 ###2015.04.11
-- version update for new webGui
+- included online help information
 
-###2015.02.01
-- fixed wrong display of system overview information. In certain cases.
+###2015.02.21
+- support of new cron mechanism
+
+###2015.02.15
+- workaround to restore /var/log permissions
 
 ###2015.01.22
 - version update for webGui 2015.01.21
 
-###2014.12.07
-- fixed addition of info settings
+###2014.12.05
+- used global disk utilization thresholds
+- fixed cron error message about sa1
+- fixed display error when array in maintenance mode
+
+###2014.12.01
+- fixed cache disk pool display in Disk Stats.
 
 ###2014.11.28
 - initial release for unRAID v6
@@ -52,7 +58,7 @@
 
 <!--
 Copyright 2015, Bergware International
-Dynamix System Information - System hardware and BIOS details
+Dynamix System Stats - disk and system usage graphs
 -->
 
 <!--
@@ -60,31 +66,15 @@ The 'pre-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-cfg="/boot/config/plugins/dynamix/dynamix.cfg"
-
-add_key(){
-  key=$(echo $2|cut -d'=' -f1)
-  section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
-  if [[ -z $section ]]; then
-    echo -e "[$1]\n$2" >> $cfg
-  else
-    if [[ $(echo $section|grep "$key="|wc -l) -eq 0 ]]; then
-      sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
-    fi
-  fi
-}
-
-# Add sysinfo setting
-if [[ -e $cfg ]]; then
-  add_key 'display' 'sysinfo="/Tools/SystemProfiler"'
-else
-  echo -e "[display]\nsysinfo=\"/Tools/SystemProfiler\"" > $cfg
-fi
-
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 version=$(stat -c %Y ${file}.txz 2>/dev/null)
-[[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]] && rm -f ${file}*.txz
+if [[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]]; then
+  rm -f ${file}*.txz
+fi
+
+# Remove legacy cron entry (if existing)
+crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 </INLINE>
 </FILE>
 
@@ -100,6 +90,17 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Create sa directory (workaround)
+mkdir -p /var/log/sa
+
+# Create cron entry
+cron=/boot/config/plugins/&name;/sysstats.cron
+if [[ ! -f $cron ]]; then
+  echo '# Generated system data collection schedule:' > $cron
+  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
+  /usr/local/sbin/update_cron
+fi
+
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
 
@@ -119,9 +120,6 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-# Delete sysinfo setting
-sed -i '/^sysinfo=/d' /boot/config/plugins/dynamix/dynamix.cfg
-
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
 

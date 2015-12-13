@@ -1,0 +1,182 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.cache.dirs">
+<!ENTITY author    "Bergware">
+<!ENTITY version   "2015.12.11">
+<!ENTITY launch    "Settings/FolderCachingSettings">
+<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+
+<CHANGES>
+##&name;
+
+###&version;
+- more refinement in stopping cache_dirs and its child processes (thanks dlandon)
+
+###2015.12.10
+- kill child processes as needed when cache_dirs script is stopped
+
+###2015.12.09
+- improved stopping of cache_dirs script (thanks dlandon)
+
+###2015.09.23
+- correction in PLG file
+
+###2015.09.04
+- correct missing folder selection for include and exclude list
+
+###2015.08.14
+- correct regression error in cache_dirs script path reference
+
+###2015.08.13
+- adhere new security policy in unRAID v6.1 (please reboot after upgrade)
+
+###2015.08.08
+- make plugin compatible with unRAID version 6.0 and 6.1
+
+###2015.06.27
+- new logo
+- removed utilities page (now standard included with Dynamix webGui)
+- removed Reset button (now controlled by Dynamix webGui)
+- changed behavior of Default button (immediate reset)
+- changed behavior of enable/disable fields
+
+###2015.04.28
+- added Reset button on settings page
+- fixed enabling/disabling of buttons
+
+###2015.04.11
+- included online help information
+- removed 'All' option from excluded/included folder selection
+
+###2015.02.14
+- fixed cache_dirs startup after system reboot
+
+###2015.01.22
+- version update for webGui 2015.01.21
+
+###2014.12.07
+- changed stop event to 'stopping_svcs'
+
+###2014.12.03
+- fixed failed download of cache_dirs upon reboot
+
+###2014.11.28
+- initial release for unRAID v6
+</CHANGES>
+
+<!--
+Copyright 2015, Bergware International
+Dynamix Folder Caching - Store names in memory to avoid disk spin-ups. Makes use of cache_dirs script written by Joe L.
+-->
+
+<!--
+The 'pre-install' script.
+-->
+<FILE Run="/bin/bash">
+<INLINE>
+# Stop service
+/usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs stop 2>/dev/null
+
+# Remove old 'source' files
+rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null|grep -v '&version;')
+</INLINE>
+</FILE>
+
+<!--
+The 'source' file.
+-->
+<FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
+<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;-&version;.txz</URL>
+</FILE>
+
+<!--
+Workaround to start service.
+-->
+<FILE Name="/tmp/start_service" Mode="0770">
+<INLINE>
+#!/bin/bash
+/usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs start
+</INLINE>
+</FILE>
+
+<!--
+The 'post-install' script.
+-->
+<FILE Run="/bin/bash">
+<INLINE>
+cfg="/boot/config/plugins/&name;/&name;.cfg"
+if [[ ! -e $cfg ]]; then
+  cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
+fi
+
+# get variable
+getvar(){
+  if [[ -e /proc/mdcmd ]]; then
+    awk -F= '/^'$1'=/{print $2}' /proc/mdcmd
+  fi
+}
+
+# Install cache_dirs script
+if [[ ! -e /boot/config/plugins/&name;/cache_dirs.zip ]]; then
+  echo -n " downloading cache_dirs script ... "
+  wget -q -O /boot/config/plugins/&name;/cache_dirs.zip "http://lime-technology.com/forum/index.php?action=dlattach;topic=4500.0;attach=21431"
+  if [[ $? -eq 0 ]]; then
+    echo "done"
+  else
+    echo "failed"
+    logger "cache_dirs script failed to download. Abort installation."
+    exit 1
+  fi
+fi
+unzip -o -q /boot/config/plugins/&name;/cache_dirs.zip -d /usr/local/emhttp/plugins/&name;/scripts
+chmod +x /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
+
+# Start service
+enable=$(grep "^service=" $cfg|cut -d'"' -f2)
+conf="/etc/cache_dirs.conf"
+if [[ $enable -eq 1 ]]; then
+  if [[ ! -e $conf ]]; then
+    grep "^options=" $cfg|cut -d'"' -f2-|sed 's:"$::'|tr -d "\n" > $conf
+  fi
+  if [[ $(getvar mdState) == STARTED ]]; then
+    at -M -f /tmp/start_service now 2>/dev/null
+  fi
+fi
+rm -f /tmp/start_service
+
+# Update file access mode
+chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " Plugin &name; is installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2015, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+# Stop service
+/usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs stop
+
+# Remove plugin related files
+rm -rf /boot/config/plugins/&name;
+rm -f /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
+
+# Uninstall the 'source' package
+removepkg &name;-&version;
+</INLINE>
+</FILE>
+
+</PLUGIN>

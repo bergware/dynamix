@@ -1,10 +1,10 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.system.stats">
-<!ENTITY author    "Bergware">
+<!ENTITY name      "dynamix.system.autofan">
+<!ENTITY author    "Bergware/gfjardim">
 <!ENTITY version   "2015.12.13">
-<!ENTITY launch    "Settings/StatSettings">
+<!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -15,50 +15,33 @@
 
 ###&version;
 - changed .txz file naming to support consistent package upgrading
+- updated rc.autofan script (start | stop | restart)
 
-###2015.08.17
-- adhere new security policy in unRAID v6.1
+###2015.08.13
+- adhere new security policy in unRAID v6.1 (please reboot after upgrade)
+- correction in display of detection progress
+
+###2015.08.08
+- made plugin compatible for unRAID version 6.0 and 6.1
 
 ###2015.06.27
-- introduced new logo (thanks Zonediver)
 - removed utilities page (now standard included with Dynamix webGui)
 - removed Reset button (now controlled by Dynamix webGui)
-- changed behavior of Default button (immediate reset)
-- fixed missing disks when these are in data rebuild
+- added Default button
 
 ###2015.04.28
 - added Reset button on settings page
 
-###2015.04.18
-- fixed top field position
-
 ###2015.04.11
-- included online help information
+- improved pwm scanning (thanks to gfjardim)
 
-###2015.02.21
-- support of new cron mechanism
-
-###2015.02.15
-- workaround to restore /var/log permissions
-
-###2015.01.22
-- version update for webGui 2015.01.21
-
-###2014.12.05
-- used global disk utilization thresholds
-- fixed cron error message about sa1
-- fixed display error when array in maintenance mode
-
-###2014.12.01
-- fixed cache disk pool display in Disk Stats.
-
-###2014.11.28
+###2015.02.07
 - initial release for unRAID v6
 </CHANGES>
 
 <!--
 Copyright 2015, Bergware International
-Dynamix System Stats - disk and system usage graphs
+Dynamix System Autofan - Fan speed control. Makes use of autofan script contributed by Aiden, Dan Stroot, Guzzi, gfjardim
 -->
 
 <!--
@@ -66,13 +49,15 @@ The 'pre-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Stop service
+/usr/local/emhttp/plugins/&name;/scripts/rc.autofan stop 2>/dev/null
+
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 version=$(stat -c %Y ${file}.txz 2>/dev/null)
-[[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]] && rm -f ${file}*.txz
-
-# Remove legacy cron entry (if existing)
-crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
+if [[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]]; then
+  rm -f ${file}*.txz
+fi
 </INLINE>
 </FILE>
 
@@ -84,20 +69,31 @@ The 'source' file.
 </FILE>
 
 <!--
+Workaround to start service.
+-->
+<FILE Name="/tmp/start_service">
+<INLINE>
+#!/bin/bash
+/usr/local/emhttp/plugins/&name;/scripts/rc.autofan start 2>/dev/null
+</INLINE>
+</FILE>
+
+<!--
 The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Create sa directory (workaround)
-mkdir -p /var/log/sa
-
-# Create cron entry
-cron=/boot/config/plugins/&name;/sysstats.cron
-if [[ ! -f $cron ]]; then
-  echo '# Generated system data collection schedule:' > $cron
-  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
-  /usr/local/sbin/update_cron
+cfg="/boot/config/plugins/&name;/&name;.cfg"
+if [[ ! -e $cfg ]]; then
+  cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
 fi
+
+# Start service
+enable=$(awk -F'"' '/^service=/{print $2}' $cfg)
+if [[ $enable -eq 1 ]]; then
+  at -M -f /tmp/start_service now 2>/dev/null
+fi
+rm -f /tmp/start_service
 
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;-&version;)
@@ -118,6 +114,9 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
+# Stop service
+/usr/local/emhttp/plugins/&name;/scripts/rc.autofan stop 2>/dev/null
+
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
 

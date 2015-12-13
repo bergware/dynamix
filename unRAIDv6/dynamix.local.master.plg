@@ -47,7 +47,9 @@ fi
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 version=$(stat -c %Y ${file}.txz 2>/dev/null)
-[[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]] && rm -f ${file}*.txz
+if [[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]]; then
+  rm -f ${file}*.txz
+fi
 
 # Rename original files
 if [[ ! -f /usr/local/emhttp/webGui/SMBWorkGroup.page- ]]; then
