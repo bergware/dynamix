@@ -134,7 +134,7 @@ getvar(){
 
 # Install cache_dirs script
 zip="/boot/config/plugins/&name;/cache_dirs.zip"
-MD5=$(md5sum $zip|grep -Po '^\S+')
+MD5=$(md5sum $zip 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 -ne &ZIP; ]]; then
   echo -n " downloading cache_dirs script ... "
   wget -q -O $zip "https://raw.github.com/dlandon/cache_dirs/master/cache_dirs.zip"
