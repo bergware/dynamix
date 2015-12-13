@@ -48,7 +48,9 @@ fi
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 MD5=$(md5sum ${file}.txz|grep -Po '^\S+)
-[[ $MD5 -ne &MD5; ]] &amp;&amp; rm -f "${file}*.txz"
+if [[ $MD5 -ne &MD5; ]]; then
+  rm -f "${file}*.txz"
+fi
 
 # Rename original files
 if [[ ! -f /usr/local/emhttp/webGui/SMBWorkGroup.page- ]]; then
