@@ -82,10 +82,9 @@ else
 fi
 
 # Remove old 'source' files
-version=$(stat -c %Y /boot/config/plugins/&name;/&name;.txz 2>/dev/null)
-if [[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]]; then
-  rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
-fi
+file=/boot/config/plugins/&name;/&name;
+version=$(stat -c %Y ${file}.txz 2>/dev/null)
+[[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]] && rm -f ${file}*.txz
 </INLINE>
 </FILE>
 
