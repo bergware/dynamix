@@ -1,12 +1,12 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.system.stats">
+<!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13c">
-<!ENTITY launch    "Settings/StatSettings">
+<!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY MD5       "f0df44b005042f9ae3d8f7322dde5cf2">
+<!ENTITY MD5       "c495d3bfea3b65de58d0463bbfa0a1a6">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -17,41 +17,47 @@
 ###&version;
 - changed .txz file naming to support consistent package upgrading
 
-###2015.08.17
-- adhere new security policy in unRAID v6.1
+###2015.10.12
+- fixed incorrect timer pause/resume function
 
 ###2015.06.27
 - introduced new logo (thanks Zonediver)
 - removed utilities page (now standard included with Dynamix webGui)
 - removed Reset button (now controlled by Dynamix webGui)
-- changed behavior of Default button (immediate reset)
-- fixed missing disks when these are in data rebuild
+- fixed intermittent non-display
 
 ###2015.04.28
 - added Reset button on settings page
 
-###2015.04.18
-- fixed top field position
-
 ###2015.04.11
 - included online help information
 
-###2015.02.21
-- support of new cron mechanism
+###2015.02.07
+- replaced 'add to startup/remove from startup' with automatic loading by plugin
+- changed 'detect' and 'save' buttons are made permanent
+- fixed list of drivers not always displayed
+- changed icon of mainboard
 
-###2015.02.15
-- workaround to restore /var/log permissions
+###2015.02.03
+- added 'detect' button to do manual scanning (fixes long wait issues - some people have)
+- added possibility to manually add a driver name
+- added improved control management
+- changed probe activation is integrated in dropdown menus
+
+###2015.02.02
+- added suppression of inactive/unused probes
+- added selection of probes to display in footer
+
+###2015.01.31
+- added display of array fan
+- added settings page (contributed by gfjardim)
+- changed icons
 
 ###2015.01.22
 - version update for webGui 2015.01.21
 
 ###2014.12.05
-- used global disk utilization thresholds
-- fixed cron error message about sa1
-- fixed display error when array in maintenance mode
-
-###2014.12.01
-- fixed cache disk pool display in Disk Stats.
+- used function showFooter()
 
 ###2014.11.28
 - initial release for unRAID v6
@@ -59,7 +65,7 @@
 
 <!--
 Copyright 2015, Bergware International
-Dynamix System Stats - disk and system usage graphs
+Dynamix System Temperature - Real-time monitoring of CPU and MB temperatures
 -->
 
 <!--
@@ -69,13 +75,18 @@ The 'pre-install' script.
 <INLINE>
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz|grep -Po '^\S+)
+MD5=$(md5sum ${file}.txz|grep -Po '^\S+')
 if [[ $MD5 -ne &MD5; ]]; then
   rm -f "${file}*.txz"
 fi
 
-# Remove legacy cron entry (if existing)
-crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
+# Remove legacy config file
+rm -f /boot/config/plugins/&name;/&name;.cfg
+
+# Remove legacy commands from 'go' file
+if grep -q '^# Sensors drivers' /boot/config/go; then
+  sed -i '/^# Sensors drivers/d;/^.*drivers.conf)$/d' /boot/config/go
+fi
 </INLINE>
 </FILE>
 
@@ -92,15 +103,16 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Create sa directory (workaround)
-mkdir -p /var/log/sa
+# Load sensor drivers
+drivers=/boot/config/plugins/&name;/drivers.conf
+if [[ -f $drivers ]]; then
+  modprobe -a $(cat $drivers)
+fi
 
-# Create cron entry
-cron=/boot/config/plugins/&name;/sysstats.cron
-if [[ ! -f $cron ]]; then
-  echo '# Generated system data collection schedule:' > $cron
-  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
-  /usr/local/sbin/update_cron
+# Copy settings file
+sensors=/boot/config/plugins/&name;/sensors.conf
+if [[ -f $sensors ]]; then
+  cp -f $sensors /etc/sensors.d
 fi
 
 # Update file access mode
@@ -127,6 +139,9 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;
+
+# Uninstall the external package
+#removepkg limetech:perl
 </INLINE>
 </FILE>
 

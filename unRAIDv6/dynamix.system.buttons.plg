@@ -1,15 +1,14 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.active.streams">
+<!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13c">
-<!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY MD5       "06f1280196db86d4707baf461ded7000">
+<!ENTITY MD5       "23598397826f22eef03978f85c564fca">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ##&name;
@@ -17,47 +16,56 @@
 ###&version;
 - changed .txz file naming to support consistent package upgrading
 
-###2015.08.13
-- fixed regression error (missing tools header file)
+###2015.09.12
+- changed shutdown and reboot execution. When the powerdown plugin is installed, it will be used instead of the standard webGUI commands.
 
-###2015.06.27
-- introduced new logo (thanks Zonediver)
-- removed Reset button (now controlled by Dynamix webGui)
-- enable/Disable Apply button when changes are made
-- replaced halt image for awesome font symbol
-- added Done button on active streams page
+###2015.08.16
+- textual adjustments
 
-###2015.04.28
-- added Reset button on User Names page
+###2015.08.08
+- code optimizations
 
-###2015.04.18
-- improved IP/Users list
+###2015.08.07a
+- fixed regression error
 
-###2015.04.11
-- included online help information
-- better support for Plex streams
+###2015.08.07
+- added menu commands are prohibited when parity operation or mover is running
+- added CTRL + mouse click to do a forced system shutdown or system reboot (requires powerdown plugin)
+- added system sleep indicator
 
-###2015.01.22
-- version update for webGui 2015.01.21
+###2015.08.06a
+- used same confirmations for popup window as for Array Operations page
 
-###2014.12.08
-- adjusted table to new css styling
+###2015.08.06
+- added array start/stop buttons
 
-###2014.12.06
-- fixed wrong placement of config file
-- fixed regression error in names list
+###2015.08.02
+- added confirmation of commands (default is OFF)
+- fixed improper command execution on some systems
 
-###2014.12.05
-- fixed wrong file size display
-- fixed compatability issue with unRAID v6
+###2015.08.01c
+- fixed typo
 
-###2014.11.28
+###2015.08.01b
+- corrected reference to javascript file for version 6.0.x
+
+###2015.08.01a
+- made it part of the Dynamix family
+
+###2015.08.01
+- changed to single button with context menu
+- added sleep action (avalaible when Dynamix S3 sleep plugin is installed)
+
+###2015.07.22a
+- removed close button from shadowbox
+
+###2015.07.22
 - initial release for unRAID v6
 </CHANGES>
 
 <!--
 Copyright 2015, Bergware International
-Dynamix Active Streams - Real-time monitoring of SMB shares
+Dynamix System Buttons - Single click system reboot and system shutdown
 -->
 
 <!--
@@ -67,9 +75,14 @@ The 'pre-install' script.
 <INLINE>
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz|grep -Po '^\S+)
+MD5=$(md5sum ${file}.txz|grep -Po '^\S+')
 if [[ $MD5 -ne &MD5; ]]; then
   rm -f "${file}*.txz"
+fi
+
+# Restore Confirmations.page
+if [[ -f /usr/local/emhttp/webGui/Confirmations.page- ]]; then
+  mv -f /usr/local/emhttp/webGui/Confirmations.page- /usr/local/emhttp/webGui/Confirmations.page
 fi
 </INLINE>
 </FILE>
@@ -111,6 +124,7 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;
+
 </INLINE>
 </FILE>
 

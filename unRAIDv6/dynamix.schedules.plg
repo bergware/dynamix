@@ -1,11 +1,11 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.system.buttons">
+<!ENTITY name      "dynamix.schedules">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13c">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY MD5       "23598397826f22eef03978f85c564fca">
+<!ENTITY MD5       "bfe2ba3c83ffeb006c3911dd9751112c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -16,56 +16,25 @@
 ###&version;
 - changed .txz file naming to support consistent package upgrading
 
-###2015.09.12
-- changed shutdown and reboot execution. When the powerdown plugin is installed, it will be used instead of the standard webGUI commands.
+###2015.09.13
+- changed styling
 
-###2015.08.16
-- textual adjustments
+###2015.08.13
+- adhere new security policy in unRAID v6.1 (please reboot after upgrade)
 
 ###2015.08.08
-- code optimizations
+- make plugin compatible with unRAID version 6.0 and 6.1
 
-###2015.08.07a
-- fixed regression error
+###2015.07.20
+- added scheduled tasks list
 
-###2015.08.07
-- added menu commands are prohibited when parity operation or mover is running
-- added CTRL + mouse click to do a forced system shutdown or system reboot (requires powerdown plugin)
-- added system sleep indicator
-
-###2015.08.06a
-- used same confirmations for popup window as for Array Operations page
-
-###2015.08.06
-- added array start/stop buttons
-
-###2015.08.02
-- added confirmation of commands (default is OFF)
-- fixed improper command execution on some systems
-
-###2015.08.01c
-- fixed typo
-
-###2015.08.01b
-- corrected reference to javascript file for version 6.0.x
-
-###2015.08.01a
-- made it part of the Dynamix family
-
-###2015.08.01
-- changed to single button with context menu
-- added sleep action (avalaible when Dynamix S3 sleep plugin is installed)
-
-###2015.07.22a
-- removed close button from shadowbox
-
-###2015.07.22
+###2015.07.19
 - initial release for unRAID v6
 </CHANGES>
 
 <!--
 Copyright 2015, Bergware International
-Dynamix System Buttons - Single click system reboot and system shutdown
+Dynamix Schedules - GUI inteface to alter the built-in hourly, daily, weekly and monthly schedules.
 -->
 
 <!--
@@ -75,14 +44,9 @@ The 'pre-install' script.
 <INLINE>
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz|grep -Po '^\S+)
+MD5=$(md5sum ${file}.txz|grep -Po '^\S+')
 if [[ $MD5 -ne &MD5; ]]; then
   rm -f "${file}*.txz"
-fi
-
-# Restore Confirmations.page
-if [[ -f /usr/local/emhttp/webGui/Confirmations.page- ]]; then
-  mv -f /usr/local/emhttp/webGui/Confirmations.page- /usr/local/emhttp/webGui/Confirmations.page
 fi
 </INLINE>
 </FILE>
@@ -100,6 +64,19 @@ The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
+cron="/tmp/cron.tmp"
+cfg="/boot/config/plugins/&name;/&name;.cfg"
+if [[ -e $cfg ]]; then
+  source $cfg
+  crontab -l > $cron
+  sed -i -r "s/^[0-9]+(.*cron.hourly.*)/${hourlyMM}\1/" $cron
+  sed -i -r "s/^[0-9]+ [0-9]+(.*cron.daily.*)/${dailyMM} ${dailyHH}\1/" $cron
+  sed -i -r "s/^[0-9]+ [0-9]+ \* \* [0-9](.*cron.weekly.*)/${weeklyMM} ${weeklyHH} * * ${weeklyDD}\1/" $cron
+  sed -i -r "s/^[0-9]+ [0-9]+ [0-9]+(.*cron.monthly.*)/${monthlyMM} ${monthlyHH} ${monthlyDD}\1/" $cron
+  crontab $cron
+  rm -f $cron
+fi
+
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 
@@ -124,7 +101,6 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;
-
 </INLINE>
 </FILE>
 
