@@ -3,9 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2015.12.13d">
+<!ENTITY version   "2015.12.13e">
 <!ENTITY launch    "Settings/FanSettings">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "a2cb1fc0e2cfbcb174f19241a2716004">
 ]>
 
@@ -17,6 +17,7 @@
 ###&version;
 - changed .txz file naming to support consistent package upgrading
 - updated rc.autofan script (start | stop | restart)
+- fixed autofan script start
 
 ###2015.08.13
 - adhere new security policy in unRAID v6.1 (please reboot after upgrade)
@@ -45,9 +46,7 @@ Copyright 2015, Bergware International
 Dynamix System Autofan - Fan speed control. Makes use of autofan script contributed by Aiden, Dan Stroot, Guzzi, gfjardim
 -->
 
-<!--
-The 'pre-install' script.
--->
+<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Stop service
@@ -62,27 +61,21 @@ fi
 </INLINE>
 </FILE>
 
-<!--
-The 'source' file.
--->
+<!-- SOURCE FILE -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-Workaround to start service.
--->
-<FILE Name="/tmp/start_service">
+<!-- WORKAROUND -->
+<FILE Name="/tmp/start_service" Mode="0770">
 <INLINE>
 #!/bin/bash
 /usr/local/emhttp/plugins/&name;/scripts/rc.autofan start 2>/dev/null
 </INLINE>
 </FILE>
 
-<!--
-The 'post-install' script.
--->
+<!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 cfg="/boot/config/plugins/&name;/&name;.cfg"
@@ -111,9 +104,7 @@ echo ""
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Stop service

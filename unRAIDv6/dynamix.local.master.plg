@@ -4,7 +4,7 @@
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13d">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "bff0f07efb6cc7b4321f69b70b1e441f">
 ]>
 
@@ -33,9 +33,7 @@ Copyright 2015, Bergware International
 Dynamix local master - Monitors and shows the local master election in an SMB network
 -->
 
-<!--
-The 'pre-install' script.
--->
+<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Check unRAID version
@@ -45,34 +43,32 @@ if [[ ${version:0:3} == 6.0 ]]; then
   exit 1
 fi
 
+# Rename original files
+smb=/usr/local/emhttp/webGui/SMBWorkGroup
+layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
+if [[ ! -f $smb.page- ]]; then
+  mv -f $smb.page $smb.page-
+fi
+if [[ ! -f $layout.php- ]]; then
+  mv -f $layout.php $layout.php-
+fi
+
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f ${file}*.txz
 fi
-
-# Rename original files
-if [[ ! -f /usr/local/emhttp/webGui/SMBWorkGroup.page- ]]; then
-  mv -f /usr/local/emhttp/webGui/SMBWorkGroup.page /usr/local/emhttp/webGui/SMBWorkGroup.page-
-fi
-if [[ ! -f /usr/local/emhttp/webGui/include/DefaultPageLayout.php- ]]; then
-  mv -f /usr/local/emhttp/webGui/include/DefaultPageLayout.php /usr/local/emhttp/webGui/include/DefaultPageLayout.php-
-fi
 </INLINE>
 </FILE>
 
-<!--
-The 'source' file.
--->
+<!-- SOURCE FILE -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-The 'post-install' script.
--->
+<!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Update file access mode
@@ -89,9 +85,7 @@ echo ""
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Remove plugin related files
@@ -101,15 +95,18 @@ rm -rf /boot/config/plugins/&name;
 removepkg &name;
 
 # Restore original files
-if [[ -f /usr/local/emhttp/webGui/SMBWorkGroup.page- ]]; then
-  mv -f /usr/local/emhttp/webGui/SMBWorkGroup.page- /usr/local/emhttp/webGui/SMBWorkGroup.page
+smb=/usr/local/emhttp/webGui/SMBWorkGroup
+layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
+if [[ -f $smb.page- ]]; then
+  mv -f $smb.page- $smb.page
 fi
-if [[ -f /usr/local/emhttp/webGui/include/DefaultPageLayout.php- ]]; then
-  mv -f /usr/local/emhttp/webGui/include/DefaultPageLayout.php- /usr/local/emhttp/webGui/include/DefaultPageLayout.php
+if [[ -f $layout.php- ]]; then
+  mv -f $layout.php- $layout.php
 fi
 
 # Remove setting
 sed -i '/^monitor=/d' /boot/config/plugins/dynamix/dynamix.cfg
+
 # Update cron
 rm -f /boot/config/plugins/dynamix/localmaster.cron
 /usr/local/sbin/update_cron

@@ -5,7 +5,7 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13d">
 <!ENTITY launch    "Tools/ActiveStreams">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "06f1280196db86d4707baf461ded7000">
 ]>
 
@@ -60,9 +60,7 @@ Copyright 2015, Bergware International
 Dynamix Active Streams - Real-time monitoring of SMB shares
 -->
 
-<!--
-The 'pre-install' script.
--->
+<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
@@ -74,17 +72,13 @@ fi
 </INLINE>
 </FILE>
 
-<!--
-The 'source' file.
--->
+<!-- SOURCE FILE -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-The 'post-install' script.
--->
+<!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Update file access mode
@@ -101,9 +95,7 @@ echo ""
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Remove plugin related files

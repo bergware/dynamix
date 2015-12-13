@@ -4,7 +4,7 @@
 <!ENTITY name      "dynamix.schedules">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13d">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "bfe2ba3c83ffeb006c3911dd9751112c">
 ]>
 
@@ -37,9 +37,7 @@ Copyright 2015, Bergware International
 Dynamix Schedules - GUI inteface to alter the built-in hourly, daily, weekly and monthly schedules.
 -->
 
-<!--
-The 'pre-install' script.
--->
+<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
@@ -51,17 +49,13 @@ fi
 </INLINE>
 </FILE>
 
-<!--
-The 'source' file.
--->
+<!-- SOURCE FILE -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-The 'post-install' script.
--->
+<!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 cron="/tmp/cron.tmp"
@@ -91,9 +85,7 @@ echo ""
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Remove plugin related files

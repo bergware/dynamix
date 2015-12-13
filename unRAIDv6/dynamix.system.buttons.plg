@@ -4,7 +4,7 @@
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13d">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "23598397826f22eef03978f85c564fca">
 ]>
 
@@ -68,9 +68,7 @@ Copyright 2015, Bergware International
 Dynamix System Buttons - Single click system reboot and system shutdown
 -->
 
-<!--
-The 'pre-install' script.
--->
+<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
@@ -79,25 +77,16 @@ MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f ${file}*.txz
 fi
-
-# Restore Confirmations.page
-if [[ -f /usr/local/emhttp/webGui/Confirmations.page- ]]; then
-  mv -f /usr/local/emhttp/webGui/Confirmations.page- /usr/local/emhttp/webGui/Confirmations.page
-fi
 </INLINE>
 </FILE>
 
-<!--
-The 'source' file.
--->
+<!-- SOURCE FILE -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-The 'post-install' script.
--->
+<!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Update file access mode
@@ -114,9 +103,7 @@ echo ""
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Remove plugin related files

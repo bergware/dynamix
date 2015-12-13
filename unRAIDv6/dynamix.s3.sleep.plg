@@ -5,7 +5,7 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13d">
 <!ENTITY launch    "Settings/SleepSettings">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "1d3fbcaf1d20b8659f2c335bb1227d56">
 ]>
 
@@ -79,9 +79,7 @@ Copyright 2015, Bergware International
 Dynamix S3 Sleep - Manual and automatic sleep mode
 -->
 
-<!--
-The 'pre-install' script.
--->
+<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 cfg="/boot/config/plugins/dynamix/dynamix.cfg"
@@ -119,17 +117,13 @@ fi
 </INLINE>
 </FILE>
 
-<!--
-The 'source' file.
--->
+<!-- SOURCE FILE -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-Workaround to start service.
--->
+<!-- WORKAROUND -->
 <FILE Name="/tmp/start_service" Mode="0770">
 <INLINE>
 #!/bin/bash
@@ -137,9 +131,7 @@ Workaround to start service.
 </INLINE>
 </FILE>
 
-<!--
-The 'post-install' script.
--->
+<!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 bin="/usr/local/emhttp/plugins/&name;/scripts"
@@ -200,9 +192,7 @@ echo ""
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Delete sleep settings

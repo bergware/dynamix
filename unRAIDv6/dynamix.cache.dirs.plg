@@ -5,7 +5,7 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.12.13d">
 <!ENTITY launch    "Settings/FolderCachingSettings">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY MD5       "2f08b56a5bc91bd3341b4ce69c2df98f">
 <!ENTITY ZIP       "273a87fe159de5af973e71fb29c01eff">
 ]>
@@ -80,9 +80,7 @@ Copyright 2015, Bergware International
 Dynamix Folder Caching - Store names in memory to avoid disk spin-ups. Makes use of cache_dirs script written by Joe L. and updated by Alex R. Berg
 -->
 
-<!--
-The 'pre-install' script.
--->
+<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Stop service
@@ -97,17 +95,13 @@ fi
 </INLINE>
 </FILE>
 
-<!--
-The 'source' file.
--->
+<!-- SOURCE FILE -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
-<URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!--
-Workaround to start service.
--->
+<!-- WORKAROUND -->
 <FILE Name="/tmp/start_service" Mode="0770">
 <INLINE>
 #!/bin/bash
@@ -115,9 +109,7 @@ Workaround to start service.
 </INLINE>
 </FILE>
 
-<!--
-The 'post-install' script.
--->
+<!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 cfg="/boot/config/plugins/&name;/&name;.cfg"
@@ -137,7 +129,7 @@ zip="/boot/config/plugins/&name;/cache_dirs.zip"
 MD5=$(md5sum $zip 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &ZIP; ]]; then
   echo -n " downloading cache_dirs script ... "
-  wget -q -O $zip "https://raw.github.com/dlandon/cache_dirs/master/cache_dirs.zip"
+  wget -q -O $zip "https://raw.githubusercontent.com/dlandon/cache_dirs/master/cache_dirs.zip"
   if [[ $? -eq 0 ]]; then
     echo "done"
   else
@@ -176,9 +168,7 @@ echo ""
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Stop service
