@@ -73,9 +73,13 @@ The 'pre-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
+if [[ $(date -d @$(stat -c %Y boot/config/plugins/&name;/&name;.txz) +%Y.%m.%d) != &version; ]]; then
+  rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
+fi
+
 # Remove legacy config file
 rm -f /boot/config/plugins/&name;/&name;.cfg
+
 # Remove legacy commands from 'go' file
 if grep -q '^# Sensors drivers' /boot/config/go; then
   sed -i '/^# Sensors drivers/d;/^.*drivers.conf)$/d' /boot/config/go

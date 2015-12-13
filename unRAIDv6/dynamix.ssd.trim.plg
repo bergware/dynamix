@@ -37,7 +37,9 @@ if [[ ${version:0:3} == 6.0 ]]; then
 fi
 
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
+if [[ $(date -d @$(stat -c %Y boot/config/plugins/&name;/&name;.txz) +%Y.%m.%d) != &version; ]]; then
+  rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
+fi
 </INLINE>
 </FILE>
 

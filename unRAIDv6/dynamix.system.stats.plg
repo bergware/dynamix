@@ -67,7 +67,10 @@ The 'pre-install' script.
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove old 'source' files
-rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
+if [[ $(date -d @$(stat -c %Y boot/config/plugins/&name;/&name;.txz) +%Y.%m.%d) != &version; ]]; then
+  rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
+fi
+
 # Remove legacy cron entry (if existing)
 crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 </INLINE>
