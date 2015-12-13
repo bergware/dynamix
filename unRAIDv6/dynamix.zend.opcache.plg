@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.zend.opcache">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.05.26">
+<!ENTITY version   "2015.12.14">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY OPcache   "zendopcache-php-7.0.5-x86_64-1bw">
 <!ENTITY MD5       "dfb7fc7cf079e336baed45232d1367a8">
@@ -22,7 +22,7 @@ In addition, it applies a few bytecode optimization patterns that make code exec
 </INLINE>
 </FILE>
 
-<!-- ZEND OPcache IMAGE -->
+<!-- OPcache IMAGE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
 <INLINE>
 iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACx
@@ -63,7 +63,7 @@ VG/o53E5ZZN5Ng5B+B+/0lr6BOJwegAAAABJRU5ErkJggg==
 </INLINE>
 </FILE>
 
-<!-- ZEND OPcache BINARY -->
+<!-- OPcache PACKAGE -->
 <FILE Name="/boot/packages/&OPcache;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&OPcache;.txz</URL>
 <MD5>&MD5;</MD5>

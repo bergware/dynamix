@@ -4,14 +4,12 @@
 <!ENTITY name      "dynamix.network.ready">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2015.05.06">
-<!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" plugintype="system">
 
-<!--
-The README file.
--->
+<!-- README FILE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
 <INLINE>
 **Dynamix Network Ready**
@@ -21,9 +19,7 @@ It will wait until the network is ready by pinging an external IP address and ov
 </INLINE>
 </FILE>
 
-<!--
-The 'network ready' image.
--->
+<!-- NETWORK IMAGE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
 <INLINE>
 iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAASu0lEQVRo3qWZe5BnR3XfP6f73vt7
@@ -115,9 +111,7 @@ RU5ErkJggg==
 </INLINE>
 </FILE>
 
-<!--
-The 'install' script.
--->
+<!-- INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 <![CDATA[
@@ -141,9 +135,7 @@ fi
 </INLINE>
 </FILE>
 
-<!--
-The 'remove' script.
--->
+<!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Remove plugin related files

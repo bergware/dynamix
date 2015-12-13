@@ -3,9 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13d">
+<!ENTITY version   "2015.12.14">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "1d3fbcaf1d20b8659f2c335bb1227d56">
 ]>
 
@@ -15,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added unRAID version check. Only version 6.1 or higher is allowed
+- updated consistency of PLG file
+
+###2015.12.13
 - changed .txz file naming to support consistent package upgrading
 - updated rc.s3_sleep script (start | stop | restart)
 
@@ -82,6 +87,13 @@ Dynamix S3 Sleep - Manual and automatic sleep mode
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Check unRAID version
+source /etc/unraid-version
+if [[ ${version:0:3} == 6.0 ]]; then
+  echo "unRAID version 6.1 or higher is required"
+  exit 1
+fi
+
 cfg="/boot/config/plugins/dynamix/dynamix.cfg"
 
 add_key(){
@@ -108,17 +120,16 @@ fi
 # Stop service
 /usr/local/emhttp/plugins/&name;/scripts/rc.s3sleep stop 2>/dev/null
 
-# Remove old 'source' files
-file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
+# Remove old 'source' packages
+MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
-  rm -f ${file}*.txz
+  rm -f &source;*.txz
 fi
 </INLINE>
 </FILE>
 
-<!-- SOURCE FILE -->
-<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<!-- SOURCE PACKAGE -->
+<FILE Name="&source;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>

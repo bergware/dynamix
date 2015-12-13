@@ -3,9 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2015.12.13e">
+<!ENTITY version   "2015.12.14">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "a2cb1fc0e2cfbcb174f19241a2716004">
 ]>
 
@@ -15,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added unRAID version check. Only version 6.1 or higher is allowed
+- updated consistency of PLG file
+
+###2015.12.13
 - changed .txz file naming to support consistent package upgrading
 - updated rc.autofan script (start | stop | restart)
 - fixed autofan script start
@@ -49,20 +54,26 @@ Dynamix System Autofan - Fan speed control. Makes use of autofan script contribu
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Check unRAID version
+source /etc/unraid-version
+if [[ ${version:0:3} == 6.0 ]]; then
+  echo "unRAID version 6.1 or higher is required"
+  exit 1
+fi
+
 # Stop service
 /usr/local/emhttp/plugins/&name;/scripts/rc.autofan stop 2>/dev/null
 
-# Remove old 'source' files
-file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
+# Remove old 'source' packages
+MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
-  rm -f ${file}*.txz
+  rm -f &source;*.txz
 fi
 </INLINE>
 </FILE>
 
-<!-- SOURCE FILE -->
-<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<!-- SOURCE PACKAGE -->
+<FILE Name="&source;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>

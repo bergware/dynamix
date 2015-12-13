@@ -3,8 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13d">
+<!ENTITY version   "2015.12.14">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "bff0f07efb6cc7b4321f69b70b1e441f">
 ]>
 
@@ -14,6 +15,10 @@
 ##&name;
 
 ###&version;
+- added unRAID version check. Only version 6.1 or higher is allowed
+- updated consistency of PLG file
+
+###2015.12.13
 - changed .txz file naming to support consistent package upgrading
 
 ###2015.10.12
@@ -53,17 +58,16 @@ if [[ ! -f $layout.php- ]]; then
   mv -f $layout.php $layout.php-
 fi
 
-# Remove old 'source' files
-file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
+# Remove old 'source' packages
+MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
-  rm -f ${file}*.txz
+  rm -f &source;*.txz
 fi
 </INLINE>
 </FILE>
 
-<!-- SOURCE FILE -->
-<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<!-- SOURCE PACKAGE -->
+<FILE Name="&source;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>

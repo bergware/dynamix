@@ -3,9 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13d">
+<!ENTITY version   "2015.12.14">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "f0df44b005042f9ae3d8f7322dde5cf2">
 ]>
 
@@ -15,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added unRAID version check. Only version 6.1 or higher is allowed
+- updated consistency of PLG file
+
+###2015.12.13
 - changed .txz file naming to support consistent package upgrading
 
 ###2015.08.17
@@ -65,20 +70,26 @@ Dynamix System Stats - disk and system usage graphs
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Check unRAID version
+source /etc/unraid-version
+if [[ ${version:0:3} == 6.0 ]]; then
+  echo "unRAID version 6.1 or higher is required"
+  exit 1
+fi
+
 # Remove legacy cron entry (if existing)
 crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 
-# Remove old 'source' files
-file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
+# Remove old 'source' packages
+MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
-  rm -f ${file}*.txz
+  rm -f &source;*.txz
 fi
 </INLINE>
 </FILE>
 
-<!-- SOURCE FILE -->
-<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<!-- SOURCE PACKAGE -->
+<FILE Name="&source;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>

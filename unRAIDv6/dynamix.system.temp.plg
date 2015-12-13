@@ -3,9 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13d">
+<!ENTITY version   "2015.12.14">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "c495d3bfea3b65de58d0463bbfa0a1a6">
 ]>
 
@@ -15,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added unRAID version check. Only version 6.1 or higher is allowed
+- updated consistency of PLG file
+
+###2015.12.13
 - changed .txz file naming to support consistent package upgrading
 
 ###2015.10.12
@@ -71,6 +76,13 @@ Dynamix System Temperature - Real-time monitoring of CPU and MB temperatures
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Check unRAID version
+source /etc/unraid-version
+if [[ ${version:0:3} == 6.0 ]]; then
+  echo "unRAID version 6.1 or higher is required"
+  exit 1
+fi
+
 # Remove legacy config file
 rm -f /boot/config/plugins/&name;/&name;.cfg
 
@@ -79,17 +91,16 @@ if grep -q '^# Sensors drivers' /boot/config/go; then
   sed -i '/^# Sensors drivers/d;/^.*drivers.conf)$/d' /boot/config/go
 fi
 
-# Remove old 'source' files
-file=/boot/config/plugins/&name;/&name;
-MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
+# Remove old 'source' packages
+MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
-  rm -f ${file}*.txz
+  rm -f &source;*.txz
 fi
 </INLINE>
 </FILE>
 
-<!-- SOURCE FILE -->
-<FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
+<!-- SOURCE PACKAGE -->
+<FILE Name="&source;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
@@ -132,7 +143,7 @@ rm -rf /boot/config/plugins/&name;
 # Uninstall the 'source' package
 removepkg &name;
 
-# Uninstall the external package
+# Uninstall the 'external' package
 #removepkg limetech:perl
 </INLINE>
 </FILE>
