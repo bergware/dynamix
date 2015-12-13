@@ -76,7 +76,7 @@ The 'pre-install' script.
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
-if [[ $MD5 -ne &MD5; ]]; then
+if [[ $MD5 != &MD5; ]]; then
   rm -f ${file}*.txz
 fi
 

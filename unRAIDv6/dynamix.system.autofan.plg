@@ -1,12 +1,12 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.system.info">
-<!ENTITY author    "Bergware">
+<!ENTITY name      "dynamix.system.autofan">
+<!ENTITY author    "Bergware/gfjardim">
 <!ENTITY version   "2015.12.13c">
-<!ENTITY launch    "Tools/SystemProfiler">
+<!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY MD5       "805aebd74b8cfc0cd3c3b543d267e95c">
+<!ENTITY MD5       "a2cb1fc0e2cfbcb174f19241a2716004">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,44 +16,33 @@
 
 ###&version;
 - changed .txz file naming to support consistent package upgrading
+- updated rc.autofan script (start | stop | restart)
 
-###2015.11.07
-- fixed truncated rows in some cases
-- code optimization
+###2015.08.13
+- adhere new security policy in unRAID v6.1 (please reboot after upgrade)
+- correction in display of detection progress
 
-###2015.09.26
-- fixed display when more than one ethernet port is present
-
-###2015.07.27
-- fixed incorrect display of memory under system overview
+###2015.08.08
+- made plugin compatible for unRAID version 6.0 and 6.1
 
 ###2015.06.27
-- introduced new logo (thanks Zonediver)
-- changed display of information to multiple pages
-- fixed incorrect maximum memory size reporting
+- removed utilities page (now standard included with Dynamix webGui)
+- removed Reset button (now controlled by Dynamix webGui)
+- added Default button
 
-###2015.04.23
-- fixed memory display and calculation under 'System Overview'
+###2015.04.28
+- added Reset button on settings page
 
 ###2015.04.11
-- version update for new webGui
+- improved pwm scanning (thanks to gfjardim)
 
-###2015.02.01
-- fixed wrong display of system overview information. In certain cases.
-
-###2015.01.22
-- version update for webGui 2015.01.21
-
-###2014.12.07
-- fixed addition of info settings
-
-###2014.11.28
+###2015.02.07
 - initial release for unRAID v6
 </CHANGES>
 
 <!--
 Copyright 2015, Bergware International
-Dynamix System Information - System hardware and BIOS details
+Dynamix System Autofan - Fan speed control. Makes use of autofan script contributed by Aiden, Dan Stroot, Guzzi, gfjardim
 -->
 
 <!--
@@ -61,31 +50,13 @@ The 'pre-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-cfg="/boot/config/plugins/dynamix/dynamix.cfg"
-
-add_key(){
-  key=$(echo $2|cut -d'=' -f1)
-  section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
-  if [[ -z $section ]]; then
-    echo -e "[$1]\n$2" >> $cfg
-  else
-    if [[ $(echo $section|grep "$key="|wc -l) -eq 0 ]]; then
-      sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
-    fi
-  fi
-}
-
-# Add sysinfo setting
-if [[ -e $cfg ]]; then
-  add_key 'display' 'sysinfo="/Tools/SystemProfiler"'
-else
-  echo -e "[display]\nsysinfo=\"/Tools/SystemProfiler\"" > $cfg
-fi
+# Stop service
+/usr/local/emhttp/plugins/&name;/scripts/rc.autofan stop 2>/dev/null
 
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
 MD5=$(md5sum ${file}.txz 2>/dev/null|grep -Po '^\S+')
-if [[ $MD5 -ne &MD5; ]]; then
+if [[ $MD5 != &MD5; ]]; then
   rm -f ${file}*.txz
 fi
 </INLINE>
@@ -100,10 +71,32 @@ The 'source' file.
 </FILE>
 
 <!--
+Workaround to start service.
+-->
+<FILE Name="/tmp/start_service">
+<INLINE>
+#!/bin/bash
+/usr/local/emhttp/plugins/&name;/scripts/rc.autofan start 2>/dev/null
+</INLINE>
+</FILE>
+
+<!--
 The 'post-install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
+cfg="/boot/config/plugins/&name;/&name;.cfg"
+if [[ ! -e $cfg ]]; then
+  cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
+fi
+
+# Start service
+enable=$(awk -F'"' '/^service=/{print $2}' $cfg)
+if [[ $enable -eq 1 ]]; then
+  at -M -f /tmp/start_service now 2>/dev/null
+fi
+rm -f /tmp/start_service
+
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 
@@ -123,8 +116,8 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-# Delete sysinfo setting
-sed -i '/^sysinfo=/d' /boot/config/plugins/dynamix/dynamix.cfg
+# Stop service
+/usr/local/emhttp/plugins/&name;/scripts/rc.autofan stop 2>/dev/null
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
