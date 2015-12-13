@@ -110,7 +110,8 @@ fi
 /usr/local/emhttp/plugins/&name;/scripts/rc.s3sleep stop 2>/dev/null
 
 # Remove old 'source' files
-if [[ $(date -d @$(stat -c %Y boot/config/plugins/&name;/&name;.txz) +%Y.%m.%d) != &version; ]]; then
+version=$(stat -c %Y boot/config/plugins/&name;/&name;.txz 2>/dev/null)
+if [[ -z $version || $(date -d @$version +%Y.%m.%d) != &version; ]]; then
   rm -f $(ls /boot/config/plugins/&name;/&name;*.txz 2>/dev/null)
 fi
 </INLINE>
