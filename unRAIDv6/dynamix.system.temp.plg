@@ -3,9 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13b">
+<!ENTITY version   "2015.12.13c">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY MD5       "c495d3bfea3b65de58d0463bbfa0a1a6">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -74,12 +75,8 @@ The 'pre-install' script.
 <INLINE>
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
-plugin=&version;
-plugin=${plugin:0:10}
-version=$(stat -c %Y ${file}.txz 2>/dev/null)
-if [[ "$version" -lt "$(date -d ${plugin//./-} +%s)" ]]; then
-  rm -f ${file}*.txz
-fi
+MD5=$(md5sum ${file}.txz|grep -Po '^\S+)
+[[ $MD5 -ne &MD5; ]] && rm -f "${file}*.txz"
 
 # Remove legacy config file
 rm -f /boot/config/plugins/&name;/&name;.cfg
@@ -96,6 +93,7 @@ The 'source' file.
 -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<MD5>&MD5;</MD5>
 </FILE>
 
 <!--

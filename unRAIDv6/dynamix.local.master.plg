@@ -3,8 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13b">
+<!ENTITY version   "2015.12.13c">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY MD5       "bff0f07efb6cc7b4321f69b70b1e441f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -46,12 +47,8 @@ fi
 
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
-plugin=&version;
-plugin=${plugin:0:10}
-version=$(stat -c %Y ${file}.txz 2>/dev/null)
-if [[ "$version" -lt "$(date -d ${plugin//./-} +%s)" ]]; then
-  rm -f ${file}*.txz
-fi
+MD5=$(md5sum ${file}.txz|grep -Po '^\S+)
+[[ $MD5 -ne &MD5; ]] && rm -f "${file}*.txz"
 
 # Rename original files
 if [[ ! -f /usr/local/emhttp/webGui/SMBWorkGroup.page- ]]; then
@@ -68,6 +65,7 @@ The 'source' file.
 -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<MD5>&MD5;</MD5>
 </FILE>
 
 <!--

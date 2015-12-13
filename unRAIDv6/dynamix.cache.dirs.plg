@@ -3,9 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.13b">
+<!ENTITY version   "2015.12.13c">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.github.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY MD5       "2f08b56a5bc91bd3341b4ce69c2df98f">
+<!ENTITY ZIP       "273a87fe159de5af973e71fb29c01eff">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -88,12 +90,8 @@ The 'pre-install' script.
 
 # Remove old 'source' files
 file=/boot/config/plugins/&name;/&name;
-plugin=&version;
-plugin=${plugin:0:10}
-version=$(stat -c %Y ${file}.txz 2>/dev/null)
-if [[ "$version" -lt "$(date -d ${plugin//./-} +%s)" ]]; then
-  rm -f ${file}*.txz
-fi
+MD5=$(md5sum ${file}.txz|grep -Po '^\S+)
+[[ $MD5 -ne &MD5; ]] && rm -f "${file}*.txz"
 </INLINE>
 </FILE>
 
@@ -102,6 +100,7 @@ The 'source' file.
 -->
 <FILE Name="/boot/config/plugins/&name;/&name;.txz" Run="upgradepkg --install-new">
 <URL>https://raw.github.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<MD5>&MD5;</MD5>
 </FILE>
 
 <!--
@@ -133,9 +132,8 @@ getvar(){
 
 # Install cache_dirs script
 zip="/boot/config/plugins/&name;/cache_dirs.zip"
-version=$(stat -c %Y $zip 2>/dev/null)
-replace=$(date -d "2015-12-13" +%s)
-if [[ "$version" -lt "$replace" ]]; then
+MD5=$(md5sum $zip|grep -Po '^\S+)
+if [[ $MD5 -ne &ZIP; ]]; then
   echo -n " downloading cache_dirs script ... "
   wget -q -O $zip "https://raw.github.com/dlandon/cache_dirs/master/cache_dirs.zip"
   if [[ $? -eq 0 ]]; then
