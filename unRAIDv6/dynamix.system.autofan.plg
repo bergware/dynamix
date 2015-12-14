@@ -89,8 +89,7 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-cfg="/boot/config/plugins/&name;/&name;.cfg"
-if [[ ! -e $cfg ]]; then
+if [[ ! -e &source;.cfg ]]; then
   cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
 fi
 
