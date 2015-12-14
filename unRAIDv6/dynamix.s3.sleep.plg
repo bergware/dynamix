@@ -145,10 +145,9 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-bin="/usr/local/emhttp/plugins/&name;/scripts"
-cfg="/boot/config/plugins/&name;/&name;.cfg"
+cfg=&source;.cfg
 if [[ ! -e $cfg ]]; then
-  cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
+  cfg=/usr/local/emhttp/plugins/&name;/default.cfg
 fi
 
 # string decoder
@@ -166,6 +165,7 @@ getkey(){
 
 # Create preRun and postRun files (if existing)
 bash="#!/bin/bash\n"
+bin=/usr/local/emhttp/plugins/&name;/scripts
 preRun=$(grep -Po '^preRun="\K[^"]+' $cfg)
 if [[ -n $preRun ]]; then
   echo "${bash}${preRun}"|urldecode > $bin/preRun

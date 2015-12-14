@@ -123,9 +123,9 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-cfg="/boot/config/plugins/&name;/&name;.cfg"
+cfg=&source;.cfg
 if [[ ! -e $cfg ]]; then
-  cfg="/usr/local/emhttp/plugins/&name;/default.cfg"
+  cfg=/usr/local/emhttp/plugins/&name;/default.cfg
 fi
 
 # get unRAID key
@@ -137,7 +137,7 @@ getkey(){
 }
 
 # Install cache_dirs script
-zip="/boot/config/plugins/&name;/cache_dirs.zip"
+zip=/boot/config/plugins/&name;/cache_dirs.zip
 MD5=$(md5sum $zip 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &ZIP; ]]; then
   echo -n " downloading cache_dirs script ... "
