@@ -81,6 +81,7 @@ fi
 <INLINE>
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/{print "/"$0}' /var/log/packages/&name;)
+chmod +x /usr/local/emhttp/plugins/dynamix/scripts/localmaster
 
 echo ""
 echo "-----------------------------------------------------------"
