@@ -3,12 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.14">
+<!ENTITY version   "2015.12.17">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "2f08b56a5bc91bd3341b4ce69c2df98f">
-<!ENTITY ZIP       "273a87fe159de5af973e71fb29c01eff">
+<!ENTITY MD5       "c8bad02968549e0050c9f9218b4914f9">
+<!ENTITY ZIP       "85d6a3b78d61dd4ee0dc0219eefab230">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -17,6 +17,10 @@
 ##&name;
 
 ###&version;
+- updated version of cache_dirs script
+- removed obsolete v5 options from GUI
+
+###2015.12.14
 - added unRAID version check. Only version 6.1 or higher is allowed
 - updated consistency of PLG file
 
