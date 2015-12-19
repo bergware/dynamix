@@ -114,13 +114,13 @@ chmod 755 $new
 # Convert legacy files
 if [[ -d $old ]]; then
   for sa in $old/sa* ; do
-    sadf -c $sa > $new/$(basename $sa) 2>/dev/null
+    /usr/bin/sadf -c $sa > $new/$(basename $sa) 2>/dev/null
   done
   rm -rf $old
 else
   mkdir -p $tmp
   for sa in $new/sa* ; do
-    sadf -c $sa > $tmp/$(basename $sa) 2>/dev/null
+    /usr/bin/sadf -c $sa > $tmp/$(basename $sa) 2>/dev/null
   done
   mv -f $tmp/sa* $new
   rm -rf $tmp
