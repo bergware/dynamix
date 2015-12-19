@@ -117,7 +117,7 @@ if [[ -d $old ]]; then
     /usr/bin/sadf -c $sa > $new/$(basename $sa) 2>/dev/null
   done
   rm -rf $old
-else
+elif [[ $(ls -A $new|wc -l) -gt 0 ]]; then
   mkdir -p $tmp
   for sa in $new/sa* ; do
     /usr/bin/sadf -c $sa > $tmp/$(basename $sa) 2>/dev/null
