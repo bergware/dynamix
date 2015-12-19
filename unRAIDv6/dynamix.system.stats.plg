@@ -17,7 +17,6 @@
 
 ###&version;
 - moved log directory from /var/log/sa to /var/sa to prevent LOG file system from filling up
-- moved sa library to /usr/lib64
 
 ###2015.12.14
 - added unRAID version check. Only version 6.1 or higher is allowed
