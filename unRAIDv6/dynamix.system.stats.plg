@@ -103,6 +103,7 @@ fi
 <INLINE>
 # Create sa directory
 mkdir -p /var/sa
+chmod 755 /var/sa
 
 # Move legacy files
 legacy=/var/log/sa
