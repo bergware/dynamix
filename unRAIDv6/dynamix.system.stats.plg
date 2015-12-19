@@ -102,14 +102,15 @@ fi
 <FILE Run="/bin/bash">
 <INLINE>
 # Create sa directory
-mkdir -p /var/sa
-chmod 755 /var/sa
+old=/var/log/sa
+new=/var/sa
+mkdir -p $new
+chmod 755 $new
 
 # Move legacy files
-legacy=/var/log/sa
-if [[ -d $legacy ]]; then
-  mv -f $legacy/* /var/sa
-  rm -f $legacy
+if [[ -d $old ]]; then
+  mv -f $old/* $new
+  rm -rf $old
 fi
 
 # Create cron entry
