@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.14">
+<!ENTITY version   "2015.12.19">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- moved log directory from /var/log/sa to /var/sa to prevent LOG file system from filling up
+- moved sa library to /usr/lib64
+
+###2015.12.14
 - added unRAID version check. Only version 6.1 or higher is allowed
 - updated consistency of PLG file
 
@@ -97,8 +101,15 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Create sa directory (workaround)
-mkdir -p /var/log/sa
+# Create sa directory
+mkdir -p /var/sa
+
+# Move legacy files
+legacy=/var/log/sa
+if [[ -d $legacy ]]; then
+  mv -f $legacy/* /var/sa
+  rm -f $legacy
+fi
 
 # Create cron entry
 cron=/boot/config/plugins/&name;/sysstats.cron
