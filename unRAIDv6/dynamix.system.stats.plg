@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.19a">
+<!ENTITY version   "2015.12.19b">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "aeeaee7a7d9ee45311690bbcefac1242">
+<!ENTITY MD5       "f5cd2a38cf413186f91cd84ca803cc86">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- updated sysstat files to version 11.1.8
+- added datafile conversion from version 10.x to 11.x
+
+###2015.12.19
 - moved log directory from /var/log/sa to /var/sa to prevent LOG file system from filling up
 
 ###2015.12.14
@@ -103,13 +107,23 @@ fi
 # Create sa directory
 old=/var/log/sa
 new=/var/sa
+tmp=/tmp/sa
 mkdir -p $new
 chmod 755 $new
 
-# Move legacy files
+# Convert legacy files
 if [[ -d $old ]]; then
-  mv -f $old/* $new
+  for sa in $old/sa* ; do
+    sadf -c $sa > $new/$(basename $sa) 2>/dev/null
+  done
   rm -rf $old
+else
+  mkdir -p $tmp
+  for sa in $new/sa* ; do
+    sadf -c $sa > $tmp/$(basename $sa) 2>/dev/null
+  done
+  mv -f $tmp/sa* $new
+  rm -rf $tmp
 fi
 
 # Create cron entry
