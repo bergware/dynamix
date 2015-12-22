@@ -246,6 +246,8 @@ if [[ $version != 6.1.6 ]]; then
   echo "unRAID version 6.1.6 is required"
   exit 1
 fi
+# Remove old hot fixes
+rm -f /boot/extra/dynamix.*.txz
 </INLINE>
 </FILE>
 
