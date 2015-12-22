@@ -11,6 +11,22 @@
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
+<CHANGES>
+##&name;
+
+###&version;
+- corrections in parity check logging
+- SMART functionality enhancements
+- added help text for SMART functions
+- coding improvements and optimizations
+- more choices in number notations (see display settings)
+- fix number display when disk size is 1 TB
+- natural sorting of user shares and disk shares
+- color coding for syslog, disk log and live log stream
+- dynamic table height setting for long lists, no more page scrolling
+- miscellaneous corrections
+</CHANGES>
+
 <!--
 Copyright 2015, Bergware International
 Dynamix Active Streams - Real-time monitoring of SMB shares
