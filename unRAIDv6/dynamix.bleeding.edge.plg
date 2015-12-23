@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.22">
+<!ENTITY version   "2015.12.23">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "87844cca5916b9ed3f19d853e6b44aef">
+<!ENTITY MD5       "9962e0479402a550b63e5ccfef6fcb3c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -262,13 +262,18 @@ if [[ $version != 6.1.6 ]]; then
   echo "unRAID version 6.1.6 is required"
   exit 1
 fi
+# Remove old 'source' packages
+MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
+if [[ $MD5 != &MD5; ]]; then
+  rm -f &source;.txz
+fi
 # Remove old hot fixes
 rm -f /boot/extra/dynamix.*.txz
 </INLINE>
 </FILE>
 
 <!-- SOURCE PACKAGE -->
-<FILE Name="&source;.txz" Run="upgradepkg --install-new">
+<FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
