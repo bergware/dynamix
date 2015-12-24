@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.24">
+<!ENTITY version   "2015.12.24a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c73f3d7316f3dac3c8c9d4302597641d">
+<!ENTITY MD5       "e3c796e452e89d9ca7c3d4774d51339c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -21,7 +21,7 @@
 - coding improvements and optimizations
 - more choices in number notations (see display settings)
 - fix number display when disk size is 1 TB
-- natural sorting of user shares and disk shares
+- natural sorting of computed rows in user shares and disk shares
 - color coding for syslog, disk log and live log stream
 - dynamic table height setting for long lists, no more page scrolling
 - miscellaneous corrections
