@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.24b">
+<!ENTITY version   "2015.12.24c">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7de5ddb0f741c3175b6755d3c56410e4">
+<!ENTITY MD5       "6b1b5d6c2526a6c39c1ce67bf6df7052">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
