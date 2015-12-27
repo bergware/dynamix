@@ -20,6 +20,7 @@
 - added help text for SMART functions
 - coding improvements and optimizations
 - more choices in number notations (see display settings)
+- fix time lapse in server uptime when browser view or tab is inactive
 - fix number display when disk size is 1 TB
 - natural sorting of computed rows in user shares and disk shares
 - color coding for syslog, disk log and live log stream
