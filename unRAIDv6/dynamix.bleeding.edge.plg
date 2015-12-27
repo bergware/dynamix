@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.27">
+<!ENTITY version   "2015.12.27a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "46db12d55aa87f7fe7587424295e5c53">
+<!ENTITY MD5       "20c624291e0edecb34cd6478ddf231d8">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -24,8 +24,8 @@
 - natural sorting of computed rows in user shares and disk shares
 - color coding for syslog, disk log and live log stream
 - dynamic table height setting for long lists, no more page scrolling
-- moved disk temperature and disk utilization settings to Disk Settings
-- allow to set individual temp/usage settings per disk
+- moved disk temperature and disk utilization settings to the Disk Settings page
+- allow to set individual temp/usage settings per disk under the device page
 - allow SMART alert acknowledgement to clear status on dashboard page
 - miscellaneous corrections
 </CHANGES>
