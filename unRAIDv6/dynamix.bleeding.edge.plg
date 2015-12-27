@@ -24,6 +24,9 @@
 - natural sorting of computed rows in user shares and disk shares
 - color coding for syslog, disk log and live log stream
 - dynamic table height setting for long lists, no more page scrolling
+- moved disk temperature and disk utilization settings to Disk Settings
+- allow to set individual temp/usage settings per disk
+- allow SMART alert acknowledgement to clear status on dashboard page
 - miscellaneous corrections
 </CHANGES>
 
