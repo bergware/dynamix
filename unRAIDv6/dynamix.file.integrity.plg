@@ -78,8 +78,10 @@ echo ""
 <!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-# Uninstall the 'source' package
+# Uninstall the packages
 removepkg &name;
+removepkg b2sum-20130305-x86_64-1
+removepkg inotify-tools-3.14-x86_64-1
 </INLINE>
 </FILE>
 
