@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.29">
+<!ENTITY version   "2015.12.29a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "f214f0b86576959994aef8baf252689f">
@@ -57,13 +57,13 @@ fi
 
 smb=/usr/local/emhttp/webGui/SMBWorkGroup
 layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
-# Restore original file
-if [[ -f $smb.page- ]]; then
-  mv -f $smb.page- $smb.page
-fi
 # Rename original file
-if [[ ! -f $layout.php- ]]; then
-  mv -f $layout.php $layout.php-
+if [[ ! -f $smb.page- ]]; then
+  mv -f $smb.page $smb.page-
+fi
+# Restore original file
+if [[ -f $layout.php- ]]; then
+  mv -f $layout.php- $layout.php
 fi
 
 # Remove old 'source' packages
@@ -106,7 +106,11 @@ rm -rf /boot/config/plugins/&name;
 # Uninstall the 'source' package
 removepkg &name;
 
-# Restore original file
+# Restore original files
+smb=/usr/local/emhttp/webGui/SMBWorkGroup
+if [[ -f $smb.page- ]]; then
+  mv -f $smb.page- $smb.page
+fi
 layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
 if [[ -f $layout.php- ]]; then
   mv -f $layout.php- $layout.php
