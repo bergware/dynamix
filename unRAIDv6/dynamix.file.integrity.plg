@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.29a">
+<!ENTITY version   "2015.12.30">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1dee596ad62c750abc1837b11355e137">
+<!ENTITY MD5       "0bf4ad4a28a5b1d7072a8df91263d4de">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,8 +16,12 @@
 ##&name;
 
 ###&version;
-- Fixed file cleanup when operation is canceled
-- Fixed export function with excluded folders
+- fixed broken highlighting of active verifications
+- changed Remove command to completely empty the attribute information
+
+###2015.12.29a
+- fixed file cleanup when operation is canceled
+- fixed export function with excluded folders
 
 *AFTER INSTALLATION: DISABLE + ENABLE AUTOMATIC HASH FUNCTION*
 
