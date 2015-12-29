@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.15">
+<!ENTITY version   "2015.12.29">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "918add7016209d7ca67d808bed21a2be">
+<!ENTITY MD5       "f214f0b86576959994aef8baf252689f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- changed to hook solution for main page display
+
+###2015.12.15
 - fixed regression error
 - changed icon display under SMB workgroup
 
@@ -52,12 +55,13 @@ if [[ ${version:0:3} == 6.0 ]]; then
   exit 1
 fi
 
-# Rename original files
 smb=/usr/local/emhttp/webGui/SMBWorkGroup
 layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
-if [[ ! -f $smb.page- ]]; then
-  mv -f $smb.page $smb.page-
+# Restore original file
+if [[ -f $smb.page- ]]; then
+  mv -f $smb.page- $smb.page
 fi
+# Rename original file
 if [[ ! -f $layout.php- ]]; then
   mv -f $layout.php $layout.php-
 fi
@@ -102,12 +106,8 @@ rm -rf /boot/config/plugins/&name;
 # Uninstall the 'source' package
 removepkg &name;
 
-# Restore original files
-smb=/usr/local/emhttp/webGui/SMBWorkGroup
+# Restore original file
 layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
-if [[ -f $smb.page- ]]; then
-  mv -f $smb.page- $smb.page
-fi
 if [[ -f $layout.php- ]]; then
   mv -f $layout.php- $layout.php
 fi
