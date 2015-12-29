@@ -55,13 +55,13 @@ if [[ ${version:0:3} == 6.0 ]]; then
   exit 1
 fi
 
-smb=/usr/local/emhttp/webGui/SMBWorkGroup
-layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
 # Rename original file
+smb=/usr/local/emhttp/webGui/SMBWorkGroup
 if [[ ! -f $smb.page- ]]; then
   mv -f $smb.page $smb.page-
 fi
 # Restore original file
+layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
 if [[ -f $layout.php- ]]; then
   mv -f $layout.php- $layout.php
 fi
