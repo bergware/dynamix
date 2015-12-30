@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.30a">
+<!ENTITY version   "2015.12.30b">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "99bb2328a245e393e7ff79439a36ce2e">
+<!ENTITY MD5       "eac39c7e7a18aa9a3d541825b2eb9749">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,12 @@
 ##&name;
 
 ###&version;
+- adjustments to bunker script
+- optimized watcher
+
+**AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW WATCHER TO WORK**
+
+###2015.12.30a
 - several corrections in bunker script, mandatory update
 
 ###2015.12.30
