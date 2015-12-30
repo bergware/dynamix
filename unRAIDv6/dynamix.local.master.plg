@@ -55,6 +55,12 @@ if [[ ${version:0:3} == 6.0 ]]; then
   exit 1
 fi
 
+# Restore original file
+layout=/usr/local/emhttp/webGui/include/DefaultPageLayout.php
+if [[ -f $layout.php- ]]; then
+  mv -f $layout.php- $layout.php
+fi
+
 # Rename original file
 smb=/usr/local/emhttp/webGui/SMBWorkGroup
 if [[ ! -f $smb.page- ]]; then
@@ -102,6 +108,11 @@ rm -rf /boot/config/plugins/&name;
 removepkg &name;
 
 # Restore original files
+layout=/usr/local/emhttp/webGui/include/DefaultPageLayout.php
+if [[ -f $layout.php- ]]; then
+  mv -f $layout.php- $layout.php
+fi
+
 smb=/usr/local/emhttp/webGui/SMBWorkGroup
 if [[ -f $smb.page- ]]; then
   mv -f $smb.page- $smb.page
