@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.30c">
+<!ENTITY version   "2015.12.30d">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c6558a472645b16b6bd80222117a0d7e">
+<!ENTITY MD5       "3bf1afe641ec34934127b9fbc4407d50">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,13 +16,18 @@
 ##&name;
 
 ###&version;
+- fixed no display of SHA526 selection on control page
+- added new option *Save new hashing results to flash* (see Help)
+- added BLAKE2 test, option is disabled when unsupported by the processor
+
+**AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW SETTINGS TO WORK**
+
+###2015.12.30c
 - changed name and extension of export files to 'diskXX.export.hash'
 - changed cron job creation to prevent cron error messages
 - added events to start/stop service with array start/stop
 - fixed race-condition
 - other miscellanuous enhancements
-
-**AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW CRON JOB TO WORK**
 
 **DELETE OLD EXPORT FILES (IF EXISTING) AND REGENERATE**
 
