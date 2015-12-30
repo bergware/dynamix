@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.30">
+<!ENTITY version   "2015.12.30a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0bf4ad4a28a5b1d7072a8df91263d4de">
+<!ENTITY MD5       "99bb2328a245e393e7ff79439a36ce2e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- several corrections in bunker script, mandatory update
+
+###2015.12.30
 - fixed broken highlighting of active verifications
 - changed Remove command to completely empty the attribute information
 
@@ -23,7 +26,7 @@
 - fixed file cleanup when operation is canceled
 - fixed export function with excluded folders
 
-*AFTER INSTALLATION: DISABLE + ENABLE AUTOMATIC HASH FUNCTION*
+**NOTE: AFTER INSTALLATION: DISABLE + ENABLE AUTOMATIC PROTECTION FUNCTION**
 
 ###2015.12.29
 - beta release for unRAID v6.1
