@@ -15,6 +15,8 @@
 <CHANGES>
 ##&name;
 
+**NOTE: AFTER INSTALLATION: DISABLE + ENABLE AUTOMATIC PROTECTION FUNCTION**
+
 ###&version;
 - several corrections in bunker script, mandatory update
 
@@ -25,8 +27,6 @@
 ###2015.12.29a
 - fixed file cleanup when operation is canceled
 - fixed export function with excluded folders
-
-**NOTE: AFTER INSTALLATION: DISABLE + ENABLE AUTOMATIC PROTECTION FUNCTION**
 
 ###2015.12.29
 - beta release for unRAID v6.1
