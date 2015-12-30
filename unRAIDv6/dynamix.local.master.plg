@@ -56,7 +56,7 @@ if [[ ${version:0:3} == 6.0 ]]; then
 fi
 
 # Restore original file
-layout=/usr/local/emhttp/webGui/include/DefaultPageLayout.php
+layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
 if [[ -f $layout.php- ]]; then
   mv -f $layout.php- $layout.php
 fi
