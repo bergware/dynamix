@@ -202,6 +202,9 @@ echo ""
 removepkg &name;
 removepkg b2sum-20130305-x86_64-1
 removepkg inotify-tools-3.14-x86_64-1
+
+# Remove exporter cron job
+rm -f /etc/cron.daily/exporter
 </INLINE>
 </FILE>
 
