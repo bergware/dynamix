@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added exporter cron job - daily update of export files
+
+###2015.12.30d
 - fixed no display of SHA526 selection on control page
 - added new option *Save new hashing results to flash* (see Help)
 - added BLAKE2 test, option is disabled when unsupported by the processor
