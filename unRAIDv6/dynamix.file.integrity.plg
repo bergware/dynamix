@@ -107,7 +107,7 @@ fi
 for disk in $disks ; do
   find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
   key=0;
-  if [[ $(grep -c '^# file' $tmpfile) -gt 0 ]]; then
+  if [[ -s $tmpfile ]]; then
     filedate=0
     filesize=0
     IFS='"'
