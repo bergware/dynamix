@@ -75,13 +75,13 @@ if [[ $MD5 != &MD5; ]]; then
   rm -f &source;*.txz
 fi
 
-# Remove exporter script
-rm -f /etc/cron.daily/exporter
+# Remove exportrotate script
+rm -f /etc/cron.daily/exportrotate
 </INLINE>
 </FILE>
 
-<!-- EXPORTER SCRIPT - RUNS DAILY -->
-<FILE Name="/etc/cron.daily/exporter" Mode="0770">
+<!-- EXPORTROTATE SCRIPT - RUNS DAILY -->
+<FILE Name="/etc/cron.daily/exportrotate" Mode="0755">
 <INLINE>
 <![CDATA[
 #!/bin/bash
@@ -203,8 +203,8 @@ removepkg &name;
 removepkg b2sum-20130305-x86_64-1
 removepkg inotify-tools-3.14-x86_64-1
 
-# Remove exporter cron job
-rm -f /etc/cron.daily/exporter
+# Remove exportrotate cron job
+rm -f /etc/cron.daily/exportrotate
 </INLINE>
 </FILE>
 
