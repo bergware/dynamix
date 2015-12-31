@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.31">
+<!ENTITY version   "2015.12.31a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "88958545d32c55deac0046a571cd2a63">
+<!ENTITY MD5       "49d387cc0876a691e1cc1b8e72586dd5">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,14 @@
 ##&name;
 
 ###&version;
+- changed export format to the same format as MD5/SHA256/BLAKE2 utilities &lt;hash-key&gt; *&lt;file-name&gt;
+- made display of settings and control pages conditional (array must be started)
+
+**DELETE OLD EXPORT FILES (IF EXISTING) AND REGENERATE**
+
+**AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW SETTINGS TO WORK**
+
+##2015.12.31
 - added exporter cron job - daily update of export files
 
 ###2015.12.30d
@@ -23,16 +31,12 @@
 - added new option *Save new hashing results to flash* (see Help)
 - added BLAKE2 test, option is disabled when unsupported by the processor
 
-**AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW SETTINGS TO WORK**
-
 ###2015.12.30c
 - changed name and extension of export files to 'diskXX.export.hash'
 - changed cron job creation to prevent cron error messages
 - added events to start/stop service with array start/stop
 - fixed race-condition
 - other miscellanuous enhancements
-
-**DELETE OLD EXPORT FILES (IF EXISTING) AND REGENERATE**
 
 ###2015.12.30b
 - adjustments to bunker script
@@ -98,11 +102,15 @@ touch -t $(date -d "@$(($(date +%s)-86400))" +%Y%m%d%H%M.%S) $tmpfile.0
 
 if [[ -z $method ]]; then
   hash=sha256
+  code=64
 elif [[ $method == -b2 ]]; then
   hash=blake2
+  code=128
 else
   hash=md5
+  code=32
 fi
+name=$((code+2))
 
 for disk in $disks ; do
   find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
@@ -114,39 +122,30 @@ for disk in $disks ; do
     while read -r line; do
       if [[ -n $line ]]; then
         if [[ ${line:0:6} == "# file" ]]; then
-          [[ -n $key && $key != 0 ]] && echo "$key|$file|$userdate|$filedate|$filesize" >>$tmpfile.1
+          [[ -n $key && $key != 0 ]] && echo "$key *$file" >>$tmpfile.1
           file="${line:8}"
           key=
-          userdate=$scandate
-          filedate=
-          filesize=
         else
           line=($line)
           [[ ${line[0]} == "user.$hash=" ]] && key=${line[1]}
-          [[ ${line[0]} == "user.scandate=" ]] && userdate=${line[1]}
-          [[ ${line[0]} == "user.filedate=" ]] && filedate=${line[1]}
-          [[ ${line[0]} == "user.filesize=" ]] && filesize=${line[1]}
         fi
       fi
     done <$tmpfile
     IFS=$ifs
-    [[ -n $key ]] && echo "$key|$file|$userdate|$filedate|$filesize" >>$tmpfile.1
+    [[ -n $key ]] && echo "$key *$file" >>$tmpfile.1
   fi
   if [[ -s $tmpfile.1 ]]; then
     hashfile=$path/${disk:5}.export.hash
     if [[ -s $hashfile ]]; then
       cp -f $hashfile $tmpfile.2
-      IFS='|'
-      while read -ra line; do
-        row=$(grep -Fn "|${line[1]}|" $hashfile|cut -d: -f1)
-        new="${line[0]}|${line[1]}|${line[2]}|${line[3]}|${line[4]}"
+      while read -r line; do
+        row=$(grep -Fn "${line:$name}" $hashfile|cut -d: -f1)
         if [[ -n $row ]]; then
-          sed -i "$row s:.*:$new:" $tmpfile.2
+          sed -i "$row s:.*:$line:" $tmpfile.2
         else
-          echo "$new" >>$tmpfile.2
+          echo "$line" >>$tmpfile.2
         fi        
       done <$tmpfile.1
-      IFS=$ifs
     else
       cp -f $tmpfile.1 $tmpfile.2
     fi
@@ -155,8 +154,7 @@ for disk in $disks ; do
   fi
 done
 old=$path/disks.export.$(date +%Y%m%d -d -1day).new.hash
-[[ -f $old ]] && rm -f $old
-rm -f $tmpfile*
+rm -f $tmpfile* $old
 exit 0
 ]]>
 </INLINE>
