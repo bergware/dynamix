@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.01b">
+<!ENTITY version   "2016.01.02">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "14fefe97bad7a9f769091525a8d7ccc7">
+<!ENTITY MD5       "b9103c79b5601be70d427e9d202ed496">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- fixed bug in bunker script
+
+**AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW SETTINGS TO WORK**
+
+###2016.01.01b
 - fixed process termination and display update when a running disk operation is canceled
 
 ###2016.01.01a
@@ -29,8 +34,6 @@
 - made display of settings and control pages conditional (array must be started)
 
 **DELETE OLD EXPORT FILES (IF EXISTING) AND REGENERATE**
-
-**AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW SETTINGS TO WORK**
 
 ##2015.12.31
 - added exporter cron job - daily update of export files
