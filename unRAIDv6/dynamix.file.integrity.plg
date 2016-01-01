@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.01a">
+<!ENTITY version   "2016.01.01b">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1b737265799c5cbef6cfd2f823eb3907">
+<!ENTITY MD5       "14fefe97bad7a9f769091525a8d7ccc7">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed process termination and display update when a running disk operation is canceled
+
+###2016.01.01a
 - improved process killing when a running disk operation is canceled from the control page
 
 ###2016.01.01
