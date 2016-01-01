@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.01">
+<!ENTITY version   "2016.01.01a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "86574c6131c77c557f0635d5b9b7f300">
+<!ENTITY MD5       "1b737265799c5cbef6cfd2f823eb3907">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- improved process killing when a running disk operation is canceled from the control page
+
+###2016.01.01
 - corrections and updates to bunker script (use new format for all commands)
 
 ###2015.12.31b
