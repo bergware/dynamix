@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.31b">
+<!ENTITY version   "2016.01.01">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "19e0fc7f709d1ea29e6b57e34ea27758">
+<!ENTITY MD5       "86574c6131c77c557f0635d5b9b7f300">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- corrections and updates to bunker script (use new format for all commands)
+
+###2015.12.31b
 - changed export format to the same format as MD5/SHA256/BLAKE2 utilities &lt;hash-key&gt; *&lt;file-name&gt;
 - made display of settings and control pages conditional (array must be started)
 
