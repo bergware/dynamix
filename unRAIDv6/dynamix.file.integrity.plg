@@ -105,7 +105,7 @@ source $conf
 scandate=$(date +%s)
 tmpfile=/tmp/d.$RANDOM.list
 path=/boot/config/plugins/dynamix.file.integrity
-ifs=$IFS;
+ifs=$IFS
 
 touch -t $(date -d "@$(($(date +%s)-86400))" +%Y%m%d%H%M.%S) $tmpfile.0
 
