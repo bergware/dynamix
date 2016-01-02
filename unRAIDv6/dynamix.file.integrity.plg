@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.02">
+<!ENTITY version   "2016.01.02a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b9103c79b5601be70d427e9d202ed496">
+<!ENTITY MD5       "c8dfa9db958578b51a8c6d7ccccf013b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed highlighting and disabling of 'active' disks on the settings page
+
+###2015.01.02
 - fixed bug in bunker script
 
 **AFTER INSTALLATION STOP/START THE AUTOMATIC PROTECTION FUNCTION TO ALLOW THE NEW SETTINGS TO WORK**
