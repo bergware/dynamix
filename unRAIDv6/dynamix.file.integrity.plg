@@ -217,7 +217,7 @@ fi
 # Start service
 enable=$(grep -Po '^service="\K[^"]+' $cfg)
 array=$(grep -Po '^mdState=\K.*' /proc/mdcmd)
-if [[ $enable -eq 1 && $array == STARTED ]]; then
+if [[ $enable -eq 1 &amp;&amp; $array == STARTED ]]; then
   at -M -f /tmp/start_service now 2>/dev/null
 fi
 rm -f /tmp/start_service
