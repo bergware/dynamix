@@ -3,17 +3,21 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.03a">
+<!ENTITY version   "2016.01.04">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a8119f1406b2c5a8b77ece5600abcafc">
+<!ENTITY MD5       "a72a7d405777329984f6836f186d89c1">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ###&version;
+- changed last message and be more informative when operation is finished
+- improved file clean-up when operation is canceled
+
+###2016.01.03a
 - fixed wrong key length for MD5/SHA256 in bunker script
 - stop all background operations when array is put off-line or system goes down
 - include automatic stop/start service in PLG file
