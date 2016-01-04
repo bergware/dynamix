@@ -3,17 +3,20 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.04">
+<!ENTITY version   "2016.01.04a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a72a7d405777329984f6836f186d89c1">
+<!ENTITY MD5       "0d49d4c2351466eeef6cf964e8c0e388">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ###&version;
+- fixed parameter quoting in configuration file after a system restart
+
+###2016.01.04
 - changed last message and be more informative when operation is finished
 - improved file clean-up when operation is canceled
 
