@@ -3,17 +3,20 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.05">
+<!ENTITY version   "2016.01.05a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "775fa6646288a26871086a613dd47e52">
+<!ENTITY MD5       "d97c442e847e62eada120b3c83056c03">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ###&version;
+- added colored command in progress bar
+
+###2016.01.05
 - official release
 
 ###2016.01.04a
