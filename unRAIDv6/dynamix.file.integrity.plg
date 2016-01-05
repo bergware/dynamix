@@ -3,17 +3,20 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.04a">
+<!ENTITY version   "2016.01.05">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0d49d4c2351466eeef6cf964e8c0e388">
+<!ENTITY MD5       "775fa6646288a26871086a613dd47e52">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ###&version;
+- official release
+
+###2016.01.04a
 - fixed parameter quoting in configuration file after a system restart
 
 ###2016.01.04
@@ -173,7 +176,7 @@ for disk in $disks ; do
           sed -i "$row s:.*:$line:" $tmpfile.2
         else
           echo "$line" >>$tmpfile.2
-        fi        
+        fi
       done <$tmpfile.1
     else
       cp -f $tmpfile.1 $tmpfile.2
