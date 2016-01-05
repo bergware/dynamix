@@ -3,17 +3,20 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.05a">
+<!ENTITY version   "2016.01.05b">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "d97c442e847e62eada120b3c83056c03">
+<!ENTITY MD5       "62ed945cbdcbb84d60ef9522aa15f870">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ###&version;
+- fixed cancel operation not always terminating the background processes
+
+###2016.01.05a
 - added colored command in progress bar
 
 ###2016.01.05
