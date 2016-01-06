@@ -3,17 +3,21 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.05b">
+<!ENTITY version   "2016.01.06">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "62ed945cbdcbb84d60ef9522aa15f870">
+<!ENTITY MD5       "984cbd7c041b3204e481c369768a2f8b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ###&version;
+- added initial build and initial export status of each disk on control page
+- changed "Exit" button to "Done" button
+
+###2016.01.05b
 - fixed cancel operation not always terminating the background processes
 
 ###2016.01.05a
