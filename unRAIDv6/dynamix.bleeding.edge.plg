@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.27a">
+<!ENTITY version   "2016.01.09">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "20c624291e0edecb34cd6478ddf231d8">
+<!ENTITY MD5       "0db66ac2e98d25edcb2039b94b5816aa">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -28,7 +28,10 @@
 - moved disk temperature and disk utilization settings to the Disk Settings page
 - allow to set individual temp/usage settings per disk under the device page
 - allow SMART alert acknowledgement to clear status on dashboard page
+- new setting "Placement of Users menu"
+- include all syslog files in GUI display when rotation took place
 - miscellaneous corrections
+- fixed regression errors from previous bleeding edge version
 </CHANGES>
 
 <!--
