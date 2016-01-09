@@ -3,17 +3,20 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.09">
+<!ENTITY version   "2016.01.09a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7e5e5943b025d085dc5e55b4fc291e15">
+<!ENTITY MD5       "3f9c1e248ba310aa8eeaefca2dc79989">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ###&version;
+- fixed missing hash reference in watcher
+
+###2016.01.09
 - fixed text display when check/import command is done and no export file present
 - changed initial build/export to build/export up-to-date (daily scheduled verification done)
 - updated help information
