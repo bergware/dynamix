@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.09">
+<!ENTITY version   "2016.01.09a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "0db66ac2e98d25edcb2039b94b5816aa">
@@ -309,7 +309,7 @@ echo ""
 rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
-removepkg &name;
+#removepkg &name;
 
 echo "Remove successful - PLEASE REBOOT YOUR SERVER"
 </INLINE>
