@@ -15,9 +15,10 @@
 
 <CHANGES>
 ##&name;
+
+###&version;
 - changed maxdepth setting to adaptive depth setting
 - updated version of cache_dirs script v2.1.1
-###&version;
 
 ###2015.12.17
 - updated version of cache_dirs script v2.1.0
