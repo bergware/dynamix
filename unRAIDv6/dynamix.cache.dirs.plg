@@ -3,20 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.17">
+<!ENTITY version   "2016.01.12">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c8bad02968549e0050c9f9218b4914f9">
-<!ENTITY ZIP       "85d6a3b78d61dd4ee0dc0219eefab230">
+<!ENTITY MD5       "2854256063f74535c9db8c3f74929fde">
+<!ENTITY ZIP       "66f967028c64aea77135a8469640bc0d">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
 ##&name;
-
+- changed maxdepth setting to adaptive depth setting
+- include cache_dirs version 2.1.1
 ###&version;
+
+###2015.12.17
 - updated version of cache_dirs script
 - removed obsolete v5 options from GUI
 
