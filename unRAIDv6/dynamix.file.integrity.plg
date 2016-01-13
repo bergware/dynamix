@@ -3,17 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.09a">
+<!ENTITY version   "2016.01.13">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3f9c1e248ba310aa8eeaefca2dc79989">
+<!ENTITY MD5       "dd940da6573de38a4a73d20ea973ae01">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <CHANGES>
+##&name;
+
 ###&version;
+- exclude docker image file if located on a data disk, e.g. /mnt/disk1/docker.img
+- fixed cron error message when disks.ini file does not exist
+
+###2016.01.09a
 - fixed missing hash reference in watcher
 
 ###2016.01.09
