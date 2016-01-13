@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.19b">
+<!ENTITY version   "2016.01.13">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f5cd2a38cf413186f91cd84ca803cc86">
+<!ENTITY MD5       "913395722833f9700608d4f9ed6d7a79">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,13 @@
 ##&name;
 
 ###&version;
+- added new setting "Placement of Stats menu", allows the menu to move away from the header (requires unRAID 6.1.7 or higher)
+- added new setting "Opening page", selects the first page to view upon visitng Stats
+- added coloring based on global and individual disk settings
+- updated sysstat files to version 11.2.0
+- changed icons
+
+###2015.12.19b
 - updated sysstat files to version 11.1.8
 - added datafile conversion from version 10.x to 11.x
 
@@ -124,6 +131,12 @@ elif [[ $(ls -A $new|wc -l) -gt 0 ]]; then
   done
   mv -f $tmp/sa* $new
   rm -rf $tmp
+fi
+
+# Backward compatibility
+source /etc/unraid-version
+if [[ $version != 6.1.7 &amp;&amp; ${version:0:3} != 6.2 ]]; then
+  sed -i 's:/.*=::' /usr/local/emhttp/plugins/&name;/Stats.page
 fi
 
 # Create cron entry
