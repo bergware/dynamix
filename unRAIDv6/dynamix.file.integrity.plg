@@ -211,24 +211,26 @@ for disk in $disks ; do
   fi
 done
 
-for disk in $disks ; do
-  find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
-  ifs=$IFS; IFS=','
-  for folder in $exclude ; do
-    sed -i "/^\/mnt\/disk[0-9]*\/$folder\//d" $tmpfile
+if [[ -f $path/disks.ini ]]; then
+  for disk in $disks ; do
+    find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
+    ifs=$IFS; IFS=','
+    for folder in $exclude ; do
+      sed -i "/^\/mnt\/disk[0-9]*\/$folder\//d" $tmpfile
+    done
+    IFS=$ifs
+    [[ -s $tmpfile ]] && sed -ri "/^${disk:5}=/d" $path/disks.ini
   done
-  IFS=$ifs
-  [[ -s $tmpfile ]] && sed -ri "/^${disk:5}=/d" $path/disks.ini
-done
 
-for disk in $disks ; do
-  hashfile=$path/${disk:5}.export.hash
-  if [[ -s $hashfile ]]; then
-    touch -t $(date -d "@$(stat -c %Y $hashfile)" +%Y%m%d%H%M.%S) $tmpfile.0
-    find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
-    [[ -s $tmpfile ]] && sed -ri "s/(^${disk:5}=[^,]*),?export,?/\1/" $path/disks.ini
-  fi
-done
+  for disk in $disks ; do
+    hashfile=$path/${disk:5}.export.hash
+    if [[ -s $hashfile ]]; then
+      touch -t $(date -d "@$(stat -c %Y $hashfile)" +%Y%m%d%H%M.%S) $tmpfile.0
+      find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
+      [[ -s $tmpfile ]] && sed -ri "s/(^${disk:5}=[^,]*),?export,?/\1/" $path/disks.ini
+    fi
+  done
+fi
 
 old=$path/disks.export.$(date +%Y%m%d -d -1day).new.hash
 rm -f $tmpfile* $old
