@@ -17,7 +17,7 @@
 
 ###&version;
 - added new setting "Placement of Stats menu", allows the menu to move away from the header (requires unRAID 6.1.7 or higher)
-- added new setting "Opening page", selects the first page to view upon visitng Stats
+- added new setting "Opening page", selects the first page to view upon visiting Stats
 - added coloring based on global and individual disk settings
 - updated sysstat files to version 11.2.0
 - changed icons
