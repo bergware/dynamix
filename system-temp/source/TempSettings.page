@@ -1,0 +1,217 @@
+Menu="Utilities"
+Title="System Temp"
+Icon="dynamix.system.temp.png"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * Plugin development contribution by gfjardim
+ */
+?>
+
+<?
+$sensors_file  = "/boot/config/plugins/dynamix.system.temp/sensors.conf";
+$drivers_file  = "/boot/config/plugins/dynamix.system.temp/drivers.conf";
+$settings_file = "/etc/sensors.d/sensors.conf";
+
+$unit = $display['unit'];
+$dot  = $display['number'][0];
+
+function get_sensors() {
+  global $settings_file;
+  $out = array();
+  $tmp = '/tmp/sensors.conf';
+  exec("grep -v 'ignore' $settings_file > $tmp");
+  preg_match_all("/(.*?)\nAdapter:.*?\n(.*?)(?:[\n]{2,})/smi", shell_exec("sensors -u -c $tmp"), $controllers);
+  foreach ($controllers[1] as $key => $controller) {
+    preg_match_all("/(.*):\n\s+([^:]*): (.*)/", $controllers[2][$key], $matches);
+    for ($i=0; $i<count($matches[1]); $i++) {
+      $out[] = array(
+        'ctrl' => $controller,
+        'name' => $matches[1][$i],
+        'attr' => $matches[2][$i],
+        'val'  => $matches[3][$i]
+      );
+    }
+  }
+  unlink($tmp);
+  return $out;
+}
+
+function get_modules() {
+  global $drivers_file;
+  return file_exists($drivers_file) ? file($drivers_file) : array();
+}
+
+function save_modules($mod) {
+  global $drivers_file;
+  file_put_contents($drivers_file, preg_replace("/\s|,/", PHP_EOL, $mod));
+}
+
+function detect_modules(){
+  $mods = array();
+  exec("yes ''|perl /usr/sbin/sensors-detect 2>&1|grep -Po \"^Driver.{2}\K[^\']*\"", $matches);
+  foreach ($matches as $mod) if (exec("modprobe -D $mod 2>/dev/null")) $mods[]=$mod ;
+  sort($mods);
+  return $mods;
+}
+
+function is_module_loaded($mod) {
+  return exec("lsmod|grep -c $mod")>0;
+}
+
+function load_mod($mod) {
+  if (!is_module_loaded($mod)) exec("modprobe $mod");
+}
+
+function unload_mod($mod){
+  if (is_module_loaded($mod)) exec("modprobe -r $mod");
+}
+
+###  MAIN ###
+
+switch ($_POST['op']) {
+case 'sensors':
+  if (isset($_POST['rescan'])) break;
+  $content = "# sensors\n";
+  $probes = "";
+  foreach ($_POST as $key => $value) {
+    switch ($key) {
+    case 'mb_temp':
+    case 'cpu_temp':
+    case 'array_fan':
+      list($chip, $input, $label) = explode("|", $value = preg_match("/.*?\|.*?\|.*?/", $value) ? $value : "||");
+      $content .= strlen($chip) ? sprintf("chip \"%s\"\nlabel \"%s\" \"%s\"\n", $chip, $input, $label) : "";
+    break;
+    case 'temp_ignore':
+    case 'fan_ignore':
+      foreach (explode('#', $value) as $ignore) {
+        if (!$ignore) continue;
+        list($chip, $input) = explode("|", $ignore);
+        $content .= sprintf("chip \"%s\"\nignore \"%s\"\n", $chip, $input);
+      }
+    break;}
+  }
+  file_put_contents($sensors_file, $content);
+  copy($sensors_file, $settings_file);
+break;
+case 'modules':
+  foreach ($_POST as $key => $value) {
+    switch ($key) {
+    case 'detect':
+      $all_modules = implode(" ", detect_modules());
+      $open = file_exists($drivers_file) ? $all_modules != trim(str_replace("\n"," ",file_get_contents($drivers_file))) : true;
+    break;
+    case 'save':
+      if (empty($_POST['drivers'])) break;
+      save_modules($_POST['drivers']);
+      $open = false;
+    break;
+    case 'load':
+      foreach (get_modules() as $mod) load_mod($mod);
+    break;
+    case 'unload':
+      foreach (get_modules() as $mod) unload_mod($mod);
+  break;}
+  }
+break;}
+
+$sensors = get_sensors();
+if (!isset($all_modules)) $all_modules = implode(" ",get_modules());
+$disabled = (file_exists($drivers_file) && !$open) ? "" : "disabled";
+
+$mb_options = "<option>Not used</option>";
+$cpu_options = "<option>Not used</option>";
+$fan_options = "<option>Not used</option>";
+$temp_ignore = "";
+$fan_ignore = "";
+
+foreach ($sensors as $value) {
+  if (preg_match("/temp\d+_input/", $value['attr'])) {
+    preg_match("/(\d+\.\d)/", $value['val'], $temp);
+    $input = explode("_", $value['attr'])[0];
+    $temp= $temp[1];
+    if ($temp==0) {
+      if ($temp_ignore) $temp_ignore .= '#';
+      $temp_ignore .= "{$value['ctrl']}|$input";
+    } else {
+      $temp = str_replace('.',$dot,$unit=='C' ? $temp : round(9/5*$temp+32));
+      $chip = explode("-", $value['ctrl'])[0];
+      $mb_options  .= sprintf("<option value='%s|%s|MB Temp' %s>%s - %s - %s &deg;%s</option>", $value['ctrl'], $input, $value['name']=="MB Temp" ? "selected" : "", $chip, $value['name'], $temp, $unit);
+      $cpu_options .= sprintf("<option value='%s|%s|CPU Temp' %s>%s - %s - %s &deg;%s</option>", $value['ctrl'], $input, $value['name']=="CPU Temp" ? "selected" : "", $chip, $value['name'], $temp, $unit);
+    }
+  } else if (preg_match("/fan\d+_input/", $value['attr'])) {
+    preg_match("/(\d+)/", $value['val'], $rpm);
+    $input = explode("_", $value['attr'])[0];
+    $rpm = $rpm[1];
+    if ($rpm==0) {
+      if ($fan_ignore) $fan_ignore .= '#';
+      $fan_ignore .= "{$value['ctrl']}|$input";
+    } else {
+      $chip = explode("-", $value['ctrl'])[0];
+      $fan_options  .=  sprintf("<option value='%s|%s|Array Fan' %s>%s - %s - %s RPM</option>", $value['ctrl'], $input, $value['name']=="Array Fan" ? "selected" : "", $chip, $value['name'], $rpm);
+    }
+  }
+}
+?>
+<form markdown="1" method="POST">
+<input type="hidden" name="op" value="modules">
+Available drivers:
+: <input type="text" name="drivers" id="drivers" value="<?=$all_modules?>" placeholder="Click DETECT">
+
+> Use 'detect' to search for available drivers using the 'sensors-detect' script. After detection proceed with saving the list.<br>
+> Use 'save' to store the drivers list to disk, the drivers field may be edited before saving (e.g. add a non-specified driver). Saving is mandatory.<br>
+> Use 'load drivers / unload drivers' to manually load or unload the available driver modules.
+
+&nbsp;
+<?$loaded = true; foreach (get_modules() as $mod) $loaded &= is_module_loaded($mod)?>
+: <input type="submit" name="detect" value="Detect"><input type="submit" name="save" value="Save">
+  <?echo ($loaded) ? "<input type='submit' name='unload' id='btn1' value='Unload drivers' $disabled>" : "<input type='submit' name='load' id='btn1' value='Load drivers' $disabled>";?>
+</form>
+
+<div id="title"><span class="left"><img src="/plugins/dynamix.system.temp/icons/sensors.png" class="icon">Sensors</span></div>
+
+<form markdown="1" method="POST">
+<input type="hidden" name="op" value="sensors">
+<input type="hidden" name="temp_ignore" value="<?=$temp_ignore?>">
+<input type="hidden" name="fan_ignore" value="<?=$fan_ignore?>">
+Processor temperature:
+: <select name="cpu_temp" <?=$disabled?>>
+  <?=$cpu_options;?>
+  </select>
+
+> Select one of the available probes as the processor temperature indicator.
+> The output of this probe is shown at the bottom of the page.
+> Select 'Not used' to suppress display of this probe.
+
+Mainboard temperature:
+: <select name="mb_temp" <?=$disabled?>>
+  <?=$mb_options;?>
+  </select>
+
+> Select one of the available probes as the mainboard temperature indicator.
+> The output of this probe is shown at the bottom of the page.
+> Select 'Not used' to suppress display of this probe.
+
+Array fan speed:
+: <select name="array_fan" <?=$disabled?>>
+  <?=$fan_options;?>
+  </select>
+
+> Select one of the available probes as the array fan speed indicator.
+> The output of this probe is shown at the bottom of the page.
+> Select 'Not used' to suppress display of this probe.
+
+&nbsp;
+: <input type="submit" value="Apply"><input type="button" value="Done" onclick="done()"><?if (!$disabled):?><input type="submit" name="rescan" value="Rescan"><?endif;?>
+
+> 'Rescan' refreshes the selection list and can be used when new probes are available, e.g. a new fan probe has been installed.
+
+</form>

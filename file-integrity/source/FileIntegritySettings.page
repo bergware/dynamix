@@ -1,0 +1,264 @@
+Menu="FileIntegrity:1"
+Title="File Integrity Settings"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+if ($var['fsState']!="Started") {
+  echo "<p class='notice'>Array must be <strong>STARTED</strong> to use this feature.</p>";
+  echo "<p><input type='button' value='Done' onclick='done()'></p>";
+  return;
+}
+$plugin = 'dynamix.file.integrity';
+$cfg = parse_plugin_cfg($plugin);
+
+$sName = "disk-watch";
+$fName = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
+$check = "/usr/local/emhttp/plugins/$plugin/scripts/b2sum-check";
+
+$mode = ['Disabled','Daily','Weekly','Monthly'];
+$days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+exec("find /mnt/disk* -type d -maxdepth 1 -mindepth 1 -exec basename {} \;|uniq|sort -u", $folders);
+?>
+<style>
+span.running{background-color:#FF9E9E;}
+input.thin{margin:1px;}
+</style>
+<script>
+function prepareWatch(form) {
+  var exclude = '';
+  var disks = '';
+  for (var i=0,item; item=form.exclude.options[i]; i++) {
+    if (item.selected) {
+      if (exclude.length) exclude += ',';
+      exclude += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.exclude.options[0];
+  item.value = exclude;
+  item.selected = true;
+  var count=0;
+  $(form).find('input[class^=disk]').each(function() {
+    var checkbox = $(this);
+    if (checkbox.prop('checked')) {
+      if (disks.length) disks += ',';
+      disks += checkbox.attr('name').substr(0,checkbox.attr('name').indexOf('-'));
+    }
+  });
+  $('input.thin').prop('disabled',false);
+  form.disks.value = disks;
+}
+function presetSchedule(form) {
+  var mode = form.schedule.value;
+  form.hour.disabled = mode==0;
+  form.min.disabled = mode==0;
+  form.day.disabled = mode!=2 || mode==0;
+  form.dotm.disabled = mode!=3 || mode==0;
+  form.day.value = form.day.disabled ? '*' : (form.day.value=='*' ? 0 : form.day.value);
+  form.dotm.value = form.dotm.disabled ? '*' : (form.dotm.value=='*' ? 1 : form.dotm.value);
+  if (mode==0) {
+    $('input[class^=disk]').prop('disabled',true);
+  } else {
+    var checked = 0;
+    $(form).find('input[class^=disk]').each(function() {
+      var checkbox = $(this);
+      if (checkbox.prop('checked')) {
+        var id = checkbox.attr('class').split(' ');
+        $('[type=checkbox].'+id[0]).prop('disabled',true);
+        $('[type=checkbox].'+id[0]+'.'+id[1]).prop('disabled',false);
+        checked++;
+      }
+    });
+    if (checked==0) $('input[class^=disk]').prop('disabled',false);
+  }
+}
+function updateMatrix(checked,disk,clr) {
+  $('input[type=checkbox].'+disk).prop('disabled',checked);
+  $('input[type=checkbox].'+disk+'.'+clr).prop('disabled',false);
+}
+function showInfo(value) {
+  if (value.indexOf('-f')<0) $('#showInfo').hide(); else $('#showInfo').show();
+}
+function activeDisks() {
+  $('input[class^=disk]').each(function() {
+    var checkbox = $(this);
+    if (checkbox.prop('checked')) {
+      var c = checkbox.attr('class').split(' ');
+      $.post('/plugins/dynamix.file.integrity/include/BunkerProcess.php',{cmd:'V',disk:c[0].substr(4),kill:'false'},function(data) {
+        if (data) {$('span.'+c[0]+'.'+c[1]).addClass('running'); checkbox.prop('disabled',true);}
+      });
+    }
+  });
+}
+$(function() {
+  $('#s1').dropdownchecklist({emptyText:'None', width:131, explicitClose:'...close'});
+  presetSchedule(document.integrity_settings);
+  showInfo(document.integrity_settings.log.value);
+  activeDisks();
+});
+</script>
+<form markdown="1" name="integrity_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareWatch(this)">
+<input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.watcher.php">
+<input type="hidden" name="disks" value="">
+
+Automatically protect new and modified files:
+: <select name="service" size="1">
+  <?=mk_option($cfg['service'], "0", "Disabled")?>
+  <?=mk_option($cfg['service'], "1", "Enabled")?>
+  </select></td>
+
+> When enabled a checksum value is automatically calculated and added to the extended attributes of the newly created or modified file.
+> When it is detected that a file change has occured, but its modification time hasn't changed, then an automatic checksum verification is performed to check for any silent file corruption.
+>
+> The area selection can be filtered by excluding folders (shares) and/or excluding disks all together (see table below).
+>
+> When the automatic hashing is disabled then manual control is required to keep information up-to-date.
+
+Hashing method:
+: <select name="method" size="1">
+  <?=mk_option($cfg['method'], "", "SHA2")?>
+  <?=mk_option($cfg['method'], "-md5", "MD5")?>
+  <?=mk_option($cfg['method'], "-b2", "BLAKE2", exec($check))?>
+  </select>
+
+> Select the preferred hashing method. SHA2 generates a 256 bits checksum value, MD5 generates a 128 bits checksum value, while BLAKE2 generates a 512 bits checksum value per file.
+>
+> MD5 is the most commonly used method and should be selected when compatibility with external programs is required, BLAKE2 is the fastest method and has the highest detection grade, this is a proprietary solution though.
+> SHA2 is the official standard and is selected by default. It is the slowest of all three methods though. The BLAKE2 option is disabled if it is not supported by your processor.
+> All methods require substantial computing power from the processor and a too weak processor may not be able to perform up to expectations.
+
+Save new hashing results to flash:
+: <select name="cmd" size="1">
+  <?=mk_option($cfg['cmd'], "a", "Disabled")?>
+  <?=mk_option($cfg['cmd'], "A", "Enabled")?>
+  </select>
+
+> When enabled a daily file on the flash device will be created, holding the checksum results for all newly or modified files of that day.
+> The format of this file is the same as the standard export file. The daily file is saved as */config/plugins/dynamix.file.integrity/disks.export.&lt;date&gt;.new.hash*
+
+Excluded folders:
+: <select id="s1" name="exclude" size="1" multiple style="display:none">
+  <?foreach ($folders as $folder):?>
+  <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
+  <?endforeach;?>
+  </select>
+
+> Select here any folders (shares) you want to exclude from the automatic hashing and verification functionality. A folder existing on multiple disks will be skipped on any disk where it is present.
+
+Disk verification schedule:
+: <select name="schedule" size="1" onchange="presetSchedule(this.form)">
+  <?for ($m=0; $m<count($mode); $m++):?>
+  <?=mk_option($cfg['schedule'], strval($m), $mode[$m])?>
+  <?endfor;?>
+  </select>
+
+> When enabled a cron schedule is created to do file verification in the background. You need to select which disks participate in the automatic hashing and verification process (see table below).
+> The cron schedule can run on a selectable daily, weekly or monthly basis.
+>
+> One or more tasks can be created, each containing one or more disks. All disks under the same task are verified in parallel. This decreases the total run-time, but increases the
+> processor load. Make sure your processor can handle this load, and change grouping accordingly. At one end all disks can be put in a single task, resulting in the highest concurrency.
+> At the other end every disk can be put in its own task, resulting in the lowest processor load.
+>
+> A disk with a disabled checksum box and a red background, indicates a background verification process is currently in progress for this disk. It can not be stopped.
+>
+> When multiple tasks exist then each task is executed in the next schedule in a rotating fashion. E.g. when you have set up a weekly schedule with 3 tasks then every week
+> another task is executed and after 3 weeks the verification function has done all selected disks.
+>
+> When the verification schedule is disabled then manual control is required to verify the correctness of the files.
+
+When parity operation is running:
+: <select name="parity" size="1">
+  <?=mk_option($cfg['parity'], "0", "Continue")?>
+  <?=mk_option($cfg['parity'], "1", "Don't start")?>
+  </select></td>
+
+> Before a verification task starts it can either continue as usual when a parity operation is running, or the verification task doesn't start at all.
+> In the latter case you need to wait for the next scheduled time to execute the task.
+
+Day of the week:
+: <select name="day" size="1">
+  <?for ($d=0; $d<count($days); $d++):?>
+  <?=mk_option($cfg['day'], strval($d), $days[$d])?>
+  <?endfor;?>
+  <?=mk_option($cfg['day'], "*", "--------", "disabled")?>
+  </select>
+
+> When a weekly schedule is chosen, then select here the day of execution.
+
+Day of the month:
+: <select name="dotm" size="1">
+  <?for ($d=1; $d<=31; $d++):?>
+  <?=mk_option($cfg['dotm'], strval($d), sprintf("%02d", $d))?>
+  <?endfor;?>
+  <?=mk_option($cfg['dotm'], "*", "--------", "disabled")?>
+  </select>
+
+> When a monthly schedule is chosen, then select here the date of execution.
+
+Time of the day:
+: <select name="hour" size="1" class="narrow">
+  <?for ($d=0; $d<=23; $d++):?>
+  <?=mk_option($cfg['hour'], strval($d), sprintf("%02d", $d))?>
+  <?endfor;?>
+  </select>
+  <select name="min" size="1" class="narrow">
+  <?for ($d=0; $d<=55; $d+=5):?>
+  <?=mk_option($cfg['min'], strval($d), sprintf("%02d", $d))?>
+  <?endfor;?>
+  </select>&nbsp;&nbsp;HH:MM
+
+  
+> Select the hour and minute at which time the scheduled task will be executed. Granularity is 5 minutes.
+
+Send notifications:
+: <select name="notify" size="1">
+  <?=mk_option($cfg['notify'], "", "No")?>
+  <?=mk_option($cfg['notify'], "-n", "Yes")?>
+  </select>
+
+> Set to YES if you want to receive notifications when file corruption is detected.
+> See the notification settings on how to set up and receive "alert" notifications.
+
+Error logging:
+: <select name="log" size="1" onchange="showInfo(this.value)">
+  <?=mk_option($cfg['log'], "", "Never")?>
+  <?=mk_option($cfg['log'], "-L", "Syslog only")?>
+  <?=mk_option($cfg['log'], "-f", "Output file")?>
+  <?=mk_option($cfg['log'], "-L -f", "Syslog & File")?>
+  </select><span id="showInfo" style="display:none;font-style:italic">Information is stored on the flash device in folder **/config/plugins/dynamix.file.integrity/**</span>
+
+> Error logging, including file corruption detection information can be given in the system log, or saved as a file on flash.
+> Disabling error logging will suppress log creation, but it is still possible to receive notifications.
+
+  <table class='tablesorter'><thead><th style='font-weight:bold;padding-left:12px;width:10%'>Disk verification tasks</th>
+<?
+$i = 1;
+foreach ($disks as $disk) {
+  if ($disk['type']=='Data') {echo "<th style='text-align:center'>Task<br>$i</th>"; $i++;}
+}
+echo "</thead><tbody>";
+foreach ($disks as $disk) {
+  if ($disk['type']=='Data') {
+    echo "<tr><td>Disk {$disk['idx']}</td>";
+    for ($n = 1; $n < $i; $n++) echo "<td style='text-align:center'><span class='{$disk['name']} t{$n}'><input type='checkbox' name='{$disk['name']}-{$n}' class='{$disk['name']} t{$n} thin' onclick='updateMatrix(this.checked,\"{$disk['name']}\",\"t{$n}\")'".($cfg["{$disk['name']}-{$n}"]=='on' ? ' checked':'')."></sapn></td>";
+    echo "</tr>\n";
+  }
+}
+?>
+  </tbody></table>
+
+<input type="submit" name="#default" value="Default" onclick="$('input[class^=disk]').prop('checked',false)">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+</form>

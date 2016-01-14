@@ -1,0 +1,31 @@
+Menu="Buttons:1"
+Link="nav-user"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * Plugin development contribution by gfjardim
+ */
+?>
+
+<?if ($display['monitor']):?>
+<script>
+function localMaster() {
+  $.get('/webGui/include/LocalMaster.php',function(data) {
+    $('#localmaster').html(data);
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+    timers.localMaster = setTimeout(localMaster,<?=max(15000,abs($display['refresh']))?>);
+<?endif;?>
+  });
+}
+$('span.text-left').prepend("<span id='localmaster'></span>");
+localMaster();
+</script>
+<?endif;?>

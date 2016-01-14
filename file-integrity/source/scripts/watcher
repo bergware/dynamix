@@ -1,0 +1,27 @@
+#!/bin/bash
+cmd=$1
+method=$2
+[[ -n $3 ]] && exclude="^/mnt/disk[0-9]+/(\S+\.img$|$3)/" || exclude="^/mnt/disk[0-9]+/\S+\.img$"
+[[ -n $4 ]] && disks=$4 || disks=/mnt/disk*
+
+bunker=/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker
+
+if [[ -z $method ]]; then
+  hash=sha256
+elif [[ $method == -b2 ]]; then
+  hash=blake2
+else
+  hash=md5
+fi
+
+# main (continuous loop)
+inotifywait -mrq --exclude "$exclude" --format '%w%f' -e close_write $disks | while read file; do
+  if [[ -z $(getfattr -n user.$hash --only-values "$file" 2>/dev/null) ]]; then
+    $bunker -${cmd}q -1 $method -f "/boot/config/plugins/dynamix.file.integrity/disks.export.$(date +%Y%m%d).new.hash" "$file"
+  else
+    $bunker -Vq -1 $method -f "/boot/config/plugins/dynamix.file.integrity/disks.export.$(date +%Y%m%d).bad.hash" "$file"
+  fi
+done &
+
+# detach
+disown %%

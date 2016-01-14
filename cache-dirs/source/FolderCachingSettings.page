@@ -1,0 +1,138 @@
+Menu="Utilities"
+Title="Folder Caching"
+Icon="dynamix.cache.dirs.png"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$plugin = 'dynamix.cache.dirs';
+$cfg = parse_plugin_cfg($plugin);
+
+$sName = "cache_dirs";
+$fName = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
+$config = "/etc/cache_dirs.conf";
+$cache = isset($disks['cache']) ? '/mnt/cache' : '';
+
+exec("find /mnt/disk* $cache -type d -maxdepth 1 -mindepth 1 -exec basename {} \;|uniq|sort -u", $folders);
+?>
+<script>
+function prepareCache(form) {
+// Simulate a single input field
+  var exclude = '';
+  for (var i=0,item; item=form.exclude.options[i]; i++) {
+    if (item.selected) {
+      if (exclude.length) exclude += ',';
+      exclude += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.exclude.options[0];
+  item.value = exclude;
+  item.selected = true;
+// Simulate a single input field
+  var include = '';
+  for (var i=0,item; item=form.include.options[i]; i++) {
+    if (item.selected) {
+      if (include.length) include += ',';
+      include += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.include.options[0];
+  item.value = include;
+  item.selected = true;
+}
+$(function() {
+  var size = Math.max(window.innerHeight-$('#pin').offset().top-150,150);
+  $('#s1').dropdownchecklist({maxDropHeight:size, width:300, explicitClose:'...close'});
+  $('#s2').dropdownchecklist({maxDropHeight:size, width:300, explicitClose:'...close'});
+  showStatus('<?=$sName?>');
+});
+</script>
+<form markdown="1" name="cache_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareCache(this)">
+<input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.cache.php">
+<input type="hidden" name="#config" value="<?=$config?>">
+<input type="hidden" name="#prefix" value="minimum=m&maximum=M&depth=d&exclude=e&include=i">
+<span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
+
+Folder caching function:
+: <select name="service" size="1">
+  <?=mk_option($cfg['service'], "0", "Disabled")?>
+  <?=mk_option($cfg['service'], "1", "Enabled")?>
+  </select></td>
+
+> Select whether folder caching is enabled or disabled. Caching will only effectively occur when the array is started. The caching function is automatically restarted or stopped when the array goes online or offline.
+
+Suspend during 'Mover' process:
+: <select name="suspend" size="1">
+  <?=mk_option($cfg['suspend'], "-S", "No")?>
+  <?=mk_option($cfg['suspend'], "", "Yes")?>
+  </select>
+
+> Stop caching while the mover is running to avoid conflicts. It is recommended to set this to YES.
+
+Scan user shares:
+: <select name="shares" size="1">
+  <?=mk_option($cfg['shares'], "", "No")?>
+  <?=mk_option($cfg['shares'], "-u", "Yes")?>
+  </select>
+
+> Perform additional caching on the share folders. This shouldn't be necessary as normally disk caching is sufficient.
+
+Minimum interval between folder scans (sec):
+: <input type="text" name="minimum" class="narrow" maxlength="3" value="<?=$cfg['minimum']?>" placeholder="1">
+
+> Tweaking of the caching interval can be done for slower systems. Default value is 1 second, should be alright for most systems.
+
+Maximum interval between folder scans (sec):
+: <input type="text" name="maximum" class="narrow" maxlength="3" value="<?=$cfg['maximum']?>" placeholder="10">
+
+> Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
+
+Adaptive scan level depth:
+: <input type="text" name="depth" class="narrow" maxlength="4" value="<?=$cfg['depth']?>" placeholder="auto">
+
+> Defines how may folder levels deep scanning should continue. By default it is automatically set,
+> only change this to a fixed number when the scan needs to be limited to the first levels of the top folders.
+
+Excluded folders:
+: <select id="s1" name="exclude" size="1" multiple style="display:none">
+  <?foreach ($folders as $folder):?>
+  <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
+  <?endforeach;?>
+  </select>
+
+> The dropdown menu shows all available folders, by default no folders are excluded. Select here any folders to be excluded.
+>
+> It is recommended to use either excluded or included folders but not both when a restricted folder list is required.
+
+Included folders:
+: <select id="s2" name="include" size="1" multiple style="display:none">
+  <?foreach ($folders as $folder):?>
+  <?=mk_option_check($cfg['include'], $folder, $folder)?>
+  <?endforeach;?>
+  </select>
+
+> The dropdown menu shows all available folders, by default all folders are included. Select here the restricted list of folders to be included.
+>
+> It is recommended to use either excluded or included folders but not both when a restricted folder list is required.
+
+User defined options:
+: <input id="pin" type="text" name="other" maxlength="200" value="<?=$cfg['other']?>" placeholder="Enter custom options here">see <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">unRAID forum</a></u>
+
+<input type="submit" name="#default" value="Default">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+
+> The cache_dirs script has additional options which may be used. Refer to the online documentation to use these as needed.
+
+</form>

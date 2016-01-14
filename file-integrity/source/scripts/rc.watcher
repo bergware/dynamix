@@ -1,0 +1,46 @@
+#!/bin/bash
+plugin=dynamix.file.integrity
+script=watcher
+execute=/usr/local/emhttp/plugins/$plugin/scripts/$script
+conf=/etc/inotifywait.conf
+
+watcher.start() {
+  if [[ -z $(pgrep -f $execute) ]]; then
+    source $conf 2>/dev/null
+    $execute "$cmd" "$method" "$exclude" "$disks"
+    echo "$script started"
+  else
+    echo "$script already running!"
+  fi
+}
+
+watcher.stop() {
+  if [[ -n $(pgrep -f $execute) ]]; then
+    pkill inotifywait
+    timer=5
+    until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
+      timer=$((timer-1))
+      sleep 1
+    done
+    echo "$script stopped"
+  else
+    echo "$script not running!"
+  fi
+}
+
+watcher.restart() {
+  watcher.stop
+  sleep 1
+  watcher.start
+}
+
+case "$1" in
+'start')
+ watcher.start ;;
+'stop')
+ watcher.stop ;;
+'restart')
+ watcher.restart ;;
+*)
+ echo "Usage: $(basename $0) start|stop|restart"
+esac

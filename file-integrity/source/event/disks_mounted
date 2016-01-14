@@ -1,0 +1,24 @@
+#!/bin/bash
+plugin=dynamix.file.integrity
+cfg=/boot/config/plugins/$plugin/$plugin.cfg
+if [[ ! -e $cfg ]]; then
+  cfg=/usr/local/emhttp/plugins/$plugin/default.cfg
+fi
+conf=/etc/inotifywait.conf
+
+if [[ $(grep -Po '^service="\K[^"]+' $cfg) -eq 1 ]]; then
+  if [[ ! -s $conf ]]; then
+    source $cfg 2>/dev/null
+    exclude=${exclude/,/|}
+    list=; ifs=$IFS; IFS=','
+    for disk in $disks; do
+      list="$list ${disk/disk//mnt/disk}"
+    done
+    IFS=$ifs
+    echo "cmd=\"$cmd\"" > $conf
+    echo "method=\"$method\"" >> $conf
+    echo "exclude=\"$exclude\"" >> $conf
+    echo "disks=\"${list:1}\"" >> $conf
+  fi
+  /usr/local/emhttp/plugins/$plugin/scripts/rc.watcher start >/dev/null
+fi

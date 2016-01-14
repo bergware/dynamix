@@ -1,0 +1,90 @@
+Menu="Stats:2"
+Title="System Stats"
+Cond="(exec(\"awk -F= '/^show=/{print $2}' /boot/config/plugins/dynamix.system.stats/dynamix.system.stats.cfg 2>/dev/null\")!='\"\"')"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+
+<?
+if ($var['fsState']=="Stopped"):
+  echo "<div class='notice'>Array must be <strong><big>started</big></strong> to view system stats.</div>";
+  return;
+endif;
+
+function selector() {
+  global $graph, $frame;
+  echo "<span id='selector' class='status topright1'><span><select size='1' onchange='modeller(this.value)'>";
+  echo mk_option($graph, '0', 'Real-time');
+  echo mk_option($graph, '1', 'Last day');
+  echo mk_option($graph, '2', 'Last 2 days');
+  echo mk_option($graph, '3', 'Last 3 days');
+  echo mk_option($graph, '7', 'Last week');
+  echo mk_option($graph, '14', 'Last 2 weeks');
+  echo mk_option($graph, '21', 'Last 3 weeks');
+  echo mk_option($graph, '31', 'Last month');
+  echo mk_option($graph, '3653', 'Since start');
+  echo "</select></span><span id='monitor' class='status topright2'><select size='1' onchange='resizer(this.value)'>";
+  echo mk_option($frame, '15', '30 seconds');
+  echo mk_option($frame, '30', '1 minute');
+  echo mk_option($frame, '60', '2 minutes');
+  echo mk_option($frame, '150', '5 minutes');
+  echo mk_option($frame, '300', '10 minutes');
+  echo mk_option($frame, '900', '30 minutes');
+  echo mk_option($frame, '1800', '1 hour');
+  echo mk_option($frame, '3600', '2 hours');
+  echo "</select><input type='button' value='Reset' onclick='modeller(0)'></span></span>";
+}
+
+$cols++;
+$tag = $cols==1 ? 'graph2' : 'graph3';
+$cpu = strpos($show,'cpu')!==false;
+$ram = strpos($show,'ram')!==false;
+$com = strpos($show,'com')!==false;
+$hdd = strpos($show,'hdd')!==false;
+
+$cell = 1;
+$last = ' last';
+$tag1 = $tag.((!$ram && !$com && !$hdd) ? $last : '');
+if ($cpu) $cell++;
+$tag2 = $tag.(((!$com && !$hdd) || ($cols>1 ? $cell%$cols==0 : false)) ? $last : '');
+if ($ram) $cell++;
+$tag3 = $tag.((!$hdd || ($cols>1 ? $cell%$cols==0 : false)) ? $last : '');
+$tag4 = $tag.$last;
+?>
+<script>
+$('.tabs').append("<?=selector()?>");
+<?if ($cfg['first']):?>
+$.cookie('one','tab2',{path:'/'});
+$(function() {
+  $('#selector').show();
+  systemStats();
+});
+<?else:?>
+$.removeCookie('one',{path:'/'});
+<?endif;?>
+</script>
+<?if ($cpu):?>
+<span id='cpu' class='<?=$tag1?>'></span>
+<?endif;?>
+<?if ($ram):?>
+<span id='ram' class='<?=$tag2?>'></span>
+<?endif;?>
+<?if ($com):?>
+<span id='com' class='<?=$tag3?>'></span>
+<?endif;?>
+<?if ($hdd):?>
+<span id='hdd' class='<?=$tag4?>'></span>
+<?endif;?>
+<?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>
+<p><input type="button" value="Done" onclick="done()"></p>
+<?endif;?>

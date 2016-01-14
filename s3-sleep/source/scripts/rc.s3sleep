@@ -1,0 +1,45 @@
+#!/bin/bash
+plugin=dynamix.s3.sleep
+script=s3_sleep
+execute=/usr/local/emhttp/plugins/$plugin/scripts/$script
+options=/etc/$script.conf
+
+s3_sleep.start() {
+  if [[ -z $(pgrep -f $execute) ]]; then
+    $execute $(cat $options) 1>/dev/null 2>&1
+    echo "$script started"
+  else
+    echo "$script already running!"
+  fi
+}
+
+s3_sleep.stop() {
+  if [[ -n $(pgrep -f $execute) ]]; then
+    $execute -q 1>/dev/null 2>&1
+    timer=5
+    until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
+      timer=$((timer-1))
+      sleep 1
+    done
+    echo "$script stopped"
+  else
+    echo "$script not running!"
+  fi
+}
+
+s3_sleep.restart() {
+  s3_sleep.stop
+  sleep 1
+  s3_sleep.start
+}
+
+case "$1" in
+'start')
+ s3_sleep.start ;;
+'stop')
+ s3_sleep.stop ;;
+'restart')
+ s3_sleep.restart ;;
+*)
+ echo "Usage: $(basename $0) start|stop|restart"
+esac

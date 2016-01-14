@@ -1,0 +1,62 @@
+Menu="SMB:2"
+Title="Workgroup Settings"
+Cond="($var['shareSMBEnabled']=='yes')"
+---
+<?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<form markdown="1" name="WorkGroup" method="POST" action="/update.htm" target="progressFrame" onsubmit="setMonitor(this)">
+Workgroup:
+: <input type="text" name="WORKGROUP" maxlength="40" value="<?=$var['WORKGROUP'];?>" class="narrow">
+
+> Enter your local network Workgroup name. Usually this is "WORKGROUP".
+
+Local master browser:
+: <select name="localMaster">
+  <?=mk_option($var['localMaster'], "no", "No");?>
+  <?=mk_option($var['localMaster'], "yes", "Yes");?>
+  </select>
+
+> If set to 'Yes' then the server will fully participate in browser elections, and in the absense
+> of other servers, will usually become the local master browser (LMB).
+
+Monitor local master election:
+: <select name="monitor">
+  <?=mk_option($display['monitor'], "0", "Disabled");?>
+  <?=mk_option($display['monitor'], "1", "Enabled");?>
+  </select>
+
+> Enable or disable background monitoring of the local master election.
+> The result of the monitoring is displayed in the header at the top-right position.
+
+Current elected master:
+: <span id="elected">please wait, obtaining...</span>
+
+> Shows in real-time the current elected local master browser.
+
+&nbsp;
+: <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
+</form>
+<script>
+function setMonitor(form) {
+  $.get('/webGui/include/LocalMaster.php',{monitor:form.monitor.value});
+}
+function getMaster() {
+  $.get('/webGui/include/LocalMaster.php',{smb:true},function(data) {
+    $('#elected').html(data);
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+    setTimeout(getMaster,5000);
+<?endif;?>
+  });
+}
+$(getMaster);
+</script>

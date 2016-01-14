@@ -1,0 +1,74 @@
+Menu="Scheduler:3"
+Title="Fixed Schedules"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+
+<?
+$plugin = "dynamix.schedules";
+$cfg = parse_plugin_cfg($plugin);
+$days = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+exec("ls -1 /etc/cron.hourly", $tasks1);
+exec("ls -1 /etc/cron.daily", $tasks2);
+exec("ls -1 /etc/cron.weekly", $tasks3);
+exec("ls -1 /etc/cron.monthly", $tasks4);
+?>
+<style>
+span.time{display:inline-block;width:90px;}
+span.date{display:inline-block;width:140px;}
+span.auto{display:inline-block;width:auto;}
+span.bold{font-weight:bold;padding-left:1px;}
+input.cast{width:54px;}
+select.cast{min-width:100px;}
+</style>
+
+<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.schedules.php">
+&nbsp;
+: <span class="time bold">Hour</span><span class="time bold">Minute</span><span class="date bold">Day / Date</span><span class="auto bold">Scheduled Tasks</span>
+
+Hourly schedule:
+: <span class="time">&nbsp;&nbsp;Any</span>
+  <span class="time"><input type="number" name="hourlyMM" value="<?=$cfg['hourlyMM']?>" min="0" max="59" maxlength="2" class="cast" required></span>
+  <span class="date">&nbsp;Any</span>
+  <span class="auto"><?=$tasks1 ? implode(", ", $tasks1) : '<none>'?></span>
+
+Daily schedule:
+: <span class="time"><input type="number" name="dailyHH" value="<?=$cfg['dailyHH']?>" min="0" max="23" maxlength="2" class="cast" required></span>
+  <span class="time"><input type="number" name="dailyMM" value="<?=$cfg['dailyMM']?>" min="0" max="59" maxlength="2" class="cast" required></span>
+  <span class="date">&nbsp;Any</span>
+  <span class="auto"><?=$tasks2 ? implode(", ", $tasks2) : '<none>'?></span>
+
+Weekly schedule:
+: <span class="time"><input type="number" name="weeklyHH" value="<?=$cfg['weeklyHH']?>" min="0" max="23" maxlength="2" class="cast" required></span>
+  <span class="time"><input type="number" name="weeklyMM" value="<?=$cfg['weeklyMM']?>" min="0" max="59" maxlength="2" class="cast" required></span>
+  <span class="date"><select name="weeklyDD" size="1" class="cast">
+  <?for ($d=0; $d<count($days); $d++):?>
+  <?=mk_option($cfg['weeklyDD'], strval($d), $days[$d])?>
+  <?endfor;?>
+  </select></span>
+  <span class="auto"><?=$tasks3 ? implode(", ", $tasks3) : '<none>'?></span>
+
+Monthly schedule:
+: <span class="time"><input type="number" name="monthlyHH" value="<?=$cfg['monthlyHH']?>" min="0" max="23" maxlength="2" class="cast" required></span>
+  <span class="time"><input type="number" name="monthlyMM" value="<?=$cfg['monthlyMM']?>" min="0" max="59" maxlength="2" class="cast" required></span>
+  <span class="date"><select name="monthlyDD" size="1" class="cast">
+  <?for ($d=1; $d<=31; $d++):?>
+  <?=mk_option($cfg['monthlyDD'], strval($d), sprintf("%02d", $d))?>
+  <?endfor;?>
+  </select></span>
+  <span class="auto"><?=$tasks4 ? implode(", ", $tasks4) : '<none>'?></span>
+
+<input type="submit" name="#default" value="Default">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+</form>

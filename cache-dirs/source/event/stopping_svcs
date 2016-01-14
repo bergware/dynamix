@@ -1,0 +1,3 @@
+#!/bin/bash
+plugin="dynamix.cache.dirs"
+/usr/local/emhttp/plugins/$plugin/scripts/rc.cachedirs stop >/dev/null

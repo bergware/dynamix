@@ -1,0 +1,277 @@
+Menu="Utilities"
+Title="Sleep Settings"
+Icon="dynamix.s3.sleep.png"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * 2013/12/29 SlrG added feature to include/exclude drives outside of array
+ */
+?>
+<?
+$plugin = "dynamix.s3.sleep";
+$scripts = "/usr/local/emhttp/plugins/$plugin/scripts";
+$cfg = parse_plugin_cfg($plugin);
+$sName = "s3_sleep";
+$config = "/etc/s3_sleep.conf";
+
+exec("ifconfig -s|awk '/^(bond|eth)/{print $1}'", $sPorts);
+exec("ethtool {$cfg['port']}|awk -F':' '/Wake-on/{print $2}'",$sWakeon);
+exec("$scripts/$sName -ED", $sOutside);
+
+$days = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+?>
+<script>
+function prepareSleep(form) {
+  var days = '';
+  for (var i=0,item; item=form.stopDay.options[i]; i++) {
+    if (item.selected) {
+      if (days.length) days += ',';
+      days += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.stopDay.options[0];
+  item.value = days;
+  item.selected = true;
+  var hours = '';
+  for (var i=0,item; item=form.stopHour.options[i]; i++) {
+    if (item.selected) {
+      if (hours.length) hours += ',';
+      hours += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.stopHour.options[0];
+  item.value = hours;
+  item.selected = true;
+<?if ($sOutside):?>
+  var disks = '';
+  for (var i=0,item; item=form.outside.options[i]; i++) {
+    if (item.selected) {
+      if (disks.length) disks += ',';
+      disks += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.outside.options[0];
+  item.value = disks;
+  item.selected = true;
+<?endif;?>
+<?if ($sWakeon):?>
+  var wol = '';
+  for (var i=0,item; item=form.setWol.options[i]; i++) {
+    if (item.selected) {
+      wol += item.value;
+      item.selected = false;
+    }
+  }
+  if (wol == '<?=trim($sWakeon[1])?>') wol = '';
+  item = form.setWol.options[0];
+  item.value = wol;
+  item.selected = true;
+<?endif;?>
+  form.pingIP.value = form.pingIP.value.replace(/,/g,' ').replace(/\s+/g,',');
+}
+function changeIdle(form) {
+  var disabled = form.checkTCP.value=='';
+  form.idle.disabled = disabled;
+  form.port.disabled = disabled;
+}
+function changePort(form) {
+  var disabled = form.port.value.substr(0,3)!='eth';
+  form.forceGb.disabled = disabled;
+  form.dhcpRenew.disabled = disabled;
+}
+function logNote(note) {
+  if (note==1 || note==3) {$("#note").show();} else {$("#note").hide();}
+}
+$(function() {
+  showStatus('<?=$sName?>');
+  $("#s1").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
+  $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
+<?if ($sOutside):?>
+  $("#s3").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
+<?endif;?>
+<?if ($sWakeon):?>
+  $("#s4").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
+<?endif;?>
+});
+</script>
+<form markdown="1" name="sleep_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="return prepareSleep(this)">
+<input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.sleep.php">
+<input type="hidden" name="#config" value="<?=$config?>">
+<input type="hidden" name="#prefix" value="timeout=m&port=e&idle=N&pingIP=i&stopHour=h&stopDay=d&setWol=w&debug=D&outside=I">
+<input type="hidden" name="#folder" value="<?=$scripts?>">
+<span class="bitstream" style="float:right;margin-right:12px"><?=exec("$scripts/$sName -V")?></span>
+
+Execute function:
+: <select name="service" size="1">
+  <?=mk_option($cfg['service'], "0", "Disabled")?>
+  <?=mk_option($cfg['service'], "1", "Sleep")?>
+  <?=mk_option($cfg['service'], "2", "Shutdown")?>
+  </select>
+
+> Select the mode of operation. The system can be either put to sleep (and wake-up) or completely shutdown.
+>
+> The next settings determine the conditions under which the system will be put to sleep or shutdown.
+
+Excluded days:
+: <select id="s1" name="stopDay" size="1" multiple="multiple" style="display:none">
+  <?for ($d=0; $d<count($days); $d++):?>
+  <?=mk_option_check($cfg['stopDay'], strval($d), $days[$d])?>
+  <?endfor;?>
+  </select>
+
+> By default all days are included, select here the days that sleep or shutdown is not effective. This setting works in combination with excluded hours.
+
+Excluded hours:
+: <select id="s2" name="stopHour" size="1" multiple="multiple" style="display:none">
+  <?for ($h=0; $h<24; $h++):?>
+  <?=mk_option_check($cfg['stopHour'], sprintf("%02d", $h), sprintf("%02d:00 - %02d:00", $h, $h+1))?>
+  <?endfor;?>
+  </select>
+
+> By default all hours are included, select here the hours that sleep or shutdown is not effective. This setting works in combination with excluded days.
+
+Wait for array inactivity:
+: <select name="checkHDD" size="1">
+  <?=mk_option($cfg['checkHDD'], "", "No")?>
+  <?=mk_option($cfg['checkHDD'], "-a", "Yes")?>
+<?if (is_dir("/mnt/cache")):?>
+  <?=mk_option($cfg['checkHDD'], "-a -c", "Yes, exclude Cache")?>
+<?endif;?>
+  </select>
+
+> Select whether the array must be completely inactive (all disks are spun down) before sleep or shutdown can take place.
+>
+> The Cache disk can be included or excluded in this setting, e.g. when the Cache disk is used continuously and never spins down.
+
+<?if ($sOutside):?>
+Monitor disks outside array:
+: <select id="s3" name="outside" size="1" multiple="multiple" style="display:none">
+  <?foreach ($sOutside as $outside):?>
+  <?$dev=explode('=',$outside)?>
+  <?=mk_option_check($cfg['outside'], $dev[0], "{$dev[1]} ({$dev[0]})")?>
+  <?endforeach;?>
+  </select>
+<?endif;?>
+
+<?if ($sOutside):?>
+> If there any other disks present outside the array, then these can be monitored separately.
+<?endif;?>
+
+Extra delay after array inactivity:
+: <input type="text" name="timeout" maxlength="2" value="<?=$cfg['timeout']?>" placeholder="30">
+
+> Specify an additional delay after the array has become inactive. Value may be 0 for no delay.
+
+Wait for network inactivity:
+: <select name="checkTCP" size="1" onchange="changeIdle(this.form)">
+  <?=mk_option($cfg['checkTCP'], "", "No")?>
+  <?=mk_option($cfg['checkTCP'], "-n", "Yes")?>
+  </select>
+
+> Select whether network activity must be taken as a condition before going to sleep or shutdown.
+
+Ethernet interface:
+: <select name="port" size="1" onchange="changePort(this.form)">
+  <?foreach ($sPorts as $port):?>
+  <?=mk_option_check($cfg['port'], $port, $port)?>
+  <?endforeach;?>
+  </select>
+
+> In case of multiple network interfaces, select here the interface to use for checking the network activity.
+
+Network idle threshold:
+: <select name="idle" size="1">
+  <?=mk_option($cfg['idle'], "0", "Silent traffic [0 kb/s]")?>
+  <?=mk_option($cfg['idle'], "1250", "Low traffic [10 kb/s]")?>
+  <?=mk_option($cfg['idle'], "12500", "Medium traffic [100 kb/s]")?>
+  <?=mk_option($cfg['idle'], "62500", "High traffic [500 kb/s]")?>
+  <?=mk_option($cfg['idle'], "125000", "Mega traffic [1 Mb/s]")?>
+  </select>
+
+> Network activity is measured under different thresholds. Ranging from completely silent to megabit traffic. Experiment with this setting to find to right balance for your situation.
+
+Wait for device inactivity (IP address):
+: <input type="text" name="pingIP" maxlength="200" value="<?=$cfg['pingIP']?>" placeholder="no device">
+
+> Select whether external devices need to be monitored and non-responding as a sleep or shutdown condition.
+>
+> External devices are given by their IP address, use a comma to separate multiple IP addresses. As long as one of the external devices responds to a ping then sleep/shutdown won't be invoked.
+
+Wait for user login inactivity:
+: <select name="login" size="1">
+  <?=mk_option($cfg['login'], "", "No")?>
+  <?=mk_option($cfg['login'], "-l", "Local")?>
+  <?=mk_option($cfg['login'], "-L", "Remote")?>
+  <?=mk_option($cfg['login'], "-l -L", "Local & Remote")?>
+  </select>
+
+> Select whether local (console) or remote (telnet or ssh) logged in users need to log out first before sleep or shutdown can proceed.
+
+<?if ($sWakeon):?>
+<?$sOptions = str_split(trim($sWakeon[0]))?>
+<?if (!$cfg['setWol']) $cfg['setWol'] = trim($sWakeon[1])?>
+Set WOL options before sleep:
+: <select id="s4" name="setWol" size="1" multiple="multiple" style="display:none">
+  <?foreach ($sOptions as $option):?>
+  <?=mk_option_check($cfg['setWol'], $option, $option)?>
+  <?endforeach;?>
+  </select>
+<?endif;?>
+
+<?if ($sWakeon):?>
+> Set additional WOL options for proper support of S3 sleep. Refer to your system documentation for possibilities.
+<?endif;?>
+
+Custom commands before sleep:
+: <textarea name="preRun" rows="3" columns="120" wrap="off" placeholder="Enter custom commands here"><?=urldecode($cfg['preRun'])?></textarea>
+
+> Any extra commands before sleep or shutdown is invoked can be placed here. This maybe cleanup or other desirable actions.
+
+Custom commands after wake-up:
+: <textarea name="postRun" rows="3" columns="120" wrap="off" placeholder="Enter custom commands here"><?=urldecode($cfg['postRun'])?></textarea>
+
+> Any extra commands after wake-up of sleep can be placed here. This might be helpful for restoring a previous situation.
+
+Force gigabit speed after wake-up:
+: <select name="forceGb" size="1">
+  <?=mk_option($cfg['forceGb'], "", "No")?>
+  <?=mk_option($cfg['forceGb'], "-F", "Yes")?>
+  </select>
+
+> Leave this default OFF, in case the interface doesn't start properly after wake-up, see if forcing this setting helps.
+
+DHCP renewal after wake-up:
+: <select name="dhcpRenew" size="1">
+  <?=mk_option($cfg['dhcpRenew'], "", "No")?>
+  <?=mk_option($cfg['dhcpRenew'], "-R", "Yes")?>
+  </select>
+
+> Leave this default OFF, in case the system doesn't start properly after wake-up, see if forcing this setting helps.
+
+Enable DEBUG mode:
+: <select name="debug" size="1" onchange="logNote(this.form.debug.value)">
+  <?=mk_option($cfg['debug'], "0", "No")?>
+  <?=mk_option($cfg['debug'], "1", "Syslog and flash")?>
+  <?=mk_option($cfg['debug'], "2", "Syslog")?>
+  <?=mk_option($cfg['debug'], "3", "Flash")?>
+  <?=mk_option($cfg['debug'], "4", "Console")?>
+  </select><span id="note" style="color:red;display:none">Log will be stored in <b>"/boot/logs/<?=$sName?>.log"</b></span>
+
+> By default debug is OFF. Use this setting only in case of troubleshooting, it will generate additional messages to report the various stages within the s3_sleep script.
+
+<input type="submit" name="#default" value="Default">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+
+</form>

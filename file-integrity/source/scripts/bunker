@@ -1,0 +1,713 @@
+#!/bin/bash
+
+# bunker (based on bitrot of John Bartlett).
+
+# Copyright 2015, Bergware International.
+
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License version 2,
+# as published by the Free Software Foundation.
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+version=2.0
+
+# Display help
+usage() {
+  echo "bunker v$version - Copyright (c) 2015 Bergware International"
+  echo
+  echo "Usage: bunker -a|A|v|V|u|e|t|i|c|C|r|R [-fdDsSlLnq] [-md5|-b2] path [!] [mask]"
+  echo "  -a          add hash key attribute for files, specified in path and optional mask"
+  echo "  -A          same as -a option with implicit export function (may use -f)"
+  echo "  -v          verify hash key attribute and report mismatches (may use -f)"
+  echo "  -V          same as -v option with updating of mismatched keys (may use -f)"
+  echo "  -u          update mismatched or corrupted hash keys with new hash key attribute (may use -f)"
+  echo "  -e          export hash key attributes to the export file (may use -f)"
+  echo "  -t          touch file, i.e. copy file modified time to extended attribute"
+  echo "  -i          import hash key attributes from file and restore them (must use -f)"
+  echo "  -c          check hash key attributes from input file (must use -f)"
+  echo "  -C          same as -c option and correct mismatched hash key in extended attribute (must use -f)"
+  echo "  -r          remove hash key extended attribute from specified selection (may use -f)"
+  echo "  -R          same as -r option and remove all other values too (may use -f)"
+  echo
+  echo "  -f <file>   optional set file reference to <file>. Defaults to /tmp/bunker.store.log"
+  echo "  -d <days>   optional only verify/update/remove files which were scanned <days> or longer ago"
+  echo "  -D <time>   optional only add/verify/update/export/remove files newer than <time>, time = NNs,m,h,d,w"
+  echo "  -s <size>   optional only include files smaller than <size>"
+  echo "  -S <size>   optional only include files greater than <size>"
+  echo "  -l          optional create log entry in the syslog file"
+  echo "  -L          optional, same as -l but only create log entry when changes are present"
+  echo "  -n          optional send notifications when file corruption is detected"
+  echo "  -q          optional quiet mode, suppress all output. Use for background processing"
+  echo "  -md5        optional use md5 hashing algorithm instead of sha256"
+  echo "  -b2         optional use blake2 hashing algorithm instead of sha256"
+  echo
+  echo "  path        path to starting directory, mandatory with some exceptions (see examples)"
+  echo "  mask        optional filter for file selection. Default is all files"
+  echo "              when path or mask names have spaces, then place names between quotes"
+  echo "              precede mask with ! to change its operation from include to exclude"
+  echo
+  echo "Examples:"
+  echo "bunker -a /mnt/user/tv                                 add SHA key for files in share tv"
+  echo "bunker -a -S 10M /mnt/user/tv                          add SHA key for files greater than 10 MB in share tv"
+  echo "bunker -a /mnt/user/tv *.mov                           add SHA key for .mov files only in share tv"
+  echo "bunker -a /mnt/user/tv ! *.mov                         add SHA key for all files in share tv except .mov files"
+  echo "bunker -A -f /tmp/keys.hash /mnt/user/tv               add SHA key for files in share tv and export to file keys.hash"
+  echo "bunker -v -n /mnt/user/files                           verify SHA key for previously scanned files and send notifications"
+  echo "bunker -V /mnt/user/files                              verify SHA key for scanned files and update any mismatches"
+  echo "bunker -v -d 90 /mnt/user/movies                       verify SHA key for files scanned 90 days or longer ago"
+  echo "bunker -v -f /tmp/errors.hash /mnt/user/movies         verify SHA key and save mismatches in file errors.hash"
+  echo "bunker -u  /mnt/disk1                                  update SHA key for mismatching files"
+  echo "bunker -u -D 12h /mnt/disk1                            update SHA key for mismatching files created in the last 12 hours"
+  echo "bunker -e -f /tmp/disk1_keys.hash /mnt/disk1           export SHA key to file disk1_keys.hash"
+  echo "bunker -i -f /tmp/disk1_keys.hash                      import and restore SHA key from user defined file - no path"
+  echo "bunker -c -f /tmp/disk1_keys.hash                      check SHA key from user defined input file - no path"
+  echo "bunker -C -f /tmp/disk1_keys.hash                      check SHA key and correct mismatched attribute (omit corruptions) - no path"
+  echo "bunker -r  /mnt/user/tv                                remove SHA key for files in share tv"
+  echo "bunker -r -f /tmp/errors.hash                          remove SHA key for files listed in file errors.hash - no path"
+}
+
+# Screen controls
+clr='\r\033[K'
+cln='\n\033[K'
+up='\033[A'
+rt='\033[K'
+
+# Wait for background process to finish
+waitfor() {
+  local spin='-\|/'
+  local x=0
+  sleep .005
+  while [[ -d /proc/$1 ]]; do
+    if [[ $con -ne 0 ]]; then
+      echo -en "\r$2... ${spin:$x:1} "
+      x=$(((x+1)%4))
+    fi
+    if [[ $mon -ne 0 && $index -eq 0 ]]; then
+      echo -n "0%#<span class='red-text'>$task</span> Scanning for files... ${SECONDS}s#" >$monitor
+    fi
+    sleep .05
+  done
+}
+
+# Print result on console
+con() {
+  [[ $con -ne 0 ]] && echo -en "${clr}$1${cln}"
+  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text'>$task</span> $1#" >$monitor
+}
+
+# Log result to syslog
+log() {
+  # Non-selective logging
+  [[ $log -eq 1 ]] && logger -t bunker $1
+  # Log only if value is non-zero
+  [[ $log -eq 2 && $2 -gt 0 ]] && logger -t bunker $1
+}
+
+# Print correct single/plural wording
+plural() {
+  if [[ $1 -eq 1 ]]; then
+    local s=
+  else
+    [[ -n $3 ]] && local s=$3 || local s=s
+  fi
+  echo -n "$1 $2$s"
+}
+
+# Display progress message (file size)
+progress() {
+  if [[ $2 -gt $past ]]; then
+    if [[ $complete -gt 0 ]]; then
+      local hms=$(awk 'BEGIN{printf("%0.0f",'$SECONDS'*('$total'-'$complete')/'$complete')}')
+      local eta="[ETA: $(awk 'BEGIN{printf("%02d:%02d:%02d",'$hms'/3600,'$hms'/60%60,'$hms'%60)}')]"
+    fi
+    local volume=$(awk 'NR>'$past' && NR<='$2' {s+=$1}END{print s}' $tmpfile.1)
+    [[ -n $volume ]] && ((complete+=$volume))
+    local percent=$(awk 'BEGIN{printf("%0.1f",100*'$complete'/'$total')}')
+    [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text'>$task</span> $1#$eta" >$monitor
+    past=$2
+  fi
+  update=0
+  timer=$SECONDS
+}
+
+# Display progress message (index counter)
+progress2() {
+  if [[ $2 -gt $past ]]; then
+    past=$2
+    if [[ $past -gt 0 ]]; then
+      local hms=$(awk 'BEGIN{printf("%0.0f",'$SECONDS'*('$files'-'$past')/'$past')}')
+      local eta="[ETA: $(awk 'BEGIN{printf("%02d:%02d:%02d",'$hms'/3600,'$hms'/60%60,'$hms'%60)}')]"
+    fi
+    local percent=$(awk 'BEGIN{printf("%0.1f",100*'$past'/'$files')}')
+    [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text'>$task</span> $1#$eta" >$monitor
+  fi
+  update=0
+  timer=$SECONDS
+}
+
+# Display average hashing speed
+score() {
+  local run=$SECONDS
+  local hms=$(awk 'BEGIN{printf("%02d:%02d:%02d",'$run'/3600,'$run'/60%60,'$run'%60)}')
+  echo -n " Duration: $hms"
+  if [[ -n $1 && $1 -gt 0 ]]; then
+    [[ $run -eq 0 ]] && run=1
+    local unit=(B KB MB GB TB PB)
+    local i=-1
+    local tmp=$(awk 'BEGIN{printf("%f",'$total'/'$run')}')
+    while [[ ${tmp:0:1} != 0 ]]; do
+      local avg=${tmp:0:4}
+      local tmp=$(awk 'BEGIN{printf("%f",'$tmp'/1000)}')
+      ((i++))
+    done
+    echo -n " Average speed: $avg ${unit[$i]}/s"
+  fi
+}
+
+# Used for progress interval
+update() {
+  if [[ $update -eq 0 && ($con -ne 0 || $mon -ne 0) ]]; then
+    [[ $con -ne 0 ]] && echo -en ${up}
+    update=1
+  fi
+}
+
+# Prepare loop variables
+prepare() {
+  index=0; count=0; past=-1; skip=0; fail=0; bad=0; warning=0; complete=0; key=0; update=$(($con+$mon)); total=1; name=$(($code+2))
+  if [[ $1 -gt 0 ]]; then
+    sed -i "/\/mnt\/disk[0-9]*\/\S*\.img$/d" $tmpfile
+  else
+    sed -i "/^# file: \/mnt\/disk[0-9]*\/\S*\.img$/,/^$/d" $tmpfile
+  fi
+  if [[ -n $exclude ]]; then
+    ifs=$IFS; IFS=','
+    for folder in $exclude ; do
+      if [[ $1 -gt 0 ]]; then
+        sed -i "/\/mnt\/disk[0-9]*\/$folder\//d" $tmpfile
+      else
+        sed -i "/^# file: \/mnt\/disk[0-9]*\/$folder\//,/^$/d" $tmpfile
+      fi
+    done
+    IFS=$ifs
+  fi
+  if [[ $1 -gt 0 ]]; then
+    files=$(wc -l $tmpfile|cut -d' ' -f1)
+    awk 'BEGIN{FS="*";ORS="\0"}{print $'$1'}' $tmpfile >$tmpfile.0
+    total=$(du -b --files0-from=$tmpfile.0 2>/dev/null|awk '{s+=$1;print($1)>"'$tmpfile.1'"}END{print s}')
+    [[ -z $total || $total -eq 0 ]] && total=1
+  else
+    files=$(grep -c '^# file' $tmpfile)
+  fi
+}
+
+# Convert value to bytes, used in find
+convert() {
+  local unit
+  case ${1: -1} in
+  b|B) unit=512 ;;
+  c|C) unit=1 ;;
+  w|W) unit=2 ;;
+  k|K) unit=1024 ;;
+  m|M) unit=1048576 ;;
+  g|G) unit=1073741824 ;;
+  esac
+  [[ -n $unit ]] && bytes=$((${1::-1}*$unit)) || bytes=$(($1*512))
+  [[ ${1:0:1} != - ]] && echo "+${bytes}c" || echo "${bytes}c"
+}
+
+# File time stamping, used in find
+timestamp() {
+  local unit
+  case ${1: -1} in
+  s|S) unit=1 ;;
+  m|M) unit=60 ;;
+  h|H) unit=3600 ;;
+  d|D) unit=86400 ;;
+  w|W) unit=604800 ;;
+  esac
+  [[ -n $unit ]] && secs=$((${1::-1}*$unit)) || secs=$(($1*86400))
+  echo $(($(date +%s)-$secs))
+}
+
+# Used in export command
+write() {
+  if [[ -z $key ]]; then
+    ((skip++))
+    log "error: no export of file: $file" 1
+  elif [[ $key != 0 ]]; then
+    ((count++))
+    echo "$key *$file" >>$tmpfile.2
+  fi
+}
+
+# Update disk status (GUI)
+complete() {
+  local file=/boot/config/plugins/dynamix.file.integrity/disks.ini
+  local cmd=$1
+  local disk=$2
+  if ! grep -q "$disk=.*$cmd" $file ; then
+    if grep -q "$disk=" $file ; then
+      sed -i "s:^$disk=.*:&,$cmd:" $file
+    else
+      echo "$disk=$cmd" >> $file
+    fi
+  fi
+}
+
+# Send notifications
+notify() {
+  [[ $con -ne 0 ]] && echo -en "${clr}Sending notification..."
+  local event="unRAID file corruption"
+  local server=$(grep -Po '^NAME="\K\w+' /var/local/emhttp/var.ini 2>/dev/null)
+  [[ -z $server ]] && local server=tower
+  local notify="/usr/local/emhttp/webGui/scripts/notify"
+  [[ -f /usr/local/sbin/notify ]] && local notify="/usr/local/sbin/notify"
+  if [[ $bad -ne 0 ]]; then
+    local info="Found $(plural $bad file) with ${hash^^} hash key corruption"
+    local message=$(cat $tmpfile.2)
+    $notify -e "$event" -s "Notice [${server^^}] - $1" -d "$info" -m "$message" -i "alert" &
+  fi
+  if [[ $warning -ne 0 ]]; then
+    local info="Found $(plural $warning file) with ${hash^^} hash key mismatch"
+    local message=$(cat $tmpfile.3)
+    $notify -e "$event" -s "Notice [${server^^}] - $1" -d "$info" -m "$message" -i "warning" &
+  fi
+}
+
+# Check command line syntax
+function check_cmd() {
+  if [[ $ref -eq 0 ]]; then
+    echo "Missing input file"
+    exit
+  fi
+}
+
+# Give termination message
+function ctrl_c() {
+  con=1
+  con "Program terminated."
+  exit
+}
+
+# Cleanup on exit
+function cleanup() {
+  [[ -n $ifs ]] && IFS=$ifs
+  [[ -n $tmpfile ]] && rm -f $tmpfile*
+  [[ -n $monitor ]] && mv -f $monitor $monitor.end
+  exit 0
+}
+
+trap ctrl_c INT
+trap cleanup EXIT
+
+# Show help when no parameters given
+if [[ $# -eq 0 ]]; then
+  usage; exit
+fi
+
+# Current scan date
+scandate=$(date +%s)
+
+# Default settings
+exclude=
+proc=sha256sum
+hash=sha256
+code=64
+argv=-b
+cmd=
+mask=*
+what=
+size=
+base=
+store=/tmp/bunker.store.log
+epoch=$((scandate/86400))
+ref=0
+log=0
+one=0
+msg=0
+con=1
+mon=0
+
+# Parse user options
+while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xE:" option; do
+  case $option in
+  a|A|v|V|u|e|i|c|C|r|R)
+     cmd=$option ;;
+  f) store=$OPTARG
+     if [[ $(expr index "rRicC" "$cmd") -eq 0 ]]; then
+       if [[ ! -d $(dirname "$store") ]]; then
+         echo "Specified file can't be created"; exit
+       fi
+     else
+       if [[ -f $store ]]; then
+         ref=1
+       else
+         echo "Specified file doesn't exist"; exit
+       fi
+     fi ;;
+  d) ((epoch-=$OPTARG)) ;;
+  D) base=$(date -d "@$(timestamp $OPTARG)" +%Y%m%d%H%M.%S) ;;
+  s) size="-size $(convert -$OPTARG)" ;;
+  S) size="-size $(convert +$OPTARG)" ;;
+  m) if [[ $OPTARG != d5 ]]; then
+       usage; exit
+     fi
+     proc=md5sum; hash=md5; code=32 ;;
+  b) case $OPTARG in
+       2) argv=""; code=128 ;;
+      2b) argv="-a blake2b"; code=128 ;;
+      2s) argv="-a blake2s"; code=64 ;;
+       *) usage; exit ;;
+     esac
+     proc=b2sum; hash=blake2 ;;
+  l) log=1 ;;
+  L) log=2 ;;
+  n) msg=1 ;;
+  q) con=0 ;;
+  1) one=1 ;;           # hidden option for GUI
+  x) mon=1 ;;           # hidden option for GUI
+  E) exclude=$OPTARG ;; # hidden option for GUI
+  :) echo "Missing argument for option -$OPTARG"; exit ;;
+  *) usage; exit ;;
+  esac
+done
+shift $((OPTIND-1))
+path=$1
+
+# Check presence of executable
+exec=$(which $proc 2>/dev/null)
+if [[ -z $exec ]]; then
+  echo "$proc executable not found! Please install package first"; exit
+fi
+
+# Upfront verifications
+if [[ $# -gt 3 ]]; then
+  echo "Too many parameters"; exit
+fi
+if [[ -z $cmd ]]; then
+  echo "Missing command switch"; exit
+fi
+if [[ $ref -ne 0 && $# -gt 0 ]]; then
+  echo "Invalid parameter specified"; exit
+fi
+if [[ $one -eq 0 ]]; then
+  if [[ $ref -eq 0 && -z $path ]]; then
+    echo "Missing path parameter"; exit
+  fi
+  if [[ $ref -eq 0 && ! -d $path ]]; then
+    echo "Specified path isn't a directory"; exit
+  fi
+fi
+
+# Optional mask parameter
+if [[ -n $2 && $one -eq 0 ]]; then
+  if [[ $2 != ! ]]; then
+    mask="$2"
+  else
+    if [[ -z $3 ]]; then
+      echo "Missing mask parameter"; exit
+    fi
+    mask="$3"
+    what=!
+  fi
+fi
+
+# Used for concurrent script execution
+tmpfile=/tmp/$cmd.$RANDOM.list
+
+# Initialize monitor file
+if [[ $mon -ne 0 ]]; then
+  if [[ $ref -eq 0 ]]; then
+    monitor=/var/tmp/${path##*/}.tmp
+  else
+    z=${store##*/}
+    monitor=/var/tmp/${z%%.*}.tmp
+  fi
+fi
+
+# Time stamp
+if [[ -n $base ]]; then
+  touch -t $base $tmpfile.9
+  base="-newer $tmpfile.9"
+fi
+
+# Execute selected command
+case $cmd in
+a|A)
+  task=Build
+  if [[ $one -eq 0 ]]; then
+    find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile + &
+    waitfor $! "Scanning for files to add"
+    sed -i "s/: user.$hash: No such attribute$//" $tmpfile &
+    waitfor $! "Preparing for execution"
+  else
+    echo "$path" > $tmpfile
+  fi
+  prepare 1
+  if [[ $files -gt 0 ]]; then
+    while read -r file; do
+      ((index++))
+      [[ $update -ne 0 ]] && progress "Currently processing file $index of $files" $index
+      $exec $argv "$file" >$tmpfile.0 &
+      waitfor $! "Calculating ${hash^^} hash key of ${rt}$file"
+      key=$(grep -Po '^\S+' $tmpfile.0)
+      filedate=$(stat -c %Y "$file")
+      filesize=$(stat -c %s "$file")
+      setfattr -n user.$hash -v "$key" "$file"
+      setfattr -n user.scandate -v "$scandate" "$file"
+      setfattr -n user.filedate -v "$filedate" "$file"
+      setfattr -n user.filesize -v "$filesize" "$file"
+      [[ $cmd == A ]] && echo "$key *$file" >>$tmpfile.2
+      [[ $timer -ne $SECONDS ]] && update
+    done <$tmpfile
+    update
+    [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -ft '*' -k2 -o "$store" $tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >> "$store"
+  fi
+  con "Finished - added $(plural $index file).$(score $index)"
+  log "added $(plural $index file) from $path with mask ${what}${mask}.$(score $index)" $index
+  [[ $mon -ne 0 ]] && complete build ${path##*/}
+;;
+
+v|V|u)
+  task=Verify
+  [[ $cmd == v ]] && text1="" || text1=" (updated)"
+  [[ $cmd == u ]] && text2=" (updated)" || text2=""
+  if [[ $one -eq 0 ]]; then
+    if [[ $ref -eq 0 ]]; then
+      find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      waitfor $! "Scanning for files to verify"
+      sed -i -n "/^$/d;s/^# file: //;h;n;s/^user.$hash=\"//;s/\"$//;G;s/\n/ \*/;p" $tmpfile &
+    else
+      sed '/^$/d' "$store" >$tmpfile &
+    fi
+    waitfor $! "Preparing for execution"
+  else
+    echo "$(getfattr -n user.$hash "$path"|grep -Po '^user.*="\K[^"]+') *$path" > $tmpfile
+  fi
+  prepare 2
+  if [[ $files -gt 0 ]]; then
+    while read -r line; do
+      ((index++))
+      [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $index
+      file="${line:$name}"
+      userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
+      if [[ -z $userdate || $((userdate/86400)) -le $epoch ]]; then
+        [[ $cmd != v ]] && setfattr -n user.scandate -v "$scandate" "$file"
+        $exec $argv "$file" >$tmpfile.0 &
+        waitfor $! "Verifying ${hash^^} hash key of ${rt}$file"
+        key=$(grep -Po '^\S+' $tmpfile.0)
+        ((count++))
+        if [[ $key != ${line:0:$code} ]]; then
+          filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
+          filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
+          filedate=$(stat -c %Y "$file")
+          filesize=$(stat -c %s "$file")
+          ((fail++))
+          if [[ $filedato -ne $filedate || $filesizo -ne $filesize ]]; then
+            ((warning++))
+            if [[ $cmd != v ]]; then
+              setfattr -n user.$hash -v "$key" "$file"
+              setfattr -n user.filedate -v "$filedate" "$file"
+              setfattr -n user.filesize -v "$filesize" "$file"
+            fi
+            echo "${hash^^} hash key mismatch$text1, $file was modified" >>$tmpfile.3
+            log "warning: ${hash^^} hash key mismatch$text1, $file was modified" 1
+          else
+            ((bad++))
+            if [[ $cmd == u ]]; then
+              setfattr -n user.$hash -v "$key" "$file"
+              setfattr -n user.filedate -v "$filedate" "$file"
+              setfattr -n user.filesize -v "$filesize" "$file"
+            fi
+            echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
+            log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
+          fi
+        fi
+      else
+        ((skip++))
+      fi
+      [[ $timer -ne $SECONDS ]] && update
+    done <$tmpfile
+    update
+    [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >> $tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -ft '*' -k2 -o "$store" $tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >> "$store"
+  fi
+  [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker $text command"
+  con "Finished - verified $(plural $count file), skipped $(plural $skip file). Found: $(plural $warning mismatch es)$text1, $(plural $bad corruption)$text2.$(score $count)"
+  log "verified $(plural $count file) from $path with mask ${what}${mask}. Found: $(plural $warning mismatch es)$text1, $(plural $bad corruption)$text2.$(score $count)" $fail
+;;
+
+e)
+  task=Export
+  if [[ $one -eq 0 ]]; then
+    find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+    waitfor $! "Scanning for files to export"
+  else
+    getfattr -d --absolute-names "$path" 1>$tmpfile 2>/dev/null
+  fi
+  prepare 0
+  if [[ $files -gt 0 ]]; then
+    ifs=$IFS; IFS='"'
+    filedate=0
+    filesize=0
+    while read -r line; do
+      [[ $update -ne 0 ]] && progress2 "Currently processing file $index of $files. Skipped: $skip files" $index
+      if [[ -n $line ]]; then
+        if [[ ${line:0:6} == "# file" ]]; then
+          ((index++))
+          write
+          file="${line:8}"
+          key=
+        else
+          line=($line)
+          [[ ${line[0]} == "user.$hash=" ]] && key=${line[1]}
+        fi
+      fi
+      [[ $timer -ne $SECONDS ]] && update
+    done <$tmpfile
+    write
+    update
+    [[ -s $tmpfile.2 && $one -eq  0 ]] && sort -ft '*' -k2 -o "$store" $tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq  1 ]] && cat $tmpfile.2 >> "$store"
+    IFS=$ifs
+  fi
+  con "Finished - exported $(plural $count file), skipped $(plural $skip file).$(score)"
+  log "exported $(plural $count file) from $path with mask ${what}${mask}.$(score)" $count
+  [[ $mon -ne 0 ]] && complete export ${path##*/}
+;;
+
+i)
+  task=Import
+  check_cmd
+  sed '/^$/d;/^#/d' "$store" >$tmpfile &
+  waitfor $! "Preparing for import"
+  prepare 2
+  if [[ $files -gt 0 ]]; then
+    while read -r line; do
+      ((index++))
+      [[ $update -ne 0 ]] && progress2 "Currently importing file $index of $files. Skipped: $skip files" $count
+      file="${line:$name}"
+      if [[ -f $file ]]; then
+        ((count++))
+        key=${line:0:$code}
+        filedate=$(stat -c %Y "$file")
+        filesize=$(stat -c %s "$file")
+        setfattr -n user.$hash -v "$key" "$file"
+        setfattr -n user.scandate -v "$scandate" "$file"
+        setfattr -n user.filedate -v "$filedate" "$file"
+        setfattr -n user.filesize -v "$filesize" "$file"
+      else
+        ((skip++))
+        echo "$file not found" >>$tmpfile.2
+        log "error: import failed, $file not found" 1
+      fi
+      [[ $timer -ne $SECONDS ]] && update
+    done <$tmpfile
+    update
+  fi
+  [[ $con -ne 0 && -s $tmpfile.2 ]] && sort -f $tmpfile.2
+  con "Finished - imported $(plural $count file), skipped $(plural $skip file).$(score)"
+  log "imported $(plural $count file) from source $store.$(score)" $count
+;;
+
+c|C)
+  task=Check
+  check_cmd
+  [[ $cmd == c ]] && text="" || text=" (updated)"
+  sed '/^$/d;/^#/d' "$store" >$tmpfile &
+  waitfor $! "Preparing for import"
+  prepare 2
+  if [[ $files -gt 0 ]]; then
+    while read -r line; do
+      ((index++))
+      [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $count
+      file="${line:$name}"
+      if [[ -f $file ]]; then
+        $exec $argv "$file" >$tmpfile.0 &
+        waitfor $! "Checking ${hash^^} hash key of ${rt}$file"
+        key=$(grep -Po '^\S+' $tmpfile.0)
+        ((count++))
+        if [[ $key != ${line:0:$code} ]]; then
+          filedate=$(stat -c %Y "$file")
+          filesize=$(stat -c %s "$file")
+          filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
+          filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
+          ((fail++))
+          if [[ $filedato -ne $filedate || $filesizo -ne $filesize ]]; then
+            ((warning++))
+            if [[ $cmd == C ]]; then
+              setfattr -n user.$hash -v "$key" "$file"
+              setfattr -n user.scandate -v "$scandate" "$file"
+              setfattr -n user.filedate -v "$filedate" "$file"
+              setfattr -n user.filesize -v "$filesize" "$file"
+            fi
+            echo "${hash^^} hash key mismatch$text, $file was modified" >>$tmpfile.3
+            log "warning: ${hash^^} hash key mismatch$text, $file was modified" 1
+          else
+            ((bad++))
+            echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
+            log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
+          fi
+        fi
+      else
+        ((skip++))
+        echo "$file is missing" >>$tmpfile.2
+        log "warning: $file is missing" 1
+      fi
+      [[ $timer -ne $SECONDS ]] && update
+    done <$tmpfile
+    update
+  fi
+  [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >> $tmpfile.2
+  [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker check command"
+  [[ $con -ne 0 && -s $tmpfile.2 ]] && sort -f $tmpfile.2
+  [[ $cmd == C && $warning -ne 0 ]] && con "warning: $(plural $warning correction) made, export file needs to be updated"
+  [[ $cmd == C && $warning -ne 0 ]] && log "warning: $(plural $warning correction) made, export file needs to be updated" 1
+  con "Finished - checked $(plural $count file), skipped $(plural $skip file). Found: $(plural $warning mismatch es)$text, $(plural $bad corruption).$(score $count)"
+  log "checked $(plural $count file) from source $store. Found: $(plural $warning mismatch es)$text, $(plural $bad corruption).$(score $count)" $fail
+;;
+
+r|R)
+  task=Remove
+  if [[ $one -eq 0 ]]; then
+    if [[ $ref -eq 0 ]]; then
+      find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      waitfor $! "Scanning for files to remove attributes"
+      sed -i "/^$/d;s/^# file: //;/^user.$hash=/d" $tmpfile &
+    else
+      sed '/^$/d;/^#/d' "$store"|cut -d'*' -f2 >$tmpfile &
+    fi
+    waitfor $! "Preparing for execution"
+  else
+    echo "$path" > $tmpfile
+  fi
+  prepare 1
+  if [[ $files -gt 0 ]]; then
+    while read -r file; do
+      ((index++))
+      [[ $update -ne 0 ]] && progress2 "Currently clearing file $index of $files. Skipped: $skip files" $index
+      userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
+      if [[ -z $userdate || $((userdate/86400)) -le $epoch ]]; then
+        ((count++))
+        setfattr -x user.$hash "$file" 2>/dev/null
+        [[ $cmd == R ]] && setfattr -x user.scandate "$file" 2>/dev/null
+        [[ $cmd == R ]] && setfattr -x user.filedate "$file" 2>/dev/null
+        [[ $cmd == R ]] && setfattr -x user.filesize "$file" 2>/dev/null
+      else
+        ((skip++))
+      fi
+      [[ $timer -ne $SECONDS ]] && update
+    done <$tmpfile
+    update
+  fi
+  con "Finished - cleared $(plural $count file), skipped $(plural $skip file).$(score)"
+  log "cleared $(plural $count file) from $path with mask ${what}${mask}.$(score)" $count
+;;
+esac

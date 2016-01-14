@@ -1,0 +1,18 @@
+#!/usr/bin/php -q
+<?PHP
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$lmb = exec("nmblookup -M -- - 2>/dev/null|grep -Pom1 '^\S+'");
+$self = exec("ifconfig|grep -om1 'inet $lmb '");
+file_put_contents("/var/local/emhttp/localmaster.htm", $self ? "<img src='/webGui/icons/localmaster.png' class='icon'>" : "");
+?>

@@ -1,0 +1,5 @@
+Menu="Utilities"
+Type="xmenu"
+Title="File Integrity"
+Icon="dynamix.file.integrity.png"
+Tabs="true"

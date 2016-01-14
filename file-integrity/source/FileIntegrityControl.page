@@ -1,0 +1,164 @@
+Menu="FileIntegrity:2"
+Title="File Integrity Control"
+---
+<?PHP
+/* Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+if ($var['fsState']!="Started") {
+  echo "<p class='notice'>Array must be <strong>STARTED</strong> to use this feature.</p>";
+  echo "<p><input type='button' value='Done' onclick='done()'></p>";
+  return;
+}
+?>
+<script>
+var disks = [];
+var bunker = [];
+
+function updateTable() {
+  $.post('/plugins/dynamix.file.integrity/include/ProgressInfo.php',{disk:0},function(data){$('#disk-status').html(data);});
+}
+function monitor(cmd,disk) {
+  $.post('/plugins/dynamix.file.integrity/include/ProgressInfo.php',{disk:disk},function(data) {
+    data = data.split('#');
+    $('#disk'+disk).animate({width:data[0]},{step:function(){$('#disk'+disk).css('overflow','visible');}}).text(data[0]);
+    $('#count'+disk).html(data[1]);
+    if (data[0] == '100%') {
+      $('#eta'+disk).remove();
+      $('#button'+disk).remove();
+      $('#count'+disk).attr('colSpan','3');
+      updateList(false,'disk'+disk);
+      prepareList(cmd);
+      $('input[name="disk'+disk+'"]').prop('disabled',false).prop('checked',false);
+      updateTable();
+    } else {
+      $('#eta'+disk).html(data[2]);
+      $('#button'+disk).html("<input type='button' value='Cancel' onclick='cancelBunker(\""+cmd+"\","+disk+")'>");
+      bunker[disk] = setTimeout('monitor("'+cmd+'",'+disk+')',3000);
+    }
+  });
+}
+function cancelBunker(cmd,disk) {
+  $.post('/plugins/dynamix.file.integrity/include/BunkerProcess.php',{cmd:cmd,disk:disk,kill:'true'},function(data) {
+    updateList(false,'disk'+disk);
+    prepareList(cmd);
+    location = location;
+  });
+}
+function updateList(checked,name) {
+  var disk = name.substr(4);
+  if (checked) disks.push(disk); else disks.splice(disks.indexOf(disk),1);
+  $('input[type=submit]').not('input[name^="#"]').prop('disabled',disks.length==0);
+  if (disks.length==0) $.removeCookie('disks',{path:'/'});
+}
+function prepareList(cmd) {
+  var cookies = $.cookie('disks')!=null ? $.cookie('disks').split(',') : [];
+  var list = '';
+  for (var i=0,disk; disk=disks[i]; i++) {
+    if (list.length) list += ',';
+    for (var x=0,cookie; cookie=cookies[x]; x++) {if (disk==cookie.substr(1)) break;}
+    list += (x==cookies.length ? cmd+disk : cookies[x]);
+  }
+  if (list.length > 0) $.cookie('disks',list,{path:'/',expires:3650});
+}
+function checkAll(checked) {
+  $('input[class=selection]').each(function() {
+    var checkbox = $(this);
+    if (checkbox.prop('disabled')==false) {
+      checkbox.prop('checked',checked);
+      updateList(checked,checkbox.attr('name'));
+    }
+  });
+}
+$(function() {
+  updateTable();
+  if ($.cookie('disks') != null) {
+    var cookies = $.cookie('disks').split(',');
+    for (var i=0,cookie; cookie=cookies[i]; i++) {
+      var cmd = cookie.substr(0,1);
+      var disk = cookie.substr(1);
+      disks.push(disk);
+      $('input[name="disk'+disk+'"]').prop('disabled',true).prop('checked',true);
+      $('#row'+disk).show();
+      bunker[disk] = setTimeout('monitor("'+cmd+'",'+disk+')',500);
+    }
+  } else {
+    $('input[type=submit]').not('input[name^="#"]').prop('disabled',true);
+  }
+});
+</script>
+<form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.x.value)">
+<input type="hidden" name="#file" value="not-used">
+<input type="hidden" name="#method" value="<?=$cfg['method']?>">
+<input type="hidden" name="#exclude" value="<?=$cfg['exclude']?>">
+<input type="hidden" name="#notify" value="<?=$cfg['notify']?>">
+<input type="hidden" name="#log" value="<?=$cfg['log']?>">
+<input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.control.php">
+<input type="hidden" name="x" value="">
+Hashing method:
+: <span style='font-size:12px'><?=$cfg['method']?str_replace(['-b2','-md5'],['BLAKE2','MD5'],$cfg['method']):'SHA2'?></span>
+
+> This is the hash method as selected on the settings page. Make sure it is correct before you perform any commands on this page.
+
+Excluded folders:
+: <span style='font-size:12px'><?=$cfg['exclude']?str_replace(',',' , ',$cfg['exclude']):'None'?></span>
+
+> This is the list of excluded folders as selected on the settings page. Make sure it is correct before you perform any commands on this page.
+
+<?
+$row1 = $row2 = [];
+foreach ($disks as $disk) {
+  if ($disk['type']=='Data') {
+    $row1[] = "<th style='text-align:center'>Disk<br>{$disk['idx']}</th>";
+    $row2[] = "<td style='text-align:center'><input type='checkbox' name='{$disk['name']}' class='selection' onchange='updateList(this.checked,this.name)'></td>";
+  }
+}
+echo "<table class='tablesorter'><thead><tr><th style='width:10%'><input type='checkbox' onchange='checkAll(this.checked)'>Select/Unselect all</th>";
+echo implode('',$row1);
+echo "</tr></thead><tbody><tr><td style='font-weight:bold'>Disk selection</td>";
+echo implode('',$row2);
+echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
+?>
+
+> Select the disks which you want to let participate in any of the commands below. You can execute a command multiple times with different selections.
+>
+> A track record for each disk is maintained (see below). The symbol <span class='orange-text'><i class='fa fa-circle-o icon'></i></span>indicates an open operation, while the symbol <span class='green-text'><i class='fa fa-check icon'></i></span>indicates a completed operation.
+>
+> - *Build up-to-date* indicates per disk whether the build is complete or some files do not have the extended attributes set yet. A manual build will update the missing files.
+>
+> - *Export up-to-date* indicates per disk whether the export file contains all files or some files are missing. A manual export will make the export file complete.
+>
+> Use the **Build** command to do the initial set up and select which disks to include. All selected disks are processed in parallel to decrease run-time, but at increased processor load.
+> Building can be done in intermediate steps, files which have their extended attributes set, will be skipped when a next build is performed.
+>
+> Use the **Export** command to generate checksum files which can be used for manual checking or restoration.
+> These files are stored on the flash disk under */config/plugins/dynamix.file.integrity/diskXX.export.hash*
+>
+> Use the **Check** command to verify files against a previously exported file. This allows for off-line verification in case of a local issue and the extended attributes can't be used.
+>
+> Use the **Import** command to restore the extended attributes from a previously exported file. This *should* only be necessary in case the extended attributes got corrupted or went missing.
+>
+> Use the **Remove** command to delete the extended attributes which are stored with the file. This makes the system see such files as unprocessed.
+
+&nbsp;
+: <input type="submit" name="cmd" value="Build" onclick="this.form.x.value='a'"><input type="submit" name="cmd" value="Export" onclick="this.form.x.value='e'"><input type="submit" name="cmd" value="Check" onclick="this.form.x.value='C'"><input type="submit" name="cmd" value="Import" onclick="this.form.x.value='i'"><input type="submit" name="cmd" value="Remove" onclick="this.form.x.value='R'"><input type="button" value=" Done" onclick="done()">
+</form>
+
+<table class='tablesorter'>
+<thead style='visibility:hidden'><tr><th style='width:40px'></th><th style='width:330px'></th><th></th><th></th><th style='width:50px'></th></tr></thead>
+</tbody>
+<?foreach ($disks as $disk):?>
+<?if ($disk['type']=='Data'):?>
+<tr id='row<?=$disk['idx']?>' style='display:none'><td><?=my_disk($disk['name'])?></td><td><div class='usage-disk sys'><span id='<?=$disk['name']?>' style='width:0'></span></div></td><td id='count<?=$disk['idx']?>'></td><td id='eta<?=$disk['idx']?>'></td><td id='button<?=$disk['idx']?>'></td></tr>
+<?endif;?>
+<?endforeach;?>
+</tbody>
+</table>

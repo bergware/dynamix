@@ -1,0 +1,14 @@
+#!/bin/bash
+plugin="dynamix.s3.sleep"
+cfg="/boot/config/plugins/$plugin/$plugin.cfg"
+if [ ! -e $cfg ]; then
+  cfg="/usr/local/emhttp/plugins/$plugin/default.cfg"
+fi
+conf="/etc/s3_sleep.conf"
+enable=$(grep "^service=" $cfg|cut -d'"' -f2)
+if [ "$enable" == "1" -o "$enable" == "2" ]; then
+  if [ ! -f $conf ]; then
+    grep "^options=" $cfg|cut -d'"' -f2|tr -d "\n" >$conf
+  fi
+  /usr/local/emhttp/plugins/$plugin/scripts/rc.s3sleep start >/dev/null
+fi

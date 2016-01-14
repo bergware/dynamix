@@ -1,0 +1,45 @@
+#!/bin/bash
+plugin=dynamix.system.autofan
+script=autofan
+execute=/usr/local/emhttp/plugins/$plugin/scripts/$script
+options=$(awk -F'"' '/^options=/{print $2}' /boot/config/plugins/$plugin/$plugin.cfg)
+
+autofan.start() {
+  if [[ -z $(pgrep -f $execute) ]]; then
+    $execute $options 1>/dev/null 2>&1
+    echo "$script started"
+  else
+    echo "$script already running!"
+  fi
+}
+
+autofan.stop() {
+  if [[ -n $(pgrep -f $execute) ]]; then
+    $execute -q 1>/dev/null 2>&1
+    timer=5
+    until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
+      timer=$((timer-1))
+      sleep 1
+    done
+    echo "$script stopped"
+  else
+    echo "$script not running!"
+  fi
+}
+
+autofan.restart() {
+  autofan.stop
+  sleep 1
+  autofan.start
+}
+
+case "$1" in
+'start')
+ autofan.start ;;
+'stop')
+ autofan.stop ;;
+'restart')
+ autofan.restart ;;
+*)
+ echo "Usage: $(basename $0) start|stop|restart"
+esac

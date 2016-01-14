@@ -1,0 +1,48 @@
+#!/bin/bash
+plugin=dynamix.cache.dirs
+script=cache_dirs
+execute=/usr/local/emhttp/plugins/$plugin/scripts/$script
+options=/etc/$script.conf
+run=/tmp/$script.run
+
+cache_dirs.start() {
+  if [[ -z $(pgrep -f $execute) ]]; then
+    echo "$execute $(cat $options) 2>/dev/null" >$run
+    source $run
+    rm -f $run
+    echo "$script started"
+  else
+    echo "$script already running!"
+  fi
+}
+
+cache_dirs.stop() {
+  if [[ -n $(pgrep -f $execute) ]]; then
+    $execute -q 1>/dev/null 2>&1
+    timer=5
+    until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
+      timer=$((timer-1))
+      sleep 1
+    done
+    echo "$script stopped"
+  else
+    echo "$script not running!"
+  fi
+}
+
+cache_dirs.restart() {
+  cache_dirs.stop
+  sleep 1
+  cache_dirs.start
+}
+
+case "$1" in
+'start')
+ cache_dirs.start ;;
+'stop')
+ cache_dirs.stop ;;
+'restart')
+ cache_dirs.restart ;;
+*)
+ echo "Usage: $(basename $0) start|stop|restart"
+esac

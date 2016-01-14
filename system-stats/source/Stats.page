@@ -1,0 +1,5 @@
+Menu="/boot/config/plugins/dynamix.system.stats/dynamix.system.stats.cfg stats=Tasks:90"
+Type="xmenu"
+Title="System Stats"
+Icon="stats.png"
+Tabs="true"
