@@ -4,12 +4,13 @@
 <!ENTITY name      "dynamix.diagnostics.tool">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2016.01.17">
+<!ENTITY launch    "Tools/Diagnostics">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "ea46a78abc054a7e5f60530edf495383">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
 
 <!--
 Copyright 2016, Bergware International
