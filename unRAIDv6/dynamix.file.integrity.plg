@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.17">
+<!ENTITY version   "2016.01.18">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed sed error in cron script
+
+###2016.01.17
 - added process priority parameter (normal, low)
 
 ###2016.01.13a
@@ -204,7 +207,7 @@ for disk in $disks ; do
       while read -r line; do
         row=$(grep -Fn "${line:$name}" $hashfile|cut -d: -f1)
         if [[ -n $row ]]; then
-          sed -i "$row s:.*:$line:" $tmpfile.2
+          sed -i "$row s|.*|$line|" $tmpfile.2
         else
           echo "$line" >>$tmpfile.2
         fi
@@ -233,7 +236,7 @@ if [[ -f $path/disks.ini ]]; then
     if [[ -s $hashfile ]]; then
       touch -t $(date -d "@$(stat -c %Y $hashfile)" +%Y%m%d%H%M.%S) $tmpfile.0
       find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
-      [[ -s $tmpfile ]] && sed -ri "s/(^${disk:5}=[^,]*),?export,?/\1/" $path/disks.ini
+      [[ -s $tmpfile ]] && sed -ri "s|(^${disk:5}=[^,]*),?export,?|\1|" $path/disks.ini
     fi
   done
 fi
