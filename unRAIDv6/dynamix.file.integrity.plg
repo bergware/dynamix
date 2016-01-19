@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.18">
+<!ENTITY version   "2016.01.19">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "46c65fc80d6016c22b973f16c3287988">
+<!ENTITY MD5       "b2a59e941e60801fa504e3136e69dcc9">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- exclude Apple specifics: .AppleDB and .DS_Store
+
+###2016.01.18
 - fixed sed error in cron script
 
 ###2016.01.17
