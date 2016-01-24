@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.30">
+<!ENTITY version   "2016.01.24">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f214f0b86576959994aef8baf252689f">
+<!ENTITY MD5       "826b91a68380fe281c4b9ba2a58b8825">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- changed file locations and made it autonomous
+
+###2015.12.30
 - changed to hook solution for main page display
 
 ###2015.12.15
@@ -55,23 +58,20 @@ if [[ ${version:0:3} == 6.0 ]]; then
   exit 1
 fi
 
-# Restore original file
-layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
-if [[ -f $layout.php- ]]; then
-  mv -f $layout.php- $layout.php
-fi
-
-# Rename original file
-smb=/usr/local/emhttp/webGui/SMBWorkGroup
-if [[ ! -f $smb.page- ]]; then
-  mv -f $smb.page $smb.page-
-fi
-
 # Remove old 'source' packages
 MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f &source;*.txz
 fi
+
+# Remove legacy cron
+flash=/boot/config/plugins/dynamix
+if [[ -f $flash/localmaster.cron ]]; then
+  rm -f $flash/localmaster.cron
+  /usr/local/sbin/update_cron
+  sed -i '/^monitor=/d' $flash/dynamix.cfg
+fi
+
 </INLINE>
 </FILE>
 
@@ -104,26 +104,15 @@ echo ""
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
 
+# Update cron
+/usr/local/sbin/update_cron
+
 # Uninstall the 'source' package
 removepkg &name;
-
-# Restore original files
-layout=/usr/local/emhttp/webGui/include/DefaultPageLayout
-if [[ -f $layout.php- ]]; then
-  mv -f $layout.php- $layout.php
-fi
-
-smb=/usr/local/emhttp/webGui/SMBWorkGroup
-if [[ -f $smb.page- ]]; then
-  mv -f $smb.page- $smb.page
-fi
 
 # Remove setting
 sed -i '/^monitor=/d' /boot/config/plugins/dynamix/dynamix.cfg
 
-# Update cron
-rm -f /boot/config/plugins/dynamix/localmaster.cron
-/usr/local/sbin/update_cron
 </INLINE>
 </FILE>
 
