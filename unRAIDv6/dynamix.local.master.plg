@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.24">
+<!ENTITY version   "2016.01.29">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9478668411901262e9de63eae07c64a7">
+<!ENTITY MD5       "f56806fdf5b68ea0433838c22a672c51">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed wrong image reference in readme file
+
+###2016.01.24
 - changed file locations and made plugin autonomous
 
 ###2015.12.30
