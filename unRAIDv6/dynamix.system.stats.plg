@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.13">
+<!ENTITY version   "2016.01.30">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "913395722833f9700608d4f9ed6d7a79">
+<!ENTITY MD5       "a345e7ffd7ecde4c89b686597a1b005d">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- changed handling of disk utilization thresholds. Warning or critical thresholds may be disabled.
+
+###2016.01.13
 - added new setting "Placement of Stats menu", allows the menu to move away from the header (requires unRAID 6.1.7 or higher)
 - added new setting "Opening page", selects the first page to view upon visiting Stats
 - added coloring based on global and individual disk settings
