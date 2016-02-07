@@ -172,6 +172,9 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;
+
+# Remove cron entry
+/usr/local/sbin/update_cron
 </INLINE>
 </FILE>
 
