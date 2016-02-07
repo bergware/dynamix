@@ -17,6 +17,7 @@
 
 ###&version;
 - fixed unRAID version checking
+- fixed cron cleanup after uninstallation
 
 ###2016.01.30
 - changed handling of disk utilization thresholds. Warning or critical thresholds may be disabled.
