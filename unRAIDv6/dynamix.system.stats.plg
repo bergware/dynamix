@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.30">
+<!ENTITY version   "2016.02.07">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a345e7ffd7ecde4c89b686597a1b005d">
+<!ENTITY MD5       "4ec166ff2b455b1a00c3b67e5de32269">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed unRAID version checking
+
+###2016.01.30
 - changed handling of disk utilization thresholds. Warning or critical thresholds may be disabled.
 
 ###2016.01.13
