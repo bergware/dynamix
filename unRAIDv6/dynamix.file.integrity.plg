@@ -16,10 +16,12 @@
 ##&name;
 
 ###&version;
-- fixed regular expression for share and file names
+- fixed regular expression when share and file names have 'special' characters
 - added *Clear* button, which allows to remove extended attributes from excluded folders and files only
 - added *Custom* field, which allows to enter custom file names and/or file extensions
-- make Apple metadata (netatalk) user selectable
+- make exclusion of Apple metadata (netatalk) user selectable
+
+**RE-APPLY THE SETTINGS AFTER THIS UPDATE**
 
 ###2016.01.19
 - exclude Apple specifics: .AppleDB and .DS_Store
