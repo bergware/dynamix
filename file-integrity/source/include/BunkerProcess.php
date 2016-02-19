@@ -10,14 +10,15 @@
  */
 ?>
 <?
-$filter = "bunker -{$_POST['cmd']}q.* \/mnt\/disk{$_POST['disk']} ?";
+$disk = 'disk'.$_POST['disk'];
+$filter = "bunker -{$_POST['cmd']}q.*(\/mnt\/$disk ?|\/$disk\.export\.hash$)";
 $pid = exec("ps -eo pid,comm,args|awk '$2==\"bunker\" && $0~/$filter/{print $1}'");
 if ($_POST['kill']=='true') {
   exec("pgrep -P $pid 2>/dev/null", $cpids);
   exec("kill $pid 2>/dev/null");
   foreach ($cpids as $cpid) exec("kill $cpid 2>/dev/null");
   usleep(100000);
-  unlink("/var/tmp/disk{$_POST['disk']}.tmp.end");
+  unlink("/var/tmp/$disk.tmp.end");
 } else {
   echo $pid;
 }
