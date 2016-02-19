@@ -2,7 +2,7 @@
 
 # bunker (based on bitrot of John Bartlett).
 
-# Copyright 2015, Bergware International.
+# Copyright 2015-2016, Bergware International.
 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2,
@@ -11,11 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
-version=2.0
+version=2.1
 
 # Display help
 usage() {
-  echo "bunker v$version - Copyright (c) 2015 Bergware International"
+  echo "bunker v$version - Copyright (c) 2015-2016 Bergware International"
   echo
   echo "Usage: bunker -a|A|v|V|u|e|t|i|c|C|r|R [-fdDsSlLnq] [-md5|-b2] path [!] [mask]"
   echo "  -a          add hash key attribute for files, specified in path and optional mask"
@@ -85,7 +85,7 @@ waitfor() {
       x=$(((x+1)%4))
     fi
     if [[ $mon -ne 0 && $index -eq 0 ]]; then
-      echo -n "0%#<span class='red-text'>$task</span> Scanning for files... ${SECONDS}s#" >$monitor
+      echo -n "0%#<span class='red-text red-button'>$task</span> Scanning for files... ${SECONDS}s#" >$monitor
     fi
     sleep .05
   done
@@ -94,7 +94,7 @@ waitfor() {
 # Print result on console
 con() {
   [[ $con -ne 0 ]] && echo -en "${clr}$1${cln}"
-  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text'>$task</span> $1#" >$monitor
+  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task</span> $1#" >$monitor
 }
 
 # Log result to syslog
@@ -126,7 +126,7 @@ progress() {
     [[ -n $volume ]] && ((complete+=$volume))
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$complete'/'$total')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text'>$task</span> $1#$eta" >$monitor
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text red-button'>$task</span> $1#$eta" >$monitor
     past=$2
   fi
   update=0
@@ -143,7 +143,7 @@ progress2() {
     fi
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$past'/'$files')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text'>$task</span> $1#$eta" >$monitor
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text red-button'>$task</span> $1#$eta" >$monitor
   fi
   update=0
   timer=$SECONDS
@@ -164,7 +164,7 @@ score() {
       local tmp=$(awk 'BEGIN{printf("%f",'$tmp'/1000)}')
       ((i++))
     done
-    echo -n " Average speed: $avg ${unit[$i]}/s"
+    echo -n ". Average speed: $avg ${unit[$i]}/s"
   fi
 }
 
@@ -179,22 +179,40 @@ update() {
 # Prepare loop variables
 prepare() {
   index=0; count=0; past=-1; skip=0; fail=0; bad=0; warning=0; complete=0; key=0; update=$(($con+$mon)); total=1; name=$(($code+2))
-  if [[ $1 -gt 0 ]]; then
-    sed -i "/\/mnt\/disk[0-9]*\/\S*\.img$/d" $tmpfile
-  else
-    sed -i "/^# file: \/mnt\/disk[0-9]*\/\S*\.img$/,/^$/d" $tmpfile
-  fi
-  if [[ -n $exclude ]]; then
-    ifs=$IFS; IFS=','
-    for folder in $exclude ; do
+  ifs=$IFS; IFS=','
+  [[ $not -ne 0 && (-n $exclude || -n $folders) ]] && touch $tmpfile.not
+  for folder in $exclude ; do
+    if [[ $not -eq 0 ]]; then
       if [[ $1 -gt 0 ]]; then
-        sed -i "/\/mnt\/disk[0-9]*\/$folder\//d" $tmpfile
+        sed -ri "/\/mnt\/disk[0-9]+\/$folder\//d" $tmpfile
       else
-        sed -i "/^# file: \/mnt\/disk[0-9]*\/$folder\//,/^$/d" $tmpfile
+        sed -ri "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/d" $tmpfile
       fi
-    done
-    IFS=$ifs
-  fi
+    else
+      if [[ $1 -gt 0 ]]; then
+        sed -rn "/\/mnt\/disk[0-9]+\/$folder\//p" $tmpfile >> $tmpfile.not
+      else
+        sed -rn "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/p" $tmpfile >> $tmpfile.not
+      fi
+    fi
+  done
+  for folder in $folders ; do
+    if [[ $not -eq 0 ]]; then
+      if [[ $1 -gt 0 ]]; then
+        sed -ri "/\/mnt\/disk[0-9]+\/.*$folder\//d" $tmpfile
+      else
+        sed -ri "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/d" $tmpfile
+      fi
+    else
+      if [[ $1 -gt 0 ]]; then
+        sed -rn "/\/mnt\/disk[0-9]+\/.*$folder\//p" $tmpfile >> $tmpfile.not
+      else
+        sed -rn "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/p" $tmpfile >> $tmpfile.not
+      fi
+    fi
+  done
+  [[ -f $tmpfile.not ]] && mv -f $tmpfile.not $tmpfile
+  IFS=$ifs
   if [[ $1 -gt 0 ]]; then
     files=$(wc -l $tmpfile|cut -d' ' -f1)
     awk 'BEGIN{FS="*";ORS="\0"}{print $'$1'}' $tmpfile >$tmpfile.0
@@ -315,13 +333,13 @@ scandate=$(date +%s)
 
 # Default settings
 exclude=
+folders=
 proc=sha256sum
 hash=sha256
 code=64
 argv=-b
 cmd=
-mask=*
-what=
+mask=
 size=
 base=
 store=/tmp/bunker.store.log
@@ -332,9 +350,10 @@ one=0
 msg=0
 con=1
 mon=0
+not=0
 
 # Parse user options
-while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xE:" option; do
+while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xzE:F:" option; do
   case $option in
   a|A|v|V|u|e|i|c|C|r|R)
      cmd=$option ;;
@@ -369,9 +388,11 @@ while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xE:" option; do
   L) log=2 ;;
   n) msg=1 ;;
   q) con=0 ;;
-  1) one=1 ;;           # hidden option for GUI
-  x) mon=1 ;;           # hidden option for GUI
-  E) exclude=$OPTARG ;; # hidden option for GUI
+  1) one=1 ;;           # hidden option for GUI front-end - process single file
+  x) mon=1 ;;           # hidden option for GUI front-end - output to monitor file
+  z) not=1 ;;           # hidden option for GUI front-end - negate selection
+  E) exclude=$OPTARG ;; # hidden option for GUI front-end - list of excluded folders
+  F) folders=$OPTARG ;; # hidden option for GUI front-end - list of custom exclusions
   :) echo "Missing argument for option -$OPTARG"; exit ;;
   *) usage; exit ;;
   esac
@@ -406,15 +427,22 @@ fi
 
 # Optional mask parameter
 if [[ -n $2 && $one -eq 0 ]]; then
-  if [[ $2 != ! ]]; then
-    mask="$2"
-  else
+  ifs=$IFS; IFS=','
+  if [[ $2 == ! ]]; then
     if [[ -z $3 ]]; then
       echo "Missing mask parameter"; exit
     fi
-    mask="$3"
-    what=!
+    for name in $3 ; do
+      [[ ${#mask} -gt 0 ]] && mask="${mask} "
+      mask="${mask}-not -iname $name"
+    done
+  else
+    for name in $2 ; do
+      [[ ${#mask} -gt 0 ]] && mask="${mask} -o "
+      mask="${mask}-iname $name"
+    done
   fi
+  IFS=$ifs
 fi
 
 # Used for concurrent script execution
@@ -441,7 +469,11 @@ case $cmd in
 a|A)
   task=Build
   if [[ $one -eq 0 ]]; then
-    find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile + &
+    if [[ -z $mask ]]; then
+      find "$path" -type f -name "*" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile + &
+    else
+      find "$path" -type f \( $mask \) $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile + &
+    fi
     waitfor $! "Scanning for files to add"
     sed -i "s/: user.$hash: No such attribute$//" $tmpfile &
     waitfor $! "Preparing for execution"
@@ -470,7 +502,7 @@ a|A)
     [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >> "$store"
   fi
   con "Finished - added $(plural $index file).$(score $index)"
-  log "added $(plural $index file) from $path with mask ${what}${mask}.$(score $index)" $index
+  log "added $(plural $index file) from $path.$(score $index)" $index
   [[ $mon -ne 0 ]] && complete build ${path##*/}
 ;;
 
@@ -480,9 +512,13 @@ v|V|u)
   [[ $cmd == u ]] && text2=" (updated)" || text2=""
   if [[ $one -eq 0 ]]; then
     if [[ $ref -eq 0 ]]; then
-      find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      if [[ -z $mask ]]; then    
+        find "$path" -type f -name "*" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      else
+        find "$path" -type f \( $mask \) $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      fi
       waitfor $! "Scanning for files to verify"
-      sed -i -n "/^$/d;s/^# file: //;h;n;s/^user.$hash=\"//;s/\"$//;G;s/\n/ \*/;p" $tmpfile &
+      sed -ni "/^$/d;s/^# file: //;h;n;s/^user.$hash=\"//;s/\"$//;G;s/\n/ \*/;p" $tmpfile &
     else
       sed '/^$/d' "$store" >$tmpfile &
     fi
@@ -541,13 +577,17 @@ v|V|u)
   fi
   [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker $text command"
   con "Finished - verified $(plural $count file), skipped $(plural $skip file). Found: $(plural $warning mismatch es)$text1, $(plural $bad corruption)$text2.$(score $count)"
-  log "verified $(plural $count file) from $path with mask ${what}${mask}. Found: $(plural $warning mismatch es)$text1, $(plural $bad corruption)$text2.$(score $count)" $fail
+  log "verified $(plural $count file) from $path. Found: $(plural $warning mismatch es)$text1, $(plural $bad corruption)$text2.$(score $count)" $fail
 ;;
 
 e)
   task=Export
   if [[ $one -eq 0 ]]; then
-    find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+    if [[ -z $mask ]]; then
+      find "$path" -type f -name "*" $size $base -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+    else
+      find "$path" -type f \( $mask \) $size $base -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+    fi
     waitfor $! "Scanning for files to export"
   else
     getfattr -d --absolute-names "$path" 1>$tmpfile 2>/dev/null
@@ -579,7 +619,7 @@ e)
     IFS=$ifs
   fi
   con "Finished - exported $(plural $count file), skipped $(plural $skip file).$(score)"
-  log "exported $(plural $count file) from $path with mask ${what}${mask}.$(score)" $count
+  log "exported $(plural $count file) from $path.$(score)" $count
   [[ $mon -ne 0 ]] && complete export ${path##*/}
 ;;
 
@@ -675,10 +715,14 @@ c|C)
 ;;
 
 r|R)
-  task=Remove
+  [[ $not -eq 0 ]] && task=Remove || task=Clear
   if [[ $one -eq 0 ]]; then
     if [[ $ref -eq 0 ]]; then
-      find "$path" -type f $what -iname "$mask" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      if [[ -z $mask ]]; then
+        find "$path" -type f -name "*" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      else
+        find "$path" -type f \( $mask \) $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
+      fi
       waitfor $! "Scanning for files to remove attributes"
       sed -i "/^$/d;s/^# file: //;/^user.$hash=/d" $tmpfile &
     else
@@ -708,6 +752,6 @@ r|R)
     update
   fi
   con "Finished - cleared $(plural $count file), skipped $(plural $skip file).$(score)"
-  log "cleared $(plural $count file) from $path with mask ${what}${mask}.$(score)" $count
+  log "cleared $(plural $count file) from $path.$(score)" $count
 ;;
 esac

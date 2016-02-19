@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2015-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,7 +10,7 @@
  */
 ?>
 <?
-$filter = "bunker -{$_POST['cmd']}q.*disk{$_POST['disk']}(\..*\.hash)?$";
+$filter = "bunker -{$_POST['cmd']}q.* \/mnt\/disk{$_POST['disk']} ?";
 $pid = exec("ps -eo pid,comm,args|awk '$2==\"bunker\" && $0~/$filter/{print $1}'");
 if ($_POST['kill']=='true') {
   exec("pgrep -P $pid 2>/dev/null", $cpids);

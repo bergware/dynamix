@@ -2,7 +2,7 @@ Menu="FileIntegrity:2"
 Title="File Integrity Control"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2015-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -18,6 +18,12 @@ if ($var['fsState']!="Started") {
   echo "<p><input type='button' value='Done' onclick='done()'></p>";
   return;
 }
+$folders = $cfg['exclude'] ? explode(',',$cfg['exclude']) : [];
+if ($cfg['folders']) $folders = array_merge($folders,array_map('trim',explode(',',$cfg['folders'])));
+$folders = $folders ? implode(' , ',$folders) : 'None';
+
+$files = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
+$files = $files ? implode(' , ',$files) : 'None';
 ?>
 <script>
 var disks = [];
@@ -99,7 +105,11 @@ $(function() {
 <input type="hidden" name="#file" value="not-used">
 <input type="hidden" name="#method" value="<?=$cfg['method']?>">
 <input type="hidden" name="#exclude" value="<?=$cfg['exclude']?>">
+<input type="hidden" name="#folders" value="<?=$cfg['folders']?>">
+<input type="hidden" name="#files" value="<?=$cfg['files']?>">
+<input type="hidden" name="#apple" value="<?=$cfg['apple']?>">
 <input type="hidden" name="#notify" value="<?=$cfg['notify']?>">
+<input type="hidden" name="#priority" value="<?=$cfg['priority']?>">
 <input type="hidden" name="#log" value="<?=$cfg['log']?>">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.control.php">
 <input type="hidden" name="x" value="">
@@ -109,9 +119,12 @@ Hashing method:
 > This is the hash method as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 
 Excluded folders:
-: <span style='font-size:12px'><?=$cfg['exclude']?str_replace(',',' , ',$cfg['exclude']):'None'?></span>
+: <span style='font-size:12px'><?=$folders?></span>
 
-> This is the list of excluded folders as selected on the settings page. Make sure it is correct before you perform any commands on this page.
+Excluded files:
+: <span style='font-size:12px'><?=$files?></span>
+
+> This is the list of excluded folders and files as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 
 <?
 $row1 = $row2 = [];
@@ -147,9 +160,17 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 > Use the **Import** command to restore the extended attributes from a previously exported file. This *should* only be necessary in case the extended attributes got corrupted or went missing.
 >
 > Use the **Remove** command to delete the extended attributes which are stored with the file. This makes the system see such files as unprocessed.
+>
+> Use the **Clear** command to delete the extended attributes from excluded folders and files only.
 
 &nbsp;
-: <input type="submit" name="cmd" value="Build" onclick="this.form.x.value='a'"><input type="submit" name="cmd" value="Export" onclick="this.form.x.value='e'"><input type="submit" name="cmd" value="Check" onclick="this.form.x.value='C'"><input type="submit" name="cmd" value="Import" onclick="this.form.x.value='i'"><input type="submit" name="cmd" value="Remove" onclick="this.form.x.value='R'"><input type="button" value=" Done" onclick="done()">
+: <input type="submit" name="cmd" value="Build"  onclick="this.form.x.value='a'">
+  <input type="submit" name="cmd" value="Export" onclick="this.form.x.value='e'">
+  <input type="submit" name="cmd" value="Check"  onclick="this.form.x.value='C'">
+  <input type="submit" name="cmd" value="Import" onclick="this.form.x.value='i'">
+  <input type="submit" name="cmd" value="Remove" onclick="this.form.x.value='R'">
+  <input type="submit" name="cmd" value="Clear"  onclick="this.form.x.value='R'">
+  <input type="button" value=" Done" onclick="done()">
 </form>
 
 <table class='tablesorter'>

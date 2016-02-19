@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2015-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,14 +10,39 @@
  */
 ?>
 <?
+function expand_folders($text) {
+  $trim = trim($text);
+  return ($trim[0]=='*' ? '' : '*').$trim.'/';
+}
+function expand_files($text) {
+  $trim = trim($text);
+  return ($trim[0]=='*' ? '' : '*').$trim.'$';
+}
+
+$cfg = @parse_ini_file("/boot/config/docker.cfg");
+$img = 'DOCKER_IMAGE_FILE';
 $new = isset($default) ? array_replace_recursive($_POST, $default) : $_POST;
-$bunker = '/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker';
-$path = '/boot/config/plugins/dynamix.file.integrity';
-$conf = '/etc/inotifywait.conf';
+$bunker = "/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker";
+$path = "/boot/config/plugins/dynamix.file.integrity";
+$conf = "/etc/inotifywait.conf";
 $cron = "$path/integrity-check.cron";
 $run  = "$path/integrity-check.sh";
+$chars = ['.','[',']','(',')','+','-','*'];
+$escape = ['\.','\[','\]','\(','\)','\+','\-','.*'];
 $tasks = [];
-file_put_contents($conf, "cmd=\"{$new['cmd']}\"\nmethod=\"{$new['method']}\"\nexclude=\"".str_replace(',','|',$new['exclude'])."\"\ndisks=\"".str_replace(['disk',','],['/mnt/disk',' '],$new['disks'])."\"\n");
+$record = [];
+
+if (isset($cfg[$img]) && strpos(dirname($cfg[$img]),'/mnt/disk')!==false) $record[] = basename($cfg[$img])."$";
+if ($new['folders']) $record = array_merge($record,array_map('expand_folders',explode(',',$new['folders'])));
+if ($new['files']) $record = array_merge($record,array_map('expand_files',explode(',',$new['files'])));
+if ($new['exclude']) $record = array_merge($record,explode(',',$new['exclude']));
+if ($new['apple']) $record = array_merge($record,['*.AppleDB','*.DS_Store$']);
+
+$more = count($record) > 1;
+$exclude = $record ? ($more ? '(':'').str_replace($chars,$escape,implode('|',$record)).($more ? ')':'') : '';
+$include = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
+
+file_put_contents($conf, "cmd=\"{$new['cmd']}\"\nmethod=\"{$new['method']}\"\nexclude=\"$exclude\"\ndisks=\"$include\"\n");
 exec("/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/rc.watcher ".($new['service'] ? 'restart' : 'stop')." &>/dev/null");
 
 foreach ($keys as $key => $value) if ($key[0]!='#' && !array_key_exists($key,$new)) unset($keys[$key]);
@@ -47,6 +72,10 @@ if ($new['schedule']>0 && $x>0) {
     $time = "{$new['min']} {$new['hour']} {$new['dotm']} * *";
     $term = "\$((10#\$(date +%m)%$x))";
     break;
+  }
+  if ($new['priority']) {
+    list($nice,$ionice) = explode(',',$new['priority']);
+    $bunker = "nice $nice ionice $ionice $bunker";
   }
   $i = 0;
   $text = [];

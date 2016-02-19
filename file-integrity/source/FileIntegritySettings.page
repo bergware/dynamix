@@ -2,7 +2,7 @@ Menu="FileIntegrity:1"
 Title="File Integrity Settings"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2015-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -31,8 +31,11 @@ $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 exec("find /mnt/disk* -type d -maxdepth 1 -mindepth 1 -exec basename {} \;|uniq|sort -u", $folders);
 ?>
 <style>
-span.running{background-color:#FF9E9E;}
 input.thin{margin:1px;}
+span.running{background-color:#FF9E9E;}
+span.green-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #6FA239;}
+span.orange-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #FF9900;}
+span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #CC0000;}
 </style>
 <script>
 function prepareWatch(form) {
@@ -148,14 +151,22 @@ Save new hashing results to flash:
 > When enabled a daily file on the flash device will be created, holding the checksum results for all newly or modified files of that day.
 > The format of this file is the same as the standard export file. The daily file is saved as */config/plugins/dynamix.file.integrity/disks.export.&lt;date&gt;.new.hash*
 
-Excluded folders:
+Excluded folders and files:
 : <select id="s1" name="exclude" size="1" multiple style="display:none">
   <?foreach ($folders as $folder):?>
   <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
   <?endforeach;?>
   </select>
+  <span style="margin:0 8px 0 12px;font-weight:bold">Custom folders:</span><input type="text" name="folders" value="<?=$cfg['folders']?>" class="narrow">
+  <span style="margin:0 8px 0 12px;font-weight:bold">Custom files:</span><input type="text" name="files" value="<?=$cfg['files']?>" class="narrow">
+  <span style="margin:0 8px 0 12px;font-weight:bold">Apple metadata:</span><input type="checkbox" name="apple" <?=$cfg['apple']?'checked':''?>>
 
-> Select here any folders (shares) you want to exclude from the automatic hashing and verification functionality. A folder existing on multiple disks will be skipped on any disk where it is present.
+> Select here any folders (shares) you want to exclude from the automatic hashing and verification functionality. A share existing on multiple disks will be skipped on any disk where it is present.
+>
+> Use **Custom folders / Custom files** to manually enter exclusions. Multiple exclusions are separated by a comma.<br>
+> Examples are folder names, e.g. **`.Recycle.Bin`**, file names, e.g. **`my_workfile.tmp`** or file extensions, e.g. **`*.tmp`**.
+>
+> Select **Apple metadata** to exclude metadata files created by Apple's netatalk (.AppleDB and .DS_Store).
 
 Disk verification schedule:
 : <select name="schedule" size="1" onchange="presetSchedule(this.form)">
@@ -177,6 +188,14 @@ Disk verification schedule:
 > another task is executed and after 3 weeks the verification function has done all selected disks.
 >
 > When the verification schedule is disabled then manual control is required to verify the correctness of the files.
+
+Process priority:
+: <select name="priority" size="1">
+  <?=mk_option($cfg['priority'], "", "Normal")?>
+  <?=mk_option($cfg['priority'], "-n19,-c2 -n7", "Low")?>
+  </select>
+
+> Background processes can be run in either normal or low priority mode.
 
 When parity operation is running:
 : <select name="parity" size="1">
