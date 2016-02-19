@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.02.19">
+<!ENTITY version   "2016.02.19a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c15889aab6d5f635568838823e457fa1">
+<!ENTITY MD5       "47ca26a3e458d0d9d962429a65571930">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed regression error in export function
+
+###2016.02.19
 - fixed regression errors
 - added list of excluded files on control page
 - improved filtering of excluded folders and/or files, when control commands are executed
