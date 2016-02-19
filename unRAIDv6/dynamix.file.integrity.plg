@@ -18,14 +18,14 @@
 ###&version;
 - fixed regression error in export function
 
+**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
+
 ###2016.02.19
 - fixed regression errors
 - added list of excluded files on control page
 - improved filtering of excluded folders and/or files, when control commands are executed
 - improved css styling on control page
 - updated bunker script to version 2.1
-
-**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
 
 ###2016.02.18c
 - separated custom folders and custom files
