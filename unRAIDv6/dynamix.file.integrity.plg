@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.02.19b">
+<!ENTITY version   "2016.02.20">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9543cf05ef20fca23cfc2f9a1b681f8f">
+<!ENTITY MD5       "241e35273ac083716d812d758dbc8e7a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,9 +16,13 @@
 ##&name;
 
 ###&version;
-- fixed regression error in command cancelation
+- fixed file selection with Clear command when no exclusions exist
+- updated bunker script to version 2.2
 
 **PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
+
+###2016.02.19b
+- fixed regression error in command cancelation
 
 ###2016.02.19a
 - fixed regression error in export function
