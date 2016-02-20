@@ -11,7 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
-version=2.1
+version=2.2
 
 # Display help
 usage() {
@@ -180,39 +180,26 @@ update() {
 prepare() {
   index=0; count=0; past=-1; skip=0; fail=0; bad=0; warning=0; complete=0; key=0; update=$(($con+$mon)); total=1; name=$(($code+2))
   ifs=$IFS; IFS=','
-  [[ $not -ne 0 && (-n $exclude || -n $folders) ]] && touch $tmpfile.not
-  for folder in $exclude ; do
-    if [[ $not -eq 0 ]]; then
-      if [[ $1 -gt 0 ]]; then
-        sed -ri "/\/mnt\/disk[0-9]+\/$folder\//d" $tmpfile
-      else
-        sed -ri "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/d" $tmpfile
-      fi
+  if [[ $not -eq 0 ]]; then
+    if [[ $1 -gt 0 ]]; then
+      for folder in $exclude; do sed -ri "/\/mnt\/disk[0-9]+\/$folder\//d" $tmpfile; done
+      for folder in $folders; do sed -ri "/\/mnt\/disk[0-9]+\/.*$folder\//d" $tmpfile; done
     else
-      if [[ $1 -gt 0 ]]; then
-        sed -rn "/\/mnt\/disk[0-9]+\/$folder\//p" $tmpfile >> $tmpfile.not
-      else
-        sed -rn "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/p" $tmpfile >> $tmpfile.not
-      fi
+      for folder in $exclude; do sed -ri "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/d" $tmpfile; done
+      for folder in $folders; do sed -ri "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/d" $tmpfile; done
     fi
-  done
-  for folder in $folders ; do
-    if [[ $not -eq 0 ]]; then
-      if [[ $1 -gt 0 ]]; then
-        sed -ri "/\/mnt\/disk[0-9]+\/.*$folder\//d" $tmpfile
-      else
-        sed -ri "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/d" $tmpfile
-      fi
+  else
+    touch $tmpfile.not
+    if [[ $1 -gt 0 ]]; then
+      for folder in $exclude; do sed -rn "/\/mnt\/disk[0-9]+\/$folder\//p" $tmpfile >> $tmpfile.not; done
+      for folder in $folders; do sed -rn "/\/mnt\/disk[0-9]+\/.*$folder\//p" $tmpfile >> $tmpfile.not; done
     else
-      if [[ $1 -gt 0 ]]; then
-        sed -rn "/\/mnt\/disk[0-9]+\/.*$folder\//p" $tmpfile >> $tmpfile.not
-      else
-        sed -rn "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/p" $tmpfile >> $tmpfile.not
-      fi
+      for folder in $exclude; do sed -rn "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/p" $tmpfile >> $tmpfile.not; done
+      for folder in $folders; do sed -rn "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/p" $tmpfile >> $tmpfile.not; done
     fi
-  done
-  [[ -f $tmpfile.not ]] && mv -f $tmpfile.not $tmpfile
-  IFS=$ifs
+    mv -f $tmpfile.not $tmpfile
+  fi
+  IFS=$ifs; ifs=
   if [[ $1 -gt 0 ]]; then
     files=$(wc -l $tmpfile|cut -d' ' -f1)
     awk 'BEGIN{FS="*";ORS="\0"}{print $'$1'}' $tmpfile >$tmpfile.0
@@ -389,10 +376,10 @@ while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xzE:F:" option; do
   n) msg=1 ;;
   q) con=0 ;;
   1) one=1 ;;           # hidden option for GUI front-end - process single file
-  x) mon=1 ;;           # hidden option for GUI front-end - output to monitor file
-  z) not=1 ;;           # hidden option for GUI front-end - negate selection
-  E) exclude=$OPTARG ;; # hidden option for GUI front-end - list of excluded folders
-  F) folders=$OPTARG ;; # hidden option for GUI front-end - list of custom exclusions
+  x) mon=1 ;;           # hidden option for GUI front-end - output progress to monitor file
+  z) not=1 ;;           # hidden option for GUI front-end - invert file selection (exclude only)
+  E) exclude=$OPTARG ;; # hidden option for GUI front-end - list of excluded folders (shares)
+  F) folders=$OPTARG ;; # hidden option for GUI front-end - list of custom folder exclusions
   :) echo "Missing argument for option -$OPTARG"; exit ;;
   *) usage; exit ;;
   esac
@@ -442,7 +429,7 @@ if [[ -n $2 && $one -eq 0 ]]; then
       mask="${mask}-iname $name"
     done
   fi
-  IFS=$ifs
+  IFS=$ifs; ifs=
 fi
 
 # Used for concurrent script execution
@@ -616,7 +603,7 @@ e)
     update
     [[ -s $tmpfile.2 && $one -eq  0 ]] && sort -ft '*' -k2 -o "$store" $tmpfile.2
     [[ -s $tmpfile.2 && $one -eq  1 ]] && cat $tmpfile.2 >> "$store"
-    IFS=$ifs
+    IFS=$ifs; ifs=
   fi
   con "Finished - exported $(plural $count file), skipped $(plural $skip file).$(score)"
   log "exported $(plural $count file) from $path.$(score)" $count
