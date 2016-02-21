@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.02.20b">
+<!ENTITY version   "2016.02.21">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "41664a5ee1dc3023b541b08107905947">
+<!ENTITY MD5       "c8f445815bb0b3ab92d5f89ad8431ab0">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,13 +16,19 @@
 ##&name;
 
 ###&version;
+- added check for deleted files in exportrotate script
+- changed new hashing results (if enabled) are stored in separate folder 'saved'
+- changed Clear exclusion files list from AND to OR function
+- updated bunker script to version 2.3
+
+**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
+
+###2016.02.20b
 - fixed creation of rogue entries in disks.ini file
 - added view log files
 - added view hash files
 - added dedicated logs folder
 - added dedicated export folder
-
-**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
 
 ###2016.02.20a
 - fixed substitution error in exportrotate script (causing cron emails)
@@ -218,10 +224,11 @@ else
   code=32
 fi
 name=$((code+2))
+[[ ${exclude:0:1} == "(" ]] && exclude=${exclude:1:-1}
 
 for disk in $disks; do
   rm -f $tmpfile
-  find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
+  find $disk -type f -name "*" -newer $tmpfile.0 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
   key=0;
   if [[ -s $tmpfile ]]; then
     filedate=0
@@ -242,8 +249,8 @@ for disk in $disks; do
     IFS=$ifs
     [[ -n $key ]] && echo "$key *$file" >>$tmpfile.1
   fi
+  hashfile=$path/export/${disk:5}.export.hash
   if [[ -s $tmpfile.1 ]]; then
-    hashfile=$path/export/${disk:5}.export.hash
     if [[ -s $hashfile ]]; then
       cp -f $hashfile $tmpfile.2
       while read -r line; do
@@ -260,32 +267,34 @@ for disk in $disks; do
     sort -ft '*' -k2 -o $hashfile $tmpfile.2
     rm -f $tmpfile.1 $tmpfile.2
   fi
-done
-
-if [[ -f $path/disks.ini ]]; then
-  [[ ${exclude:0:1} == '(' ]] && exclude=${exclude:1:-1}
-  for disk in $disks; do
+  if [[ -f $path/disks.ini ]]; then
     rm -f $tmpfile
-    find $disk -type f -iname "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
-    ifs=$IFS; IFS='|'
-    for entry in $exclude; do
-      file="$disk/$entry"
+    find $disk -type f -name "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
+    IFS='|'
+    for key in $exclude; do
+      file="$disk/$key"
       sed -ri "/^# file: ${file//\//\\/}/,/^$/d" $tmpfile
     done
-    IFS=$ifs; ifs=
+    IFS=$ifs
     [[ -s $tmpfile ]] && sed -i "/^${disk:5}=/d" $path/disks.ini
     rm -f $tmpfile
-    hashfile=$path/export/${disk:5}.export.hash
     if [[ -s $hashfile ]]; then
       touch -t $(date -d "@$(stat -c %Y $hashfile)" +%Y%m%d%H%M.%S) $tmpfile.9
-      find $disk -type f -iname "*" -newer $tmpfile.9 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
-      [[ -s $tmpfile ]] && sed -ri "s|(^${disk:5}=[^,]*),?export,?|\1|" $path/disks.ini
+      find $disk -type f -name "*" -newer $tmpfile.9 -exec getfattr -d --absolute-names "{}" 1>$tmpfile 2>/dev/null +
+      missing=0
+      sed -r 's/^\S+ \*//' $hashfile >$tmpfile.3
+      while read -r file; do
+        if [[ ! -f "$file" ]]; then
+          missing=1
+          break
+        fi
+      done <$tmpfile.3
+      [[ -s $tmpfile || $missing -ne 0 ]] && sed -ri "s|(^${disk:5}=[^,]*),?export,?|\1|" $path/disks.ini
     fi
-  done
-fi
+  fi
+done
 
-log=$path/logs/disks.export.$(date +%Y%m%d -d -1day).new.log
-rm -f $tmpfile* $log
+rm -f $tmpfile*
 exit 0
 ]]>
 </INLINE>
@@ -318,17 +327,17 @@ exit 0
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-root=/boot/config/plugins/&name;
+usb=/boot/config/plugins/&name;
 cfg=&source;.cfg
 if [[ ! -e $cfg ]]; then
   cfg=/usr/local/emhttp/plugins/&name;/default.cfg
 fi
 
-# Create logs and export folders
-mkdir -p $root/logs $root/export
+# Create logs, export, saved folders
+mkdir -p $usb/logs $usb/export $usb/saved
 
 # Move hash files from legacy location to export folder
-mv -f /boot/config/plugins/&name;/*.hash /boot/config/plugins/&name;/export 2>/dev/null
+mv -f $usb/*.hash $usb/export 2>/dev/null
 
 # Start service
 enable=$(grep -Po '^service="\K[^"]+' $cfg)
