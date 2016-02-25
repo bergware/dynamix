@@ -2,7 +2,13 @@
 plugin=dynamix.system.autofan
 script=autofan
 execute=/usr/local/emhttp/plugins/$plugin/scripts/$script
-options=$(awk -F'"' '/^options=/{print $2}' /boot/config/plugins/$plugin/$plugin.cfg)
+
+if [[ -f /boot/config/plugins/$plugin/$plugin.cfg ]]; then
+  . /boot/config/plugins/$plugin/$plugin.cfg
+else
+  echo "No config file, aborting."
+  exit 2
+fi
 
 autofan.start() {
   if [[ -z $(pgrep -f $execute) ]]; then
@@ -21,9 +27,19 @@ autofan.stop() {
       timer=$((timer-1))
       sleep 1
     done
+    # set fan to max
+    echo 255 > $controller
     echo "$script stopped"
   else
     echo "$script not running!"
+  fi
+}
+
+autofan.speed() {
+  if [[ -f $controller ]] && [[ $(cat $fan) -gt 0 ]]; then
+    echo $(($(($(cat $controller)*100))/255))
+  else
+    echo 0
   fi
 }
 
@@ -38,8 +54,10 @@ case "$1" in
  autofan.start ;;
 'stop')
  autofan.stop ;;
+'speed')
+ autofan.speed ;;
 'restart')
  autofan.restart ;;
 *)
- echo "Usage: $(basename $0) start|stop|restart"
+ echo "Usage: $(basename $0) start|stop|restart|speed"
 esac
