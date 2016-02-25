@@ -13,13 +13,23 @@
 ?>
 
 <?
-$plugin = 'dynamix.system.temp';
+$plugin  = 'dynamix.system.temp';
+$autofan = "dynamix.system.autofan";
+$script  = "/usr/local/emhttp/plugins/${autofan}/scripts/rc.autofan";
 
 function my_temp($val, $unit, $dot) {
   return ($val>0 ? ($unit=='F' ? round(9/5*$val+32) : str_replace('.',$dot,$val)) : '##')."&thinsp;$unit";
 }
 function my_rpm($val){
-	return ($val>0 ? $val : '##')."&thinsp;rpm";
+  return ($val>0 ? $val : '##')."&thinsp;rpm";
+}
+function get_autofan() {
+  global $script;
+  if (is_executable($script)) {
+    $p = trim(shell_exec("$script speed"));
+    return is_numeric($p) ? " (${p}%)" : "";
+  }
+  return "";
 }
 
 $set = array();
@@ -27,6 +37,6 @@ $val = explode(' ',exec("sensors -A|awk 'BEGIN{cpu=\"-\";mb=\"-\";fan=\"-\"}{if 
 
 if ($val[0]!='-') $set[] = "<img src='/plugins/$plugin/icons/cpu.png' title='Processor' class='icon'>".my_temp($val[0], $_GET['unit'], $_GET['dot']);
 if ($val[1]!='-') $set[] = "<img src='/plugins/$plugin/icons/mb.png' title='Mainboard' class='icon'>".my_temp($val[1], $_GET['unit'], $_GET['dot']);
-if ($val[2]!='-') $set[] = "<img src='/plugins/$plugin/icons/fan.png' title='Array fan' class='icon'>".my_rpm($val[2]);
+if ($val[2]!='-') $set[] = "<img src='/plugins/$plugin/icons/fan.png' title='Array fan' class='icon'>".my_rpm($val[2]).get_autofan();
 if ($set) echo "<span id='temps' style='margin-right:16px'>".implode('&nbsp;', $set)."</span>";
 ?>
