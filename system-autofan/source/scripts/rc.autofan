@@ -36,7 +36,7 @@ autofan.stop() {
 }
 
 autofan.speed() {
-  if [[ -f $controller ]] && [[ $(cat $fan) -gt 0 ]]; then
+  if [[ -f $controller && $(cat $fan) -gt 0 ]]; then
     echo $(($(($(cat $controller)*100))/255))
   else
     echo 0
