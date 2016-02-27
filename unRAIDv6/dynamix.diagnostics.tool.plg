@@ -22,8 +22,8 @@ Dynamix Diagnostics Tool - To the unknown man!
 <INLINE>
 # Check unRAID version
 source /etc/unraid-version
-if [[ $version != 6.1.7 ]]; then
-  echo "unRAID version 6.1.7 is required"
+if [[ $version != 6.1.8 ]]; then
+  echo "unRAID version 6.1.8 is required"
   exit 1
 fi
 # Remove old 'source' packages
