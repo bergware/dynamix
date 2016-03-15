@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2016.02.27">
+<!ENTITY version   "2016.03.15">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "bd2edd0499437fd62dd4f41071b3934d">
+<!ENTITY MD5       "6550b8c9845351599275eb69d2c41499">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- fixed temperature input when Fahrenheit is selected
+- fixed log notifications in Celsius or Fahrenheit
+
+###2016.02.27
 - added display of autofan speed percentage when system temp is installed (courtesy of gfjardim)
 
 ###2015.12.14
