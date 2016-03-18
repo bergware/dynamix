@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.03.18">
+<!ENTITY version   "2016.03.18a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "05b1c77247eafb77725678d862fcad06">
+<!ENTITY MD5       "353be00ea51aa50b5e4c6de9797339b1">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -240,7 +240,7 @@ if [[ $gui -eq 1 ]]; then
 fi
 
 [[ ${exclude:0:1} == '(' ]] && exclude=${exclude:1:-1}
-[[ -z $disks ]] && disks=/mnt/disk*
+[[ -z $disks ]] && disks=/mnt/disk[0-9]*
 
 filter() {
   case $1 in
