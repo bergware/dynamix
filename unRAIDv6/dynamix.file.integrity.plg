@@ -18,14 +18,14 @@
 ###&version;
 - fixed selection of data disks in array only
 
+**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
+
 ###2016.03.17
 - added start/stop notifications and log entries for processes started in the background
 - changed exportrotate to reporting mode only (passive)
 - improved build and export up-to-date display on control page
 - miscellaneous corrections
 - updated bunker script to version 2.5
-
-**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
 
 ###2016.02.23
 - improved regular expressions for folder and file exclusions
