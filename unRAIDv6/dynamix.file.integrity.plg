@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.03.17">
+<!ENTITY version   "2016.03.18">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "e8be1bc3d5f5e4648d6dcf0f81b67558">
+<!ENTITY MD5       "05b1c77247eafb77725678d862fcad06">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed selection of data disks in array only
+
+###2016.03.17
 - added start/stop notifications and log entries for processes started in the background
 - changed exportrotate to reporting mode only (passive)
 - improved build and export up-to-date display on control page
