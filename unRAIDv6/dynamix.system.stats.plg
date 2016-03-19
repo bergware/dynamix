@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.02.07">
+<!ENTITY version   "2016.03.19">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "4ec166ff2b455b1a00c3b67e5de32269">
+<!ENTITY MD5       "30ecd5e59ccc5463e7b95257139b84e9">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- made compatible with unRAID v6.2
+- miscellaneous corrections
+
+###2016.02.07
 - fixed unRAID version checking
 - fixed cron cleanup after uninstallation
 
