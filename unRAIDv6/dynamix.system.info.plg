@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.14">
+<!ENTITY version   "2016.03.20">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "805aebd74b8cfc0cd3c3b543d267e95c">
+<!ENTITY MD5       "e381653207df127bd804157069e1c9ac">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added MTU size for ethernet ports
+- made compatible with latest grep version
+
+###2015.12.14
 - added unRAID version check. Only version 6.1 or higher is allowed
 - updated consistency of PLG file
 
