@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.03.19">
+<!ENTITY version   "2016.03.20">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "63efa7d482bcb3f1e883251aa0dec7ec">
+<!ENTITY MD5       "6006cacac6aecd296c9c6fae13bf2a28">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,9 +16,13 @@
 ##&name;
 
 ###&version;
-- fixed regression error (typo) in bunker script
+- fixed regression error, background verification not starting when low priority is selected
+- made compatible with unRAID v6.2
 
 **PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
+
+###2016.03.19
+- fixed regression error (typo) in bunker script
 
 ###2016.03.18
 - fixed selection of data disks in array only
