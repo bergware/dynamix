@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.03.20">
+<!ENTITY version   "2016.03.21">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6006cacac6aecd296c9c6fae13bf2a28">
+<!ENTITY MD5       "500a305e5e513ab90ed97a60b2682266">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added possibility to disable export status notifications (when no export file exists)
+
+###2016.03.20
 - fixed regression error, background verification not starting when low priority is selected
 - made compatible with unRAID v6.2
 
@@ -337,8 +340,6 @@ for disk in $disks; do
       ((old+=$files))
       filter 2
     fi
-  else
-    filter 2
   fi
 done
 
