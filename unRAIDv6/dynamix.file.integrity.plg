@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.03.29">
+<!ENTITY version   "2016.03.29a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f9a0a71cc9ca179d271fe37e39c5ae5a">
+<!ENTITY MD5       "4f46cfb530eb2a8592d827f5387fbaf3">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- added warning when exported hash files are not all up-to-date
+- added direct hyperlink to duplicate names/hashes output files
+- added plugin update message (when supported by system)
+
+###2016.03.29
 - moved file integrity control page under Tools
 - added placement of file integrity control page under Tools or Header
 - added scan for file duplication function (find)
