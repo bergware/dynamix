@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.03.30">
+<!ENTITY version   "2016.04.01">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a427414adf90a3e36d21d1452e977261">
+<!ENTITY MD5       "fb670391fdb01bd39f79b6998918c70c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added conversion of exported hash files to Corz compatible format
+
+###2016.03.30
 - improved speed of file duplication script
 - fixed incorrect build/export updating
 - removed *Done* button when control page is under header menu
