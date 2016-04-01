@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.03.19">
+<!ENTITY version   "2016.04.01">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "30ecd5e59ccc5463e7b95257139b84e9">
+<!ENTITY MD5       "a798aefe9f1d54efdbe0d62fbb683276">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- make  *nice* a separate value to display of processor load (previously it was combined with *user*)
+
+###2016.03.19
 - made compatible with unRAID v6.2
 - miscellaneous corrections
 
