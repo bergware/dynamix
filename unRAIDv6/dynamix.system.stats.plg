@@ -16,7 +16,7 @@
 ##&name;
 
 ###&version;
-- make  *nice* a separate value to display of processor load (previously it was combined with *user*)
+- make  *nice* a separate value to display in the processor load graph (previously it was combined with *user*)
 
 ###2016.03.19
 - made compatible with unRAID v6.2
