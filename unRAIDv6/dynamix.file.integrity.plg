@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.01">
+<!ENTITY version   "2016.04.02">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "fb670391fdb01bd39f79b6998918c70c">
+<!ENTITY MD5       "c7e121169b52d0ba38648d535e9b2c8c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- changed Corz output to folder structure and stored in zip file
+
+###2016.04.01
 - added conversion of exported hash files to Corz compatible format
 
 ###2016.03.30
