@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.smart.drivedb">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.04a">
+<!ENTITY version   "2016.04.04b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9e857da9f52ea9c87ed594739406b779">
+<!ENTITY MD5       "a48a554b4e3a341a6af8e08037d53b66">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -15,7 +15,7 @@
 ##&name;
 
 ###&version;
-- fixed typo in cron execution
+- fixed error in cron execution
 
 **PLEASE RE-APPLY SETTINGS**
 
