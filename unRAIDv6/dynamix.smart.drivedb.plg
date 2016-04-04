@@ -51,7 +51,7 @@ fi
 <FILE Run="/bin/bash">
 <INLINE>
 # Correct smart script
-sed -ie '/^SRCEXPR=/s/http:/https:/' /usr/sbin/update-smart-drivedb
+sed -i -e '/^SRCEXPR=/s/http:/https:/' /usr/sbin/update-smart-drivedb
 
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/{print "/"$0}' /var/log/packages/&name;)
