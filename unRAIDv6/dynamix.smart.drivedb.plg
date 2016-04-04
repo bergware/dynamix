@@ -77,7 +77,7 @@ rm -rf /boot/config/plugins/&name;
 removepkg &name;
 
 # Remove cron entry
-rm -f /boot/config/plugins/dynamix/ssd-trim.cron
+rm -f /boot/config/plugins/dynamix/smart-drivedb.cron
 /usr/local/sbin/update_cron
 </INLINE>
 </FILE>
