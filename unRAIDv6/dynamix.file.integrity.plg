@@ -20,6 +20,8 @@
 - separated file monitoring and file hashing processes (use named pipe to link them)
 - made process termination more robust when stopping array
 
+**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
+
 ###2016.04.02
 - changed Corz output to folder structure and stored in zip file
 
@@ -47,8 +49,6 @@
 ###2016.03.20
 - fixed regression error, background verification not starting when low priority is selected
 - made compatible with unRAID v6.2
-
-**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
 
 ###2016.03.19
 - fixed regression error (typo) in bunker script
