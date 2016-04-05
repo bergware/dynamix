@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.02">
+<!ENTITY version   "2016.04.05">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c7e121169b52d0ba38648d535e9b2c8c">
+<!ENTITY MD5       "f1c793f404890fb70f1be7db55acf7e8">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- improved file copying performance. Array write activity is monitored to delay hash calculations
+- separated file monitoring and file hashing processes (use named pipe to link them)
+- made process termination more robust when stopping array
+
+###2016.04.02
 - changed Corz output to folder structure and stored in zip file
 
 ###2016.04.01
