@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.06">
+<!ENTITY version   "2016.04.06a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0adc93226643d38817ec63685a4e7771">
+<!ENTITY MD5       "ba7cf94f9b64b383231f52024e86b92e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -17,6 +17,7 @@
 
 ###&version;
 - improved hash processing
+- updated bunker script to version 2.5.1
 
 **PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
 
