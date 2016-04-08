@@ -18,11 +18,11 @@
 ###&version;
 - fixed overcommitment of processor when many files are copied
 
+**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
+
 ###2016.04.06
 - improved hash processing
 - updated bunker script to version 2.5.1
-
-**PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
 
 ###2016.04.05
 - improved file copying performance. Array write activity is monitored to delay hash calculations
