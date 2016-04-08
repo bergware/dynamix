@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.01">
+<!ENTITY version   "2016.04.08">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a798aefe9f1d54efdbe0d62fbb683276">
+<!ENTITY MD5       "c43f851d2483cf4e872e73c2e4fd3131">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed display when either critical level or warning level or both are set to zero
+
+###2016.04.01
 - make  *nice* a separate value to display in the processor load graph (previously it was combined with *user*)
 
 ###2016.03.19
