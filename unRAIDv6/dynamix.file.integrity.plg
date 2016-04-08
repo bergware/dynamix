@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.06a">
+<!ENTITY version   "2016.04.08">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ba7cf94f9b64b383231f52024e86b92e">
+<!ENTITY MD5       "7857c39b1c6387ef162b831c244a3546">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed overcommitment of processor when many files are copied
+
+###2016.04.06
 - improved hash processing
 - updated bunker script to version 2.5.1
 
