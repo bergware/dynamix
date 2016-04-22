@@ -55,6 +55,9 @@ if [[ ! -f /boot/config.network.cfg- ]]; then
   cp /boot/config/network.cfg /boot/config/network.cfg-
 fi
 
+# Remove auto generated files
+rm -f /usr/local/emhttp/webGui/Eth[1-9]*.page
+
 # Update file access mode
 chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 
