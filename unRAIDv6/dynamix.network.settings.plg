@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.network.settings">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.22a">
+<!ENTITY version   "2016.04.26">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3aaa6be1f1654be8da3134c29b3045ee">
+<!ENTITY MD5       "8077e50b95a0d2c1d537415383e75a62">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -28,8 +28,8 @@ Dynamix Network Settings - Allow configuration of multiple interfaces and VLANs
 <INLINE>
 # Check unRAID version
 source /etc/unraid-version
-if [[ $version != 6.2.0-beta21a ]]; then
-  echo "unRAID version 6.2.0-beta21a is required"
+if [[ ${version:0:5} != 6.2.0 ]]; then
+  echo "unRAID version 6.2.0 is required"
   exit 1
 fi
 
