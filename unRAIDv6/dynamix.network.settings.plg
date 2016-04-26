@@ -51,7 +51,7 @@ fi
 <FILE Run="/bin/bash">
 <INLINE>
 # Copy original network.cfg file
-if [[ ! -f /boot/config.network.cfg- ]]; then
+if [[ ! -f /boot/config/network.cfg- ]]; then
   cp /boot/config/network.cfg /boot/config/network.cfg-
 fi
 
