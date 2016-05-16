@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.network.settings">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.05.14">
+<!ENTITY version   "2016.05.16">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ef1b60f878df62f4ae772fa0f6d2099b">
+<!ENTITY MD5       "3077f13260795685e664ceef4ed9ee2e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
