@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.02.27">
+<!ENTITY version   "2016.06.19">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "fa7a45ed483c5ecba680a343ebee1d21">
+<!ENTITY MD5       "69f4db054e9519c9e7923ca363fb2ede">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- disable 'detect' button and give message when perl is not installed
+- auto-update sensors-detect script to latest known version
+
+###2016.02.27
 - added display of autofan speed percentage when system autofan is installed (courtesy of gfjardim)
 
 ###2015.12.14
@@ -99,6 +103,9 @@ MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f &source;*.txz
 fi
+
+# Remove sensors-detect script
+rm -f /usr/sbin/sensors-detect
 </INLINE>
 </FILE>
 
@@ -106,6 +113,11 @@ fi
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
+</FILE>
+
+<!-- SENSORS-DETECT -->
+<FILE Name="/usr/sbin/sensors-detect">
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sensors-detect</URL>
 </FILE>
 
 <!-- POST-INSTALL SCRIPT -->
