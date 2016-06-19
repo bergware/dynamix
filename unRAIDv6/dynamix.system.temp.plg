@@ -116,7 +116,7 @@ rm -f /usr/sbin/sensors-detect
 </FILE>
 
 <!-- SENSORS-DETECT -->
-<FILE Name="/usr/sbin/sensors-detect" Mode="0770">
+<FILE Name="/usr/sbin/sensors-detect" Mode="0755">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sensors-detect</URL>
 </FILE>
 
