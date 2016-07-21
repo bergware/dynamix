@@ -1,0 +1,226 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.scsi.devices">
+<!ENTITY author    "Bergware">
+<!ENTITY version   "2016.07.21">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" Min="6.2.0">
+
+<CHANGES>
+##&name;
+
+###&version;
+- initial release for unRAID v6.2
+</CHANGES>
+
+<!--
+Copyright 2016, Bergware International
+Dynamix SCSI Devices - Updates the udev storage rules file to properly name SCSI attached disks.
+-->
+
+<!-- PRE-INSTALL SCRIPT -->
+<FILE Run="/bin/bash">
+<INLINE>
+# Remove files
+rm -f /lib/udev/rules.d/60-persistent-storage.rules
+rm -rf /usr/local/emhttp/plugins/&name;/
+</INLINE>
+</FILE>
+
+<!-- README FILE -->
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<INLINE>
+**Dynamix SCSI Devices**
+
+This plugin updates the udev persistent storage devices rules file (courtesy of BubbaQ), which allows proper naming of SCSI attached disks.
+
+*Please by aware that after installation of this plugin, it might be necessary to re-assign disks due to their changed names!*
+</INLINE>
+</FILE>
+
+<!-- IMAGE -->
+<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
+<INLINE>
+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
+</INLINE>
+</FILE>
+
+<!-- NEW RULES FILE -->
+<FILE Name="/lib/udev/rules.d/60-persistent-storage.rules" Mode="0644">
+<INLINE>
+<![CDATA[
+# do not edit this file, it will be overwritten on update
+
+# persistent storage links: /dev/disk/{by-id,by-uuid,by-label,by-path}
+# scheme based on "Linux persistent device names", 2004, Hannes Reinecke <hare@suse.de>
+
+ACTION=="remove", GOTO="persistent_storage_end"
+
+SUBSYSTEM!="block", GOTO="persistent_storage_end"
+KERNEL!="loop*|mmcblk*[0-9]|msblk*[0-9]|mspblk*[0-9]|nvme*|sd*|sr*|vd*|xvd*|bcache*|cciss*|dasd*|ubd*", GOTO="persistent_storage_end"
+
+# ignore partitions that span the entire disk
+TEST=="whole_disk", GOTO="persistent_storage_end"
+
+# for partitions import parent information
+ENV{DEVTYPE}=="partition", IMPORT{parent}="ID_*"
+
+# virtio-blk
+KERNEL=="vd*[!0-9]", ATTRS{serial}=="?*", ENV{ID_SERIAL}="$attr{serial}", SYMLINK+="disk/by-id/virtio-$env{ID_SERIAL}"
+KERNEL=="vd*[0-9]", ATTRS{serial}=="?*", ENV{ID_SERIAL}="$attr{serial}", SYMLINK+="disk/by-id/virtio-$env{ID_SERIAL}-part%n"
+
+# ATA
+KERNEL=="sd*[!0-9]|sr*", ENV{ID_SERIAL}!="?*", SUBSYSTEMS=="scsi", ATTRS{vendor}=="ATA", IMPORT{program}="ata_id --export $devnode"
+
+# ATAPI devices (SPC-3 or later)
+KERNEL=="sd*[!0-9]|sr*", ENV{ID_SERIAL}!="?*", SUBSYSTEMS=="scsi", ATTRS{type}=="5", ATTRS{scsi_level}=="[6-9]*", IMPORT{program}="ata_id --export $devnode"
+
+# Run ata_id on non-removable USB Mass Storage (SATA/PATA disks in enclosures)
+KERNEL=="sd*[!0-9]|sr*", ENV{ID_SERIAL}!="?*", ATTR{removable}=="0", SUBSYSTEMS=="usb", IMPORT{program}="ata_id --export $devnode"
+
+# Fall back usb_id for USB devices
+KERNEL=="sd*[!0-9]|sr*", ENV{ID_SERIAL}!="?*", SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id"
+
+# SCSI devices
+KERNEL=="sd*[!0-9]|sr*", ENV{ID_SERIAL}!="?*", IMPORT{program}="scsi_id --export --whitelisted -d $devnode", ENV{ID_BUS}="scsi"
+KERNEL=="cciss*", ENV{DEVTYPE}=="disk", ENV{ID_SERIAL}!="?*", IMPORT{program}="scsi_id --export --whitelisted -d $devnode", ENV{ID_BUS}="cciss"
+KERNEL=="sd*|sr*|cciss*", ENV{DEVTYPE}=="disk", ENV{ID_SCSI_SERIAL}=="", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/$env{ID_BUS}-$env{ID_SERIAL}"
+KERNEL=="sd*|sr*|cciss*", ENV{DEVTYPE}=="disk", ENV{ID_SCSI_SERIAL}=="?*", SYMLINK+="disk/by-id/$env{ID_BUS}-$env{ID_MODEL}_$env{ID_SCSI_SERIAL}"
+KERNEL=="sd*|cciss*", ENV{DEVTYPE}=="partition", ENV{ID_SCSI_SERIAL}=="", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/$env{ID_BUS}-$env{ID_SERIAL}-part%n"
+KERNEL=="sd*|cciss*", ENV{DEVTYPE}=="partition", ENV{ID_SCSI_SERIAL}=="?*", SYMLINK+="disk/by-id/$env{ID_BUS}-$env{ID_MODEL}_$env{ID_SCSI_SERIAL}-part%n"
+
+# NVMe
+KERNEL=="nvme*", ENV{ID_SERIAL}!="?*", IMPORT{program}="nvme_id --export $devnode"
+KERNEL=="nvme*", ENV{DEVTYPE}=="disk", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/nvme-$env{ID_SERIAL}"
+KERNEL=="nvme*", ENV{DEVTYPE}=="partition", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/nvme-$env{ID_SERIAL}-part%n"
+
+# FireWire
+KERNEL=="sd*[!0-9]|sr*", ATTRS{ieee1394_id}=="?*", SYMLINK+="disk/by-id/ieee1394-$attr{ieee1394_id}"
+KERNEL=="sd*[0-9]", ATTRS{ieee1394_id}=="?*", SYMLINK+="disk/by-id/ieee1394-$attr{ieee1394_id}-part%n"
+
+# MMC
+KERNEL=="mmcblk[0-9]", SUBSYSTEMS=="mmc", ATTRS{name}=="?*", ATTRS{serial}=="?*", \
+  ENV{ID_NAME}="$attr{name}", ENV{ID_SERIAL}="$attr{serial}", SYMLINK+="disk/by-id/mmc-$env{ID_NAME}_$env{ID_SERIAL}"
+KERNEL=="mmcblk[0-9]p[0-9]", ENV{ID_NAME}=="?*", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/mmc-$env{ID_NAME}_$env{ID_SERIAL}-part%n"
+
+# Memstick
+KERNEL=="msblk[0-9]|mspblk[0-9]", SUBSYSTEMS=="memstick", ATTRS{name}=="?*", ATTRS{serial}=="?*", \
+  ENV{ID_NAME}="$attr{name}", ENV{ID_SERIAL}="$attr{serial}", SYMLINK+="disk/by-id/memstick-$env{ID_NAME}_$env{ID_SERIAL}"
+KERNEL=="msblk[0-9]p[0-9]|mspblk[0-9]p[0-9]", ENV{ID_NAME}=="?*", ENV{ID_SERIAL}=="?*", SYMLINK+="disk/by-id/memstick-$env{ID_NAME}_$env{ID_SERIAL}-part%n"
+
+# by-path
+ENV{DEVTYPE}=="disk", DEVPATH!="*/virtual/*", IMPORT{builtin}="path_id"
+ENV{DEVTYPE}=="disk", ENV{ID_PATH}=="?*", SYMLINK+="disk/by-path/$env{ID_PATH}"
+ENV{DEVTYPE}=="partition", ENV{ID_PATH}=="?*", SYMLINK+="disk/by-path/$env{ID_PATH}-part%n"
+
+# probe filesystem metadata of optical drives which have a media inserted
+KERNEL=="sr*", ENV{DISK_EJECT_REQUEST}!="?*", ENV{ID_CDROM_MEDIA_TRACK_COUNT_DATA}=="?*", ENV{ID_CDROM_MEDIA_SESSION_LAST_OFFSET}=="?*", \
+  IMPORT{builtin}="blkid --offset=$env{ID_CDROM_MEDIA_SESSION_LAST_OFFSET}"
+# single-session CDs do not have ID_CDROM_MEDIA_SESSION_LAST_OFFSET
+KERNEL=="sr*", ENV{DISK_EJECT_REQUEST}!="?*", ENV{ID_CDROM_MEDIA_TRACK_COUNT_DATA}=="?*", ENV{ID_CDROM_MEDIA_SESSION_LAST_OFFSET}=="", \
+  IMPORT{builtin}="blkid --noraid"
+
+# probe filesystem metadata of disks
+KERNEL!="sr*", IMPORT{builtin}="blkid"
+
+# by-label/by-uuid links (filesystem metadata)
+ENV{ID_FS_USAGE}=="filesystem|other|crypto", ENV{ID_FS_UUID_ENC}=="?*", SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"
+ENV{ID_FS_USAGE}=="filesystem|other", ENV{ID_FS_LABEL_ENC}=="?*", SYMLINK+="disk/by-label/$env{ID_FS_LABEL_ENC}"
+
+# by-id (World Wide Name)
+ENV{DEVTYPE}=="disk", ENV{ID_WWN_WITH_EXTENSION}=="?*", SYMLINK+="disk/by-id/wwn-$env{ID_WWN_WITH_EXTENSION}"
+ENV{DEVTYPE}=="partition", ENV{ID_WWN_WITH_EXTENSION}=="?*", SYMLINK+="disk/by-id/wwn-$env{ID_WWN_WITH_EXTENSION}-part%n"
+
+# by-partlabel/by-partuuid links (partition metadata)
+ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_UUID}=="?*", SYMLINK+="disk/by-partuuid/$env{ID_PART_ENTRY_UUID}"
+ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_NAME}=="?*", SYMLINK+="disk/by-partlabel/$env{ID_PART_ENTRY_NAME}"
+
+# add symlink to GPT root disk
+ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_GPT_AUTO_ROOT}=="1", SYMLINK+="gpt-auto-root"
+
+LABEL="persistent_storage_end"
+]]>
+</INLINE>
+</FILE>
+
+<!-- POST-INSTALL SCRIPT -->
+<FILE Run="/bin/bash">
+<INLINE>
+# update udev devices
+udevadm control --reload-rules
+udevadm trigger --subsystem-match=block
+udevadm settle --timeout=30
+
+# Update file access mode
+chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
+
+echo ""
+echo "-----------------------------------------------------------"
+echo " Plugin &name; is installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2016, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+<!-- REMOVE SCRIPT -->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+echo "Remove successful - PLEASE REBOOT YOUR SERVER"
+</INLINE>
+</FILE>
+
+</PLUGIN>
