@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2014, Bergware International.
+/* Copyright 2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -12,7 +12,7 @@
 <script>
 function sleepNow() {
   $('#sleepbutton').val('Sleeping...');
-  $('#statusraid').append('&nbsp;&bullet;&nbsp;<span class="warning" style="font-weight:bold">System in sleep mode</span>');
+  if (typeof showNotice == 'function') showNotice('System in sleep mode');
   for (var i=0,element; element=document.querySelectorAll('input,button,select')[i]; i++) { element.disabled = true; }
   for (var i=0,link; link=document.getElementsByTagName('a')[i]; i++) { link.style.color = "gray"; } //fake disable
   $.get('/plugins/dynamix.s3.sleep/include/SleepMode.php',function(){location=location;});

@@ -1,31 +1,31 @@
 #!/bin/bash
 plugin=dynamix.file.integrity
-script=watcher
-execute=/usr/local/emhttp/plugins/$plugin/scripts/$script
+watcher=/usr/local/emhttp/plugins/$plugin/scripts/watcher
 conf=/etc/inotifywait.conf
 
 watcher.start() {
-  if [[ -z $(pgrep -f $execute) ]]; then
+  if [[ -z $(pgrep -f $watcher) ]]; then
     source $conf 2>/dev/null
-    $execute "$cmd" "$method" "$exclude" "$disks"
-    echo "$script started"
+    $watcher "$cmd" "$method" "$exclude" "$disks"
+    echo "watcher started"
   else
-    echo "$script already running!"
+    echo "watcher already running!"
   fi
 }
 
 watcher.stop() {
-  if [[ -n $(pgrep -f $execute) ]]; then
+  if [[ -n $(pgrep -f $watcher) ]]; then
     pkill inotifywait
     timer=5
-    until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
+    until [[ -z $(pgrep -f $watcher) || $timer -eq 0 ]]; do
       timer=$((timer-1))
       sleep 1
     done
-    echo "$script stopped"
+    [[ $timer -gt 0 ]] && echo "watcher stopped" || echo "watcher did not stop"
   else
-    echo "$script not running!"
+    echo "watcher not running!"
   fi
+  rm -f /var/run/hash.pipe
 }
 
 watcher.restart() {

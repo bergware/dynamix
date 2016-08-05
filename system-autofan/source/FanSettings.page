@@ -3,7 +3,7 @@ Title="Fan Auto Control"
 Icon="dynamix.system.autofan.png"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2015-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -69,12 +69,18 @@ function detectFanLow() {
     });
   }
 }
+function tempVal(form) {
+<?if ($display['unit']=='F'):?>
+  form.low.value = Math.round((form.low.value-32)*5/9);
+  form.high.value = Math.round((form.high.value-32)*5/9);
+<?endif;?>
+}
 $(function() {
   showStatus('<?=$sName?>');
 });
 </script>
 
-<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="tempVal(this)">
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.autofan.php">
 <input type="hidden" name="#prefix" value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m">

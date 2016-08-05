@@ -48,10 +48,10 @@ Current elected master:
 </form>
 <script>
 function setMonitor(form) {
-  $.get('/webGui/include/LocalMaster.php',{monitor:form.monitor.value});
+  $.get('/plugins/dynamix.local.master/include/LocalMaster.php',{monitor:form.monitor.value});
 }
 function getMaster() {
-  $.get('/webGui/include/LocalMaster.php',{smb:true},function(data) {
+  $.get('/plugins/dynamix.local.master/include/LocalMaster.php',{smb:true},function(data) {
     $('#elected').html(data);
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     setTimeout(getMaster,5000);

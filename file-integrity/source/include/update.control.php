@@ -10,10 +10,14 @@
  */
 ?>
 <?
+function regex($text) {
+  return strtr($text,['.' => '\.','[' => '\[',']' => '\]','(' => '\(',')' => '\)','{' => '\{','}' => '\}','/' => '\/','+' => '\+','-' => '\-','*' => '.*','&' => '\&','?' => '\?']);
+}
+
 $bunker = '/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker';
-$path = '/boot/config/plugins/dynamix.file.integrity';
-$apple = ['.AppleDB','.DS_Store'];
-$disks = [];
+$path   = '/boot/config/plugins/dynamix.file.integrity/export';
+$apple  = [regex('.AppleDB'),regex('.DS_Store')];
+$disks  = [];
 
 foreach ($_POST as $key => $value) {
   if (substr($key,0,4)=='disk') {
@@ -23,8 +27,8 @@ foreach ($_POST as $key => $value) {
 }
 $m = $_POST['#method'];
 $n = $_POST['#notify'];
-$e = $_POST['#exclude'] ? "-E \"{$_POST['#exclude']}\"" : "";
-$f = $_POST['#folders'] ? "-F \"{$_POST['#folders']}\"" : "";
+$e = $_POST['#exclude'] ? "-E \"".regex($_POST['#exclude'])."\"" : "";
+$f = $_POST['#folders'] ? "-F \"".regex($_POST['#folders']).($_POST['#apple'] ? ",{$apple[0]}" : "")."\"" : "";
 $l = strpos($_POST['#log'],'-L')!==false ? "-L" : "";
 
 if ($_POST['#priority']) {
@@ -34,11 +38,11 @@ if ($_POST['#priority']) {
 
 switch ($_POST['cmd']) {
   case 'Build':
-    $custom = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
-    if ($_POST['#apple']) $custom = array_merge($custom, $apple);
-    $entry = $custom ? '! "'.implode(',', $custom).'"' : '';
+    $key = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
+    if ($_POST['#apple']) $key[] = $apple[1];
+    $key = $key ? '! "'.implode(',', $key).'"' : '';
     foreach ($disks as $disk) {
-      exec("$bunker -aqx $m $l $e $f -f $path/$disk.export.hash /mnt/$disk $entry >/dev/null &");
+      exec("$bunker -aqx $m $l $e $f -f $path/$disk.export.hash /mnt/$disk $key >/dev/null &");
     }
   break;
   case 'Export':
@@ -70,11 +74,11 @@ switch ($_POST['cmd']) {
     }
   break;
   case 'Clear':
-    $custom = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
-    if ($_POST['#apple']) $custom = array_merge($custom, $apple);
-    $entry = $custom ? '"'.implode(',', $custom).'"' : '';
+    $key = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
+    if ($_POST['#apple']) $key[] = $apple[1];
+    $key = $key ? '"'.implode(',', $key).'"' : '';
     foreach ($disks as $disk) {
-      exec("$bunker -Rqxz $m $l $e $f /mnt/$disk $entry >/dev/null &");
+      exec("$bunker -Rqxz $m $l $e $f /mnt/$disk $key >/dev/null &");
     }
   break;
 }

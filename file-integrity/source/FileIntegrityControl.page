@@ -1,4 +1,4 @@
-Menu="FileIntegrity:2"
+Menu="Integrity"
 Title="File Integrity Control"
 ---
 <?PHP
@@ -18,19 +18,37 @@ if ($var['fsState']!="Started") {
   echo "<p><input type='button' value='Done' onclick='done()'></p>";
   return;
 }
+$plugin = 'dynamix.file.integrity';
+$cfg = parse_plugin_cfg($plugin);
+
 $folders = $cfg['exclude'] ? explode(',',$cfg['exclude']) : [];
 if ($cfg['folders']) $folders = array_merge($folders,array_map('trim',explode(',',$cfg['folders'])));
-$folders = $folders ? implode(' , ',$folders) : 'None';
+$folders = $folders ? implode('&nbsp;&nbsp;',$folders) : 'None';
 
 $files = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
 $files = $files ? implode(' , ',$files) : 'None';
+
+$size = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
+$root = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
 ?>
+<style>
+input.thin{margin:1px;}
+span.running{background-color:#FF9E9E;}
+span.green-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #6FA239;}
+span.orange-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #FF9900;}
+span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #CC0000;}
+.blue-text{color:#00529B;}
+</style>
 <script>
 var disks = [];
 var bunker = [];
 
-function updateTable() {
-  $.post('/plugins/dynamix.file.integrity/include/ProgressInfo.php',{disk:0},function(data){$('#disk-status').html(data);});
+function updater() {
+  $.post('/plugins/dynamix.file.integrity/include/ProgressInfo.php',{disk:0,time:180},function(data){
+    $('#disk-status').html(data);
+    $('input[value="Find"]').prop('disabled',$('#export-status').html().search('green-text')==-1);
+    setTimeout(updater,3000);
+  });
 }
 function monitor(cmd,disk) {
   $.post('/plugins/dynamix.file.integrity/include/ProgressInfo.php',{disk:disk},function(data) {
@@ -44,10 +62,9 @@ function monitor(cmd,disk) {
       updateList(false,'disk'+disk);
       prepareList(cmd);
       $('input[name="disk'+disk+'"]').prop('disabled',false).prop('checked',false);
-      updateTable();
     } else {
       $('#eta'+disk).html(data[2]);
-      $('#button'+disk).html("<input type='button' value='Cancel' onclick='cancelBunker(\""+cmd+"\","+disk+")'>");
+      $('#button'+disk).html("<input type='button' style='margin:0' value='Cancel' onclick='cancelBunker(\""+cmd+"\","+disk+")'>");
       bunker[disk] = setTimeout('monitor("'+cmd+'",'+disk+')',3000);
     }
   });
@@ -63,6 +80,7 @@ function updateList(checked,name) {
   var disk = name.substr(4);
   if (checked) disks.push(disk); else disks.splice(disks.indexOf(disk),1);
   $('input[type=submit]').not('input[name^="#"]').prop('disabled',disks.length==0);
+  $('input[value=Corz]').prop('disabled',disks.length==0);
   if (disks.length==0) $.removeCookie('disks',{path:'/'});
 }
 function prepareList(cmd) {
@@ -84,8 +102,21 @@ function checkAll(checked) {
     }
   });
 }
+function duplicates() {
+  var args = '&arg1=<?=$size?>';
+  args += $('#export-status').html().search(/(blue|orange)-text/)>=0 ? '&arg2=part' : '&arg2=';
+  args += $('input[name="#more"]').prop('checked') ? '&arg3=more' : '&arg3=';
+  openBox('/plugins/dynamix.file.integrity/scripts/duplicates'+args,'File Duplicates Check',490,430,false);
+}
+function corz() {
+  var args = '&arg1=';
+  $('input[class="selection"]').each(function() {
+    if ($(this).prop('checked')) args += $(this).attr('name')+',';
+  });
+  openBox('/plugins/dynamix.file.integrity/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$size?>','Generate Corz Files',490,430,false);
+}
 $(function() {
-  updateTable();
+  updater();
   if ($.cookie('disks') != null) {
     var cookies = $.cookie('disks').split(',');
     for (var i=0,cookie; cookie=cookies[i]; i++) {
@@ -98,9 +129,20 @@ $(function() {
     }
   } else {
     $('input[type=submit]').not('input[name^="#"]').prop('disabled',true);
+    $('input[value=Corz]').prop('disabled',true);
   }
+  $('.tabs').append("<span class='status' style='font-size:12px'>Include duplicate file hashes in <i>Find</i> command &nbsp;<input type='checkbox' name='#more'></span>");
+<?if (function_exists('plugin_update_available') && $version = plugin_update_available($plugin)):?>
+  showNotice('Dynamix File Integrity <b><?=$version?></b> is available. <a>Download Now</a>','<?=$plugin?>');
+<?endif;?>
 });
 </script>
+<div style="float:right">
+ <span style="font-style:italic;display:block;text-align:right">hash files &nbsp;<a href="<?=$root?>/Browse?dir=/boot/config/plugins/dynamix.file.integrity/export"><img src="/webGui/images/explore.png"></a></span><br>
+ <span style="font-style:italic;display:block;text-align:right">log files &nbsp;<a href="<?=$root?>/Browse?dir=/boot/config/plugins/dynamix.file.integrity/logs"><img src="/webGui/images/explore.png"></a></span><br>
+ <span style="font-style:italic;display:block;text-align:right">saved files &nbsp;<a href="<?=$root?>/Browse?dir=/boot/config/plugins/dynamix.file.integrity/saved"><img src="/webGui/images/explore.png"></a></span>
+ </div>
+
 <form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.x.value)">
 <input type="hidden" name="#file" value="not-used">
 <input type="hidden" name="#method" value="<?=$cfg['method']?>">
@@ -114,22 +156,24 @@ $(function() {
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.control.php">
 <input type="hidden" name="x" value="">
 Hashing method:
-: <span style='font-size:12px'><?=$cfg['method']?str_replace(['-b2','-md5'],['BLAKE2','MD5'],$cfg['method']):'SHA2'?></span>
+: <span style='font-size:12px;margin-right:8px'><?=$cfg['method']?str_replace(['-b2','-md5'],['BLAKE2','MD5'],$cfg['method']):'SHA2'?></span>
 
 > This is the hash method as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 
 Excluded folders:
 : <span style='font-size:12px'><?=$folders?></span>
 
+> This is the list of excluded folders as selected on the settings page. Make sure it is correct before you perform any commands on this page.
+
 Excluded files:
 : <span style='font-size:12px'><?=$files?></span>
 
-> This is the list of excluded folders and files as selected on the settings page. Make sure it is correct before you perform any commands on this page.
+> This is the list of excluded files as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 
 <?
 $row1 = $row2 = [];
 foreach ($disks as $disk) {
-  if ($disk['type']=='Data') {
+  if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {
     $row1[] = "<th style='text-align:center'>Disk<br>{$disk['idx']}</th>";
     $row2[] = "<td style='text-align:center'><input type='checkbox' name='{$disk['name']}' class='selection' onchange='updateList(this.checked,this.name)'></td>";
   }
@@ -143,11 +187,16 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 
 > Select the disks which you want to let participate in any of the commands below. You can execute a command multiple times with different selections.
 >
-> A track record for each disk is maintained (see below). The symbol <span class='orange-text'><i class='fa fa-circle-o icon'></i></span>indicates an open operation, while the symbol <span class='green-text'><i class='fa fa-check icon'></i></span>indicates a completed operation.
+> For each disk the build and export state is maintained in near real-time.
 >
-> - *Build up-to-date* indicates per disk whether the build is complete or some files do not have the extended attributes set yet. A manual build will update the missing files.
+> + *Build up-to-date* indicates per disk whether the build is complete or some files do not have the extended attributes set yet. A manual build will update the missing files.
+> + *Export up-to-date* indicates per disk whether the export file contains all files or some files are missing. A manual export will make the export file complete.
 >
-> - *Export up-to-date* indicates per disk whether the export file contains all files or some files are missing. A manual export will make the export file complete.
+> The used symbols have the following meaning:
+>
+> + <span class='orange-text'><i class='fa fa-circle-o icon'></i></span> represents an open operation
+> + <span class='green-text'><i class='fa fa-check icon'></i></span> represents a completed operation
+> + <span class='blue-text'><i class='fa fa-close icon'></i></span> represents a disabled operation (related export file is not present)
 >
 > Use the **Build** command to do the initial set up and select which disks to include. All selected disks are processed in parallel to decrease run-time, but at increased processor load.
 > Building can be done in intermediate steps, files which have their extended attributes set, will be skipped when a next build is performed.
@@ -162,6 +211,10 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 > Use the **Remove** command to delete the extended attributes which are stored with the file. This makes the system see such files as unprocessed.
 >
 > Use the **Clear** command to delete the extended attributes from excluded folders and files only.
+>
+> Use the **Corz** command to convert the export files to Corz compatible files. Corz files are created for each folder and stored under name *&lt;disk&gt;.corz&lt;/full-path-name&gt;.hash*.
+>
+> Use the **Find** command to search for duplicate file names and file hashes in the exported *hash* files.
 
 &nbsp;
 : <input type="submit" name="cmd" value="Build"  onclick="this.form.x.value='a'">
@@ -170,7 +223,11 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
   <input type="submit" name="cmd" value="Import" onclick="this.form.x.value='i'">
   <input type="submit" name="cmd" value="Remove" onclick="this.form.x.value='R'">
   <input type="submit" name="cmd" value="Clear"  onclick="this.form.x.value='R'">
+  <input type="button" value="Corz" onclick="corz()">
+  <input type="button" value="Find" onclick="duplicates()">
+<?if ($cfg['place']=='SystemInformation'):?>
   <input type="button" value=" Done" onclick="done()">
+<?endif;?>
 </form>
 
 <table class='tablesorter'>

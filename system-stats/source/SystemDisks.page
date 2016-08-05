@@ -2,7 +2,7 @@ Menu="Stats:1"
 Title="Disk Stats"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2016, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -35,19 +35,20 @@ $offset = $text=='left' ? 6 : -6;
 $index = $text=='left' ? 2 : 0;
 $parity = $arraysize = $arrayfree = 0;
 $series = $sizes = [];
-$gap=0.18; 
+$gap=0.18;
 
 switch ($display['view']) {
-case "small": $rowHeight = 34; $y = -2; break;
-case "wide":  $rowHeight = 50; $y = 4;  break;
-default:      $rowHeight = 42; $y = 0;  break;}
+case 'small': $rowHeight = 44; $y = 0; break;
+case 'wide':  $rowHeight = 60; $y = 4; break;
+default:      $rowHeight = 52; $y = 2; break;}
 
 $scale = $display['scale']; $display['scale'] = -1; //force autoscale for chart
+$rows = 0;
 foreach ($disks as $disk) {
-  if ($disk['fsStatus']!='Mounted' && $disk['name']!='parity') continue;
+  if (($disk['fsStatus']!='Mounted' && $disk['type']!='Parity') || strpos($disk['status'],'_NP')!==false) continue;
   switch ($disk['type']) {
   case 'Parity':
-    $parity = $disk['size']*1024;
+    if ($disk['size']*1024 > $parity) $parity = $disk['size']*1024;
   break;
   case 'Data':
     $arraysize += $disk['size']*1024;
@@ -55,11 +56,13 @@ foreach ($disks as $disk) {
   case 'Flash':
     $series[] = "'".my_disk($disk['name'])."'";
     $sizes[] = "'".my_scale($disk['size']*1024,$unit)." $unit'";
+    $rows++;
   break;
   case 'Cache':
     if ($disk['name']=='cache') {
       $series[] = "'Cache'";
       $sizes[] = "'".my_scale($disk['fsSize']*1024,$unit)." $unit'";
+      $rows++;
     }
   break;}
 }
@@ -83,10 +86,15 @@ if ($display['time']=="%R") {
 
 function bar_color($val) {
   global $display;
-  if ($val>=$display['critical']) return "redbar";
-  if ($val>=$display['warning']) return "orangebar";
+  $critical = $display['critical'];
+  $warning = $display['warning'];
+  if ($val>=$critical && $critical>0) return "redbar";
+  if ($val>=$warning && $warning>0) return "orangebar";
   return "greenbar";
 }
+
+$critical = $display['critical']>0;
+$warning = $display['warning']>0 && ($display['critical']==0 || $display['warning']<$display['critical']);
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/<?=$plugin?>/styles/disk.stats.css">
 <script src="/plugins/<?=$plugin?>/javascript/jquery.highcharts.js"></script>
@@ -135,7 +143,7 @@ function resizer(time) {
   var series, start;
   if (time<frame) {
 <?if (strpos($show,'cpu')!==false):?>
-    for (var i=0; i<2; i++) {
+    for (var i=0; i<3; i++) {
       series = cpuchart.series[i].data;
       start = series.length-time;
       while (start-- > 0) series[0].remove(false);
@@ -178,22 +186,22 @@ function realtime() {
     value = string.split(' ');
 <?if (strpos($show,'cpu')!==false):?>
     shift = cpuchart.series[0].length==0 || cpuchart.series[0].data.length>frame;
-    for (i=0; i<2; i++) cpuchart.series[i].addPoint([timestamp, (value[i+0]*1)], false, shift);
+    for (i=0; i<3; i++) cpuchart.series[i].addPoint([timestamp, (value[i+0]*1)], false, shift);
     cpuchart.redraw();
 <?endif;?>
 <?if (strpos($show,'ram')!==false):?>
     shift = ramchart.series[0].length==0 || ramchart.series[0].data.length>frame;
-    for (i=0; i<3; i++) ramchart.series[i].addPoint([timestamp, (value[i+4]*1)], false, shift);
+    for (i=0; i<3; i++) ramchart.series[i].addPoint([timestamp, (value[i+5]*1)], false, shift);
     ramchart.redraw();
 <?endif;?>
 <?if (strpos($show,'com')!==false):?>
     shift = comchart.series[0].length==0 || comchart.series[0].data.length>frame;
-    for (i=0; i<2; i++) comchart.series[i].addPoint([timestamp, (value[i+7]*1)], false, shift);
+    for (i=0; i<2; i++) comchart.series[i].addPoint([timestamp, (value[i+8]*1)], false, shift);
     comchart.redraw();
 <?endif;?>
 <?if (strpos($show,'hdd')!==false):?>
     shift = hddchart.series[0].length==0 || hddchart.series[0].data.length>frame;
-    for (i=0; i<2; i++) hddchart.series[i].addPoint([timestamp, (value[i+2]*1)], false, shift);
+    for (i=0; i<2; i++) hddchart.series[i].addPoint([timestamp, (value[i+3]*1)], false, shift);
     hddchart.redraw();
 <?endif;?>
   });
@@ -349,7 +357,7 @@ $(function() {
   Highcharts.setOptions({
     global:{useUTC:false},
     chart:{
-      style:{fontFamily:'arimo,arial,sans-serif',fontSize:'10px'},
+      style:{fontFamily:'arimo',fontSize:'10px'},
       backgroundColor:{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'rgb(96,96,96)'],[1,'rgb(16,16,16)']]},
       borderWidth:0,
       borderRadius:8,
@@ -414,7 +422,7 @@ $(function() {
     credits:{enabled:false}
   });
   syschart = new Highcharts.Chart({
-    chart:{renderTo:'sys',events:{load:sys},type:'bar',height:<?=count($disks)*$rowHeight?>,width:getWidth(true),zoomType:null},
+    chart:{renderTo:'sys',events:{load:sys},type:'bar',height:<?=$rows*$rowHeight?>,width:getWidth(true),zoomType:null},
     colors:[{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#941C00'],[1,'#DE1100']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#CE7C10'],[1,'#F0B400']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#17BF0B'],[1,'#127A05']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#D9D9D9'],[1,'#949494']]}],
     plotOptions:{series:{stacking:'normal',animation:{duration:1000},pointPadding:0.2,groupPadding:0,
     dataLabels:{enabled:true,color:'#fff',align:'<?=$text?>',verticalAlign:'top',x:<?=$offset?>,y:<?=$y?>,style:{opacity:0},formatter:function(){if (this.series.index==<?=$index?>) return this.total+' %';}}}},
@@ -427,8 +435,12 @@ $(function() {
     xAxis:{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'12px'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
 <?endif;?>
     yAxis:{gridLineDashStyle:'dash',labels:{y:15},max:100,plotLines:[
+<?if ($warning):?>
       {label:{text:'<?=$display['warning']?>',style:{color:'#ff6600',fontSize:'9px'},verticalAlign:'top',textAlign:'right',y:-4,x:-4},dashStyle:'dash',color:'#ff6600',width:0.8,value:<?=$display['warning']?>,zIndex:5},
+<?endif;?>
+<?if ($critical):?>
       {label:{text:'<?=$display['critical']?>',style:{color:'#ff6600',fontSize:'9px'},verticalAlign:'top',textAlign:'right',y:-4,x:-4},dashStyle:'dash',color:'#ff6600',width:0.8,value:<?=$display['critical']?>,zIndex:5}
+<?endif;?>
     ]},
     legend:{enabled:false},
     tooltip:{enabled:false}
@@ -438,11 +450,12 @@ $(function() {
 <?if (strpos($show,'cpu')!==false):?>
   cpuchart = new Highcharts.Chart({
     chart:{renderTo:'cpu',events:{load:cpu}},
-    colors:['#AFD8F8','#EDC240'],
+    colors:['#BDE5F8','#E68A00','#EDC240'],
     plotOptions:{area:{stacking:'normal'}},
     title:{text:'Processor'},
     subtitle:{text:'CPU Load'},
     yAxis:{labels:{formatter:function(){return this.value+' %';}}},
+    legend:{y:-11},
     tooltip:{formatter:function(){
      var s='<span style="color:#ccc;font-size:9px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M',this.x)+'</span>';
      $.each(this.points,function(i,point){s+='<br><span style="color:'+point.series.color+'">'+point.series.name+':</span>'+autoscale(point.y,'%',10)});
@@ -455,7 +468,7 @@ $(function() {
 <?if (strpos($show,'ram')!==false):?>
   ramchart = new Highcharts.Chart({
     chart:{renderTo:'ram',events:{load:ram}},
-    colors:['#4DA74D','#CC6600','#EDC240'],
+    colors:['#4DA74D','#E68A00','#EDC240'],
     plotOptions:{area:{stacking:'normal'}},
     title:{text:'Memory'},
     subtitle:{text:'RAM'},
@@ -473,7 +486,7 @@ $(function() {
 <?if (strpos($show,'com')!==false):?>
   comchart = new Highcharts.Chart({
     chart:{renderTo:'com',events:{load:com}},
-    colors:['#CC6600','#EDC240'],
+    colors:['#E68A00','#EDC240'],
     title:{text:'Network'},
     subtitle:{text:'<?=$cfg['port']?>'},
     yAxis:{labels:{formatter:function() {return autoscale(this.value*<?=$cfg["unit"]=='b'?8000:1000?>,'<?=$cfg["unit"]?>/s',10);}}},
@@ -489,7 +502,7 @@ $(function() {
 <?if (strpos($show,'hdd')!==false):?>
   hddchart = new Highcharts.Chart({
     chart:{renderTo:'hdd',events:{load:hdd}},
-    colors:['#CC6600','#EDC240'],
+    colors:['#E68A00','#EDC240'],
     title:{text:'Storage'},
     subtitle:{text:'<?=exec("ls /dev/[hs]d[a-z] | wc -l")?> disks'},
     yAxis:{labels:{formatter:function() {return autoscale(this.value*512,'B/s',10);}}},
@@ -510,11 +523,15 @@ $(function() {
 <div class="left"><span id="stats1" class="mybar <?=bar_color($arraypercent)?> inside"></span><span id="stats2"><strong> <?=my_scale($arrayused, $unit)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$arraypercent?>%</strong><br/><small>Total Space Used</small></span></div>
 <div class="left"><span class="mybar whitebar inside"></span><span id="stats3"><strong><?=my_scale($arrayfree, $unit)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$freepercent?>%</strong><br/><small>Available for Data</small></span></div>
 <div class="right"><span class="mybar graybar inside"></span><strong> <?=my_scale($parity, $unit)." $unit"?></strong><br><small>Used for Parity</small></div>
+<?if ($critical):?>
 <div class="right"><span class="mybar redbar inside"></span><strong>Above <?=$display['critical']?>%</strong><br><small>Low on Space</small></div>
-<?if ($display['warning']<$display['critical']):?>
+<?endif;?>
+<?if ($warning):?>
 <div class="right"><span class="mybar orangebar inside"></span><strong>Above <?=$display['warning']?>%</strong><br><small>High on Usage</small></div>
 <?endif;?>
-<div class="right"><span class="mybar greenbar inside"></span><strong>Below <?=min($display['warning'],$display['critical'])?>%</strong><br><small>Normal Usage</small></div>
+<?if ($critical || $warning):?>
+<div class="right"><span class="mybar greenbar inside"></span><strong>Below <?=$critical?$display['critical']:$display['warning']?>%</strong><br><small>Normal Usage</small></div>
+<?endif;?>
 <span id="sys" class="graph1"></span>
 <?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>
 <p><input type="button" value="Done" onclick="done()"></p>

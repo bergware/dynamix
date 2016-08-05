@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('Wrappers.php');
+require_once 'webGui/include/Wrappers.php';
 
 if (isset($_GET['monitor'])) {
   $file = '/boot/config/plugins/dynamix/dynamix.cfg';
@@ -24,14 +24,14 @@ if (isset($_GET['monitor'])) {
   }
   @mkdir(dirname($file));
   file_put_contents($file, $text);
-  $cron = $_GET['monitor'] ? "# Generated local master browser check:\n*/1 * * * * /usr/local/emhttp/plugins/dynamix/scripts/localmaster &> /dev/null\n\n" : "";
-  parse_cron_cfg('dynamix', 'localmaster', $cron);
+  $cron = $_GET['monitor'] ? "# Generated local master browser check:\n*/1 * * * * /usr/local/emhttp/plugins/dynamix.local.master/scripts/localmaster &> /dev/null\n\n" : "";
+  parse_cron_cfg('dynamix.local.master', 'localmaster', $cron);
   exit;
 }
 if (isset($_GET['smb'])) {
   $lmb = exec("nmblookup -M -- - 2>/dev/null|grep -Pom1 '^\S+'");
   $tag = exec("nmblookup -A $lmb 2>/dev/null|grep -Pom1 '^\s+\K\S+'");
-  echo "<img src='/webGui/icons/localmaster.png' class='icon'>$tag is current local master browser";
+  echo "<img src='/plugins/dynamix.local.master/icons/localmaster.png' class='icon'>$tag is current local master browser";
 } else
   @readfile("/var/local/emhttp/localmaster.htm");
 ?>

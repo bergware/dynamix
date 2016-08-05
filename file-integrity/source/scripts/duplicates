@@ -1,0 +1,98 @@
+#!/bin/bash
+
+path=/boot/config/plugins/dynamix.file.integrity
+hash=$path/export/*.hash
+out1=$path/logs/duplicate_file_names.txt
+out2=$path/logs/duplicate_file_hashes.txt
+list=/tmp/$$_list
+
+update() {
+  time=$SECONDS
+  new=$((count*100/files))
+  if [[ $new -gt $old ]]; then
+    echo -ne "<span class='array'>Processing duplicate file entries... $new%</span>\r"
+    old=$new
+  fi
+}
+function cleanup() {
+  rm -f $list.*
+  exit 0
+}
+
+if [[ $(ls $hash 2>/dev/null|wc -l) -eq 0 ]]; then
+  echo "No hash files present."
+  exit 0
+fi
+
+trap cleanup EXIT
+
+if [[ $2 == part ]]; then
+  echo -ne "<span class='login'>Hash files are not up-to-date\n</span>"
+fi
+
+echo -ne "<span class='warn'>Reading and sorting hash files\n</span>"
+for f in $(ls -v $hash); do
+  echo -ne "<span class='warn'>Including... $(basename $f)\n</span>"
+done
+
+echo -ne "<span class='array'>Finding duplicate file names\n</span>"
+sed -r 's: \*/mnt/(disk[0-9]+)/([^/]+)/:*\1*\2*:;s: :|:g;s:\*: :g' $hash 2>/dev/null|sort -k3 >$list.0
+uniq -D -f3 $list.0|sed -r 's:^(\S+) (\S+) (\S+) :\1 \2 \3/:' >$list.1
+
+if [[ -s $list.1 ]]; then
+  echo -ne "<span class='error'>Duplicate file names found\n</span>"
+  files=$(wc -l $list.1|cut -d' ' -f1)
+  count=0; time=0; old=0; disk=; file=
+  while read -ra line; do
+    if [[ "${line[2]}" == "$file" || -z "$file" ]]; then
+      [[ -n $disk ]] && echo -n "," >>$list.f
+      disk=${line[1]}
+      echo -n $disk >>$list.f
+      echo ${line[0]} >>$list.3
+    else
+      [[ $(uniq $list.3|wc -l) -eq 1 ]] && text="equal" || text="other"
+      disk=${line[1]}
+      echo -ne " [$text content] ${file//|/ }\n$disk" >>$list.f
+      rm -f $list.3
+    fi
+    file="${line[2]}"
+    ((count++))
+    [[ $SECONDS -gt $time ]] && update
+  done <$list.1
+  if [[ -s $list.3 ]]; then
+    [[ $(uniq $list.3|wc -l) -eq 1 ]] && text="equal" || text="other"
+    echo " [$text content] ${file//|/ }" >>$list.f
+  fi
+  cp -f $list.f $out1
+  echo "<span class='system'>See <i>log</i> file: <a href='$out1' target='_blank'>$(basename $out1)</a></span>"
+else
+  rm -f $out1
+  echo "<span class='system'>No duplicate file names found</span>"
+fi
+
+if [[ $3 == more ]]; then
+  echo -ne "<span class='array'>Finding duplicate file hashes\n</span>"
+  sort $list.0|uniq -D -w$1|sed -r 's: (\S+) (\S+) : \1|\2/:' >$list.2
+
+  if [[ -s $list.2 ]]; then
+    echo -ne "<span class='error'>Duplicate file hashes found\n</span>"
+    files=$(wc -l $list.2|cut -d' ' -f1)
+    count=0; time=0; old=0; file=; key=
+    while read -ra line; do
+      file="${line[1]}"
+      if [[ ${line[0]} != $key ]]; then
+        key=${line[0]}
+        echo -e "hash: $key\n>${file//|/ }" >>$list.h
+      else
+        echo ">${file//|/ }" >>$list.h
+      fi
+      ((count++))
+      [[ $SECONDS -gt $time ]] && update
+    done <$list.2
+    cp -f $list.h $out2
+    echo "<span class='system'>See <i>log</i> file: <a href='$out2' target='_blank'>$(basename $out2)</a></span>"
+  else
+    rm -f $out2
+    echo "<span class='system'>No duplicate file hashes found</span>"
+  fi
+fi

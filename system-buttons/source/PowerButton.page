@@ -13,14 +13,10 @@ Icon="power.png"
  * all copies or substantial portions of the Software.
  */
 ?>
-<?$swal = file_exists('/usr/local/emhttp/webGui/styles/jquery.sweetalert.css');?>
 <?$force = file_exists('/var/log/plugins/powerdown-x86_64.plg') ? 'true' : 'false';?>
+
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
-<?if (file_exists('/usr/local/emhttp/webGui/javascript/context.js')):?>
 <script src="/webGui/javascript/context.js"></script>
-<?else:?>
-<script src="/webGui/scripts/context.js"></script>
-<?endif;?>
 <script>
 $(function() {
   var opts = [];
@@ -55,11 +51,7 @@ function infoBox(title,text) {
 }
 
 function alertBox(title,text) {
-<?if ($swal):?>
   swal({title:title,text:text,type:'error'});
-<?else:?>
-  alert(title+'\n\n'+text);
-<?endif;?>
 }
 
 function Shutdown(force) {
@@ -68,11 +60,7 @@ function Shutdown(force) {
       alertBox('Array busy','Parity operation or mover is running');
     } else {
 <?if ($confirm['down']):?>
-<?if ($swal):?>
       swal({title:'Proceed?',text:'This will shutdown the system',type:'warning',showCancelButton:true},function(){ShutdownNow(force);});
-<?else:?>
-      if (confirm('Proceed?\n\nThis will shutdown the system')) ShutdownNow(force);
-<?endif;?>
 <?else:?>
       ShutdownNow(force);
 <?endif;?>
@@ -94,11 +82,7 @@ function Reboot(force) {
       alertBox('Array busy','Parity operation or mover is running');
     } else {
 <?if ($confirm['down']):?>
-<?if ($swal):?>
       swal({title:'Proceed?',text:'This will reboot the system',type:'warning',showCancelButton:true},function(){RebootNow(force);});
-<?else:?>
-      if (confirm('Proceed?\n\nThis will reboot the system')) RebootNow(force);
-<?endif;?>
 <?else:?>
       RebootNow(force);
 <?endif;?>
@@ -121,11 +105,7 @@ function Sleep(force) {
       alertBox('Array busy','Parity operation or mover is running');
     } else {
 <?if ($confirm['sleep']):?>
-<?if ($swal):?>
       swal({title:'Proceed?',text:'This will put the system to sleep',type:'warning',showCancelButton:true},function(){SleepNow();});
-<?else:?>
-      if (confirm('Proceed?\n\nThis will put the system to sleep')) SleepNow();
-<?endif;?>
 <?else:?>
       SleepNow();
 <?endif;?>
@@ -146,11 +126,7 @@ function StopArray() {
       alertBox('Array busy','Parity operation or mover is running');
     } else {
 <?if ($confirm['stop']):?>
-<?if ($swal):?>
       swal({title:'Proceed?',text:'This will stop the array',type:'warning',showCancelButton:true},function(){StopArrayNow();});
-<?else:?>
-      if (confirm('Proceed?\n\nThis will stop the array')) StopArrayNow();
-<?endif;?>
 <?else:?>
       StopArrayNow();
 <?endif;?>
@@ -164,11 +140,7 @@ function StopArrayNow() {
 <?else:?>
 function StartArray() {
 <?if ($confirm['stop']):?>
-<?if ($swal):?>
   swal({title:'Proceed?',text:'This will start the array',type:'warning',showCancelButton:true},function(){StartArrayNow();});
-<?else:?>
-  if (confirm('Proceed?\n\nThis will start the array')) StartArrayNow();
-<?endif;?>
 <?else:?>
   StartArrayNow();
 <?endif;?>

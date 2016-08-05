@@ -10,13 +10,19 @@
  */
 ?>
 <?
-function expand_folders($text) {
+function expand_share($text) {
+  return $text.'/';
+}
+function expand_folder($text) {
   $trim = trim($text);
   return ($trim[0]=='*' ? '' : '*').$trim.'/';
 }
-function expand_files($text) {
+function expand_file($text) {
   $trim = trim($text);
   return ($trim[0]=='*' ? '' : '*').$trim.'$';
+}
+function regex($text) {
+  return strtr($text,['.' => '\.','[' => '\[',']' => '\]','(' => '\(',')' => '\)','{' => '\{','}' => '\}','+' => '\+','-' => '\-','*' => '.*','&' => '\&','?' => '\?']);
 }
 
 $cfg = @parse_ini_file("/boot/config/docker.cfg");
@@ -27,19 +33,18 @@ $path = "/boot/config/plugins/dynamix.file.integrity";
 $conf = "/etc/inotifywait.conf";
 $cron = "$path/integrity-check.cron";
 $run  = "$path/integrity-check.sh";
-$chars = ['.','[',']','(',')','+','-','*'];
-$escape = ['\.','\[','\]','\(','\)','\+','\-','.*'];
+$apple = [expand_folder('.AppleDB'),expand_file('.DS_Store')];
 $tasks = [];
 $record = [];
 
-if (isset($cfg[$img]) && strpos(dirname($cfg[$img]),'/mnt/disk')!==false) $record[] = basename($cfg[$img])."$";
-if ($new['folders']) $record = array_merge($record,array_map('expand_folders',explode(',',$new['folders'])));
-if ($new['files']) $record = array_merge($record,array_map('expand_files',explode(',',$new['files'])));
-if ($new['exclude']) $record = array_merge($record,explode(',',$new['exclude']));
-if ($new['apple']) $record = array_merge($record,['*.AppleDB','*.DS_Store$']);
+if (isset($cfg[$img]) && strpos(dirname($cfg[$img]),'/mnt/disk')!==false) $record[] = expand_file(basename($cfg[$img]));
+if ($new['folders']) $record = array_merge($record,array_map('expand_folder',explode(',',$new['folders'])));
+if ($new['files'])   $record = array_merge($record,array_map('expand_file',explode(',',$new['files'])));
+if ($new['exclude']) $record = array_merge($record,array_map('expand_share',explode(',',$new['exclude'])));
+if ($new['apple'])   $record = array_merge($record,$apple);
 
-$more = count($record) > 1;
-$exclude = $record ? ($more ? '(':'').str_replace($chars,$escape,implode('|',$record)).($more ? ')':'') : '';
+if (count($record)>1) {$open = '('; $close = ')';} else {$open = $close = '';}
+$exclude = $record ? $open.regex(implode('|',$record)).$close : '';
 $include = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
 
 file_put_contents($conf, "cmd=\"{$new['cmd']}\"\nmethod=\"{$new['method']}\"\nexclude=\"$exclude\"\ndisks=\"$include\"\n");
@@ -58,7 +63,6 @@ if ($new['schedule']>0 && $x>0) {
   $n = $new['notify'];
   $l = $new['log'];
   $m = $new['method'];
-  $p = $new['parity'] ? "&& $(grep -Po '^mdResync=\K\S+' /proc/mdcmd) -eq 0 " : "";
   switch ($new['schedule']) {
   case 1: //daily
     $time = "{$new['min']} {$new['hour']} * * *";
@@ -82,15 +86,16 @@ if ($new['schedule']>0 && $x>0) {
   $text[] = "#!/bin/bash";
   $text[] = "# This is an auto-generated file, do not change manually!";
   $text[] = "#";
+  if ($new['parity']) $text[] = "[[ \$(grep -Po '^mdResync=\K\S+' /proc/mdcmd) -ne 0 ]] && exit 0";
   foreach ($tasks as $task) {
     if (empty($task)) continue;
     foreach ($task as $disk) {
-      $log = strpos($l, '-f')!==false ? "$l $path/$disk.export.\$(date +%Y%m%d).bad.hash" : $l;
-      $text[] = "[[ $term -eq $i $p]] && $bunker -Vq $m $n $log /mnt/$disk >/dev/null &";
+      $log = strpos($l, '-f')!==false ? "$l $path/logs/$disk.export.\$(date +%Y%m%d).bad.log" : $l;
+      $text[] = "[[ $term -eq $i ]] && $bunker -Vqj $m $n $log /mnt/$disk >/dev/null &";
     }
     $i++;
   }
-  $text[] = "exit 0";
+  $text[] = "exit 0\n";
   file_put_contents($run, implode("\n",$text));
   file_put_contents($cron, "# Generated file integrity check schedule:\n$time $run &> /dev/null\n\n");
 } else {

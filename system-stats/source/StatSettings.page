@@ -3,7 +3,7 @@ Title="Stats Settings"
 Icon="dynamix.system.stats.png"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2016, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@ Icon="dynamix.system.stats.png"
 $plugin = 'dynamix.system.stats';
 $cfg = parse_plugin_cfg($plugin);
 extract(parse_ini_file('/etc/unraid-version'));
-$disabled = ($version=='6.1.7' || substr($version,0,3)=='6.2') ? "" : " disabled";
+$disabled = version_compare($version, '6.1.7', '>=') ? "" : " disabled";
 
 unset($sPorts);
 exec("ifconfig -s|awk '/^(bond|eth)/{print $1}'",$sPorts);

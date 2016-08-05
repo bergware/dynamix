@@ -1,27 +1,47 @@
 #!/bin/bash
+bunker=/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker
+config=/boot/config/plugins/dynamix.file.integrity
+pipe=/var/run/hash.pipe
+
 cmd=$1
 method=$2
 [[ -n $3 ]] && exclude="^/mnt/disk[0-9]+/$3" || exclude="''"
-[[ -n $4 ]] && disks=$4 || disks=/mnt/disk*
+[[ -n $4 ]] && disks=$4 || disks=/mnt/disk[0-9]*
 
-bunker=/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker
+# calculate levels
+busy=$(($(awk '$3~/md/{++c}END{print c}' /proc/diskstats)*512))
+jobs=$(($(nproc)*2))
 
-if [[ -z $method ]]; then
-  hash=sha256
-elif [[ $method == -b2 ]]; then
-  hash=blake2
-else
-  hash=md5
-fi
+# setup named pipe and speaker
+[[ -p $pipe ]] || mkfifo $pipe
+inotifywait -dsrqo $pipe -e close_write --exclude "$exclude" --format '%w%f' $disks
 
-# main (continuous loop)
-inotifywait -mrq --exclude "$exclude" --format '%w%f' -e close_write $disks | while read file; do
+# delay execution
+diskio(){
+  loop=20
+  while [[ $((t1-t0)) -ge $busy && $loop -gt 0 ]]; do
+    t0=$t1; t1=$(awk '$3~/md/{t+=$10}END{print t}' /proc/diskstats)
+    ((loop--))
+    sleep 1
+  done
+  timer=$SECONDS
+}
+
+# listener
+active=0; timer=0; t0=0; t1=$busy
+while read -r file; do
+  [[ $timer -ne $SECONDS ]] && diskio
+  while [[ $active -ge $jobs ]]; do
+    active=$(pgrep bunker|wc -l)
+    sleep 0.5
+  done
   if [[ -z $(getfattr -n user.$hash --only-values "$file" 2>/dev/null) ]]; then
-    $bunker -${cmd}q -1 $method -f "/boot/config/plugins/dynamix.file.integrity/disks.export.$(date +%Y%m%d).new.hash" "$file"
+    $bunker -${cmd}q1 $method -f "$config/saved/disks.export.$(date +%Y%m%d).new.hash" "$file" >/dev/null &
   else
-    $bunker -Vq -1 $method -f "/boot/config/plugins/dynamix.file.integrity/disks.export.$(date +%Y%m%d).bad.hash" "$file"
+    $bunker -Vq1 $method -f "$config/logs/disks.export.$(date +%Y%m%d).bad.log" "$file" >/dev/null &
   fi
-done &
+  ((active++))
+done <$pipe &
 
 # detach
 disown %%

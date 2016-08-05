@@ -1,4 +1,4 @@
-Menu="FileIntegrity:1"
+Menu="FileIntegrity"
 Title="File Integrity Settings"
 ---
 <?PHP
@@ -18,6 +18,10 @@ if ($var['fsState']!="Started") {
   echo "<p><input type='button' value='Done' onclick='done()'></p>";
   return;
 }
+function disk($key) {
+  return substr($key,0,4)=='disk' ? $key : "";
+}
+
 $plugin = 'dynamix.file.integrity';
 $cfg = parse_plugin_cfg($plugin);
 
@@ -27,8 +31,12 @@ $check = "/usr/local/emhttp/plugins/$plugin/scripts/b2sum-check";
 
 $mode = ['Disabled','Daily','Weekly','Monthly'];
 $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+$hash = glob('/boot/config/plugins/dynamix.file.integrity/export/disk*.hash');
 
-exec("find /mnt/disk* -type d -maxdepth 1 -mindepth 1 -exec basename {} \;|uniq|sort -u", $folders);
+extract(parse_ini_file('/etc/unraid-version'));
+$disabled = version_compare($version, '6.1.7', '>=') ? "" : " disabled";
+
+exec("find /mnt/disk[0-9]* -type d -maxdepth 1 -mindepth 1 -exec basename {} \;|uniq|sort -u", $folders);
 ?>
 <style>
 input.thin{margin:1px;}
@@ -36,11 +44,13 @@ span.running{background-color:#FF9E9E;}
 span.green-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #6FA239;}
 span.orange-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #FF9900;}
 span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #CC0000;}
+.blue-text{color:#00529B;}
 </style>
 <script>
 function prepareWatch(form) {
   var exclude = '';
   var disks = '';
+  var partly = '<?=preg_replace(['/^,+/','/,,+/'],'',implode(',',array_map('disk',array_keys($disks))))?>,';
   for (var i=0,item; item=form.exclude.options[i]; i++) {
     if (item.selected) {
       if (exclude.length) exclude += ',';
@@ -52,15 +62,18 @@ function prepareWatch(form) {
   item.value = exclude;
   item.selected = true;
   var count=0;
+  var disk='';
   $(form).find('input[class^=disk]').each(function() {
     var checkbox = $(this);
     if (checkbox.prop('checked')) {
       if (disks.length) disks += ',';
-      disks += checkbox.attr('name').substr(0,checkbox.attr('name').indexOf('-'));
+      disk = checkbox.attr('name').substr(0,checkbox.attr('name').indexOf('-'));
+      disks += disk;
+      partly = partly.replace(disk+',','');
     }
   });
   $('input.thin').prop('disabled',false);
-  form.disks.value = disks;
+  form.disks.value = partly ? disks : '';
 }
 function presetSchedule(form) {
   var mode = form.schedule.value;
@@ -90,8 +103,11 @@ function updateMatrix(checked,disk,clr) {
   $('input[type=checkbox].'+disk).prop('disabled',checked);
   $('input[type=checkbox].'+disk+'.'+clr).prop('disabled',false);
 }
-function showInfo(value) {
-  if (value.indexOf('-f')<0) $('#showInfo').hide(); else $('#showInfo').show();
+function showInfo1(value) {
+  if (value=='a') $('#showInfo1').hide(); else $('#showInfo1').show();
+}
+function showInfo2(value) {
+  if (value.indexOf('-f')<0) $('#showInfo2').hide(); else $('#showInfo2').show();
 }
 function activeDisks() {
   $('input[class^=disk]').each(function() {
@@ -107,14 +123,28 @@ function activeDisks() {
 $(function() {
   $('#s1').dropdownchecklist({emptyText:'None', width:131, explicitClose:'...close'});
   presetSchedule(document.integrity_settings);
-  showInfo(document.integrity_settings.log.value);
+  showInfo1(document.integrity_settings.cmd.value);
+  showInfo2(document.integrity_settings.log.value);
   activeDisks();
+<?if (function_exists('plugin_update_available') && $version = plugin_update_available($plugin)):?>
+  showNotice('Dynamix File Integrity <b><?=$version?></b> is available. <a>Download Now</a>','<?=$plugin?>');
+<?endif;?>
 });
 </script>
 <form markdown="1" name="integrity_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareWatch(this)">
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.watcher.php">
 <input type="hidden" name="disks" value="">
+
+Placement of file integrity control:
+: <select name="place" size="1"<?=$disabled?>>
+  <?=mk_option($cfg['place'], "Tasks:95", "Header menu")?>
+  <?=mk_option($cfg['place'], "SystemInformation", "Tools menu")?>
+  </select>
+
+> Select the placement of the file integrity control page. By default it is placed under the *Tools* menu, but it may be moved under the *header* menu.
+>
+> Keep in mind that the *header* menu has limited space.
 
 Automatically protect new and modified files:
 : <select name="service" size="1">
@@ -134,7 +164,7 @@ Hashing method:
   <?=mk_option($cfg['method'], "", "SHA2")?>
   <?=mk_option($cfg['method'], "-md5", "MD5")?>
   <?=mk_option($cfg['method'], "-b2", "BLAKE2", exec($check))?>
-  </select>
+  </select><?if ($hash):?><span style="font-style:italic"><a href="/Settings/FileIntegrity/Browse?dir=/boot/config/plugins/dynamix.file.integrity/export"><img src="/webGui/images/explore.png"></a>&nbsp; view hash files</span><?endif?>
 
 > Select the preferred hashing method. SHA2 generates a 256 bits checksum value, MD5 generates a 128 bits checksum value, while BLAKE2 generates a 512 bits checksum value per file.
 >
@@ -143,13 +173,13 @@ Hashing method:
 > All methods require substantial computing power from the processor and a too weak processor may not be able to perform up to expectations.
 
 Save new hashing results to flash:
-: <select name="cmd" size="1">
+: <select name="cmd" size="1" onchange="showInfo1(this.value)">
   <?=mk_option($cfg['cmd'], "a", "Disabled")?>
   <?=mk_option($cfg['cmd'], "A", "Enabled")?>
-  </select>
+  </select><span id="showInfo1" style="display:none;font-style:italic"><a href="/Settings/FileIntegrity/Browse?dir=/boot/config/plugins/dynamix.file.integrity/saved"><img src="/webGui/images/explore.png"></a>&nbsp; view saved files</span>
 
-> When enabled a daily file on the flash device will be created, holding the checksum results for all newly or modified files of that day.
-> The format of this file is the same as the standard export file. The daily file is saved as */config/plugins/dynamix.file.integrity/disks.export.&lt;date&gt;.new.hash*
+> When enabled a daily file on the flash device will be created, holding the checksum results for all newly or modified files of that particular day.
+> The format of this file is the same as the standard export file. The daily file is saved as */config/plugins/dynamix.file.integrity/saved/disks.export.&lt;date&gt;.new.hash*
 
 Excluded folders and files:
 : <select id="s1" name="exclude" size="1" multiple style="display:none">
@@ -157,9 +187,9 @@ Excluded folders and files:
   <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
   <?endforeach;?>
   </select>
-  <span style="margin:0 8px 0 12px;font-weight:bold">Custom folders:</span><input type="text" name="folders" value="<?=$cfg['folders']?>" class="narrow">
-  <span style="margin:0 8px 0 12px;font-weight:bold">Custom files:</span><input type="text" name="files" value="<?=$cfg['files']?>" class="narrow">
-  <span style="margin:0 8px 0 12px;font-weight:bold">Apple metadata:</span><input type="checkbox" name="apple" <?=$cfg['apple']?'checked':''?>>
+  <span style="margin:0 8px 0 20px;font-weight:bold">Custom folders:</span><input type="text" name="folders" value="<?=$cfg['folders']?>" class="narrow">
+  <span style="margin:0 8px;font-weight:bold">Custom files:</span><input type="text" name="files" value="<?=$cfg['files']?>" class="narrow">
+  <span style="margin:0 8px;font-weight:bold">Apple metadata:</span><input type="checkbox" name="apple" <?=$cfg['apple']?'checked':''?>>
 
 > Select here any folders (shares) you want to exclude from the automatic hashing and verification functionality. A share existing on multiple disks will be skipped on any disk where it is present.
 >
@@ -238,7 +268,6 @@ Time of the day:
   <?endfor;?>
   </select>&nbsp;&nbsp;HH:MM
 
-  
 > Select the hour and minute at which time the scheduled task will be executed. Granularity is 5 minutes.
 
 Send notifications:
@@ -251,12 +280,12 @@ Send notifications:
 > See the notification settings on how to set up and receive "alert" notifications.
 
 Error logging:
-: <select name="log" size="1" onchange="showInfo(this.value)">
+: <select name="log" size="1" onchange="showInfo2(this.value)">
   <?=mk_option($cfg['log'], "", "Never")?>
   <?=mk_option($cfg['log'], "-L", "Syslog only")?>
   <?=mk_option($cfg['log'], "-f", "Output file")?>
-  <?=mk_option($cfg['log'], "-L -f", "Syslog & File")?>
-  </select><span id="showInfo" style="display:none;font-style:italic">Information is stored on the flash device in folder **/config/plugins/dynamix.file.integrity/**</span>
+  <?=mk_option($cfg['log'], "-L -f", "Syslog & Output file")?>
+  </select><span id="showInfo2" style="display:none;font-style:italic"><a href="/Settings/FileIntegrity/Browse?dir=/boot/config/plugins/dynamix.file.integrity/logs"><img src="/webGui/images/explore.png"></a>&nbsp; view log files</span>
 
 > Error logging, including file corruption detection information can be given in the system log, or saved as a file on flash.
 > Disabling error logging will suppress log creation, but it is still possible to receive notifications.
@@ -265,11 +294,11 @@ Error logging:
 <?
 $i = 1;
 foreach ($disks as $disk) {
-  if ($disk['type']=='Data') {echo "<th style='text-align:center'>Task<br>$i</th>"; $i++;}
+  if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {echo "<th style='text-align:center'>Task<br>$i</th>"; $i++;}
 }
 echo "</thead><tbody>";
 foreach ($disks as $disk) {
-  if ($disk['type']=='Data') {
+  if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {
     echo "<tr><td>Disk {$disk['idx']}</td>";
     for ($n = 1; $n < $i; $n++) echo "<td style='text-align:center'><span class='{$disk['name']} t{$n}'><input type='checkbox' name='{$disk['name']}-{$n}' class='{$disk['name']} t{$n} thin' onclick='updateMatrix(this.checked,\"{$disk['name']}\",\"t{$n}\")'".($cfg["{$disk['name']}-{$n}"]=='on' ? ' checked':'')."></sapn></td>";
     echo "</tr>\n";

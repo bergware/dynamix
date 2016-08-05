@@ -1,0 +1,4 @@
+Menu="/boot/config/plugins/dynamix.file.integrity/dynamix.file.integrity.cfg place=SystemInformation"
+Type="xmenu"
+Title="File Integrity"
+Icon="dynamix.file.integrity.png"

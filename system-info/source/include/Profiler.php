@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2015-2016, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -73,8 +73,9 @@ case 'overview':
   echo "<tr><td>Memory:</td>";
   $memory = explode('#',exec("dmidecode -q -t 17|awk -F: '/^\tBank Locator:/{b=b$2\";\";}; /^\tSize:/{split($2,s,\" \");t+=s[1];c=c$2\";\";}; /^\tSpeed:/{v=v$2\";\";} END{print t\"#\"b\"#\"c\"#\"v}'"));
   $maximum = exec("dmidecode -t 16 | awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2} END{print t}'");
-  if ($maximum*1024 < $memory[0]) {$maximum = pow(2,ceil(log($memory[0]/1024)/log(2))); $star = "*";} else $star = "";
-  echo "<td>{$memory[0]} MB (max. installable capacity $maximum GB)$star</td></tr>";
+  $memory[0] /= 1024;
+  if ($maximum < $memory[0]) {$maximum = pow(2,ceil(log($memory[0])/log(2))); $star = "*";} else $star = "";
+  echo "<td>{$memory[0]} GB (max. installable capacity $maximum GB)$star</td></tr>";
   $bank = array_map('trim',explode(';', $memory[1]));
   $size = array_map('trim',explode(';', $memory[2]));
   $speed = array_map('trim',explode(';', $memory[3]));
@@ -83,14 +84,17 @@ case 'overview':
   exec("ifconfig -s|grep -Po '^(bond|eth)\d+'",$sPorts);
   $i = 0;
   foreach ($sPorts as $port) {
+    $mtu = file_get_contents("/sys/class/net/$port/mtu");
     if ($i++) echo "<tr><td></td>";
     if ($port=='bond0') {
-      $mode = exec("grep -Po '^Bonding Mode: \K.+' /proc/net/bonding/bond0");
+      $mode = exec("grep -Pom1 '^Bonding Mode: \K.+' /proc/net/bonding/bond0").", mtu $mtu";
       echo "<td>$port: $mode</td></tr>";
+    } else if ($port=='lo') {
+      echo str_replace('yes','loopback',exec("ethtool lo|grep -Pom1 '^\s+Link detected: \K.+'"));
     } else {
       unset($info);
-      exec("ethtool $port|grep -Po '^\s+(Speed|Duplex): \K[^U]+'",$info);
-      echo $info[0] ? "<td>$port: {$info[0]} - {$info[1]} Duplex</td></tr>" : "<td>$port: not connected</td></tr>";
+      exec("ethtool $port|grep -Po '^\s+(Speed|Duplex|Link\sdetected): \K[^U\\n]+'",$info);
+      echo (array_pop($info)=='yes' && $info[0]) ? "<td>$port: {$info[0]}, ".strtolower($info[1])." duplex, mtu $mtu</td></tr>" : "<td>$port: not connected</td></tr>";
     }
   }
   if ($i==0) echo "Not available";
@@ -127,10 +131,11 @@ case 'device':
 case 'ethernet':
   exec("ifconfig -s|grep -Po '^(bond|eth)\d+'",$ports);
   foreach ($ports as $port) {
-    if ($port=='bond0')
-      exec("sed 's/Ethernet Channel Bonding.*/Port bond0 Information/' /proc/net/bonding/bond0",$output);
+    if (substr($port,0,4)=='bond')
+      exec("sed 's/Ethernet Channel Bonding.*/Port $port Information/' /proc/net/bonding/$port",$output);
     else
       exec("ethtool $port|sed 's/^Settings for $port:/Port $port Information/'",$output);
+    $output[] = "MTU size: ".file_get_contents("/sys/class/net/$port/mtu")." bytes";
   }
   break;
 }

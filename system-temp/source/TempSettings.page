@@ -23,6 +23,7 @@ $settings_file = "/etc/sensors.d/sensors.conf";
 
 $unit = $display['unit'];
 $dot  = $display['number'][0];
+$perl = exec("which perl 2>/dev/null");
 
 function get_sensors() {
   global $settings_file;
@@ -161,6 +162,13 @@ foreach ($sensors as $value) {
   }
 }
 ?>
+<?if (!$perl):?>
+<script>
+$(function() {
+  $('input[name="detect"]').prop('disabled',true);
+});
+</script>
+<?endif;?>
 <form markdown="1" method="POST">
 <input type="hidden" name="op" value="modules">
 Available drivers:
@@ -174,6 +182,7 @@ Available drivers:
 <?$loaded = true; foreach (get_modules() as $mod) $loaded &= is_module_loaded($mod)?>
 : <input type="submit" name="detect" value="Detect"><input type="submit" name="save" value="Save">
   <?echo ($loaded) ? "<input type='submit' name='unload' id='btn1' value='Unload drivers' $disabled>" : "<input type='submit' name='load' id='btn1' value='Load drivers' $disabled>";?>
+  <?if (!$perl):?><span class="orange-text"><b>Perl</b> must be installed to do automated driver detection</span><?endif;?>
 </form>
 
 <div id="title"><span class="left"><img src="/plugins/dynamix.system.temp/icons/sensors.png" class="icon">Sensors</span></div>

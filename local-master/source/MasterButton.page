@@ -18,7 +18,7 @@ Link="nav-user"
 <?if ($display['monitor']):?>
 <script>
 function localMaster() {
-  $.get('/webGui/include/LocalMaster.php',function(data) {
+  $.get('/plugins/dynamix.local.master/include/LocalMaster.php',function(data) {
     $('#localmaster').html(data);
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     timers.localMaster = setTimeout(localMaster,<?=max(15000,abs($display['refresh']))?>);

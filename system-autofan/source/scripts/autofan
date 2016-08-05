@@ -2,10 +2,10 @@
 #=======================================================================================
 #  Name:  autofan
 #=======================================================================================
-#  Description: 
+#  Description:
 #
-#  A simple script to check for the highest hard disk temperature and then set the 
-#  fan to an apropriate speed. Fan needs to be connected to a motherboard with pwm 
+#  A simple script to check for the highest hard disk temperature and then set the
+#  fan to an apropriate speed. Fan needs to be connected to a motherboard with pwm
 #  support.
 #
 #  How to invoke in your "go" script (copy to /boot/scripts):
@@ -13,12 +13,13 @@
 #  /boot/fan_speed.sh                  -- superseeded by Dynamix plugin
 #=======================================================================================
 # Version 1.0   Authored by Aiden
-# Version 1.1   Modified by Dan Stroot to run in a loop. Does not require the user 
+# Version 1.1   Modified by Dan Stroot to run in a loop. Does not require the user
 #               to add this to cron - just start it in your go file.
 # Version 1.2   Modified by Guzzi    - removed -d ata to work on sas controllers
 # Version 1.3   Modified by gfjardim - added to dynamix.system.autofan
 # Version 1.4   Modified by Bergware - added additional line parameters
 #                                      start/stop control by Dynamix plugin
+#                                      celsius/fahrenheit conversion
 #=======================================================================================
 # Dependencies: grep,awk,smartctl,hdparm
 #=======================================================================================
@@ -30,8 +31,8 @@ usage() {
  echo "       $program_name -q      = quit the program if it is running"
  echo
  echo " Argument descriptions:"
- echo " -t NN    =   set the low disk temp, below this temp the fan is off (default=35)"
- echo " -T NN    =   set the high disk temp, above this temp the fan is 100% (default=45)"
+ echo " -t NN    =   set the low disk temp, below this temp the fan is off (default=35C)"
+ echo " -T NN    =   set the high disk temp, above this temp the fan is 100% (default=45C)"
  echo " -c name  =   specify name of the controller (default=/sys/class/hwmon/hwmon2/pwm1)"
  echo " -f name  =   specify name of the fan (default=/sys/class/hwmon/hwmon2/fan1_input)"
  echo " -l NN    =   set value to slow down the fan speed (default=35)"
@@ -40,9 +41,9 @@ usage() {
 #=======================================================================================
 # USER DEFINED VARIABLES: *MUST* BE SET TO *YOUR* VALUES
 #=======================================================================================
-# Fan device. Depends on *your* system. pwmconfig can help with finding this out. 
+# Fan device. Depends on *your* system. pwmconfig can help with finding this out.
 # pwm1 is usually the cpu fan. You can "cat /sys/class/hwmon/hwmon1/device/fan4_input"
-# to see the current rpm of the fan. If 0 then fan is off or there is no fan connected 
+# to see the current rpm of the fan. If 0 then fan is off or there is no fan connected
 # or motherboard can't read rpm of fan.
 PWM_CONTROLLER=/sys/class/hwmon/hwmon2/pwm1 # Power (speed) setting
 PWM_FAN=/sys/class/hwmon/hwmon2/fan1_input  # Used to track actual rpm values
@@ -51,7 +52,7 @@ PWM_FAN=/sys/class/hwmon/hwmon2/fan1_input  # Used to track actual rpm values
 TEMP_LOW=35    # Anything this number and below - fan is *off*
 TEMP_HIGH=45   # Anything this number and above - fan is *full*
 
-# Fan speed settings. Run pwmconfig (part of the lm_sensors package) to determine 
+# Fan speed settings. Run pwmconfig (part of the lm_sensors package) to determine
 # what numbers you want to use for your fan pwm settings. Should not need to
 # change the OFF variable, only the LOW and maybe also HIGH to what you desire.
 # Any real number between 0 and 255.
@@ -133,7 +134,7 @@ if [[ -f $lockfile ]]; then
   else
     if [[ $quit_flag == yes ]]; then
       echo killing $program_name process "$lock_pid"
-      echo killing $program_name process "$lock_pid" | logger -t$program_name 
+      echo killing $program_name process "$lock_pid" | logger -t$program_name
       kill "$lock_pid"
       rm "${lockfile}"
       exit 0
@@ -207,14 +208,14 @@ function_calc_new_fan_speed() {
     ADJUSTED_PERCENT_SPEED=0
     ADJUSTED_OUTPUT="OFF"
   else
-    if [[ $HIGHEST_TEMP -ge  $TEMP_HIGH ]]; then
+    if [[ $HIGHEST_TEMP -ge $TEMP_HIGH ]]; then
       ADJUSTED_FAN_SPEED=$PWM_HIGH
       ADJUSTED_PERCENT_SPEED=100
       ADJUSTED_OUTPUT="FULL"
     else
       ADJUSTED_FAN_SPEED=$(($(($(($HIGHEST_TEMP-$TEMP_LOW))*$FAN_PWM_INCREMENTS))+$PWM_LOW))
       ADJUSTED_PERCENT_SPEED=$(($(($ADJUSTED_FAN_SPEED*100))/$PWM_HIGH))
-      ADJUSTED_OUTPUT=$ADJUSTED_FAN_SPEED  
+      ADJUSTED_OUTPUT=$ADJUSTED_FAN_SPEED
     fi
   fi
   #echo Adjusted output = $ADJUSTED_OUTPUT              # Uncomment for debugging
@@ -234,8 +235,15 @@ function_change_fan_speed() {
     ADJUSTED_FAN_RPM=`cat $PWM_FAN`
     ADJUSTED_OUTPUT="${ADJUSTED_OUTPUT} (${ADJUSTED_PERCENT_SPEED}% @ ${ADJUSTED_FAN_RPM}rpm)"
     # Output the change
-    echo "$program_name: Highest disk temp is ${HIGHEST_TEMP}&deg;C, adjusting fan speed from: $CURRENT_OUTPUT to: $ADJUSTED_OUTPUT"
-    echo "Highest disk temp is ${HIGHEST_TEMP}&deg;C, adjusting fan speed from: $CURRENT_OUTPUT to: $ADJUSTED_OUTPUT" | logger -t$program_name
+    CFG=/boot/config/plugins/dynamix/dynamix.cfg
+    [[ -f $CFG ]] && TEMP_UNIT=`grep -Po '^unit="\K[^"]+' $CFG` || TEMP_UNIT=C
+    if [[ $TEMP_UNIT == F ]]; then
+      REPORTED_TEMP=$((($HIGHEST_TEMP*9/5)+32))
+    else
+      REPORTED_TEMP=$HIGHEST_TEMP
+    fi
+    echo "$program_name: Highest disk temp is ${REPORTED_TEMP}${TEMP_UNIT}, adjusting fan speed from: $CURRENT_OUTPUT to: $ADJUSTED_OUTPUT"
+    echo "Highest disk temp is ${REPORTED_TEMP}${TEMP_UNIT}, adjusting fan speed from: $CURRENT_OUTPUT to: $ADJUSTED_OUTPUT" | logger -t$program_name
   fi
 }
 
@@ -255,23 +263,23 @@ while [[ -f $lockfile ]]; do
   if [[ $(cat $FAN_RPM_MIN) -ne 0 ]]; then
     echo 0 > $FAN_RPM_MIN
   fi
-  
+
   # Calculate size of increments.
-  FAN_TEMP_INCREMENTS=$(($TEMP_HIGH-$TEMP_LOW))  
+  FAN_TEMP_INCREMENTS=$(($TEMP_HIGH-$TEMP_LOW))
   FAN_PWM_INCREMENTS=$(($(($PWM_HIGH-$PWM_LOW))/$FAN_TEMP_INCREMENTS))
 
   # Get highest drive temperature
   function_get_highest_hd_temp
-  
+
   # Get current fan speed
   function_get_current_fan_speed
-  
+
   # Calculate new fan speed
   function_calc_new_fan_speed
 
   # Change fan speed if necessary
   function_change_fan_speed
-  
+
   #echo Sleeping for $INTERVAL minutes                  # uncomment for debugging
   sleep $(($INTERVAL*60))
 done &
@@ -281,5 +289,5 @@ done &
 background_pid=$!
 echo $background_pid > "${lockfile}"
 echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q" >&2
-echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q" | logger -t$program_name 
+echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q" | logger -t$program_name
 disown %%

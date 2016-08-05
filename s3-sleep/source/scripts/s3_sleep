@@ -29,10 +29,11 @@
 # Version 2.1.2   SlrG fix cache drive list inclusion
 # Version 3.0.0   Code rewrite, remove bwm-ng dependency
 # Version 3.0.1   Move immediate sleep to front
+# Version 3.0.2   Include SCSI attached drives in array list
 #
 # Bergware International
 ####################################################################################
-version=3.0.1
+version=3.0.2
 program=$(basename $0)
 
 # Get ID of flash device
@@ -58,7 +59,7 @@ getArray() {
 
 # Get list of all devices
 getDisks() {
-  disks=($(ls -l /dev/disk/by-id/[au]*|awk -F/ '$0!~/part1/{print $7"="$5}'|sed 's/\(usb\|ata\|ide\)-//;s/ -> ..$//'))
+  disks=($(ls -l /dev/disk/by-id/[asu]*|awk -F/ '$0!~/part1/{print $7"="$5}'|sed 's/\(usb\|ata\|scsi|ide\)-//;s/ -> ..$//'))
 }
 
 # list devices outside of array

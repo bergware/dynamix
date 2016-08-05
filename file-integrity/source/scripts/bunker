@@ -11,7 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
-version=2.2
+version=2.5.1
 
 # Display help
 usage() {
@@ -85,7 +85,7 @@ waitfor() {
       x=$(((x+1)%4))
     fi
     if [[ $mon -ne 0 && $index -eq 0 ]]; then
-      echo -n "0%#<span class='red-text red-button'>$task</span> Scanning for files... ${SECONDS}s#" >$monitor
+      echo -n "0%#<span class='orange-text orange-button'>$task</span> Scanning for files... ${SECONDS}s#" >$monitor
     fi
     sleep .05
   done
@@ -100,9 +100,9 @@ con() {
 # Log result to syslog
 log() {
   # Non-selective logging
-  [[ $log -eq 1 ]] && logger -t bunker $1
+  [[ $log -eq 1 ]] && logger -t bunker "$1"
   # Log only if value is non-zero
-  [[ $log -eq 2 && $2 -gt 0 ]] && logger -t bunker $1
+  [[ $log -eq 2 && $2 -gt 0 ]] && logger -t bunker "$1"
 }
 
 # Print correct single/plural wording
@@ -126,7 +126,7 @@ progress() {
     [[ -n $volume ]] && ((complete+=$volume))
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$complete'/'$total')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text red-button'>$task</span> $1#$eta" >$monitor
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1#$eta" >$monitor
     past=$2
   fi
   update=0
@@ -143,7 +143,7 @@ progress2() {
     fi
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$past'/'$files')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='red-text red-button'>$task</span> $1#$eta" >$monitor
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1#$eta" >$monitor
   fi
   update=0
   timer=$SECONDS
@@ -151,20 +151,22 @@ progress2() {
 
 # Display average hashing speed
 score() {
-  local run=$SECONDS
-  local hms=$(awk 'BEGIN{printf("%02d:%02d:%02d",'$run'/3600,'$run'/60%60,'$run'%60)}')
+  local time=$SECONDS
+  local hms=$(awk 'BEGIN{printf("%02d:%02d:%02d",'$time'/3600,'$time'/60%60,'$time'%60)}')
   echo -n " Duration: $hms"
   if [[ -n $1 && $1 -gt 0 ]]; then
-    [[ $run -eq 0 ]] && run=1
+    [[ $time -eq 0 ]] && local time=1
     local unit=(B KB MB GB TB PB)
-    local i=-1
-    local tmp=$(awk 'BEGIN{printf("%f",'$total'/'$run')}')
-    while [[ ${tmp:0:1} != 0 ]]; do
-      local avg=${tmp:0:4}
-      local tmp=$(awk 'BEGIN{printf("%f",'$tmp'/1000)}')
+    local t=$(awk 'BEGIN{printf("%f",'$total'/'$time')}')
+    [[ ${t:0:1} == 0 ]] && local s=0
+    [[ ${t:0:1} == 0 ]] && local i=0 || local i=-1
+    while [[ ${t:0:1} != 0 ]]; do
+      local s=${t:0:4}
+      [[ ${s: -1} == . ]] && local s=${s:0:-1}
+      local t=$(awk 'BEGIN{printf("%f",'$t'/1000)}')
       ((i++))
     done
-    echo -n ". Average speed: $avg ${unit[$i]}/s"
+    echo -n ". Average speed: $s ${unit[$i]}/s"
   fi
 }
 
@@ -182,22 +184,22 @@ prepare() {
   ifs=$IFS; IFS=','
   if [[ $not -eq 0 ]]; then
     if [[ $1 -gt 0 ]]; then
-      for folder in $exclude; do sed -ri "/\/mnt\/disk[0-9]+\/$folder\//d" $tmpfile; done
-      for folder in $folders; do sed -ri "/\/mnt\/disk[0-9]+\/.*$folder\//d" $tmpfile; done
+      for take in $exclude; do sed -ri "/\/mnt\/disk[0-9]+\/$take\//d" $tmpfile; done
+      for take in $folders; do sed -ri "/\/mnt\/disk[0-9]+\/.*$take\//d" $tmpfile; done
     else
-      for folder in $exclude; do sed -ri "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/d" $tmpfile; done
-      for folder in $folders; do sed -ri "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/d" $tmpfile; done
+      for take in $exclude; do sed -ri "/^# file: \/mnt\/disk[0-9]+\/$take\//,/^$/d" $tmpfile; done
+      for take in $folders; do sed -ri "/^# file: \/mnt\/disk[0-9]+\/.*$take\//,/^$/d" $tmpfile; done
     fi
   else
     touch $tmpfile.not
-    if [[ $1 -gt 0 ]]; then
-      for folder in $exclude; do sed -rn "/\/mnt\/disk[0-9]+\/$folder\//p" $tmpfile >> $tmpfile.not; done
-      for folder in $folders; do sed -rn "/\/mnt\/disk[0-9]+\/.*$folder\//p" $tmpfile >> $tmpfile.not; done
-    else
-      for folder in $exclude; do sed -rn "/^# file: \/mnt\/disk[0-9]+\/$folder\//,/^$/p" $tmpfile >> $tmpfile.not; done
-      for folder in $folders; do sed -rn "/^# file: \/mnt\/disk[0-9]+\/.*$folder\//,/^$/p" $tmpfile >> $tmpfile.not; done
-    fi
-    mv -f $tmpfile.not $tmpfile
+    for take in $exclude; do sed -rn "/^\/mnt\/disk[0-9]+\/$take\//p" $tmpfile >>$tmpfile.not; done
+    for take in $folders; do sed -rn "/^\/mnt\/disk[0-9]+\/.*$take\//p" $tmpfile >>$tmpfile.not; done
+    for take in $entries; do
+      [[ ${take:0:2} != ".*" ]] && take=".*$take"
+      sed -rn "/^\/mnt\/disk[0-9]+\/$take$/p" $tmpfile >>$tmpfile.not
+    done
+    sort -uo $tmpfile $tmpfile.not
+    rm -f $tmpfile.not
   fi
   IFS=$ifs; ifs=
   if [[ $1 -gt 0 ]]; then
@@ -250,16 +252,58 @@ write() {
   fi
 }
 
+mysize() {
+  local t=$1
+  local unit=(B KB MB GB TB PB)
+  [[ ${t:0:1} == 0 ]] && local s=0
+  [[ ${t:0:1} == 0 ]] && local i=0 || local i=-1
+  while [[ ${t:0:1} != 0 ]]; do
+    local s=${t:0:4}
+    [[ ${s: -1} == . ]] && local s=${s:0:-1}
+    local t=$(awk 'BEGIN{printf("%f",'$t'/1000)}')
+    ((i++))
+  done
+  echo -n "$s ${unit[$i]}"
+}
+
+mytime() {
+  echo -n $(awk 'BEGIN{printf("%d hr, %d min, %d sec.",'$1'/3600,'$1'/60%60,'$1'%60)}')
+}
+
+# Record start-stop action (GUI)
+record() {
+  if [[ $ref -eq 0 ]]; then
+    local disk=${path##*/}
+  else
+    local disk=${store##*/}
+    local disk=${disk%%.*}
+  fi
+  local server=$(grep -Po '^NAME="\K\w+' /var/local/emhttp/var.ini 2>/dev/null)
+  [[ -z $server ]] && local server=tower
+  local notify="/usr/local/emhttp/webGui/scripts/notify"
+  local plugin="Dynamix file integrity"
+  [[ -f /usr/local/sbin/notify ]] && local notify="/usr/local/sbin/notify"
+  if [[ $1 == start ]]; then
+    [[ $log -ne 0 ]] && logger -t bunker "$task task for $disk started, total files size $(mysize $total)" &
+    [[ $msg -ne 0 ]] && $notify -e "$plugin [$disk]" -s "Notice [${server^^}] - $task task for $disk started" -d "Total files size: $(mysize $total)" &
+  elif [[ $1 == stop ]]; then
+    [[ $log -ne 0 ]] && logger -t bunker "$task task for $disk finished, duration: $(mytime $SECONDS)" &
+    [[ $msg -ne 0 ]] && $notify -e "$plugin [$disk]" -s "Notice [${server^^}] - $task task for $disk finished" -d "Duration: $(mytime $SECONDS)" &
+  fi
+}
+
 # Update disk status (GUI)
 complete() {
-  local file=/boot/config/plugins/dynamix.file.integrity/disks.ini
+  local ini=/boot/config/plugins/dynamix.file.integrity/disks.ini
   local cmd=$1
-  local disk=$2
-  if ! grep -q "$disk=.*$cmd" $file ; then
-    if grep -q "$disk=" $file ; then
-      sed -i "s:^$disk=.*:&,$cmd:" $file
-    else
-      echo "$disk=$cmd" >> $file
+  local disk=${path##*/}
+  if [[ ${disk:0:4} == disk ]]; then
+    if ! grep -q "$disk=.*$cmd" $ini; then
+      if grep -q "$disk=" $ini; then
+        sed -i "s:^$disk=.*:&,$cmd:" $ini
+      else
+        echo "$disk=$cmd" >>$ini
+      fi
     fi
   fi
 }
@@ -337,10 +381,11 @@ one=0
 msg=0
 con=1
 mon=0
+job=0
 not=0
 
 # Parse user options
-while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xzE:F:" option; do
+while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xjzE:F:" option; do
   case $option in
   a|A|v|V|u|e|i|c|C|r|R)
      cmd=$option ;;
@@ -377,6 +422,7 @@ while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xzE:F:" option; do
   q) con=0 ;;
   1) one=1 ;;           # hidden option for GUI front-end - process single file
   x) mon=1 ;;           # hidden option for GUI front-end - output progress to monitor file
+  j) job=1 ;;           # hidden option for GUI front-end - give start-stop signalling
   z) not=1 ;;           # hidden option for GUI front-end - invert file selection (exclude only)
   E) exclude=$OPTARG ;; # hidden option for GUI front-end - list of excluded folders (shares)
   F) folders=$OPTARG ;; # hidden option for GUI front-end - list of custom folder exclusions
@@ -385,7 +431,7 @@ while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xzE:F:" option; do
   esac
 done
 shift $((OPTIND-1))
-path=$1
+path="$1"
 
 # Check presence of executable
 exec=$(which $proc 2>/dev/null)
@@ -413,23 +459,27 @@ if [[ $one -eq 0 ]]; then
 fi
 
 # Optional mask parameter
-if [[ -n $2 && $one -eq 0 ]]; then
-  ifs=$IFS; IFS=','
-  if [[ $2 == ! ]]; then
-    if [[ -z $3 ]]; then
-      echo "Missing mask parameter"; exit
+if [[ $not -eq 0 ]]; then
+  if [[ -n $2 && $one -eq 0 ]]; then
+    ifs=$IFS; IFS=','
+    if [[ $2 == ! ]]; then
+      if [[ -z $3 ]]; then
+        echo "Missing mask parameter"; exit
+      fi
+      for name in $3; do
+        [[ ${#mask} -gt 0 ]] && mask="${mask} "
+        mask="${mask}-not -iname $name"
+      done
+    else
+      for name in $2; do
+        [[ ${#mask} -gt 0 ]] && mask="${mask} -o "
+        mask="${mask}-iname $name"
+      done
     fi
-    for name in $3 ; do
-      [[ ${#mask} -gt 0 ]] && mask="${mask} "
-      mask="${mask}-not -iname $name"
-    done
-  else
-    for name in $2 ; do
-      [[ ${#mask} -gt 0 ]] && mask="${mask} -o "
-      mask="${mask}-iname $name"
-    done
+    IFS=$ifs; ifs=
   fi
-  IFS=$ifs; ifs=
+else
+  [[ $2 == ! ]] && entries=$3 || entries=$2
 fi
 
 # Used for concurrent script execution
@@ -465,10 +515,11 @@ a|A)
     sed -i "s/: user.$hash: No such attribute$//" $tmpfile &
     waitfor $! "Preparing for execution"
   else
-    echo "$path" > $tmpfile
+    [[ -f $path ]] && echo "$path" >$tmpfile || exit
   fi
   prepare 1
   if [[ $files -gt 0 ]]; then
+    [[ $job -ne 0 ]] && record start
     while read -r file; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files" $index
@@ -485,12 +536,13 @@ a|A)
       [[ $timer -ne $SECONDS ]] && update
     done <$tmpfile
     update
-    [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -ft '*' -k2 -o "$store" $tmpfile.2
-    [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >> "$store"
+    [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -fk2 -o "$store" $tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >>"$store"
+    [[ $job -ne 0 ]] && record stop
   fi
   con "Finished - added $(plural $index file).$(score $index)"
   log "added $(plural $index file) from $path.$(score $index)" $index
-  [[ $mon -ne 0 ]] && complete build ${path##*/}
+  [[ $mon -ne 0 ]] && complete build
 ;;
 
 v|V|u)
@@ -499,7 +551,7 @@ v|V|u)
   [[ $cmd == u ]] && text2=" (updated)" || text2=""
   if [[ $one -eq 0 ]]; then
     if [[ $ref -eq 0 ]]; then
-      if [[ -z $mask ]]; then    
+      if [[ -z $mask ]]; then
         find "$path" -type f -name "*" $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
       else
         find "$path" -type f \( $mask \) $size $base -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null + &
@@ -511,10 +563,11 @@ v|V|u)
     fi
     waitfor $! "Preparing for execution"
   else
-    echo "$(getfattr -n user.$hash "$path"|grep -Po '^user.*="\K[^"]+') *$path" > $tmpfile
+    [[ -f $path ]] && echo "$(getfattr -n user.$hash --absolute-names "$path" 2>/dev/null|grep -Po '^user.*="\K[^"]+') *$path" >$tmpfile || exit
   fi
   prepare 2
   if [[ $files -gt 0 ]]; then
+    [[ $job -ne 0 ]] && record start
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $index
@@ -558,11 +611,14 @@ v|V|u)
       [[ $timer -ne $SECONDS ]] && update
     done <$tmpfile
     update
-    [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >> $tmpfile.2
-    [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -ft '*' -k2 -o "$store" $tmpfile.2
-    [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >> "$store"
+    [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >>$tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -fk2 -o "$store" $tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >>"$store"
+    [[ $job -ne 0 ]] && record stop
   fi
-  [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker $text command"
+  [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker verify command"
+  [[ $warning -eq 0 ]] && text1=""
+  [[ $bad -eq 0 ]] && text2=""
   con "Finished - verified $(plural $count file), skipped $(plural $skip file). Found: $(plural $warning mismatch es)$text1, $(plural $bad corruption)$text2.$(score $count)"
   log "verified $(plural $count file) from $path. Found: $(plural $warning mismatch es)$text1, $(plural $bad corruption)$text2.$(score $count)" $fail
 ;;
@@ -577,10 +633,11 @@ e)
     fi
     waitfor $! "Scanning for files to export"
   else
-    getfattr -d --absolute-names "$path" 1>$tmpfile 2>/dev/null
+    [[ -f $path ]] && getfattr -d --absolute-names "$path" 1>$tmpfile 2>/dev/null || exit
   fi
   prepare 0
   if [[ $files -gt 0 ]]; then
+    [[ $job -ne 0 ]] && record start
     ifs=$IFS; IFS='"'
     filedate=0
     filesize=0
@@ -601,13 +658,14 @@ e)
     done <$tmpfile
     write
     update
-    [[ -s $tmpfile.2 && $one -eq  0 ]] && sort -ft '*' -k2 -o "$store" $tmpfile.2
-    [[ -s $tmpfile.2 && $one -eq  1 ]] && cat $tmpfile.2 >> "$store"
+    [[ -s $tmpfile.2 && $one -eq  0 ]] && sort -fk2 -o "$store" $tmpfile.2
+    [[ -s $tmpfile.2 && $one -eq  1 ]] && cat $tmpfile.2 >>"$store"
     IFS=$ifs; ifs=
+    [[ $job -ne 0 ]] && record stop
   fi
   con "Finished - exported $(plural $count file), skipped $(plural $skip file).$(score)"
   log "exported $(plural $count file) from $path.$(score)" $count
-  [[ $mon -ne 0 ]] && complete export ${path##*/}
+  [[ $mon -ne 0 ]] && complete export
 ;;
 
 i)
@@ -617,6 +675,7 @@ i)
   waitfor $! "Preparing for import"
   prepare 2
   if [[ $files -gt 0 ]]; then
+    [[ $job -ne 0 ]] && record start
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress2 "Currently importing file $index of $files. Skipped: $skip files" $count
@@ -638,6 +697,7 @@ i)
       [[ $timer -ne $SECONDS ]] && update
     done <$tmpfile
     update
+    [[ $job -ne 0 ]] && record stop
   fi
   [[ $con -ne 0 && -s $tmpfile.2 ]] && sort -f $tmpfile.2
   con "Finished - imported $(plural $count file), skipped $(plural $skip file).$(score)"
@@ -652,6 +712,7 @@ c|C)
   waitfor $! "Preparing for import"
   prepare 2
   if [[ $files -gt 0 ]]; then
+    [[ $job -ne 0 ]] && record start
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $count
@@ -691,12 +752,14 @@ c|C)
       [[ $timer -ne $SECONDS ]] && update
     done <$tmpfile
     update
+    [[ $job -ne 0 ]] && record stop
   fi
-  [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >> $tmpfile.2
+  [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >>$tmpfile.2
   [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker check command"
   [[ $con -ne 0 && -s $tmpfile.2 ]] && sort -f $tmpfile.2
   [[ $cmd == C && $warning -ne 0 ]] && con "warning: $(plural $warning correction) made, export file needs to be updated"
   [[ $cmd == C && $warning -ne 0 ]] && log "warning: $(plural $warning correction) made, export file needs to be updated" 1
+  [[ $warning -eq 0 ]] && text=""
   con "Finished - checked $(plural $count file), skipped $(plural $skip file). Found: $(plural $warning mismatch es)$text, $(plural $bad corruption).$(score $count)"
   log "checked $(plural $count file) from source $store. Found: $(plural $warning mismatch es)$text, $(plural $bad corruption).$(score $count)" $fail
 ;;
@@ -717,10 +780,11 @@ r|R)
     fi
     waitfor $! "Preparing for execution"
   else
-    echo "$path" > $tmpfile
+    [[ -f $path ]] && echo "$path" >$tmpfile || exit
   fi
   prepare 1
   if [[ $files -gt 0 ]]; then
+    [[ $job -ne 0 ]] && record start
     while read -r file; do
       ((index++))
       [[ $update -ne 0 ]] && progress2 "Currently clearing file $index of $files. Skipped: $skip files" $index
@@ -737,6 +801,7 @@ r|R)
       [[ $timer -ne $SECONDS ]] && update
     done <$tmpfile
     update
+    [[ $job -ne 0 ]] && record stop
   fi
   con "Finished - cleared $(plural $count file), skipped $(plural $skip file).$(score)"
   log "cleared $(plural $count file) from $path.$(score)" $count

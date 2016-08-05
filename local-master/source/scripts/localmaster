@@ -14,5 +14,5 @@
 <?
 $lmb = exec("nmblookup -M -- - 2>/dev/null|grep -Pom1 '^\S+'");
 $self = exec("ifconfig|grep -om1 'inet $lmb '");
-file_put_contents("/var/local/emhttp/localmaster.htm", $self ? "<img src='/webGui/icons/localmaster.png' class='icon'>" : "");
+file_put_contents("/var/local/emhttp/localmaster.htm", $self ? "<img src='/plugins/dynamix.local.master/icons/localmaster.png' class='icon'>" : "");
 ?>

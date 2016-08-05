@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2016, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -16,8 +16,10 @@ require_once 'webGui/include/Helpers.php';
 
 function bar_color($val) {
   global $display;
-  if ($val>=$display['critical']) return "redbar";
-  if ($val>=$display['warning']) return "orangebar";
+  $critical = $display['critical'];
+  $warning = $display['warning'];
+  if ($val>=$critical && $critical>0) return "redbar";
+  if ($val>=$warning && $warning>0) return "orangebar";
   return "greenbar";
 }
 
@@ -54,7 +56,7 @@ case 'sys':
   $json = [];
   foreach ($disks as $disk) {
     $size = 0;
-    if ($disk['fsStatus']!='Mounted' && $disk['name']!='parity') continue;
+    if ($disk['fsStatus']!='Mounted' && $disk['type']!='Parity') continue;
     switch ($disk['type']) {
     case 'Data':
     case 'Flash':
@@ -69,11 +71,11 @@ case 'sys':
         $percent = 100-round(100*$free/$size);
         $critical = !empty($disk['critical']) ? $disk['critical'] : $display['critical'];
         $warning = !empty($disk['warning']) ? $disk['warning'] : $display['warning'];
-        $point[0] = $percent-$critical;
-        $point[1] = $percent-$warning;
-        if ($point[0]>0) {$point[1] = $critical-$warning;} else {$point[0] = 0;}
-        if ($point[1]>0) {$point[2] = $warning;} else {$point[2] = $percent; $point[1] = 0;}
-        if ($warning>=$critical && $point[2]>$warning) $point[2] = $critical;
+        $point[0] = $critical>0 ? $percent-$critical : 0;
+        $point[1] = $warning>0 ? $percent-$warning : 0;
+        if ($point[0]>0) {$point[1] = $warning>0 ? $critical-$warning : 0;} else {$point[0] = 0;}
+        if ($point[1]>0) {$point[2] = $warning;} else {$point[2] = $warning>0 ? $percent : $percent-$point[0]; $point[1] = 0;}
+        if ($warning>=$critical && $critical>0 && $point[2]>$warning) $point[2] = $critical;
       } else {
         $point[0] = 0;
         $point[1] = 0;
@@ -93,12 +95,12 @@ case 'rts':
   $hdd = '$2=="tps"';
   $ram = '$2=="kbmemfree"';
   $com = '$2=="'.$_POST['port'].'"';
-  exec("sar 1 1 -u -b -r -n DEV|grep '^Average'|awk '$cpu {u=$3+$4;s=$5;}; $hdd {getline;r=$5;w=$6;}; $ram {getline;f=$2;c=$5+$6;d=$3-c;}; $com {x=$5;y=$6;} END{print u,s{$nl}r,w{$nl}f,c,d{$nl}x,y}'",$data);
+  exec("sar 1 1 -u -b -r -n DEV|grep '^Average'|awk '$cpu {u=$3;n=$4;s=$5;}; $hdd {getline;r=$5;w=$6;}; $ram {getline;f=$2;c=$5+$6;d=$3-c;}; $com {x=$5;y=$6;} END{print u,n,s{$nl}r,w{$nl}f,c,d{$nl}x,y}'",$data);
   echo implode(' ', $data);
   exit;
 case 'cpu':
-  $series = ['User','System'];
-  $data = '$5+$6,$7';
+  $series = ['User','Nice','System'];
+  $data = '$5,$6,$7';
   $case = '';
   $mask = ' && $5<=100 && $6<=100 && $7<=100';
   break;
