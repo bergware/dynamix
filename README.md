@@ -6,7 +6,7 @@
 
 ~~*Starting from version 2.1.0 there is code alignment with the 64-bit version which is released separately.*~~
 
-*64-bit version of Dynamix is now built-in unRAID OS6*
+*64-bit version of Dynamix is now natively supported in unRAID OS6*
 
 *Starting from version 2.2.1 the new dashboard page is added to the GUI.*
 
