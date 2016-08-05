@@ -4,7 +4,9 @@
 
 *Dynamix webGui has been updated to version 2.2.10. Thanks to the support of the unRAID community a number of fixes and improvements are introduced. See the folder "changes" for a list of what has been changed, including changes in the optional plugins. All users of earlier versions are encouraged to upgrade to this version.*
 
-*Starting from version 2.1.0 there is code alignment with the 64-bit version which is released separately.*
+~~*Starting from version 2.1.0 there is code alignment with the 64-bit version which is released separately.*~~
+
+*64-bit version of Dynamix is not built-in unRAID OS6*
 
 *Starting from version 2.2.1 the new dashboard page is added to the GUI.*
 
