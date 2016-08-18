@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.scsi.devices">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.07.21">
+<!ENTITY version   "2016.08.18">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- fixed chmod error message
+
+###2016.07.21
 - initial release for unRAID v6.2
 </CHANGES>
 
@@ -201,9 +204,6 @@ LABEL="persistent_storage_end"
 udevadm control --reload-rules
 udevadm trigger --subsystem-match=block
 udevadm settle --timeout=30
-
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 
 echo ""
 echo "-----------------------------------------------------------"
