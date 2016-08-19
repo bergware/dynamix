@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.06.22">
+<!ENTITY version   "2016.08.19">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c474a87ffc66a33c1f05e7d137901312">
+<!ENTITY MD5       "df8fff610c75476de6c630a17b05b587">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- updated s3_sleep script to version 3.0.3 (changed HDD activity check to allow RAID controllers, courtesy Michael A.)
+- changed sleep icon
+
+###2016.06.22
 - updated s3_sleep script to version 3.0.2 (include SCSI attached disks in array list)
 
 ###2016.06.20
