@@ -3,18 +3,21 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.schedules">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.14">
+<!ENTITY version   "2016.08.20">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "bfe2ba3c83ffeb006c3911dd9751112c">
+<!ENTITY MD5       "02602da08c9314d0f83762438e990993">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.0">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- updated logo
+
+###2015.12.14
 - added unRAID version check. Only version 6.1 or higher is allowed
 - updated consistency of PLG file
 
@@ -38,7 +41,7 @@
 </CHANGES>
 
 <!--
-Copyright 2015, Bergware International
+Copyright 2016, Bergware International
 Dynamix Schedules - GUI inteface to alter the built-in hourly, daily, weekly and monthly schedules.
 -->
 
@@ -89,7 +92,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2015, Bergware International"
+echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
