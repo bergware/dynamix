@@ -10,7 +10,7 @@
 <!ENTITY MD5       "1ddc42f057d5b68a849ff91f5cb73306">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.0">
 
 <CHANGES>
 ##&name;
@@ -229,7 +229,7 @@
 </CHANGES>
 
 <!--
-Copyright 2015, Bergware International
+Copyright 2016, Bergware International
 Dynamix File Integrity - Real-time hashing and verification of files. Report on failed file content integrity (aka bit-rot).
 -->
 
@@ -454,7 +454,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2015-2016, Bergware International"
+echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
