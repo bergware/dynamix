@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.04.08">
+<!ENTITY version   "2016.08.20">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7857c39b1c6387ef162b831c244a3546">
+<!ENTITY MD5       "1ddc42f057d5b68a849ff91f5cb73306">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- updated tables to accommodate unRAID 6.2 number of data disks
+
+###2016.04.08
 - fixed overcommitment of processor when many files are copied
 
 **PLEASE RE-APPLY THE SETTINGS AFTER THIS UPDATE**
