@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.20">
+<!ENTITY version   "2016.08.21">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1ddc42f057d5b68a849ff91f5cb73306">
+<!ENTITY MD5       "5a3b2f2ce4263d89d83c4cdd20cea7ca">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.0">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- made all tables fixed size
+
+###2016.08.21
 - updated tables to accommodate unRAID 6.2 number of data disks
 
 ###2016.04.08
