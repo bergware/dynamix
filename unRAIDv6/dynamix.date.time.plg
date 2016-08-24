@@ -7,7 +7,7 @@
 <!ENTITY launch    "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "69b61efc251cdf6f9a3af3022771d47b">
+<!ENTITY MD5       "061d0474cce6a43bbb6f71bc6071b5b5">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.2.0rc4">
