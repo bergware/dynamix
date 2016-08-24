@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.date.time">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.24">
+<!ENTITY version   "2016.08.24a">
 <!ENTITY launch    "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "061d0474cce6a43bbb6f71bc6071b5b5">
+<!ENTITY MD5       "557d01bf352825215f389c4740983985">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.2.0rc4">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added show selected country
+
+###2016.08.24
 - initial release for unRAID v6.2
 </CHANGES>
 
