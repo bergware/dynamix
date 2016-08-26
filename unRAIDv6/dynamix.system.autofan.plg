@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2016.03.15">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6550b8c9845351599275eb69d2c41499">
+<!ENTITY MD5       "375ce3623e073387b9fb0b73a8626369">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2016.03.15
 - fixed temperature input when Fahrenheit is selected
 - fixed log notifications in Celsius or Fahrenheit
 
@@ -54,20 +58,13 @@
 </CHANGES>
 
 <!--
-Copyright 2015, Bergware International
+Copyright 2016, Bergware International
 Dynamix System Autofan - Fan speed control. Makes use of autofan script contributed by Aiden, Dan Stroot, Guzzi, gfjardim
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 # Stop service
 /usr/local/emhttp/plugins/&name;/scripts/rc.autofan stop 2>/dev/null
 
@@ -108,14 +105,11 @@ if [[ $enable -eq 1 ]]; then
 fi
 rm -f /tmp/start_service
 
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
-
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2015, Bergware International"
+echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

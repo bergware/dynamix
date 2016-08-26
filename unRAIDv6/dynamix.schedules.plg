@@ -3,18 +3,22 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.schedules">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.20">
+<!ENTITY version   "2016.08.26">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "02602da08c9314d0f83762438e990993">
+<!ENTITY MD5       "33a19b0d44f2d3a6ca76a1c81c252632">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2016.08.20
 - updated logo
 
 ###2015.12.14
@@ -48,13 +52,6 @@ Dynamix Schedules - GUI inteface to alter the built-in hourly, daily, weekly and
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 # Remove old 'source' packages
 MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
@@ -84,9 +81,6 @@ if [[ -e $cfg ]]; then
   crontab $cron
   rm -f $cron
 fi
-
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 
 echo ""
 echo "-----------------------------------------------------------"

@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.12.14">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "06f1280196db86d4707baf461ded7000">
+<!ENTITY MD5       "68622390bb172b318a74261d7fb78d1c">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2015.12.14
 - added unRAID version check. Only version 6.1 or higher is allowed
 - updated consistency of PLG file
 
@@ -61,20 +65,13 @@
 </CHANGES>
 
 <!--
-Copyright 2015, Bergware International
+Copyright 2016, Bergware International
 Dynamix Active Streams - Real-time monitoring of SMB shares
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 # Remove old 'source' packages
 MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
@@ -92,14 +89,11 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
-
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2015, Bergware International"
+echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

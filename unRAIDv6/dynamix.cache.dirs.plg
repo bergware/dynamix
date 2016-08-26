@@ -3,20 +3,24 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.01.12">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "2854256063f74535c9db8c3f74929fde">
-<!ENTITY ZIP       "66f967028c64aea77135a8469640bc0d">
+<!ENTITY MD5       "bc043af246df9bb533f6d20abd1f9ac3">
+<!ENTITY ZIP       "3194b87ae645916c81336d524d65af78">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2016.01.12
 - changed maxdepth setting to adaptive depth setting
 - updated version of cache_dirs script v2.1.1
 
@@ -89,20 +93,13 @@
 </CHANGES>
 
 <!--
-Copyright 2015, Bergware International
+Copyright 2016, Bergware International
 Dynamix Folder Caching - Store names in memory to avoid disk spin-ups. Makes use of cache_dirs script written by Joe L. and updated by Alex R. Berg
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 # Stop service
 /usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs stop 2>/dev/null
 
@@ -166,7 +163,7 @@ enable=$(grep -Po '^service="\K[^"]+' $cfg)
 conf=/etc/cache_dirs.conf
 if [[ $enable -eq 1 ]]; then
   if [[ ! -e $conf ]]; then
-    grep -Po '^options="\K.*' $cfg|sed -n 'G;s:"\n$::;p' > $conf
+    grep -Po '^options="\K.*' $cfg|sed -n 'G;s:"\n$::;p' >$conf
   fi
   if [[ $(getkey mdState) == STARTED ]]; then
     at -M -f /tmp/start_service now 2>/dev/null
@@ -174,14 +171,11 @@ if [[ $enable -eq 1 ]]; then
 fi
 rm -f /tmp/start_service
 
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
-
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2015, Bergware International"
+echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

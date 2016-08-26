@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.23a">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f6d95a5c9b4c74f9cc8f9b40f12b0149">
+<!ENTITY MD5       "c2226cca935396876fd7944a1593a3cd">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2016.08.23a
 - fixed compatability with unRAID 6.1
 
 ###2016.08.20
@@ -78,20 +82,13 @@ Dynamix System Information - System hardware and BIOS details
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 cfg="/boot/config/plugins/dynamix/dynamix.cfg"
 
 add_key(){
   key=$(echo $2|cut -d'=' -f1)
   section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
   if [[ -z $section ]]; then
-    echo -e "[$1]\n$2" >> $cfg
+    echo -e "[$1]\n$2" >>$cfg
   else
     if [[ $(echo $section|grep "$key="|wc -l) -eq 0 ]]; then
       sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
@@ -103,7 +100,7 @@ add_key(){
 if [[ -e $cfg ]]; then
   add_key 'display' 'sysinfo="/Tools/SystemProfiler"'
 else
-  echo -e "[display]\nsysinfo=\"/Tools/SystemProfiler\"" > $cfg
+  echo -e "[display]\nsysinfo=\"/Tools/SystemProfiler\"" >$cfg
 fi
 
 # Remove old 'source' packages
@@ -123,9 +120,6 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
-
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."

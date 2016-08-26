@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.20">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "e497b78fdc156a0f123c537eb6fb2507">
+<!ENTITY MD5       "ca00b6b754075a8cedff4b9200557b73">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2016.08.20
 - updated sysstat files to version 11.2.1.1
 
 ###2016.04.08
@@ -104,13 +108,6 @@ Dynamix System Stats - disk and system usage graphs
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 # Remove legacy cron entry (if existing)
 crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 
@@ -141,34 +138,25 @@ chmod 755 $new
 # Convert legacy files
 if [[ -d $old ]]; then
   for sa in $old/sa* ; do
-    /usr/bin/sadf -c $sa > $new/$(basename $sa) 2>/dev/null
+    /usr/bin/sadf -c $sa >$new/$(basename $sa) 2>/dev/null
   done
   rm -rf $old
 elif [[ $(ls -A $new|wc -l) -gt 0 ]]; then
   mkdir -p $tmp
   for sa in $new/sa* ; do
-    /usr/bin/sadf -c $sa > $tmp/$(basename $sa) 2>/dev/null
+    /usr/bin/sadf -c $sa >$tmp/$(basename $sa) 2>/dev/null
   done
   mv -f $tmp/sa* $new
   rm -rf $tmp
 fi
 
-# Backward compatibility
-source /etc/unraid-version
-if [[ $version != 6.1.7 &amp;&amp; ${version:0:3} != 6.2 ]]; then
-  sed -i 's:/.*=::' /usr/local/emhttp/plugins/&name;/Stats.page
-fi
-
 # Create cron entry
 cron=/boot/config/plugins/&name;/sysstats.cron
 if [[ ! -f $cron ]]; then
-  echo '# Generated system data collection schedule:' > $cron
-  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
+  echo '# Generated system data collection schedule:' >$cron
+  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;>/dev/null\n' >>$cron
   /usr/local/sbin/update_cron
 fi
-
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
 
 echo ""
 echo "-----------------------------------------------------------"

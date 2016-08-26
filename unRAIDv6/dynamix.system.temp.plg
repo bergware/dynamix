@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.06.19">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "69f4db054e9519c9e7923ca363fb2ede">
+<!ENTITY MD5       "0cfde2de3ad4fd702727bce77252d500">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2016.06.19
 - disable 'detect' button and give message when perl is not installed
 - auto-update sensors-detect script to latest known version
 
@@ -76,20 +80,13 @@
 </CHANGES>
 
 <!--
-Copyright 2015, Bergware International
+Copyright 2016, Bergware International
 Dynamix System Temperature - Real-time monitoring of CPU and MB temperatures
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 # Remove legacy config file
 rm -f /boot/config/plugins/&name;/&name;.cfg
 
@@ -116,7 +113,7 @@ rm -f /usr/sbin/sensors-detect
 </FILE>
 
 <!-- SENSORS-DETECT -->
-<FILE Name="/usr/sbin/sensors-detect" Mode="0755">
+<FILE Name="/usr/sbin/sensors-detect" Mode="0644">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sensors-detect</URL>
 </FILE>
 
@@ -135,14 +132,11 @@ if [[ -f $sensors ]]; then
   cp -f $sensors /etc/sensors.d
 fi
 
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md)$/ {print "/"$0}' /var/log/packages/&name;)
-
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2015, Bergware International"
+echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.19">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "df8fff610c75476de6c630a17b05b587">
+<!ENTITY MD5       "1c49a29456296be04223226a2a3d3e45">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+- added minimum unRAID version 6.1.9
+
+###2016.8.19
 - updated s3_sleep script to version 3.0.3 (changed HDD activity check to allow RAID controllers, courtesy Michael A.)
 - changed sleep icon
 
@@ -93,27 +97,20 @@
 </CHANGES>
 
 <!--
-Copyright 2015, Bergware International
+Copyright 2016, Bergware International
 Dynamix S3 Sleep - Manual and automatic sleep mode
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Check unRAID version
-source /etc/unraid-version
-if [[ ${version:0:3} == 6.0 ]]; then
-  echo "unRAID version 6.1 or higher is required"
-  exit 1
-fi
-
 cfg="/boot/config/plugins/dynamix/dynamix.cfg"
 
 add_key(){
   key=$(echo $2|cut -d'=' -f1)
   section=$(sed -n "/^\[$1\]/,/^\[/p" $cfg)
   if [[ -z $section ]]; then
-    echo -e "[$1]\n$2" >> $cfg
+    echo -e "[$1]\n$2" >>$cfg
   else
     if [[ $(echo $section|grep "$key="|wc -l) -eq 0 ]]; then
       sed -i "$(sed -n "/^\[$1\]/,/^\[/=" $cfg|tail -1) i $2" $cfg
@@ -126,8 +123,8 @@ if [[ -e $cfg ]]; then
   add_key 'confirm' 'sleep="1"'
   add_key 'display' 'sleep="plugins/&name;/Sleep.php"'
 else
-  echo -e "[confirm]\nsleep=\"1\"" > $cfg
-  echo -e "[display]\nsleep=\"plugins/&name;/Sleep.php\"" >> $cfg
+  echo -e "[confirm]\nsleep=\"1\"" >$cfg
+  echo -e "[display]\nsleep=\"plugins/&name;/Sleep.php\"" >>$cfg
 fi
 
 # Stop service
@@ -181,12 +178,12 @@ bash="#!/bin/bash\n"
 bin=/usr/local/emhttp/plugins/&name;/scripts
 preRun=$(grep -Po '^preRun="\K[^"]+' $cfg)
 if [[ -n $preRun ]]; then
-  echo "${bash}${preRun}"|urldecode > $bin/preRun
+  echo "${bash}${preRun}"|urldecode >$bin/preRun
   chmod u+x $bin/preRun
 fi
 postRun=$(grep -Po '^postRun="\K[^"]+' $cfg)
 if [[ -n $postRun ]]; then
-  echo "${bash}${postRun}"|urldecode > $bin/postRun
+  echo "${bash}${postRun}"|urldecode >$bin/postRun
   chmod u+x $bin/postRun
 fi
 
@@ -195,7 +192,7 @@ enable=$(grep -Po '^service="\K[^"]+' $cfg)
 conf=/etc/s3_sleep.conf
 if [[ $enable -eq 1 ]]; then
   if [[ ! -e $conf ]]; then
-    grep -Po '^options="\K.*' $cfg|sed -n 'G;s:"\n$::;p' > $conf
+    grep -Po '^options="\K.*' $cfg|sed -n 'G;s:"\n$::;p' >$conf
   fi
   if [[ $(getkey mdState) == STARTED ]]; then
     at -M -f /tmp/start_service now 2>/dev/null
@@ -210,7 +207,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2015, Bergware International"
+echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

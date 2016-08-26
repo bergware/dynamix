@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.date.time">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.24a">
+<!ENTITY version   "2016.08.26">
 <!ENTITY launch    "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "557d01bf352825215f389c4740983985">
+<!ENTITY MD5       "9227211da4df8b402c3476ecdfca8baf">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.2.0rc4">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed folders and files permissions
+
+###2016.08.24a
 - added show selected country
 
 ###2016.08.24
@@ -47,9 +50,6 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Update file access mode
-chmod 644 $(awk '/\.(htm|php|js|page|css|png|plg|gif|cfg|md|key|map)$/ {print "/"$0}' /var/log/packages/&name;)
-
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
