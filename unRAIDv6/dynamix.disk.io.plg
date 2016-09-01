@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.disk.io">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.31">
+<!ENTITY version   "2016.09.01">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "12126b3fe31c15b4497944a0f98190eb">
+<!ENTITY MD5       "483528d9db07c985aad12b910d70ac1d">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2.0rc4">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- code improvements
+
+###2016.08.31
 - initial release for unRAID v6.2
 </CHANGES>
 
