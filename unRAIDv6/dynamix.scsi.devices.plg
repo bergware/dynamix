@@ -3,16 +3,20 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.scsi.devices">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.18b">
+<!ENTITY version   "2016.09.03">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2.0rc1">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2.0rc4">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed file permissions
+- minimum unRAID version 6.2.0rc4
+
+###2016.08.18b
 - fixed chmod error message
 
 ###2016.07.21
@@ -34,7 +38,7 @@ rm -rf /usr/local/emhttp/plugins/&name;/
 </FILE>
 
 <!-- README FILE -->
-<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md" Mode="0644">
 <INLINE>
 **Dynamix SCSI Devices**
 
@@ -45,7 +49,7 @@ This plugin updates the udev persistent storage devices rules file (courtesy of 
 </FILE>
 
 <!-- IMAGE -->
-<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
+<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64" Mode="0644">
 <INLINE>
 iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAKmklEQVRo3u1Za2wc1RX+ZmZn9r07
 9nr9iE3iGBoMBHCRaQR94PzhB2rBtBWihYpE/YFKJQiV+qN/aEKrIoSsJESgVoJS0aqlqlJII0JQ
@@ -200,6 +204,10 @@ LABEL="persistent_storage_end"
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+# update folder permissions
+chmod 755 /usr/local/emhttp/plugins/&name;
+chmod 755 /usr/local/emhttp/plugins/&name;/images
+
 # update udev devices
 udevadm control --reload-rules
 udevadm trigger --subsystem-match=block
