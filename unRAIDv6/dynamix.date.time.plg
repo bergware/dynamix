@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.date.time">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2016.09.07">
 <!ENTITY launch    "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9227211da4df8b402c3476ecdfca8baf">
+<!ENTITY MD5       "d9fda5dd06842d79372b7f576361265a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.2.0rc4">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- removed custom time zone setting
+
+###2016.08.26
 - fixed folders and files permissions
 
 ###2016.08.24a
