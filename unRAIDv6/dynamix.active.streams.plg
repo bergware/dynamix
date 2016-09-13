@@ -7,7 +7,7 @@
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "11a37dab32a1bb3190ae8c63dc725cd6">
+<!ENTITY MD5       "da67e5a0a58cd46e24b2a978b4d284a0">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
