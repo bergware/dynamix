@@ -6,7 +6,7 @@
 <!ENTITY version   "2016.09.13">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "39b4b01501829b675255e3f626a78b03">
+<!ENTITY MD5       "a9d80b955a9e35f60f7135e471cbe4d5">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
