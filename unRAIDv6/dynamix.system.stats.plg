@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2016.09.13">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ca00b6b754075a8cedff4b9200557b73">
+<!ENTITY MD5       "1980507767daf62ede2a3fce754ea56e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed absolute path using $docroot
+
+###2016.08.26
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
