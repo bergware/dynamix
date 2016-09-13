@@ -6,7 +6,7 @@
 <!ENTITY version   "2016.08.26">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "d9dc8b34ec7632cea0a811ad9d190740">
+<!ENTITY MD5       "643c3830368258abaa3c1da074129dce">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- added header to dropdown menu
+
+###2016.08.26
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
