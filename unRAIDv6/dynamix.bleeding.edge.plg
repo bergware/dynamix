@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.14">
+<!ENTITY version   "2016.09.14a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cfe1d860d1534fdd59a7c990e22c6036">
+<!ENTITY MD5       "89be8111ad27748e52906e19dd8f8a8f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2.0-rc5" max="6.2.0-rc5">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- added grey background when no unread notifications are present
+- moved notification counters to the far right
+
+###2016.09.14
 - Replace deprecated HTML5 tags: big, font, center
 - Make all 'require_once' statements consistent with absolute path using $docroot
 - Enhanced notification system: Detailed and Summarized views
