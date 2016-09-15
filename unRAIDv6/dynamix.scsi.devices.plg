@@ -3,16 +3,19 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.scsi.devices">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.03">
+<!ENTITY version   "2016.09.15">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2.0rc4">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- minimum unRAID version 6.2 (stable version)
+
+###2016.09.03
 - fixed file permissions
 - minimum unRAID version 6.2.0rc4
 
