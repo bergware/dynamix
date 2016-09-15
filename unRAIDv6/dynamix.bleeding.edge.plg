@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.14a">
+<!ENTITY version   "2016.09.15">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "89be8111ad27748e52906e19dd8f8a8f">
+<!ENTITY MD5       "732782748677f3818fe801ea5523c3b8">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2.0-rc5" max="6.2.0-rc5">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed compatibility issue
+
+###2016.09.14a
 - added grey background when no unread notifications are present
 - moved notification counters to the far right
 
