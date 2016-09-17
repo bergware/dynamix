@@ -3,19 +3,22 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.date.time">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.07">
+<!ENTITY version   "2016.09.17">
 <!ENTITY launch    "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "d9fda5dd06842d79372b7f576361265a">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.2.0rc4">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.2">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- minimum unRAID version 6.2 (stable version)
+
+###2016.09.07
 - removed custom time zone setting
 
 ###2016.08.26
