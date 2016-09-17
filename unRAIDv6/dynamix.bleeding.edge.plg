@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.16">
+<!ENTITY version   "2016.09.17">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "75c2de57ed5b7f61af20951856624518">
+<!ENTITY MD5       "caf7183412f23dda798b678a8ef7a1b8">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed regression error in VM manager
+
+###2016.09.16
 - changed minimum unRAID version 6.2 (stable version)
 - fixed css duplicate names
 
