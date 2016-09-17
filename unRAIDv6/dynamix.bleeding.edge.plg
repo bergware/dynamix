@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.17">
+<!ENTITY version   "2016.09.17a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "caf7183412f23dda798b678a8ef7a1b8">
+<!ENTITY MD5       "01f5a92bbfefd7f2eb5521d1026bd968">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed missing default gateway when VLANs are added using DHCP
+
+###2016.09.17
 - fixed regression error in VM manager
 
 ###2016.09.16
