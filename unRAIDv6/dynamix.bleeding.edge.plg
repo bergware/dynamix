@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.18">
+<!ENTITY version   "2016.09.18a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "02c35eeca51b320a8426c519b05d0ae4">
+<!ENTITY MD5       "673e085ae89e1392e4fa912f5718cddb">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed toggle button display when page refresh is disabled
+
+###2016.09.18
 - rearranged notification summary drop-down menu
 
 ###2016.09.17a
