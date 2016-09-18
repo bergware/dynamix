@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.18c">
+<!ENTITY version   "2016.09.18d">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f27952a7a51aaba78f758d971523e726">
+<!ENTITY MD5       "6dc5eb96132d42f517d1374142b567c9">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed execution of notify script
+
+###2016.09.18c
 - fixed toggle button display when page refresh is disabled
 
 ###2016.09.18
