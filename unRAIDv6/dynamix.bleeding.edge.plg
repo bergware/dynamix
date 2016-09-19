@@ -15,7 +15,7 @@
 ##&name;
 
 ###&version;
-- fixed $docroot initialization
+- added $docroot fallback mechanism
 
 ###2016.09.18d
 - fixed execution of notify script
