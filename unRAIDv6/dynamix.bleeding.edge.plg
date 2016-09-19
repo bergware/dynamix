@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.18d">
+<!ENTITY version   "2016.09.19">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6dc5eb96132d42f517d1374142b567c9">
+<!ENTITY MD5       "b5b57c40f526a3ddd57b4f06e2e9eeff">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed $docroot initialization
+
+###2016.09.18d
 - fixed execution of notify script
 
 ###2016.09.18c
