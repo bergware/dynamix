@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2016.09.20">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed mdcmd not found error
+
+###2016.08.26
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
@@ -433,6 +436,14 @@ if [[ ! -e $cfg ]]; then
   cfg=/usr/local/emhttp/plugins/&name;/default.cfg
 fi
 
+# get unRAID key
+getkey(){
+  if [[ -e /proc/mdcmd ]]; then
+    local key=$1
+    grep -Po "^$key=\K.*" /proc/mdcmd
+  fi
+}
+
 # Create logs, export, saved folders
 mkdir -p $usb/logs $usb/export $usb/saved
 
@@ -441,8 +452,7 @@ mv -f $usb/*.hash $usb/export 2>/dev/null
 
 # Start service
 enable=$(grep -Po '^service="\K[^"]+' $cfg)
-array=$(grep -Po '^mdState=\K.*' /proc/mdcmd)
-if [[ $enable -eq 1 &amp;&amp; $array == STARTED ]]; then
+if [[ $enable -eq 1 &amp;&amp; $(getkey mdState) == STARTED ]]; then
   at -M -f /tmp/start_service now 2>/dev/null
 fi
 rm -f /tmp/start_service
