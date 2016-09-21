@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.19b">
+<!ENTITY version   "2016.09.21">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "5da504a7fde1c493fbb55fcea673bb22">
+<!ENTITY MD5       "a31376a5427b6d109d255289934b2c38">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- changed opacity of notifications to improve readability
+
+###2016.09.19b
 - added $docroot fallback mechanism
 
 ###2016.09.18d
