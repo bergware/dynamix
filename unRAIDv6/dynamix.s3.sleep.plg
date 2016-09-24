@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2016.09.24">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1c49a29456296be04223226a2a3d3e45">
+<!ENTITY MD5       "1ff02d305b9da4d75e3819686bbe4e95">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- updated s3_sleep script to version 3.0.4 (fixed calling of powerdown script)
+
+###2016.08.26
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
