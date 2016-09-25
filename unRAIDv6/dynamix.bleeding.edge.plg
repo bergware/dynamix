@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.25a">
+<!ENTITY version   "2016.09.25b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "43157a6af1edf6c5bce8db92c236f073">
+<!ENTITY MD5       "d9bd8d7c6a2bcd5317f887979b2798c6">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- added NMVe disk I/O support
+
+###2016.09.25a
 - fixed suppress new GUI message when unRAID-OS is newer
 
 ###2016.09.25
