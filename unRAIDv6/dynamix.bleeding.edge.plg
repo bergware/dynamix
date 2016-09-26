@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.25b">
+<!ENTITY version   "2016.09.26">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "d9bd8d7c6a2bcd5317f887979b2798c6">
+<!ENTITY MD5       "d7ecdd09a98fa9c465b9942bac520c31">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- added disk temperature display in array overview on dashboard page
+- added context menu in array overview on dashboard page shows bad attributes
+
+###2016.09.25b
 - added NMVe disk I/O support
 
 ###2016.09.25a
