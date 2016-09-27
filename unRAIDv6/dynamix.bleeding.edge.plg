@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.26a">
+<!ENTITY version   "2016.09.27">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "e7ff00b7ed9214e323962089d3eb7c82">
+<!ENTITY MD5       "9ae197714ce1c1251ff00c47aeaa6e1e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed selection of SAS devices with WWN disabled
+
+###2016.09.26a
 - added disk temperature display in array overview on dashboard page
 - added title menu in array overview on dashboard page shows bad attributes
 - added show disk name in context menu
