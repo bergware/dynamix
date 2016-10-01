@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.10.01e">
+<!ENTITY version   "2016.10.01f">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6a3c020399cfd4bbffd224d69af165fc">
+<!ENTITY MD5       "ee4fbdbdf93fbfa42ae52a6dbb06dc0a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -19,6 +19,7 @@
 - fixed suppress parity2 on dashboard page when not used
 - added description when array 'Stop' button is disabled
 - changed wording of attached devices (registration page)
+- fixed regression error
 
 ###2016.09.27
 - fixed selection of SAS devices with WWN disabled
