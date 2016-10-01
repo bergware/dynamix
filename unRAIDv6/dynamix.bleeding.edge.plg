@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.27">
+<!ENTITY version   "2016.10.01">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9ae197714ce1c1251ff00c47aeaa6e1e">
+<!ENTITY MD5       "0ad716cc7d010cdd07be487cf512e94e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed SMART attributes highlighting
+
+###2016.09.27
 - fixed selection of SAS devices with WWN disabled
 
 ###2016.09.26a
