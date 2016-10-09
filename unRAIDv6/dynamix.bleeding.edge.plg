@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.10.09">
+<!ENTITY version   "2016.10.09a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "70cb53154232c7cbc4ce96f63faf1dd0">
+<!ENTITY MD5       "5ff987efab7418a653db4edf9857c92b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -16,6 +16,7 @@
 
 ###&version;
 - replaced "Yes I want to do this" checkbox with popup message for array-stop, system-reboot, system-shutdown
+- added unrestricted Reboot and Shutdown
 
 ###2016.10.08
 - fixed too long password in userAdd and userEdit pages
