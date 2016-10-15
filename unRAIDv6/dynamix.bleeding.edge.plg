@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.10.09i">
+<!ENTITY version   "2016.10.15">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b2c6bfb38cf0e06b121495e912936ef6">
+<!ENTITY MD5       "9fce35b58a4334e39595f8da70f3a0c0">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- added *Notify My Android* agent
+
+###2016.10.09
 - replaced "Yes I want to do this" checkbox with popup message for array-stop, system-reboot, system-shutdown
 - added unrestricted Reboot and Shutdown buttons
 - added active Reboot and Shutdown pages
