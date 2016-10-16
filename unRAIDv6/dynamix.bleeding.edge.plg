@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.10.15">
+<!ENTITY version   "2016.10.16">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9fce35b58a4334e39595f8da70f3a0c0">
+<!ENTITY MD5       "7f221821e0795ed3d2810d48e345c9c5">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- added class id to body tag
+- added auto scan of themes
+
+###2016.10.15
 - added *Notify My Android* agent
 
 ###2016.10.09
