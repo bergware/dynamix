@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.10.20">
+<!ENTITY version   "2016.10.22">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "987c032f1d6df09f8c6c182e6a889b15">
+<!ENTITY MD5       "cd93e2b17536561a8f75ac94628daa99">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- code optimizations
+
+###2016.10.20
 - alignment with unRAID v6.3.0-rc2
 
 ###2016.10.17
