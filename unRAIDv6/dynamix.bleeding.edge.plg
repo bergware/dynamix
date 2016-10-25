@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.10.23">
+<!ENTITY version   "2016.10.25">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3e721eec0acbda7237b4c10431026343">
+<!ENTITY MD5       "3ab9776f1d9e655e65abcb81bee436d1">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.2">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- fixed regression error in NewConfig when no devices are selected
+- fixed display of DNS servers in automatic mode and settings are locked
+
+###2016.10.23
 - added confirmation box to stop parity operation
 
 ###2016.10.22
