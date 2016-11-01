@@ -61,7 +61,7 @@ fi
 <INLINE>
 # Start service
 cron=/boot/config/plugins/dynamix/mover.cron
-if [[ -f $cfg ]] && grep -q '^\. \. ' $cfg; then
+if [[ -f $cfg ]] &amp;&amp; grep -q '^\. \. ' $cfg; then
   at -M -f /tmp/start_service now 2>/dev/null
 fi
 rm -f /tmp/start_service
