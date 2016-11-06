@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2016.11.06">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c2226cca935396876fd7944a1593a3cd">
+<!ENTITY MD5       "d2800fd80cf22151d2b3a78c234bb2ab">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- replaced deprecated PHP split function for explode function
+
+###2016.08.26
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
