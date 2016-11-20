@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.13">
+<!ENTITY version   "2016.11.20">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "69a0c2accdd1820c1e3ed4217b716ec4">
+<!ENTITY MD5       "5d32fca7b4ed5fdc5ec9cbef3c9af183">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,6 +15,11 @@
 ##&name;
 
 ###&version;
+- fixed compatibility with unRAID 6.2 and higher
+- replaced deprecated HTML5 'center' tags
+- replaced plugin icon
+
+###2016.09.13
 - added header to dropdown menu
 
 ###2016.08.26
