@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.cache">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.11.20">
+<!ENTITY version   "2016.12.18">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "381340861bd7c5433a1d4191bdcf0f55">
+<!ENTITY MD5       "5afb734af90bbfe5552fbbdc085c124f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.3.0-rc3">
@@ -15,7 +15,7 @@
 ##&name;
 
 ###&version;
-- disable regular mover in continuous mode
+- inhibit regular mover in continuous mode
 
 ###2016.11.01
 - initial release for unRAID v6.3 only
