@@ -44,7 +44,7 @@ fi
 <FILE Name="/tmp/start_service" Mode="0770">
 <INLINE>
 #!/bin/bash
-/usr/local/emhttp/webGui/scripts/rc.mover start
+/usr/local/emhttp/webGui/scripts/rc.rt_mover start
 </INLINE>
 </FILE>
 
@@ -84,7 +84,7 @@ echo ""
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 # Stop all processes
-/usr/local/emhttp/webGui/scripts/rc.mover stop
+/usr/local/emhttp/webGui/scripts/rc.rt_mover stop
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
