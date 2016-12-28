@@ -23,14 +23,14 @@
 
 <!--
 Copyright 2016, Bergware International
-Dynamix local master - Monitors and shows the local master election in an SMB network
+Dynamix system cache - Adds ability to directly move files from cache to array as soon as they are received
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Stop service
-/usr/local/emhttp/webGui/scripts/rc.mover stop
+/usr/local/emhttp/webGui/scripts/rc.rt_mover stop
 
 # Remove old 'source' packages
 MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
