@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.20">
+<!ENTITY version   "2017.02.17">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- made compatible with unRAID v6.3
+
+###2016.09.20
 - fixed mdcmd not found error
 
 ###2016.08.26
@@ -412,7 +415,7 @@ exit 0
 </FILE>
 
 <!-- INOTIFY-TOOLS PACKAGE -->
-<FILE Name="/boot/packages/inotify-tools-3.14-x86_64-1.txz" Run="upgradepkg --install-new">
+<FILE Name="/boot/packages/inotify-tools-3.14-x86_64-1.txz" Run="upgradepkg --install-new" Max="6.2.4">
 <URL>http://mirrors.slackware.com/slackware/slackware64-14.1/slackware64/a/inotify-tools-3.14-x86_64-1.txz</URL>
 </FILE>
 
@@ -475,9 +478,13 @@ echo ""
 /usr/local/emhttp/plugins/&name;/event/stopping_svcs
 
 # Uninstall the packages
+. /etc/unraid-version
+
 removepkg &name;
 removepkg b2sum-20130305-x86_64-1
-removepkg inotify-tools-3.14-x86_64-1
+if [[ ${version:0:3} != 6.3 ]]; then
+  removepkg inotify-tools-3.14-x86_64-1
+fi
 
 # Remove exportrotate cron job
 rm -f /etc/cron.daily/exportrotate
