@@ -44,6 +44,15 @@ function list_pwm() {
   }
   return $out;
 }
+
+function disk_sort_by_device($a, $b) {
+  return strcmp($a['device'], $b['device']);
+}
+
+// get disk list
+$disks = array_filter($disks,'my_disks');
+usort($disks, 'disk_sort_by_device');
+
 ?>
 <script>
 function detectFan() {
@@ -75,15 +84,33 @@ function tempVal(form) {
   form.high.value = Math.round((form.high.value-32)*5/9);
 <?endif;?>
 }
+
+function prepareEdit(form) {
+  // Return exclude as single line input
+  var exclude = '';
+  for (var i=0,item; item=form.exclude.options[i]; i++) {
+    if (item.selected) {
+      if (exclude.length) exclude += ',';
+      exclude += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.exclude.options[0];
+  item.value = exclude;
+  item.selected = true;
+  return true;
+}
+
 $(function() {
   showStatus('<?=$sName?>');
+  $("#exclude_drives").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
 });
 </script>
 
-<form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="tempVal(this)">
+<form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="tempVal(this);return prepareEdit(this)">
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.autofan.php">
-<input type="hidden" name="#prefix" value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m">
+<input type="hidden" name="#prefix" value="exclude=e&controller=c&fan=f&pwm=l&low=t&high=T&interval=m">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
 Fan control function:
@@ -103,7 +130,7 @@ PWM controller:
 PWM fan:
 : <input type="text" name="fan" value="<?=$cfg['fan']?>" placeholder="Click DETECT"><input type="button" value="Detect" onclick="detectFan();" id="fan" style="margin-top:0">
 
-Minimun PWM value:
+Minimum PWM value:
 : <input type="text" name="pwm" value="<?=$cfg['pwm']?>" placeholder="Click DETECT"><input type="button" value="Detect" onclick="detectFanLow();" id="pwm" style="margin-top:0">
 
 Low temperature threshold (&deg;<?=$display['unit']?>):
@@ -114,6 +141,16 @@ High temperature threshold (&deg;<?=$display['unit']?>):
 
 Refresh interval (minutes):
 : <input type="text" name="interval" value="<?=$cfg['interval']?>" class="narrow">
+
+Exclude drives:
+: <select id="exclude_drives" name="exclude" size="1" multiple style="display:none">
+  <?foreach ($disks as $disk):?>
+  <?php if (strtolower($disk['name']) === 'flash') continue; ?>
+  <?=mk_option_check($cfg['exclude'], $disk['device'], sprintf('%s (%s)',
+    my_disk($disk['name']), $disk['device']
+  )); ?>
+  <?endforeach;?>
+  </select>
 
 <input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
