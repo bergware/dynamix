@@ -37,6 +37,7 @@ usage() {
  echo " -f name  =   specify name of the fan (default=/sys/class/hwmon/hwmon2/fan1_input)"
  echo " -l NN    =   set value to slow down the fan speed (default=35)"
  echo " -m NN    =   number of minutes to wait between fan speed changes (default=5)"
+ echo " -e name  =   drives to exclude from max temp calculation (optional)"
 }
 #=======================================================================================
 # USER DEFINED VARIABLES: *MUST* BE SET TO *YOUR* VALUES
@@ -61,11 +62,12 @@ PWM_LOW=35     # Value to make your fan go slow
 PWM_HIGH=255   # Value to make your fan go fast
 
 INTERVAL=5     # The default number of minutes to loop
+EXCLUDE=""
 #=======================================================================================
 # PROGRAM LOGIC - CHANGE AT YOUR PERIL ;)
 #=======================================================================================
 # Get User Input
-while getopts "t:T:m:c:f:l:qhV" opt; do
+while getopts "e:t:T:m:c:f:l:qhV" opt; do
   case $opt in
     t) TEMP_LOW=$OPTARG ;;
     T) TEMP_HIGH=$OPTARG ;;
@@ -76,6 +78,7 @@ while getopts "t:T:m:c:f:l:qhV" opt; do
     V) echo $program_name version: $version ; exit 0 ;;
     h) usage >&2 ; exit 0 ;;
     q) quit_flag="yes" ;;
+    e) EXCLUDE=$OPTARG ;;
    \?) usage >&2 ; exit 0 ;;
   esac
 done
@@ -153,14 +156,20 @@ else
 fi
 
 # Obtain the ID of your flash drive (your flash drive is named "UnRaid" right?)
-flash=/dev/`ls -l /dev/disk/by-label| grep UNRAID | cut -d/ -f3 | cut -c 1-3`
+flash=/dev/`ls -l /dev/disk/by-label | grep UNRAID | cut -d/ -f3 | cut -c 1-3`
+
+if [[ ! -z $EXCLUDE ]]; then
+  DRIVES=$(ls /dev/[hs]d? | grep -v "$flash" | grep -v "/dev/`echo $EXCLUDE | sed -e $'s/,/\\\n/g'`")
+else
+  DRIVES=$(ls /dev/[hs]d? | grep -v "$flash")
+fi
 
 # Count the number of drives in your array (ignoring the flash drive we identified)
 NUM_OF_DRIVES=$(ls /dev/[hs]d? | grep -v "$flash" | wc -l)
 
 # Identify the drives in your array so we can test their temperature
 COUNT=1
-for d in $(ls /dev/[hs]d? | grep -v "$flash"); do
+for d in $DRIVES; do
   HD[$COUNT]=$d
   #echo HDD=${HD[$COUNT]}                               # Uncomment for debugging
   COUNT=$[$COUNT+1]
@@ -290,4 +299,9 @@ background_pid=$!
 echo $background_pid > "${lockfile}"
 echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q" >&2
 echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q" | logger -t$program_name
+
+if [[ ! -z $EXCLUDE ]]; then
+  echo "$program_name excluding drives $EXCLUDE from max temp calculations" | logger -t$program_name
+fi
+
 disown %%
