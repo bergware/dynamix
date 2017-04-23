@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.ssd.trim">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.04.23">
+<!ENTITY version   "2017.04.23a">
 <!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7c4720239e91f60e54ac94466ec3fba8">
+<!ENTITY MD5       "9fe95b31aefb3bbe1b7b404f0c54fe3c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,9 +16,10 @@
 ##&name;
 
 ###&version;
-- do trim operation on all mount points which support it
-- make plugin autonomous
-- add shortcut link on plugins page
+- made trim operation on all mount points which support it
+- made plugin autonomous
+- added shortcut link on plugins page
+- updated plugin icon
 
 ###2016.08.26
 - fixed folders and files permissions
