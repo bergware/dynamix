@@ -3,18 +3,24 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.ssd.trim">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2017.04.23">
+<!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "387927d2fcbffca8a50b2b575fea5929">
+<!ENTITY MD5       "7c4720239e91f60e54ac94466ec3fba8">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- do trim operation on all mount points which support it
+- make plugin autonomous
+- add shortcut link on plugins page
+
+###2016.08.26
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
@@ -30,8 +36,8 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
-Dynamix local master - Monitors and shows the local master election in an SMB network
+Copyright 2017, Bergware International
+Dynamix SSD trim - create a cronjob to do regular SSD TRIM operations
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
@@ -41,6 +47,12 @@ Dynamix local master - Monitors and shows the local master election in an SMB ne
 MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f &source;*.txz
+fi
+
+# Move legacy cronjob
+if [[ -f /boot/config/plugins/dynamix/ssd-trim.cron ]]; then
+  mv -f /boot/config/plugins/dynamix/ssd-trim.cron /boot/config/plugins/&name;
+  /usr/local/sbin/update_cron
 fi
 </INLINE>
 </FILE>
@@ -58,7 +70,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2017, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -74,8 +86,7 @@ rm -rf /boot/config/plugins/&name;
 # Uninstall the 'source' package
 removepkg &name;
 
-# Remove cron entry
-rm -f /boot/config/plugins/dynamix/ssd-trim.cron
+# Update cronjob
 /usr/local/sbin/update_cron
 </INLINE>
 </FILE>
