@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.04.24">
+<!ENTITY version   "2017.04.24a">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cfa4dbd4d0684c27d083dbd784ea2f53">
+<!ENTITY MD5       "56e444586517facbf5aba5799b1dc051">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -18,6 +18,7 @@
 ###&version;
 - adjusted table header
 - fixed regression error
+- fixed potential conflict with unassigned devices plugin
 
 ###2017.04.23
 - fixed missing csrf_token when using unRAID v6.3.3 or higher
