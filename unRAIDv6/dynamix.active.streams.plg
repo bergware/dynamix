@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.09.13">
+<!ENTITY version   "2017.04.23">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "da67e5a0a58cd46e24b2a978b4d284a0">
+<!ENTITY MD5       "eb442870ae504e53395ba45f8d669161">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- fixed missing csrf_token when using unRAID v6.3.3 or higher
+- fixed saving of user names
+- fixed folder remapping when using Plex
+
+###2016.09.13
 - fixed absolute path using $docroot
 
 ###2016.08.26
