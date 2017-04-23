@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.04.23d">
+<!ENTITY version   "2017.04.24">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "aec865c6889c5b094f016754e1184ed8">
+<!ENTITY MD5       "cfa4dbd4d0684c27d083dbd784ea2f53">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- adjusted table header
+- fixed regression error
+
+###2017.04.23
 - fixed missing csrf_token when using unRAID v6.3.3 or higher
 - fixed saving of user names
 - fixed folder remapping when using Plex
@@ -101,7 +105,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2017, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
