@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.11.20a">
+<!ENTITY version   "2017.04.23">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "72310705a78266e661f8570c1192b241">
+<!ENTITY MD5       "a3a29ef178344971383e559bf3a0ca71">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed display of shutdown/reboot page for unRAID 6.2 and higher
+
+###2016.11.20a
 - fixed compatibility with unRAID 6.2 and higher
 - replaced deprecated HTML5 'center' tags
 - replaced plugin icon
