@@ -1,4 +1,6 @@
-## Dynamix v2.2.10
+# Dynamix is now integrated in unRAID v6 and higher
+
+## Dynamix v2.2.10 - Obsolete
 
 #### Update
 
