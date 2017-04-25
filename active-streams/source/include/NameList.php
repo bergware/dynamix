@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -9,12 +9,11 @@
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
-require_once 'webGui/include/Helpers.php';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/webGui/include/Wrappers.php";
 
 $plugin = $_GET['plugin'];
-$warn = $_GET['warn'];
 $cfg = parse_plugin_cfg($plugin);
 ?>
 
@@ -28,17 +27,18 @@ function done_plus(button) {
   }
 }
 $(function() {
-  $('input[value="Apply"]').attr('disabled','disabled');
-  $('form').find('input[type=text]').each(function(){$(this).change(function() {
+  $('input[value="Apply"]').prop('disabled',true);
+  $('form[name="host_names"]').find('input[type=text]').each(function(){$(this).on('input change',function() {
     var form = $(this).parentsUntil('form').parent();
-    form.find('input[value="Apply"]').removeAttr('disabled');
+    form.find('input[value="Apply"]').prop('disabled',false);
     form.find('input[value="Done"]').val('Reset').prop('onclick',null).click(function(){refresh(form.offset().top)});
   });});
 });
 </script>
 <form name="host_names" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#file"  value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#file"  value="<?=$plugin.'/'.$plugin?>.cfg">
 <input type="hidden" name="#cleanup" value="true">
+<input type="hidden" name="csrf_token" value="<?=$_GET['csrf']?>">
 <table class="settings">
 <?
 $online = array();

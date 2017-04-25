@@ -530,7 +530,7 @@ $(function() {
 <div class="right"><span class="mybar orangebar inside"></span><strong>Above <?=$display['warning']?>%</strong><br><small>High on Usage</small></div>
 <?endif;?>
 <?if ($critical || $warning):?>
-<div class="right"><span class="mybar greenbar inside"></span><strong>Below <?=$critical?$display['critical']:$display['warning']?>%</strong><br><small>Normal Usage</small></div>
+<div class="right"><span class="mybar greenbar inside"></span><strong>Below <?=$warning?$display['warning']:$display['critical']?>%</strong><br><small>Normal Usage</small></div>
 <?endif;?>
 <span id="sys" class="graph1"></span>
 <?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>

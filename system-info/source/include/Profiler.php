@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015-2016, Bergware International.
+/* Copyright 2012-2016, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -11,6 +11,15 @@
  */
 ?>
 <?
+function grep($key, $speed){
+  global $raid6;
+  $match = '';
+  foreach ($raid6 as $line) if (preg_match("/$key/",$line)) {$match = $line; break;}
+  if (!$match) return;
+  $line = preg_split('/ +/',substr($match,22));
+  $size = count($line);
+  return $speed ? $line[$size-2].' '.$line[$size-1] : $line[$size-3];
+}
 $output = array();
 switch ($_POST['cmd']) {
 case 'overview':
@@ -20,7 +29,7 @@ case 'overview':
   echo "<tr><td>Motherboard:</td><td>".exec("dmidecode -q -t 2|awk -F: '/^\tManufacturer:/{m=$2;}; /^\tProduct Name:/{p=$2;} END{print m\" -\"p}'")."</td></tr>";
   echo "<tr><td>Processor:</td><td>";
   $cpu = explode('#',exec("dmidecode -q -t 4|awk -F: '/^\tVersion:/{v=$2;}; /^\tCurrent Speed:/{s=$2;} END{print v\"#\"s}'"));
-  $cpumodel = str_replace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&trade;"),$cpu[0]);
+  $cpumodel = str_ireplace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&trade;"),$cpu[0]);
   if (strpos($cpumodel,'@')===false) {
     $cpuspeed = explode(' ',trim($cpu[1]));
     if ($cpuspeed[0]>=1000 && $cpuspeed[1]=='MHz') {
@@ -101,14 +110,19 @@ case 'overview':
   echo "</td></tr>";
   echo "<tr><td>Kernel:</td><td>".exec("uname -srm")."</td></tr>";
   echo "<tr><td>OpenSSL:</td><td>".exec("openssl version|cut -d' ' -f2")."</td></tr>";
-  echo "<tr><td>Uptime:</td><td>";
+  echo "<tr><td>P + Q algorithm:</td>";
+  exec("grep ' raid6: ' /var/log/dmesg", $raid6);
+  $way = grep('using \S+ recovery',false);
+  $p = max(grep("$way +gen",true),grep("$way +xor",true));
+  $q = grep('using algorithm ',true);
+  echo "<td>$p + $q</td></tr>";
+  echo "<tr><td>Uptime:</td>";
   $time = strtok(exec("cat /proc/uptime"), ".");
   $days = sprintf("%2d", $time/86400);
   $hours = sprintf("%2d", $time/3600%24);
   $min = sprintf("%2d", $time/60%60);
   $sec = sprintf("%2d", $time%60);
-  echo "$days days, $hours hours, $min minutes, $sec seconds";
-  echo "</td></tr>";
+  echo "<td>$days days, $hours hours, $min minutes, $sec seconds</td></tr>";
   return;
 case 'bios':
   exec('dmidecode -q -t 0',$output);

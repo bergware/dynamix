@@ -42,10 +42,13 @@ if ($_POST['disk']>0) {
       $row2[] = "<td style='text-align:center'><i class='fa fa-".status('export',$name,file_exists("$path/export/$name.export.hash"))."'></i></td>";
     }
   }
+  $x = 28-count($row1);
   echo "<tr><td style='font-style:italic'>Build up-to-date</td>";
   echo implode('',$row1);
+  echo str_repeat("<td></td>", $x);
   echo "</tr><tr id='export-status'><td style='font-style:italic'>Export up-to-date</td>";
   echo implode('',$row2);
+  echo str_repeat("<td></td>", $x);
   echo "</tr>";
 }
 ?>

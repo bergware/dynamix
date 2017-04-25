@@ -1,6 +1,0 @@
-Author="Bergware"
-Version="1.2.1"
-Title="Unassigned Devices"
-Menu="Main:4"
-Type="php"
-Cond="((count($devs)>0)&&($var['fsState']=='Started'))"

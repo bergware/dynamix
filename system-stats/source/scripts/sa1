@@ -1,8 +1,8 @@
 #!/bin/sh
-# /usr/lib64/sa/sa1
-# (C) 1999-2015 Sebastien Godard (sysstat <at> orange.fr)
+# /usr/lib64/sa/sa1 --> /usr/local/emhttp/plugins/dynamix.system.stats/scripts/sa1
+# (C) 1999-2016 Sebastien Godard (sysstat <at> orange.fr)
 #
-#@(#) sysstat-11.1.8
+#@(#) sysstat-11.2.1.1
 #@(#) sa1: Collect and store binary data in system activity data file.
 #
 # Adapted by Bergware International for use in unRAID OS

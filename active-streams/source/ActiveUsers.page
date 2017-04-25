@@ -2,7 +2,7 @@ Menu="ActiveStreams"
 Title="User Names"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -19,7 +19,7 @@ $plugin = 'dynamix.active.streams';
 
 <script>
 function nameList() {
-  $('#names').load('/plugins/<?=$plugin?>/include/NameList.php','plugin=<?=$plugin?>&warn=<?=$confirm['warn']?>');
+  $('#names').load('/plugins/<?=$plugin?>/include/NameList.php','plugin=<?=$plugin?>&csrf=<?=$var['csrf_token']?>');
 }
 $(function() {
   nameList();
@@ -32,5 +32,5 @@ $(function() {
 >
 > To remove a name association, clear the respective user name box and press apply.
 
-<table class="tablesorter shift"><thead><tr><th style="width:33%;padding-left:12px">IP Address</th><th style="padding-left:0">User Name</th></tr></thead></table>
+<table class="tablesorter shift"><thead><tr><th style="width:33%;padding-left:12px">Host Address</th><th style="padding-left:0">User Name</th></tr></thead></table>
 <div id="names"></div>

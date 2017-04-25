@@ -290,17 +290,20 @@ Error logging:
 > Error logging, including file corruption detection information can be given in the system log, or saved as a file on flash.
 > Disabling error logging will suppress log creation, but it is still possible to receive notifications.
 
-  <table class='tablesorter'><thead><th style='font-weight:bold;padding-left:12px;width:10%'>Disk verification tasks</th>
+  <table class='share_status fixed' style='margin:20px 0'><thead><td style='width:10%'>Verification tasks</td>
 <?
 $i = 1;
 foreach ($disks as $disk) {
-  if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {echo "<th style='text-align:center'>Task<br>$i</th>"; $i++;}
+  if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {echo "<td>Task<br>$i</td>"; $i++;}
 }
+$x = 29-$i;
+echo str_repeat("<td>-</td>", $x);
 echo "</thead><tbody>";
 foreach ($disks as $disk) {
   if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {
     echo "<tr><td>Disk {$disk['idx']}</td>";
     for ($n = 1; $n < $i; $n++) echo "<td style='text-align:center'><span class='{$disk['name']} t{$n}'><input type='checkbox' name='{$disk['name']}-{$n}' class='{$disk['name']} t{$n} thin' onclick='updateMatrix(this.checked,\"{$disk['name']}\",\"t{$n}\")'".($cfg["{$disk['name']}-{$n}"]=='on' ? ' checked':'')."></sapn></td>";
+    echo str_repeat("<td></td>", $x);
     echo "</tr>\n";
   }
 }

@@ -5,7 +5,7 @@ Icon="dynamix.active.streams.png"
 Tabs="true"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -18,17 +18,23 @@ Tabs="true"
 
 <?
 $plugin = 'dynamix.active.streams';
-exec("docker inspect PlexMediaServer 2>/dev/null|sed -n '/^    \"Volumes\": {/,/}/p'|awk -F'\"' '/\"\/mnt\/user\"/{print $2}'",$plex);
+$mounts = '';
+$plex = exec("docker ps --format='{{.Names}}'|grep -Pim1 '^(plex|plexmediaserver)$'");
+if ($plex) {
+  $mounts = explode('|',exec("docker inspect --format='{{range .Mounts}}{{.Source}}:{{.Destination}}|{{end}}' $plex"));
+  rsort($mounts);
+  $mounts = implode('|',$mounts);
+}
 ?>
 
 <script>
 function streamList() {
-  $('#streams').load('/plugins/<?=$plugin?>/include/StreamList.php','plugin=<?=$plugin?>&plex=<?=implode('|',$plex)?>'<?if ($var['fsState']=='Started'):?>,function(){setTimeout(streamList,1000);}<?endif;?>);
+  $('#streams').load('/plugins/<?=$plugin?>/include/StreamList.php','plugin=<?=$plugin?>&plex=<?=urlencode($mounts)?>'<?if ($var['fsState']=='Started'):?>,function(){setTimeout(streamList,1000);}<?endif;?>);
 }
 $(streamList);
 </script>
 <table class='share_status small'>
-<thead><tr><td width='12%'>User</td><td width='9%'>Share</td><td width='5%'>Type</td><td width='auto'>Stream</td><td width='8%'>Duration</td><td width='8%'>Size</td><td width='3%' style='text-align:center'>Halt</td></tr></thead>
+<thead><tr><td width='12%'>Host/User</td><td width='9%'>Share</td><td width='5%'>Type</td><td width='auto'>Stream</td><td width='8%'>Duration</td><td width='8%'>Size</td><td width='3%' style='text-align:center'>Halt</td></tr></thead>
 <tbody id="streams"></tbody>
 </table>
 <input type="button" value="Done" onclick="done()">

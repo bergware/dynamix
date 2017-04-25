@@ -3,7 +3,7 @@ Title="Fan Auto Control"
 Icon="dynamix.system.autofan.png"
 ---
 <?PHP
-/* Copyright 2015-2016, Bergware International.
+/* Copyright 2012-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -19,14 +19,14 @@ Icon="dynamix.system.autofan.png"
 $plugin = "dynamix.system.autofan";
 $cfg    = parse_plugin_cfg($plugin);
 $sName  = "autofan";
-$fName  = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
+$fName  = "$docroot/plugins/$plugin/scripts/$sName";
 
 function temp_val($val) {
   global $display;
   return $display['unit']=='C' ? $val : round(9/5*$val+32);
 }
 function scan_dir($dir, $type = "") {
-  $out = array();
+  $out = [];
   foreach (array_slice(scandir($dir), 2) as $entry){
     $sep   = (preg_match("/\/$/", $dir)) ? "" : "/";
     $out[] = $dir.$sep.$entry ;
@@ -34,12 +34,12 @@ function scan_dir($dir, $type = "") {
   return $out;
 }
 function list_pwm() {
-  $out = array();
+  $out = [];
   exec("find /sys/devices -type f -iname 'pwm[0-9]' -exec dirname \"{}\" +|uniq", $chips);
   foreach ($chips as $chip) {
     $name = is_file("$chip/name") ? file_get_contents("$chip/name") : "";
     foreach (preg_grep("/pwm\d+$/", scan_dir($chip)) as $pwm) {
-      $out[] = array('chip'=>$name, 'name'=>end(split('/',$pwm)), 'sensor'=>$pwm);
+      $out[] = array('chip'=>$name, 'name'=>end(explode('/',$pwm)), 'sensor'=>$pwm);
     }
   }
   return $out;

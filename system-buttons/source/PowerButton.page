@@ -3,7 +3,7 @@ Title=""
 Icon="power.png"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,24 +13,31 @@ Icon="power.png"
  * all copies or substantial portions of the Software.
  */
 ?>
-<?$force = file_exists('/var/log/plugins/powerdown-x86_64.plg') ? 'true' : 'false';?>
-
+<?
+$unraid = parse_ini_file('/etc/unraid-version');
+$direct = version_compare($unraid['version'],'6.1.9','>');
+$force = $direct || file_exists('/var/log/plugins/powerdown-x86_64.plg') ? 'true' : 'false';
+?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <script src="/webGui/javascript/context.js"></script>
 <script>
 $(function() {
-  var opts = [];
+  var opts = [{header:'Buttons', image:'/plugins/dynamix.system.buttons/icons/buttons.png'}];
   $('#nav-item.PowerButton a').prop('onclick', null).attr('id','nav-power');
   context.init({preventDoubleContext:false});
 <?if ($var['mdState']=='STARTED'):?>
   opts.push({text:'Stop Array',icon:'fa-dot-circle-o',action:function(e){e.preventDefault();StopArray();}});
+  opts.push({divider:true});
 <?else:?>
   opts.push({text:'Start Array',icon:'fa-play-circle-o',action:function(e){e.preventDefault();StartArray();}});
+  opts.push({divider:true});
 <?endif;?>
 <?if (isset($display['sleep'])):?>
   opts.push({text:'Sleep',icon:'fa-moon-o',action:function(e){e.preventDefault();Sleep(e.shiftKey|e.ctrlKey);}});
+  opts.push({divider:true});
 <?endif;?>
   opts.push({text:'Shutdown',icon:'fa-power-off',action:function(e){e.preventDefault();Shutdown(<?=$force?>);}});
+  opts.push({divider:true});
   opts.push({text:'Reboot',icon:'fa-refresh',action:function(e){e.preventDefault();Reboot(<?=$force?>);}});
   context.attach('#nav-power',opts);
 });
@@ -46,7 +53,7 @@ function pageLoad(page) {
 
 function infoBox(title,text) {
   pageDisable();
-  Shadowbox.open({title:title,content:text,player:'html',height:120,width:300,options:{modal:false}});
+  Shadowbox.open({title:title,content:'<div style="margin-top:36px;text-align:center">'+text+'</div>',player:'html',height:120,width:300,options:{modal:false}});
   $('#sb-nav-close').css('background','none');
 }
 
@@ -68,12 +75,17 @@ function Shutdown(force) {
   });
 }
 function ShutdownNow(force) {
-  infoBox('Shutdown','<center><br><br><br><i class="fa fa-spinner fa-spin icon"></i>Please wait... preparing for shutdown!</center>');
+<?if ($direct):?>
+   document.directOps.cmd.value = 'shutdown';
+   document.directOps.submit();
+<?else:?>
+  infoBox('Shutdown','<i class="fa fa-spinner fa-spin icon"></i>Please wait... preparing for shutdown!');
   if (force) {
     $.post('/plugins/dynamix.system.buttons/include/Powerdown.php',{cmd:'shutdown'},function(p){pageLoad(p);});
   } else {
     $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'},function(){$.post('/update.htm',{shutdown:'Power down'},pageLoad('shutdown'));});
   }
+<?endif;?>
 }
 
 function Reboot(force) {
@@ -90,12 +102,17 @@ function Reboot(force) {
   });
 }
 function RebootNow(force) {
-  infoBox('Reboot','<center><br><br><br><i class="fa fa-spinner fa-spin icon"></i>Please wait... preparing for reboot!</center>');
+<?if ($direct):?>
+   document.directOps.cmd.value = 'reboot';
+   document.directOps.submit();
+<?else:?>
+  infoBox('Reboot','<i class="fa fa-spinner fa-spin icon"></i>Please wait... preparing for reboot!');
   if (force) {
     $.post('/plugins/dynamix.system.buttons/include/Powerdown.php',{cmd:'reboot'},function(p){pageLoad(p);});
   } else {
     $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'},function(){$.post('/update.htm',{reboot:'Reboot'},pageLoad('reboot'));});
   }
+<?endif;?>
 }
 
 <?if (isset($display['sleep'])):?>
@@ -134,7 +151,7 @@ function StopArray() {
   });
 }
 function StopArrayNow() {
-  infoBox('Stop Array','<br><br><br><center><i class="fa fa-spinner fa-spin icon"></i>Please wait... stopping the array!</center>');
+  infoBox('Stop Array','<i class="fa fa-spinner fa-spin icon"></i>Please wait... stopping the array!');
   $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'},pageLoad());
 }
 <?else:?>
@@ -146,8 +163,12 @@ function StartArray() {
 <?endif;?>
 }
 function StartArrayNow() {
-  infoBox('Start Array','<br><br><br><center><i class="fa fa-spinner fa-spin icon"></i>Please wait... starting the array!</center>');
+  infoBox('Start Array','<i class="fa fa-spinner fa-spin icon"></i>Please wait... starting the array!');
   $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStart:'Start'},pageLoad());
 }
 <?endif;?>
 </script>
+<form name='directOps' method='POST' action='/webGui/include/Boot.php' style='display:none'>
+<input type='hidden' name='csrf_token' value='<?=$var['csrf_token']?>'>
+<input type='hidden' name='cmd' value=''>
+</form>

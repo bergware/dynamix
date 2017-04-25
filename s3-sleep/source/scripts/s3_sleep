@@ -30,10 +30,13 @@
 # Version 3.0.0   Code rewrite, remove bwm-ng dependency
 # Version 3.0.1   Move immediate sleep to front
 # Version 3.0.2   Include SCSI attached drives in array list
+# Version 3.0.3   Changed HDD activity check to allow RAID controllers (courtesy Michael A.)
+# Version 3.0.4   Fixed full path to powerdown script
+# Version 3.0.5   Added automatic detection of available sleep mode
 #
 # Bergware International
 ####################################################################################
-version=3.0.2
+version=3.0.5
 program=$(basename $0)
 
 # Get ID of flash device
@@ -226,8 +229,10 @@ exclude_period() {
 HDD_activity() {
   result=
   if [[ $checkHDD == yes ]]; then
+    [[ -f /dev/shm/1 ]] && cp -f /dev/shm/1 /dev/shm/2 || touch /dev/shm/2
+    cat /proc/diskstats >/dev/shm/1
     for dev in ${array[@]}; do
-      if [[ -n $(hdparm -C /dev/$dev 2>/dev/null|grep active) ]]; then
+      if [[ -n $(diff /dev/shm/1 /dev/shm/2|grep -m1 "$dev ") ]]; then
         result=1
         break;
       fi
@@ -325,9 +330,9 @@ post_sleep_activity() {
 system_sleep() {
 # Do pre-sleep activities
   pre_sleep_activity
-# Go to sleep
+# Go to sleep (s1 or s3)
   log "Enter sleep state now"
-  echo -n mem >/sys/power/state
+  echo -n $state >/sys/power/state
 # Do post-sleep activities
   log "Wake-up now"
   post_sleep_activity
@@ -336,7 +341,7 @@ system_sleep() {
 system_down() {
   log "Shutdown system now"
 # Perform a 'clean' powerdown
-  powerdown
+  /usr/local/sbin/powerdown
 }
 
 # Immediate sleep or shutdown
@@ -414,6 +419,7 @@ fi
 
 # main (continuous loop)
 extraDelay=$delayInit
+state=$(sed 's:freeze ::' /sys/power/state)
 [[ $checkTCP == yes ]] && start=0 || start=-1
 while [[ -f $lockfile ]]; do
   if [[ -z $(exclude_period) ]]; then

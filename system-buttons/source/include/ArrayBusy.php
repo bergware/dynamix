@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,6 +11,6 @@
 ?>
 <?
 $mdResync = exec("grep -Po '^mdResync=\K\d+' /proc/mdcmd");
-$mover = file_exists("/var/run/mover.pid");
+$mover = file_exists('/var/run/mover.pid') ? file_get_contents('/var/run/mover.pid') : '';
 echo ($mdResync || $mover);
 ?>

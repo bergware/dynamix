@@ -1,6 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
- * Copyright 2015, Lime Technology
+/* Copyright 2012-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,7 +10,8 @@
  */
 ?>
 <?
-require_once 'webGui/include/Wrappers.php';
+$docroot = $_SERVER['DOCUMENT_ROOT'];
+require_once "$docroot/webGui/include/Wrappers.php";
 
 if (isset($_GET['monitor'])) {
   $file = '/boot/config/plugins/dynamix/dynamix.cfg';
@@ -24,7 +24,7 @@ if (isset($_GET['monitor'])) {
   }
   @mkdir(dirname($file));
   file_put_contents($file, $text);
-  $cron = $_GET['monitor'] ? "# Generated local master browser check:\n*/1 * * * * /usr/local/emhttp/plugins/dynamix.local.master/scripts/localmaster &> /dev/null\n\n" : "";
+  $cron = $_GET['monitor'] ? "# Generated local master browser check:\n*/1 * * * * $docroot/plugins/dynamix.local.master/scripts/localmaster &> /dev/null\n\n" : "";
   parse_cron_cfg('dynamix.local.master', 'localmaster', $cron);
   exit;
 }

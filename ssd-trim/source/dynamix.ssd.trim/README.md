@@ -1,4 +1,4 @@
 **Dynamix SSD TRIM**
 
-Dynamix SSD trim allows to create a cronjob to do regular SSD TRIM operations on the cache device(s).
-The command 'fstrim -v /mnt/cache' is executed at given interval.
+Dynamix SSD trim creates a cronjob to do regular SSD TRIM operations on all mount points which support the operation.
+The command 'fstrim -a -v' is executed at the given interval.

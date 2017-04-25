@@ -1,7 +1,0 @@
-#!/bin/bash
-for file in /usr/local/emhttp/plugins/dynamix/event/$1.*
-do
-  if [ -x $file ]; then
-    $file
-  fi
-done

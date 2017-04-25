@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -25,7 +25,7 @@ function list_fan() {
   foreach ($chips as $chip) {
     $name = is_file("$chip/name") ? file_get_contents("$chip/name") : "";
     foreach (preg_grep("/fan\d+_input/", scan_dir($chip)) as $fan) {
-      $out[] = array('chip'=>$name, 'name'=>end(split('/',$fan)), 'sensor'=>$fan , 'rpm'=>file_get_contents($fan));
+      $out[] = array('chip'=>$name, 'name'=>end(explode('/',$fan)), 'sensor'=>$fan , 'rpm'=>file_get_contents($fan));
     }
   }
   return $out;
@@ -56,11 +56,12 @@ if (is_file( $_GET['pwm'])) {
 break;
 case 'pwm':
 if (is_file( $_GET['pwm']) && is_file( $_GET['fan'])) {
-  $autofan = "/usr/local/emhttp/plugins/dynamix.system.autofan/scripts/rc.autofan";
+  $docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+  $autofan = "$docroot/plugins/dynamix.system.autofan/scripts/rc.autofan";
   exec("$autofan stop >/dev/null");
   $pwm = $_GET['pwm'];
   $fan = $_GET['fan'];
-  $fan_min = split("_", $_GET['fan'])[0]."_min";
+  $fan_min = explode("_", $_GET['fan'])[0]."_min";
   $default_method = file_get_contents($pwm."_enable");
   $default_pwm = file_get_contents($pwm);
   $default_fan_min = file_get_contents($fan_min);

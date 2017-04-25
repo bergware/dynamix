@@ -1,5 +1,0 @@
-Author="Bergware"
-Version="1.2.1"
-Menu="Debug"
-Title="Processes"
-Type="/usr/local/emhttp/plugins/webGui/scripts/pre ps -ef"

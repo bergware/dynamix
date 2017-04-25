@@ -135,6 +135,7 @@ $(function() {
 <?if (function_exists('plugin_update_available') && $version = plugin_update_available($plugin)):?>
   showNotice('Dynamix File Integrity <b><?=$version?></b> is available. <a>Download Now</a>','<?=$plugin?>');
 <?endif;?>
+  setTimeout(function(){$('#delayed').html("<input type='checkbox' onchange='checkAll(this.checked)'>Toggle all");},200);
 });
 </script>
 <div style="float:right">
@@ -174,14 +175,17 @@ Excluded files:
 $row1 = $row2 = [];
 foreach ($disks as $disk) {
   if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {
-    $row1[] = "<th style='text-align:center'>Disk<br>{$disk['idx']}</th>";
-    $row2[] = "<td style='text-align:center'><input type='checkbox' name='{$disk['name']}' class='selection' onchange='updateList(this.checked,this.name)'></td>";
+    $row1[] = "<td>Disk<br>{$disk['idx']}</td>";
+    $row2[] = "<td><input type='checkbox' name='{$disk['name']}' class='selection' onchange='updateList(this.checked,this.name)'></td>";
   }
 }
-echo "<table class='tablesorter'><thead><tr><th style='width:10%'><input type='checkbox' onchange='checkAll(this.checked)'>Select/Unselect all</th>";
+$x = 28-count($row1);
+echo "<table class='share_status fixed' style='margin:20px 0'><thead><tr><td id='delayed' style='width:10%'></td>";
 echo implode('',$row1);
+echo str_repeat("<td>-</td>", $x);
 echo "</tr></thead><tbody><tr><td style='font-weight:bold'>Disk selection</td>";
 echo implode('',$row2);
+echo str_repeat("<td></td>", $x);
 echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 ?>
 
@@ -234,7 +238,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 <thead style='visibility:hidden'><tr><th style='width:40px'></th><th style='width:330px'></th><th></th><th></th><th style='width:50px'></th></tr></thead>
 </tbody>
 <?foreach ($disks as $disk):?>
-<?if ($disk['type']=='Data'):?>
+<?if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false):?>
 <tr id='row<?=$disk['idx']?>' style='display:none'><td><?=my_disk($disk['name'])?></td><td><div class='usage-disk sys'><span id='<?=$disk['name']?>' style='width:0'></span></div></td><td id='count<?=$disk['idx']?>'></td><td id='eta<?=$disk['idx']?>'></td><td id='button<?=$disk['idx']?>'></td></tr>
 <?endif;?>
 <?endforeach;?>
