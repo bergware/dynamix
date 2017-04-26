@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.04.23">
+<!ENTITY version   "2017.04.26">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a3a29ef178344971383e559bf3a0ca71">
+<!ENTITY MD5       "ea00d841ea16f69918d1e7d4691e4418">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- fixed array start/stop missing csrf_token
+
+###2017.04.23
 - fixed display of shutdown/reboot page for unRAID 6.2 and higher
 
 ###2016.11.20a
