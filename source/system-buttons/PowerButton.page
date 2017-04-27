@@ -152,7 +152,7 @@ function StopArray() {
 }
 function StopArrayNow() {
   infoBox('Stop Array','<i class="fa fa-spinner fa-spin icon"></i>Please wait... stopping the array!');
-  $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'},pageLoad());
+  $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'<?if ($direct):?>,csrf_token:'<?=$var['csrf_token']?>'<?endif;?>},pageLoad());
 }
 <?else:?>
 function StartArray() {
@@ -164,11 +164,13 @@ function StartArray() {
 }
 function StartArrayNow() {
   infoBox('Start Array','<i class="fa fa-spinner fa-spin icon"></i>Please wait... starting the array!');
-  $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStart:'Start'},pageLoad());
+  $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStart:'Start'<?if ($direct):?>,csrf_token:'<?=$var['csrf_token']?>'<?endif;?>},pageLoad());
 }
 <?endif;?>
 </script>
+<?if ($direct):?>
 <form name='directOps' method='POST' action='/webGui/include/Boot.php' style='display:none'>
 <input type='hidden' name='csrf_token' value='<?=$var['csrf_token']?>'>
 <input type='hidden' name='cmd' value=''>
 </form>
+<?endif;?>
