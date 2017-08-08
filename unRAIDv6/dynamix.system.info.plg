@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.08.08">
+<!ENTITY version   "2017.08.08a">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cfdc18f76c64614f1529064c9d72dc89">
+<!ENTITY MD5       "a1f745eef2163841461985b593039462">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -19,6 +19,7 @@
 - fixed incorrect memory calculation in certain circumstances
 - fixed suppress error message in dmidecode
 - fixed include all available ethernet ports
+- suppress 'Done' button in non-tabbed view
 
 ###2017.04.23
 - fixed P + Q display in system overview
