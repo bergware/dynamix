@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.04.23">
+<!ENTITY version   "2017.08.08">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "8a9e783f016be3092fe9e679a002967f">
+<!ENTITY MD5       "cfdc18f76c64614f1529064c9d72dc89">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,7 +16,12 @@
 ##&name;
 
 ###&version;
-- fixed P + Q display on system overview
+- fixed incorrect memory calculation in certain circumstances
+- fixed suppress error message in dmidecode
+- fixed include all available ethernet ports
+
+###2017.04.23
+- fixed P + Q display in system overview
 
 ###2016.11.06
 - replaced deprecated PHP split function for explode function
