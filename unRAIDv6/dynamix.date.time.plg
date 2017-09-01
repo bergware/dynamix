@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.date.time">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.11.20">
+<!ENTITY version   "2017.09.01">
 <!ENTITY launch    "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "104695fe8c88e8d8d2099b18ffebb07b">
+<!ENTITY MD5       "8f6cb490a594c81f7e2637c867e7b034">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.2">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed PHP time variable
+
+###2016.11.20
 - fixed compatibility with unRAID version 6.3 and higher
 
 ###2016.09.17
