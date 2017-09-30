@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.02.17">
+<!ENTITY version   "2017.09.30">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- made compatible with unRAID v6.4
+
+###2017.02.17
 - made compatible with unRAID v6.3
 
 ###2016.09.20
@@ -272,7 +275,8 @@ plugin=dynamix.file.integrity
 conf=/etc/inotifywait.conf
 path=/boot/config/plugins/$plugin
 
-[[ ! -f $conf || $(grep -Po '^mdState=\K.*' /proc/mdcmd) != STARTED || ! -f $path/disks.ini ]] && exit 0
+[[ -e /proc/mdstat ]] && mdcmd=mdstat || mdcmd=mdcmd
+[[ ! -f $conf || $(grep -Po '^mdState=\K.*' /proc/$mdcmd) != STARTED || ! -f $path/disks.ini ]] && exit 0
 [[ -n $1 ]] && gui=1 || gui=0
 
 source $conf 2>/dev/null
@@ -438,12 +442,12 @@ cfg=&source;.cfg
 if [[ ! -e $cfg ]]; then
   cfg=/usr/local/emhttp/plugins/&name;/default.cfg
 fi
-
+[[ -e /proc/mdstat ]] && mdcmd=mdstat || mdcmd=mdcmd
 # get unRAID key
 getkey(){
-  if [[ -e /proc/mdcmd ]]; then
+  if [[ -e /proc/$mdcmd ]]; then
     local key=$1
-    grep -Po "^$key=\K.*" /proc/mdcmd
+    grep -Po "^$key=\K.*" /proc/$mdcmd
   fi
 }
 
@@ -464,7 +468,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2017, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
