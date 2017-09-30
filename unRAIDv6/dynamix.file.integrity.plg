@@ -442,7 +442,7 @@ cfg=&source;.cfg
 if [[ ! -e $cfg ]]; then
   cfg=/usr/local/emhttp/plugins/&name;/default.cfg
 fi
-[[ -e /proc/mdstat ]] && mdcmd=mdstat || mdcmd=mdcmd
+[[ -e /proc/mdstat ]] &amp;&amp; mdcmd=mdstat || mdcmd=mdcmd
 # get unRAID key
 getkey(){
   if [[ -e /proc/$mdcmd ]]; then
