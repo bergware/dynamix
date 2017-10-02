@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.10.02a">
+<!ENTITY version   "2017.10.02b">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "476e7a398c25440da557593596583d13">
+<!ENTITY MD5       "a7f3f490cdef022016aeecdc8b4a2d69">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -17,6 +17,7 @@
 
 ###&version;
 - fixed regression error in RAM calculation
+- fixed y-axis numbering in storage graph
 
 ###2017.10.01
 - updated sysstat files to version 11.6.0
