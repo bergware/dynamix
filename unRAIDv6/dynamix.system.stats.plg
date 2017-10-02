@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.10.01a">
+<!ENTITY version   "2017.10.02">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1f097c17c26fefbf973a2493fd7d3398">
+<!ENTITY MD5       "7f50d34dd80d714b743f84860f43a75f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed regression error in RAM calculation
+
+###2017.10.01
 - updated sysstat files to version 11.6.0
 - added new parameter "CPU graph scaling"
 - fixed y-axis scaling of network graph
