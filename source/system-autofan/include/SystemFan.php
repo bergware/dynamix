@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -56,7 +56,7 @@ if (is_file( $_GET['pwm'])) {
 break;
 case 'pwm':
 if (is_file( $_GET['pwm']) && is_file( $_GET['fan'])) {
-  $docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+  $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
   $autofan = "$docroot/plugins/dynamix.system.autofan/scripts/rc.autofan";
   exec("$autofan stop >/dev/null");
   $pwm = $_GET['pwm'];

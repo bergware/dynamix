@@ -3,7 +3,7 @@ Title="Fan Auto Control"
 Icon="dynamix.system.autofan.png"
 ---
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,6 +20,7 @@ $plugin = "dynamix.system.autofan";
 $cfg    = parse_plugin_cfg($plugin);
 $sName  = "autofan";
 $fName  = "$docroot/plugins/$plugin/scripts/$sName";
+$width  = strstr('gray,azure',$display['theme']) ? 305:300;
 
 function temp_val($val) {
   global $display;
@@ -44,6 +45,14 @@ function list_pwm() {
   }
   return $out;
 }
+function disk_sort_by_device($a, $b) {
+  return strcmp($a['device'], $b['device']);
+}
+
+// get disk list
+$disks = array_filter($disks,'my_disks');
+usort($disks, 'disk_sort_by_device');
+
 ?>
 <script>
 function detectFan() {
@@ -74,16 +83,28 @@ function tempVal(form) {
   form.low.value = Math.round((form.low.value-32)*5/9);
   form.high.value = Math.round((form.high.value-32)*5/9);
 <?endif;?>
+  var exclude = '';
+  for (var i=0,item; item=form.exclude.options[i]; i++) {
+    if (item.selected) {
+      if (exclude.length) exclude += ',';
+      exclude += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.exclude.options[0];
+  item.value = exclude;
+  item.selected = true;
 }
 $(function() {
   showStatus('<?=$sName?>');
+  $('#s1').dropdownchecklist({emptyText:'None', width:<?=$width?>, explicitClose:'...close'});
 });
 </script>
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="tempVal(this)">
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.autofan.php">
-<input type="hidden" name="#prefix" value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m">
+<input type="hidden" name="#prefix" value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m&exclude=e">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
 Fan control function:
@@ -103,7 +124,7 @@ PWM controller:
 PWM fan:
 : <input type="text" name="fan" value="<?=$cfg['fan']?>" placeholder="Click DETECT"><input type="button" value="Detect" onclick="detectFan();" id="fan" style="margin-top:0">
 
-Minimun PWM value:
+Minimum PWM value:
 : <input type="text" name="pwm" value="<?=$cfg['pwm']?>" placeholder="Click DETECT"><input type="button" value="Detect" onclick="detectFanLow();" id="pwm" style="margin-top:0">
 
 Low temperature threshold (&deg;<?=$display['unit']?>):
@@ -114,6 +135,14 @@ High temperature threshold (&deg;<?=$display['unit']?>):
 
 Refresh interval (minutes):
 : <input type="text" name="interval" value="<?=$cfg['interval']?>" class="narrow">
+
+Exclude drives:
+: <select id="s1" name="exclude" size="1" multiple style="display:none">
+<?foreach ($disks as $disk):?>
+<?if (strtolower($disk['name'])=='flash') continue;?>
+<?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',my_disk($disk['name']),$disk['device']))?>
+<?endforeach;?>
+  </select>
 
 <input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">

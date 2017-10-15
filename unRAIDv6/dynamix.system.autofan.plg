@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2016.12.15">
+<!ENTITY version   "2017.10.15">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "eb0e0173d6b1a3be141470cb64859eca">
+<!ENTITY MD5       "ad3af00081ad9a6cec8d27368f315449">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added temperature reading from NVMe devices (contributed by syntactic-salt)
+- added exclude disks option from temperature reading (contributed by andreiio)
+
+###2016.12.15
 - fixed incompatibility with PHP7
 
 ###2016.08.26
