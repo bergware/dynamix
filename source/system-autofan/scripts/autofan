@@ -156,11 +156,11 @@ fi
 flash=/dev/`ls -l /dev/disk/by-label| grep UNRAID | cut -d/ -f3 | cut -c 1-3`
 
 # Count the number of drives in your array (ignoring the flash drive we identified)
-NUM_OF_DRIVES=$(ls /dev/[hs]d? | grep -v "$flash" | wc -l)
+NUM_OF_DRIVES=$(ls /dev/{[hs]d?,nvme[0-9]} | grep -v "$flash" | wc -l)
 
 # Identify the drives in your array so we can test their temperature
 COUNT=1
-for d in $(ls /dev/[hs]d? | grep -v "$flash"); do
+for d in $(ls /dev/{[hs]d?,nvme[0-9]} | grep -v "$flash"); do
   HD[$COUNT]=$d
   #echo HDD=${HD[$COUNT]}                               # Uncomment for debugging
   COUNT=$[$COUNT+1]
@@ -171,7 +171,11 @@ function_get_highest_hd_temp() {
   for DISK in "${HD[@]}"; do
     SLEEPING=`hdparm -C ${DISK} | grep -c standby`
     if [[ $SLEEPING -eq 0 ]]; then
-      CURRENT_TEMP=`smartctl -A ${DISK} | grep -m 1 -i Temperature_Celsius | awk '{print $10}'`
+      if [[ $DISK == /dev/nvme[0-9] ]]; then
+        CURRENT_TEMP=`smartctl -A ${DISK} | grep -m 1 -i Temperature | awk '{print $2}'`
+      else
+        CURRENT_TEMP=`smartctl -A ${DISK} | grep -m 1 -i Temperature_Celsius | awk '{print $10}'`
+      fi
       if [[ $HIGHEST_TEMP -le $CURRENT_TEMP ]]; then
         HIGHEST_TEMP=$CURRENT_TEMP
       fi
