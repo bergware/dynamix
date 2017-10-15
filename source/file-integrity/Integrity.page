@@ -2,3 +2,4 @@ Menu="/boot/config/plugins/dynamix.file.integrity/dynamix.file.integrity.cfg pla
 Type="xmenu"
 Title="File Integrity"
 Icon="dynamix.file.integrity.png"
+Code="f058"
