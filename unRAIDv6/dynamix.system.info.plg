@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.11.18">
+<!ENTITY version   "2017.11.18a">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "066928ebcc58ba8ad380c45d8844ab34">
+<!ENTITY MD5       "40002a19da671385b79781c84b2aa9aa">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -17,6 +17,7 @@
 
 ###&version;
 - fixed memory calculation, sometimes wrong
+- fixed ethernet port listing, suppress VLANs
 
 ###2017.08.23
 - fixed P+Q calculation
