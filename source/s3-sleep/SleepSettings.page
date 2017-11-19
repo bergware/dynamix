@@ -13,6 +13,7 @@ Icon="dynamix.s3.sleep.png"
  * all copies or substantial portions of the Software.
  *
  * 2013/12/29 SlrG added feature to include/exclude drives outside of array
+ * 2017/11/19 SlrG added feature to check VM activity
  */
 ?>
 <?
@@ -218,6 +219,14 @@ Wait for user login inactivity:
   </select>
 
 > Select whether local (console) or remote (telnet or ssh) logged in users need to log out first before sleep or shutdown can proceed.
+
+Wait for VM inactivity:
+: <select name="checkVM" size="1" onchange="changeIdle(this.form)">
+  <?=mk_option($cfg['checkVM'], "", "No")?>
+  <?=mk_option($cfg['checkVM'], "-v", "Yes")?>
+  </select>
+
+> Select whether vm activity must be taken as a condition before going to sleep or shutdown.
 
 <?if ($sWakeon):?>
 <?$sOptions = str_split(trim($sWakeon[0]))?>
