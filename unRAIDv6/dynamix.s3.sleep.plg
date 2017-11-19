@@ -5,8 +5,8 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2017.11.19">
 <!ENTITY launch    "Settings/SleepSettings">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/SlrG/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY pkgURL    "https://raw.githubusercontent.com/SlrG/dynamix/master/archive/&name;.txz">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pkgURL    "https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "4eac93511e1347d29cc9a7d2bedd0613">
 ]>
