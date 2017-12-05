@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.11.18">
+<!ENTITY version   "2017.12.05">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6dfd6a7f8e9626f8d857a60ba987a665">
+<!ENTITY MD5       "37bc19ea444c04cf630725f7e51014d4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- fixed "exclude" selection is not correctly set upon system startup
+- don't install b2sum package for unRAID 6.4, it is already included
+
+###2017.11.18
 - minor changes in visual display
 
 ###2017.10.01
@@ -281,9 +285,9 @@ plugin=dynamix.file.integrity
 conf=/etc/inotifywait.conf
 path=/boot/config/plugins/$plugin
 
-[[ -e /proc/mdstat ]] && mdcmd=mdstat || mdcmd=mdcmd
-[[ ! -f $conf || $(grep -Po '^mdState=\K.*' /proc/$mdcmd) != STARTED || ! -f $path/disks.ini ]] && exit 0
-[[ -n $1 ]] && gui=1 || gui=0
+[[ -f /proc/mdstat ]] && mdstat=mdstat || mdstat=mdcmd
+[[ ! -f $conf || $(grep -Po '^mdState=\K.*' /proc/$mdstat) != STARTED || ! -f $path/disks.ini ]] && exit 0
+gui=$1
 
 source $conf 2>/dev/null
 tmpfile=/tmp/d.$RANDOM.list
@@ -297,10 +301,7 @@ else
   hash=md5
 fi
 
-if [[ $gui -eq 1 ]]; then
-  devs=$(grep -Po '^(name|device)="\K[^"]+' /var/local/emhttp/disks.ini 2>/dev/null)
-fi
-
+[[ -n $gui ]] && devs=$(grep -Po '^(name|device)="\K[^"]+' /var/local/emhttp/disks.ini 2>/dev/null)
 [[ ${exclude:0:1} == '(' ]] && exclude=${exclude:1:-1}
 [[ -z $disks ]] && disks=/mnt/disk[0-9]*
 
@@ -361,12 +362,16 @@ opt() {
 }
 
 dev() {
-  d=0
+  d=
   for dev in $devs; do
-    [[ $d -eq 1 ]] && break
+    [[ -n $d ]] && break
     [[ $1 == $dev ]] && d=1
   done
   echo -n $dev
+}
+
+get() {
+  echo -n $(grep -Po "^$1=\"\K[^\"]+" $path/$plugin.cfg)
 }
 
 touch -t $(date -d "@$(($(date +%s)-86400))" +%Y%m%d%H%M.%S) $tmpfile.0
@@ -374,16 +379,18 @@ touch -t $(date -d "@$(($(date +%s)-86400))" +%Y%m%d%H%M.%S) $tmpfile.0
 day=0; new=0; old=0
 for disk in $disks; do
   hdd=${disk:5}
-  [[ $gui -eq 1 && -z $(hdparm -C /dev/$(dev $hdd) 2>/dev/null|grep -o active) ]] && continue
+  [[ -n $gui && -z $(hdparm -C /dev/$(dev $hdd) 2>/dev/null|grep -o active) ]] && continue
   find $disk -type f -name "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
   # new files in the past 24 hours
   filter 0
   hashfile=$path/export/$hdd.export.hash
   if [[ -s $hashfile ]]; then
+    changed=0
     touch -t $(date -d "@$(stat -c %Y $hashfile)" +%Y%m%d%H%M.%S) $tmpfile.1
     find $disk -type f -name "*" -newer $tmpfile.1 -exec getfattr -n user.$hash --absolute-names "{}" 1>$tmpfile 2>/dev/null +
     filter 1
     if [[ $files -gt 0 ]]; then
+      [[ -z $gui ]] && changed=1
       # non-exported files
       ((new+=$files))
       filter 2
@@ -394,14 +401,19 @@ for disk in $disks; do
     done <$hashfile
     IFS=$ifs
     if [[ $files -gt 0 ]]; then
+      [[ -z $gui ]] && changed=1
       # missing files
       ((old+=$files))
       filter 2
     fi
+    if [[ $changed -eq 1 && $(get cmd) == A ]]; then
+      # update export file
+      echo -n "export"
+    fi
   fi
 done
 
-if [[ $gui -eq 0 && -n $(grep -Po '^notify="\K[^"]+' $path/$plugin.cfg) ]]; then
+if [[ -z $gui && -n $(get notify) ]]; then
   notify=/usr/local/emhttp/webGui/scripts/notify
   event="Dynamix file integrity daily update"
   server=$(grep -Po '^NAME="\K\w+' /var/local/emhttp/var.ini 2>/dev/null)
@@ -425,12 +437,12 @@ exit 0
 </FILE>
 
 <!-- INOTIFY-TOOLS PACKAGE -->
-<FILE Name="/boot/packages/inotify-tools-3.14-x86_64-1.txz" Run="upgradepkg --install-new" Max="6.2.4">
+<FILE Name="/boot/packages/inotify-tools-3.14-x86_64-1.txz" Run="upgradepkg --install-new" Max="6.2.9">
 <URL>http://mirrors.slackware.com/slackware/slackware64-14.1/slackware64/a/inotify-tools-3.14-x86_64-1.txz</URL>
 </FILE>
 
 <!-- B2SUM PACKAGE (prepared by Bergware) -->
-<FILE Name="/boot/packages/b2sum-20130305-x86_64-1.txz" Run="upgradepkg --install-new">
+<FILE Name="/boot/packages/b2sum-20130305-x86_64-1.txz" Run="upgradepkg --install-new" Max="6.3.9">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/b2sum-20130305-x86_64-1.txz</URL>
 </FILE>
 
