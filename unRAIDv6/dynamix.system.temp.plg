@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2017.12.06">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY source    "/boot/config/plugins/&name;/&name;">
+<!ENTITY flash     "/boot/config/plugins/&name;">
 <!ENTITY MD5       "0cfde2de3ad4fd702727bce77252d500">
 ]>
 
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- keep a local copy of sensors-detect script
+
+###2016.08.16
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
@@ -80,7 +83,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2017, Bergware International
 Dynamix System Temperature - Real-time monitoring of CPU and MB temperatures
 -->
 
@@ -95,10 +98,10 @@ if grep -q '^# Sensors drivers' /boot/config/go; then
   sed -i '/^# Sensors drivers/d;/^.*drivers.conf)$/d' /boot/config/go
 fi
 
-# Remove old 'source' packages
-MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
+# Remove old 'source' package when new is available
+MD5=$(md5sum &flash;/&name;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
-  rm -f &source;*.txz
+  rm -f &flash;/&name;*.txz
 fi
 
 # Remove sensors-detect script
@@ -107,14 +110,17 @@ rm -f /usr/sbin/sensors-detect
 </FILE>
 
 <!-- SOURCE PACKAGE -->
-<FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
+<FILE Name="&flash;/&name;.txz" Run="upgradepkg --install-new --reinstall">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
-<!-- SENSORS-DETECT -->
-<FILE Name="/usr/sbin/sensors-detect" Mode="0755">
+<!-- SENSORS-DETECT SCRIPT -->
+<FILE Name="&flash;/sensors-detect">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sensors-detect</URL>
+</FILE>
+<FILE Name="/usr/sbin/sensors-detect" Mode="0755">
+<LOCAL>&flash;/sensors-detect</LOCAL>
 </FILE>
 
 <!-- POST-INSTALL SCRIPT -->
@@ -136,7 +142,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2017, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -151,9 +157,6 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;
-
-# Uninstall the 'external' package
-#removepkg limetech:perl
 </INLINE>
 </FILE>
 
