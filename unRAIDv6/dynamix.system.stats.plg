@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.10.02b">
+<!ENTITY version   "2017.12.30">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a7f3f490cdef022016aeecdc8b4a2d69">
+<!ENTITY MD5       "33271f225fa1667264dda32c8d54418f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added icon for themes AZURE and GRAY
+
+###2017.10.02
 - fixed regression error in RAM calculation
 - fixed y-axis numbering in storage graph
 

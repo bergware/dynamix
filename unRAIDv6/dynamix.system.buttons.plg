@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.06.07">
+<!ENTITY version   "2017.12.30">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "5f4f9443f59c9b300eb1fa5c2b534865">
+<!ENTITY MD5       "1d5f92f66be18cdec2cd10724afabc9c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- added icon for themes AZURE and GRAY
+
+###2017.06.07
 - added support for new themes GRAY and AZURE
 
 ###2017.04.26
