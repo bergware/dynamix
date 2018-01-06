@@ -7,7 +7,7 @@
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" plugintype="system">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
 <!-- README FILE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
