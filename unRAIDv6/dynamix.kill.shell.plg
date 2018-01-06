@@ -26,10 +26,6 @@ Dynamix kill shell - Terminates open shells when stopping the array
 <INLINE>
 # Remove files
 rm -rf /usr/local/emhttp/plugins/&name;/
-mkdir /usr/local/emhttp/plugins/&name;
-chmod 755 /usr/local/emhttp/plugins/&name;
-mkdir /usr/local/emhttp/plugins/&name;/images
-chmod 755 /usr/local/emhttp/plugins/&name;/images
 </INLINE>
 </FILE>
 
@@ -128,7 +124,9 @@ done
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-# Set permissions
+# Update folder permissions
+chmod 755 /usr/local/emhttp/plugins/&name;
+chmod 755 /usr/local/emhttp/plugins/&name;/images
 chmod 755 /usr/local/emhttp/webGui/event/unmounting_disks
 
 # Display message
