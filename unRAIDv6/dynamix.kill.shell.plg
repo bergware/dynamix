@@ -91,11 +91,13 @@ OToxMC0wNjowMCp/ViYAAAAASUVORK5CYII=
 <!-- KILL SHELL SCRIPT -->
 <FILE Name="/usr/local/emhttp/webGui/event/unmounting_disks/kill_shell" Mode="0755">
 <INLINE>
+<![CDATA[
 #!/bin/bash
 # kill any open shell which prevents unmounting of array
 for PID in $(lsof /mnt/disk[0-9]* /mnt/cache /mnt/user /mnt/user0 2>/dev/null|awk '/^(bash|sh|mc) /{print $2}'); do
   kill $PID 1>/dev/null 2>&1
 done
+]]>
 </INLINE>
 </FILE>
 
