@@ -9,8 +9,28 @@
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
 
+<CHANGES>
+##&name;
+
+###&version;
+- initial version
+</CHANGES>
+
+<!--
+Copyright 2018, Bergware International
+Dynamix kill shell - Terminates open shells when stopping the array
+-->
+
+<!-- PRE-INSTALL SCRIPT -->
+<FILE Run="/bin/bash">
+<INLINE>
+# Remove files
+rm -rf /usr/local/emhttp/plugins/&name;/
+</INLINE>
+</FILE>
+
 <!-- README FILE -->
-<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md" Mode="0644">
 <INLINE>
 **Dynamix Kill Shell**
 
@@ -21,8 +41,8 @@ This script looks for any open shells in /mnt/... and terminate them. This ensur
 </INLINE>
 </FILE>
 
-<!-- NETWORK IMAGE -->
-<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
+<!-- IMAGE -->
+<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64" Mode="0644">
 <INLINE>
 iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
 WXMAAABIAAAASABGyWs+AAAACXZwQWcAAAAwAAAAMADO7oxXAAAMn0lEQVRo3u2Za2wc13XHfzNz
@@ -98,6 +118,20 @@ for PID in $(lsof /mnt/disk[0-9]* /mnt/cache /mnt/user /mnt/user0 2>/dev/null|aw
   kill $PID 1>/dev/null 2>&1
 done
 ]]>
+</INLINE>
+</FILE>
+
+<!-- POST-INSTALL SCRIPT -->
+<FILE Run="/bin/bash">
+<INLINE>
+echo ""
+echo "-----------------------------------------------------------"
+echo " Plugin &name; is installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2018, Bergware International"
+echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo ""
 </INLINE>
 </FILE>
 
