@@ -26,7 +26,8 @@ Dynamix kill shell - Terminates open shells when stopping the array
 <INLINE>
 # Remove files
 rm -rf /usr/local/emhttp/plugins/&name;/
-mkdir -p /usr/local/emhttp/plugins/&name;/
+mkdir /usr/local/emhttp/plugins/&name;
+mkdir /usr/local/emhttp/plugins/&name;/images
 </INLINE>
 </FILE>
 
