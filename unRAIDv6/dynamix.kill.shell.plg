@@ -1,0 +1,115 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.kill.shell">
+<!ENTITY author    "Bergware">
+<!ENTITY version   "2018.01.06">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" plugintype="system">
+
+<!-- README FILE -->
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<INLINE>
+**Dynamix Kill Shell**
+
+The Dynamix Kill Shell plugin adds a script which gets invoked when the array is stopped.
+This script looks for any open shells in /mnt/... and terminate them. This ensures the array can be stopped.
+
+*Be aware that automatic terminating of open shells may lead to data loss if an active process is writing to the array.*
+</INLINE>
+</FILE>
+
+<!-- NETWORK IMAGE -->
+<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
+<INLINE>
+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+WXMAAABIAAAASABGyWs+AAAACXZwQWcAAAAwAAAAMADO7oxXAAAMn0lEQVRo3u2Za2wc13XHfzNz
+57XvXXJJ0aTej0i0LPkhWbZsS7YCJU6FRnkgCYwAKYICAdoibYq2QJEiaFJ/aJO6QVwEaD81iAMH
+SeE+nNopnBjVw44N2W0qyVISR5ZEUhQlSuQu9znvuf0wy12uTdmSH+iH+HzZuzNzz/z/55x7zrl3
+4H15X36zRXkvlJ59+EuyPX2B2G2jWilSYytZ/5VvvSfveleUHvv9h2Tt5cPEDQ81axI3PNKip9qw
+RXes2lnSO/Yz/s1/eFfe/Y6UPP7gLtk48yoFTe1eK/SGpIVCK5RdMq1Q4rVVWmHMBAFfnmm8YxJv
+S8Ezf/Vlefw73+4BVRM1g5qG7aqYqRivnTAxUzGVOixIn+NNCToM6jrb8irb1tkA5B98iNEvPfK2
+sLytSX9ezsicnkwVaGQ6BBbikHogqUSSBQmEklosqUUxq2zBDltnW05lpGwCoKd77jI2bGLDtw/d
+MJ4bmvDUF78g/+2JJzhdbSWW01RqUdwd5w2VggJrLJWcrTKoaRRU+OpEi315mz1FlWJWx7LUPvCL
+og+U2fj48RvCdN0P//AzH5dnn3uWZqQRxyGHGwGrbMH9aaP7jGrK7nooqHRj/3szLgCfGDKXJaBZ
+Wk9HunRDJNTreeipL35Bnn3uWQDiOKQSSQDuKPReHJvxsuAB1uc1Jr1kLbxeFsFLw0QaJlHQ4sxn
+b5XvKoGpJ74PQD1I9B5p+mxLCRRPJTZjYjNGLHGmmjX75ufVJNTUDPhOuCz4pRK3Kkz+8W9fF4m3
+JPCP6wuyqfTy+KL1S1onNcb97ymoEDe8vmtr9OQ1lYZPK5S4bkzQStaOmi6hFAbQ1mxEKQx0Cbnn
+T3D1sb99SxJvSuCpA/fLuB0SEnWtP+nFrNEFOV0hJHqjwo71lxavtFDI2wZTYTL2nRBfSeN7Gkqx
+iJUuoykWaqHUJQFw9fvfemcemDpxou+/70lOBAG3pTSakYZAQ/H6VSy1/lISY5bOuVBSqSeecytV
+3JaGrFaJijlIJzVBbSULPnIjNEt7y1AS17rxg00lmbi9F/vTGuQ7sZ7RIkKSOrCcF6qvayc2ZBUO
+12MuxhFm2LleqTJnlSilz2Kly0RXZgAIGiEa4M4H1Cu/vHEPHP+br8m4mcTsUjnR8tlu6gBoZn+m
+C5HYrtrnBcc2aIWSVih5rSHBEDw21+ZoNe7NmzlL/VdzzJyexa3UWLjQpD3XpjEf4roxbqXKix+6
+85peWNYDv/qnR7vjZAGH+J6khmSdpaKqgsiLEhIeqJ6KakocK8aJe/2QMxvgWGC7KtOux76Cwupy
+mu9cDXhtNuD+tMG6jAKVKlDlXF3hF5akOLSKVePjmPlMYhAvhJ+8dP0EKm0JMui7tjR84jgETSHy
+JAJoxpKMp1BBUogVPJEwcKw40UXERMslX0qzNq/ztVGTQxd9Hptqkm8ZjFk6ha3bGfncPnbvvJtS
+qUg2m8XzfUzDQAjB9J/+hTQMg6EVY8qbEvjGg/fJ5slXyHSsHxIl1o9iiqqK70kGM/2Rt9gLLcrF
+uJOd2gm5ShBSVFUKmorvhDgk1Xv11s2MP/gRHti/n2KhQDabRQiBYRjYlo2qCVKZHO1mnThK6kdj
+YV46rtMl0n3zM//5lHzyR09S/OmPyEUOtbZKRotoRhquE/C061NUVXYbPc4rMvqybl3a3M01Y6al
+ZCqI2Je3mbBMjHvv4bcOHGTLzVsBusDzuXwX9KK0m/Xuf99zCQO/SyZbGOhVqEM/fZKW41IEap1W
+OOksAxBQQ1KLI7ZJQaZD+3IzwDAVVFUQxyGLHeqUJ/G9TuaSkp8Lk6HVo6Q//TH+YN9+ACzb7gNu
+WCkM03qDMRbB9xGJQqKOlxWAR77xsDx3fopGs43x6mnK51/rVlyAk+2QVbrGCS+gqKps0/sjL7Mk
+gpoSFgTU/JhaFLPhgx/kgY8e4NYdO5P79TqlUpFisYhhJKGUTmcRuoFhWl0rL8qitV8viwTEkUPP
+yuefO9xR1uZcOsd0qJAPO6lOKFTjmG26YDs6Rz2fVWgUlvQ+07LX9wPExWF2HPgwBz96kEI+h6Zp
+GELDc11KpSKGaVKtVgEwTJN2u43n+zRqtWXBmpaFYZqkUykMw+gS930fcfHCRUzLxNJ8NKGRzmQ4
+MzxMNDvPoNOm6iWLd5FM3lOYCiJqS/YC1Tgmv2KEHXvu4469e9i8ZTOWnVRW13HQNGi3WrieT6vt
+4LdrNDoVV9MEURQS+g6oOqZpoQkNUyi03RBF+oSxSug7WJbJ8E2rGR0bwzCMhEC9Pg+AnRqgEDW6
+rKuDFa5cmqZWbxKFCkeaTaC3FjJ2iqHRUTbtvJ0H7t3N2g0bkbHEdV3CIKAZBLiuixp7VEOJ73m4
+bkgQOIRh4n5dxEh0wlhBqBJd1yFuYFlJJT996n9IiXnKg8OMrtpCFPtMTpzHMnUGysMYhoFQlKQV
+SOfSyeLSfAq5tfj+KNxyS5dQzgbVzJO2LVYMjzA4OIiVShP4iSWrc3OJRYVG4LtEYUQUhbhuiOM0
+CcMQIfrXThCqCAFZWyNj+RimwsTkDN/9j2c5+rOXKJdS3LNzHVu3wNW5WW5aswPbkly5PEO+OMDY
+qnWKKJcHcb02QRh2SZhhDTU7gDAEpmWiC4Gh2yhKjK6bCKGxsFBF74TBoggBdHq5MIRGY6Hv/iIJ
+IRKj2aZgpJyk4qmJ83z1kR9w5szZvjm1ers7rjcWkIpNHrrGEKvXb+TKlVmCMFziiXR3kt550A8c
+NE0gZYDvByhKjOO00XWzA14j6BRv1+3fDyyKZZnYpuhYO4NpSNq1KRoLlzl5euIN4AGarV5GMvUk
+zQ6tuImxVesUAHHHHXcq//rPj0vl6hxxLGk5DXQhCMKw+9uXvqKwe29RFEUjXPKcMCxC3+2zdjGf
+JmVKfK9Jdf4isxdOsn3LKK5vUCxYfGjXSr7+OvBBkOjcvNqkOLySiatFxrfezvY77u6mQAHwiU9/
+VnnyX34oWy2XVMrCdT0MXRLFAZrWH7eaqmMsKcBSgqLQBWvbNmEIIm1hGSopUxIFTV546QV+8l8v
+cubMGf7o87sBMEwBPqwYylIeGGKoXODK1V7Y5XIZ9txzM/fdvxtVMdiz4XffsNnvojv4yc8oP3v+
+iJybvQyA5yXx7TgOYaxA3O+JpfGs6zaWJRBqjFQMSlkP32ty9IX/5cjzL3Py1C9otZNQyGYssmmd
+RivAcVwGinnm6z6rx7J8/qF7+PrfP81gMU2xVGTv3ev52MHdZMslQjezbFj2mfeee/cqAMdeOCov
+X7rUiW3R9UIUhW/wSDeMpM+Vy+d5/sXjHHv5OL/89bllnyuXUpQKaVKpkMmLFXbdXuTqgkejEfCV
+P9xHywmYnJpj/AMjfPLB7YxvvxWiBewVB5Y9alkWza7dexSA/37mr2W1KYiVNFEMugqhzGKqDaIY
+lNhDpYnvLOA05zly6BT//swpGk2Xa8lt4yOsGMrjuB7np+bxvZC8DRcu1RnPDvB3f/lxJi82sVMG
+w2s2J2uhUbumvmtuKQGKhZDAu0zaMohQCBwPL4ig02VUa0mKkwSAxl3bV3JhusLhY8tb/5YPDHNw
+/zi5tIVtW9TqLj8/NcHeu7Yw24DJ6QYrxzRWj2ZAmMjWRQg9Uit/75oHXW96AlaZfFpOv3oYy05S
+ZcvxCZxeirx0pYKuWwSBi+cn2Wb60jyHj53l1KuXqS/Z4G/dNMynDmxn2/gonVMW6i2Xy1cS6+66
+fSNBLFE0k/KATapzIJDZ8CdvivEtj/AuvPKorF6aZnC4iONGGBrMVRpEXkC95eO6PmEQIQm6JBzH
+Y36hSavt0nAUQr/N3rvWMjyQR9W0bh9jGAaNlkOlWsPzYXAgRy5tEGs2I6tvY+XNn3pLfNd1Bnn2
+2MPStvpPH6IgYq7SYGryEsIqELmtbjgp6Ahdw9Q1DFPgOC62bWGbepI6O2LqST72ggDfC3G8pBKW
+V+1k852/c13YrvsQ9cIrj0otbpFJp2i22l0Ss5cq1OoOhinwvV6qNUyBqWuoqooQgvlKg4FSFttK
+QGdLy6dFPbeT8tr9143rhs/jZ059U2asJIgXiZw9M4MiTHKp5LraSbX66/bKtXoLVVUZGMxjpgyE
+2vOqkRqhsP5z7+33gS6Qiz+WivPrZUmU872DWsNKNh5mqncE36g0u+MglhiZEpt2/dnb/tT0jr9R
+VSe+J4PGDGEcMTdbpVZ3GBrI9YWI2km7aqcvElYOzVpHfuWH/3++kb2ZzJ17WlauzlBdmCeXL5PJ
+5khnUhhGhszI3vfkU+v78r78Jsv/AQGfkYO8h5lDAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDEwLTA1
+LTAyVDIxOjE1OjQ5LTA1OjAwKFmmvAAAACV0RVh0ZGF0ZTptb2RpZnkAMjAwOC0xMS0wNlQxNzox
+OToxMC0wNjowMCp/ViYAAAAASUVORK5CYII=
+</INLINE>
+</FILE>
+
+<!-- KILL SHELL SCRIPT -->
+<FILE Name="/usr/local/emhttp/webGui/event/unmounting_disks/kill_shell" Mode="0755">
+<INLINE>
+<![CDATA[
+#!/bin/bash
+# kill any open shell which prevents unmounting of array
+for PID in $(lsof /mnt/disk[0-9]* /mnt/cache /mnt/user /mnt/user0 2>/dev/null|awk '/^(bash|sh|mc) /{print $2}'); do
+  kill $PID 1>/dev/null 2>&1
+done
+]]>
+</INLINE>
+</FILE>
+
+<!-- REMOVE SCRIPT -->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+# Remove plugin related files
+rm -rf /usr/local/emhttp/plugins/&name;
+
+# Remove kill_shell script
+rm -rf /usr/local/emhttp/webGui/event/unmounting_disks
+</INLINE>
+</FILE>
+
+</PLUGIN>
