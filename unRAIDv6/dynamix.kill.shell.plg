@@ -26,11 +26,12 @@ Dynamix kill shell - Terminates open shells when stopping the array
 <INLINE>
 # Remove files
 rm -rf /usr/local/emhttp/plugins/&name;/
+mkdir -p /usr/local/emhttp/plugins/&name;/
 </INLINE>
 </FILE>
 
 <!-- README FILE -->
-<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md" Mode="0644">
 <INLINE>
 **Dynamix Kill Shell**
 
@@ -42,7 +43,7 @@ This script looks for any open shells in /mnt/... and terminate them. This ensur
 </FILE>
 
 <!-- IMAGE -->
-<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64">
+<FILE Name="/usr/local/emhttp/plugins/&name;/images/&name;.png" Type="base64" Mode="0644">
 <INLINE>
 iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
 WXMAAABIAAAASABGyWs+AAAACXZwQWcAAAAwAAAAMADO7oxXAAAMn0lEQVRo3u2Za2wc13XHfzNz
