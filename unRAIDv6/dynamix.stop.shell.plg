@@ -1,9 +1,9 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.kill.shell">
+<!ENTITY name      "dynamix.stop.shell">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.01.06">
+<!ENTITY version   "2018.01.09">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -18,7 +18,7 @@
 
 <!--
 Copyright 2018, Bergware International
-Dynamix kill shell - Terminates open shells when stopping the array
+Dynamix Stop shell - Terminates open shells when stopping the array
 -->
 
 <!-- PRE-INSTALL SCRIPT -->
@@ -32,9 +32,9 @@ rm -rf /usr/local/emhttp/plugins/&name;/
 <!-- README FILE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/README.md" Mode="0644">
 <INLINE>
-**Dynamix Kill Shell**
+**Dynamix Stop Shell**
 
-The Dynamix Kill Shell plugin adds a script which gets invoked when the array is stopped.
+The Dynamix Stop Shell plugin adds a script which gets invoked when the array is stopped.
 This script looks for any open shells in /mnt/... and terminate them. This ensures the array can be stopped.
 
 *Be aware that automatic terminating of open shells may lead to data loss if an active process is writing to the array.*
@@ -108,12 +108,12 @@ OToxMC0wNjowMCp/ViYAAAAASUVORK5CYII=
 </INLINE>
 </FILE>
 
-<!-- KILL SHELL SCRIPT -->
-<FILE Name="/usr/local/emhttp/webGui/event/unmounting_disks/kill_shell" Mode="0755">
+<!-- STOP SHELL SCRIPT -->
+<FILE Name="/usr/local/emhttp/webGui/event/unmounting_disks/stop_shell" Mode="0755">
 <INLINE>
 <![CDATA[
 #!/bin/bash
-# kill any open shell which prevents unmounting of array
+# stop any open shell which prevents unmounting of array
 for PID in $(lsof /mnt/disk[0-9]* /mnt/cache /mnt/user /mnt/user0 2>/dev/null|awk '/^(bash|sh|mc) /{print $2}'); do
   kill $PID 1>/dev/null 2>&1
 done
@@ -147,7 +147,7 @@ echo ""
 # Remove plugin related files
 rm -rf /usr/local/emhttp/plugins/&name;
 
-# Remove kill_shell script
+# Remove stop_shell script
 rm -rf /usr/local/emhttp/webGui/event/unmounting_disks
 </INLINE>
 </FILE>
