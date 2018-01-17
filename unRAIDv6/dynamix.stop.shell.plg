@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.stop.shell">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.01.13">
+<!ENTITY version   "2018.01.13a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" Min="6.4.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.4.0">
 
 <CHANGES>
 ##&name;
