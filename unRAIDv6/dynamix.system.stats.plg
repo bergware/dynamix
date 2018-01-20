@@ -3,19 +3,24 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.12.30">
+<!ENTITY version   "2018.01.20">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "33271f225fa1667264dda32c8d54418f">
+<!ENTITY MD5       "b8bd60bf234f00f66e067af7ab797afb">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- updated sysstat files to version 11.6.2
+- fixed graph width for themes AZURE and GRAY
+- minimum unRAID version 6.4.0
+
+###2017.12.30
 - added icon for themes AZURE and GRAY
 
 ###2017.10.02
@@ -127,7 +132,7 @@
 </CHANGES>
 
 <!--
-Copyright 2012-2017, Bergware International
+Copyright 2012-2018, Bergware International
 Dynamix System Stats - disk and system usage graphs
 -->
 
@@ -188,7 +193,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2012-2017, Bergware International"
+echo " Copyright 2012-2018, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
