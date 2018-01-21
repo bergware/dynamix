@@ -3,11 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.05.12a">
+<!ENTITY version   "2017.11.19">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pkgURL    "https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "07382d13ba0d200da14878deb94db65e">
+<!ENTITY MD5       "4eac93511e1347d29cc9a7d2bedd0613">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +17,9 @@
 ##&name;
 
 ###&version;
+- updated s3_sleep script to version 3.0.5 (SlrG added feature to check VM activity)
+
+###2017.05.12a
 - revert to previous version, until proper solution is implemented.
 
 ###2017.04.28
@@ -158,7 +162,7 @@ fi
 
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>&pkgURL;</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 

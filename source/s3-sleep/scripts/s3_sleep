@@ -32,7 +32,7 @@
 # Version 3.0.2   Include SCSI attached drives in array list
 # Version 3.0.3   Changed HDD activity check to allow RAID controllers (courtesy Michael A.)
 # Version 3.0.4   Fixed full path to powerdown script
-# Version 3.0.5   Added automatic detection of available sleep mode
+# Version 3.0.5   SlrG added feature to check VM activity
 #
 # Bergware International
 ####################################################################################
@@ -83,7 +83,7 @@ fi
 
 usage() {
  echo
- echo "Usage: $program [-acnRFSLlVq] [-I disk] [-N idle] [-i ip] [-d day] [-h hour] [-m time] [-t time] [-e eth] [-w wol] [-b name] [-p name] [-C case] [-D 0-4] [-ED]"
+ echo "Usage: $program [-acnRFSLlvVq] [-I disk] [-N idle] [-i ip] [-d day] [-h hour] [-m time] [-t time] [-e eth] [-w wol] [-b name] [-p name] [-C case] [-D 0-4] [-ED]"
  echo " -a          wait for array inactivity"
  echo " -c          exclude cache drive from array monitoring"
  echo " -I disk     include outside of array disk (may be repeated for other disks)"
@@ -95,6 +95,7 @@ usage() {
  echo " -i ip       IP address to ping (may be repeated as many times as desired)"
  echo " -L          check remotely logged in users (SSH)"
  echo " -l          check locally logged in users"
+ echo " -v          wait for VM inactivity"
  echo " -d day      Excluded day (may be repeated as many times as desired)"
  echo " -h hour     Excluded hour (may be repeated as many times as desired)"
  echo " -m time     extra delay after array inactivity"
@@ -134,6 +135,7 @@ checkSSH=no           # check for remote login sessions (telnet or SSH)
 checkTTY=no           # check for local login sessions (if "no" allows console debugging)
 hosts=()              # do not sleep when 'hosts' are pingable
                       # example: <hosts="192.168.1.1 172.16.1.1">
+checkVM=no            # check for VM activity
 
 # before sleep
 setWol=               # set wol options before sleep
@@ -149,7 +151,7 @@ quit_flag=no          # signal program exit
 sleepNow=no           # force immediate sleep now
 
 # options to overwrite defaults
-while getopts "acnN:i:I:d:h:m:t:e:C:w:RFqVSLlb:p:D:" opt; do
+while getopts "acnN:i:I:d:h:m:t:e:C:w:RFqvVSLlb:p:D:" opt; do
   case $opt in
     a) checkHDD=yes ;;
     c) checkCache=no ;;
@@ -172,6 +174,7 @@ while getopts "acnN:i:I:d:h:m:t:e:C:w:RFqVSLlb:p:D:" opt; do
     S) sleepNow=yes ;;
     L) checkSSH=yes ;;
     l) checkTTY=yes ;;
+    v) checkVM=yes ;;
     b) preRun=$OPTARG ;;
     p) postRun=$OPTARG ;;
     D) debug=$OPTARG ;;
@@ -294,6 +297,16 @@ SSH_activity() {
   fi
 }
 
+VM_activity() {
+  vms=$(tr " " "\n" <<< $(virsh list --all|grep running|awk -F' ' '{for (i=2; i<=NF-2; i++) printf $i;print $(NF-1)}') | paste -sd , -)
+  result=
+  [[ $checkVM == yes && ! -z $(virsh list --all|grep running|awk -F' ' '{for (i=2; i<=NF-2; i++) printf $i;print $(NF-1)}') ]] && result=1
+  if [[ -n $result ]]; then
+    log "VM activity on going: $vms"
+    echo $result
+  fi
+}
+
 pre_sleep_activity() {
 # Set WOL MagicPacket options
   if [[ -n $setWol ]]; then
@@ -330,9 +343,9 @@ post_sleep_activity() {
 system_sleep() {
 # Do pre-sleep activities
   pre_sleep_activity
-# Go to sleep (s1 or s3)
+# Go to sleep
   log "Enter sleep state now"
-  echo -n $state >/sys/power/state
+  echo -n mem >/sys/power/state
 # Do post-sleep activities
   log "Wake-up now"
   post_sleep_activity
@@ -377,6 +390,7 @@ check network activity=$checkTCP
 check active devices=$devices
 check local login=$checkTTY
 check remote login=$checkSSH
+check vm activity=$checkVM
 version=$version
 ----------------------------------------------
 included disks=${array[@]}
@@ -419,19 +433,23 @@ fi
 
 # main (continuous loop)
 extraDelay=$delayInit
-state=$(sed 's:freeze ::' /sys/power/state)
 [[ $checkTCP == yes ]] && start=0 || start=-1
 while [[ -f $lockfile ]]; do
   if [[ -z $(exclude_period) ]]; then
-    if [[ -z $(HDD_activity) ]]; then
-      log "All monitored HDDs are spun down"
-      if [[ $extraDelay -ge 0 ]]; then
-        log "Extra delay period running: $extraDelay minute(s)"
-        ((extraDelay--))
-      fi
-    else
-      log "Disk activity detected. Reset timers."
+    if [[ ! -z $(VM_activity) ]]; then
+      log "VM activity detected. Reset timers."
       extraDelay=$delayInit
+    else
+      if [[ -z $(HDD_activity) ]]; then
+        log "All monitored HDDs are spun down"
+        if [[ $extraDelay -ge 0 ]]; then
+          log "Extra delay period running: $extraDelay minute(s)"
+          ((extraDelay--))
+        fi
+      else
+        log "Disk activity detected. Reset timers."
+        extraDelay=$delayInit
+      fi
     fi
     if [[ $extraDelay -lt 0 ]]; then
       if [[ $start -eq 0 ]]; then
