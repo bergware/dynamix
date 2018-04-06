@@ -3,7 +3,7 @@ Title="Stats Settings"
 Icon="dynamix.system.stats.png"
 ---
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -39,7 +39,7 @@ function prepareStats(form) {
   item.selected = true;
 }
 $(function(){
-  $('#s1').dropdownchecklist({emptyText:'None', width:131, firstItemChecksAll: true, explicitClose:'...close'});
+  $('#s1').dropdownchecklist({emptyText:'None', width:<?=strstr('gray,azure',$display['theme'])?166:131?>, firstItemChecksAll: true, explicitClose:'...close'});
 });
 </script>
 
@@ -80,12 +80,20 @@ Viewable system graphs:
 >
 > This setting only affects what is being displayed.
 
+CPU graph scaling:
+: <select name="cpu" size="1">
+  <?=mk_option($cfg['cpu'], "0", "Automatic")?>
+  <?=mk_option($cfg['cpu'], "100", "Fixed")?>
+  </select>
+
+> Select the CPU graph scaling to be automatic or fixed at 100%.
+
 System graphs view per row:
 : <select name="cols" size="1">
   <?=mk_option($cfg['cols'], "0", "Single")?>
-  <?=mk_option($cfg['cols'], "1", "Dual")?>
-  <?=mk_option($cfg['cols'], "2", "Triple")?>
-  <?=mk_option($cfg['cols'], "3", "Quadruple")?>
+  <?=mk_option($cfg['cols'], "1", "Pair")?>
+  <?=mk_option($cfg['cols'], "2", "Three")?>
+  <?=mk_option($cfg['cols'], "3", "Four")?>
   </select>
 
 > Select how many graphs will be displayed in a single row. The width is automatically adjusted to the number of graphs and the screen resolution.

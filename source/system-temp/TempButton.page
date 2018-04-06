@@ -2,7 +2,7 @@ Menu="Buttons:1"
 Link="nav-user"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,12 +17,10 @@ Link="nav-user"
 
 <script>
 function systemTemp() {
-  $.get('/plugins/dynamix.system.temp/include/SystemTemp.php',{unit:'<?=$display['unit']?>',dot:'<?=$display['number'][0]?>'},function(data) {
-    if (data) showFooter(data,'temps');
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    timers.systemTemp = setTimeout(systemTemp,<?=max(abs($display['refresh']),10000)?>);
-<?endif;?>
+  $.post('/plugins/dynamix.system.temp/include/SystemTemp.php',{unit:'<?=$display['unit']?>',dot:'<?=$display['number'][0]?>'},function(data) {
+    showFooter(data,'temp');
+    timers.systemTemp = setTimeout(systemTemp,10000);
   });
 }
-systemTemp();
+setTimeout(systemTemp,100);
 </script>

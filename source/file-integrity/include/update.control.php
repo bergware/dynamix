@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,7 +11,7 @@
 ?>
 <?
 function regex($text) {
-  return strtr($text,['.' => '\.','[' => '\[',']' => '\]','(' => '\(',')' => '\)','{' => '\{','}' => '\}','/' => '\/','+' => '\+','-' => '\-','*' => '.*','&' => '\&','?' => '\?']);
+  return strtr($text,['.'=>'\.','['=>'\[',']'=>'\]','('=>'\(',')'=>'\)','{'=>'\{','}'=>'\}','/'=>'\/','+'=>'\+','-'=>'\-','*'=>'.*','&'=>'\&','?'=>'\?']);
 }
 
 $bunker = '/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker';

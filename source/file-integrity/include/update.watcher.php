@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,6 +10,8 @@
  */
 ?>
 <?
+$plugin = "dynamix.file.integrity";
+
 function expand_share($text) {
   return $text.'/';
 }
@@ -22,33 +24,32 @@ function expand_file($text) {
   return ($trim[0]=='*' ? '' : '*').$trim.'$';
 }
 function regex($text) {
-  return strtr($text,['.' => '\.','[' => '\[',']' => '\]','(' => '\(',')' => '\)','{' => '\{','}' => '\}','+' => '\+','-' => '\-','*' => '.*','&' => '\&','?' => '\?']);
+  return strtr($text,['.'=>'\.','['=>'\[',']'=>'\]','('=>'\(',')'=>'\)','{'=>'\{','}'=>'\}','+'=>'\+','-'=>'\-','*'=>'.*','&'=>'\&','?'=>'\?']);
 }
 
-$cfg = @parse_ini_file("/boot/config/docker.cfg");
+$docker = @parse_ini_file("/boot/config/docker.cfg");
 $img = 'DOCKER_IMAGE_FILE';
 $new = isset($default) ? array_replace_recursive($_POST, $default) : $_POST;
-$bunker = "/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker";
-$path = "/boot/config/plugins/dynamix.file.integrity";
+$bunker = "/usr/local/emhttp/plugins/$plugin/scripts/bunker";
+$path = "/boot/config/plugins/$plugin";
 $conf = "/etc/inotifywait.conf";
 $cron = "$path/integrity-check.cron";
 $run  = "$path/integrity-check.sh";
-$apple = [expand_folder('.AppleDB'),expand_file('.DS_Store')];
 $tasks = [];
-$record = [];
+$map = [];
 
-if (isset($cfg[$img]) && strpos(dirname($cfg[$img]),'/mnt/disk')!==false) $record[] = expand_file(basename($cfg[$img]));
-if ($new['folders']) $record = array_merge($record,array_map('expand_folder',explode(',',$new['folders'])));
-if ($new['files'])   $record = array_merge($record,array_map('expand_file',explode(',',$new['files'])));
-if ($new['exclude']) $record = array_merge($record,array_map('expand_share',explode(',',$new['exclude'])));
-if ($new['apple'])   $record = array_merge($record,$apple);
-
-if (count($record)>1) {$open = '('; $close = ')';} else {$open = $close = '';}
-$exclude = $record ? $open.regex(implode('|',$record)).$close : '';
-$include = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
-
-file_put_contents($conf, "cmd=\"{$new['cmd']}\"\nmethod=\"{$new['method']}\"\nexclude=\"$exclude\"\ndisks=\"$include\"\n");
-exec("/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/rc.watcher ".($new['service'] ? 'restart' : 'stop')." &>/dev/null");
+$cmd = $new['cmd'];
+$method = $new['method'];
+if (isset($docker[$img]) && strpos(dirname($docker[$img]),'/mnt/disk')!==false) $map[] = expand_file(basename($docker[$img]));
+if ($new['folders']) $map = array_merge($map,array_map('expand_folder',explode(',',$new['folders'])));
+if ($new['files'])   $map = array_merge($map,array_map('expand_file',explode(',',$new['files'])));
+if ($new['exclude']) $map = array_merge($map,array_map('expand_share',explode(',',$new['exclude'])));
+if ($new['apple'])   $map = array_merge($map,[expand_folder('.AppleDB'),expand_file('.DS_Store')]);
+if (count($map)>1)   {$open = '('; $close = ')';} else {$open = $close = '';}
+$exclude = $map ? $open.regex(implode('|',$map)).$close : '';
+$disks = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
+file_put_contents($conf, "cmd=\"$cmd\"\nmethod=\"$method\"\nexclude=\"$exclude\"\ndisks=\"$disks\"\n");
+exec("/usr/local/emhttp/plugins/$plugin/scripts/rc.watcher ".($new['service'] ? 'restart' : 'stop')." &>/dev/null");
 
 foreach ($keys as $key => $value) if ($key[0]!='#' && !array_key_exists($key,$new)) unset($keys[$key]);
 
@@ -86,7 +87,8 @@ if ($new['schedule']>0 && $x>0) {
   $text[] = "#!/bin/bash";
   $text[] = "# This is an auto-generated file, do not change manually!";
   $text[] = "#";
-  if ($new['parity']) $text[] = "[[ \$(grep -Po '^mdResync=\K\S+' /proc/mdcmd) -ne 0 ]] && exit 0";
+  $mdcmd = file_exists('/proc/mdstat') ? 'mdstat':'mdcmd';
+  if ($new['parity']) $text[] = "[[ \$(grep -Po '^mdResync=\K\S+' /proc/$mdcmd) -ne 0 ]] && exit 0";
   foreach ($tasks as $task) {
     if (empty($task)) continue;
     foreach ($task as $disk) {

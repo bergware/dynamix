@@ -22,4 +22,6 @@ $(function() {
 <thead><td style="width:33%">Title</td><td>Information</td></thead>
 <tbody id="bios"></tbody>
 </table>
+<?if ($tabbed):?>
 <input type="button" value="Done" onclick="done()">
+<?endif;?>

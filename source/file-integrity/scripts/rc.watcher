@@ -1,6 +1,5 @@
 #!/bin/bash
-plugin=dynamix.file.integrity
-watcher=/usr/local/emhttp/plugins/$plugin/scripts/watcher
+watcher=/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/watcher
 conf=/etc/inotifywait.conf
 
 watcher.start() {
@@ -15,13 +14,13 @@ watcher.start() {
 
 watcher.stop() {
   if [[ -n $(pgrep -f $watcher) ]]; then
-    pkill inotifywait
-    timer=5
-    until [[ -z $(pgrep -f $watcher) || $timer -eq 0 ]]; do
-      timer=$((timer-1))
+    kill $(ps -ef|grep 'inotifywait.*disk[0-9]*$'|awk '{print $2}')
+    pkill -f $watcher
+    for timer in {1..5}; do
+      [[ -z $(pgrep -f $watcher) ]] && break
       sleep 1
     done
-    [[ $timer -gt 0 ]] && echo "watcher stopped" || echo "watcher did not stop"
+    [[ $timer -lt 5 ]] && echo "watcher stopped" || echo "watcher did not stop"
   else
     echo "watcher not running!"
   fi
@@ -34,13 +33,9 @@ watcher.restart() {
   watcher.start
 }
 
-case "$1" in
-'start')
- watcher.start ;;
-'stop')
- watcher.stop ;;
-'restart')
- watcher.restart ;;
-*)
- echo "Usage: $(basename $0) start|stop|restart"
+case $1 in
+ start) watcher.start ;;
+ stop) watcher.stop ;;
+ restart) watcher.restart ;;
+ *) echo "Usage: $(basename $0) start|stop|restart"
 esac

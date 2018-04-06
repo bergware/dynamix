@@ -2,7 +2,7 @@ Menu="FileIntegrity"
 Title="File Integrity Settings"
 ---
 <?PHP
-/* Copyright 2015-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -28,6 +28,7 @@ $cfg = parse_plugin_cfg($plugin);
 $sName = "disk-watch";
 $fName = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
 $check = "/usr/local/emhttp/plugins/$plugin/scripts/b2sum-check";
+$width = strstr('gray,azure',$display['theme']) ? [166,305]:[131,300];
 
 $mode = ['Disabled','Daily','Weekly','Monthly'];
 $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -121,7 +122,7 @@ function activeDisks() {
   });
 }
 $(function() {
-  $('#s1').dropdownchecklist({emptyText:'None', width:131, explicitClose:'...close'});
+  $('#s1').dropdownchecklist({emptyText:'None', width:<?=$width[0]?>, explicitClose:'...close'});
   presetSchedule(document.integrity_settings);
   showInfo1(document.integrity_settings.cmd.value);
   showInfo2(document.integrity_settings.log.value);

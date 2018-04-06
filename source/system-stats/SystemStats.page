@@ -3,7 +3,7 @@ Title="System Stats"
 Cond="(exec(\"awk -F= '/^show=/{print $2}' /boot/config/plugins/dynamix.system.stats/dynamix.system.stats.cfg 2>/dev/null\")!='\"\"')"
 ---
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or

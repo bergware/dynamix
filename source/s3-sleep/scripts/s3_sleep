@@ -32,32 +32,29 @@
 # Version 3.0.2   Include SCSI attached drives in array list
 # Version 3.0.3   Changed HDD activity check to allow RAID controllers (courtesy Michael A.)
 # Version 3.0.4   Fixed full path to powerdown script
-# Version 3.0.5   Added automatic detection of available sleep mode
+# Version 3.0.5   HDD activity check includes both disk state and disk I/O activity
+# Version 3.0.6   Support for unRAID 6.4
+#                 Correction for Cache pool
 #
 # Bergware International
 ####################################################################################
-version=3.0.5
+version=3.0.6
 program=$(basename $0)
+ini=/var/local/emhttp/disks.ini
 
-# Get ID of flash device
+# Get flash device
 getFlash() {
-  flash=$(ls -l /dev/disk/by-label|awk -F/ '/UNRAID/ {print $3}'|cut -c1-3)
+  flash=$(grep -A1 '^name="flash' $ini|sed -r '/^--/d;/^name=/d;s/"//g;s/^device=//')
 }
 
-# Get ID of cache device (if present)
+# Get list of cache devices (if present)
 getCache() {
-  cache=$(awk '/\/mnt\/cache/ {print $1}' /proc/mounts|cut -c6-8)
+  cache=$(grep -A1 '^name="cache' $ini|sed -r '/^--/d;/^name=/d;s/"//g;s/^device=//')
 }
 
 # Get list of array devices
 getArray() {
-  array=()
-  while read -r line; do
-    if [[ ${line:0:8} == rdevName ]]; then
-      dev=${line#*=}
-      [[ -n $dev ]] && array+=($dev)
-    fi
-  done </proc/mdcmd
+  array=($(grep -PA1 '^name="(parity|disk)' $ini|sed -r '/^--/d;/^name=/d;s/"//g;s/^device=//'))
 }
 
 # Get list of all devices
@@ -77,7 +74,7 @@ if [[ $1 == -ED ]]; then
   for dev in ${array[@]}; do
     disks=(${disks[@]//*$dev=*})
   done
-  [[ -n $disks ]] && echo ${disks[@]}|tr ' ' '\n'|sort
+  [[ -n $disks ]] && echo ${disks[@]}|sort
   exit 0
 fi
 
@@ -229,10 +226,12 @@ exclude_period() {
 HDD_activity() {
   result=
   if [[ $checkHDD == yes ]]; then
-    [[ -f /dev/shm/1 ]] && cp -f /dev/shm/1 /dev/shm/2 || touch /dev/shm/2
-    cat /proc/diskstats >/dev/shm/1
+    [[ -f /dev/shm/2 ]] && cp -f /dev/shm/2 /dev/shm/1 || touch /dev/shm/1
+    awk '/(sd[a-z]*|nvme[0-9]n1) /{print $3,$6+$10}' /proc/diskstats >/dev/shm/2
     for dev in ${array[@]}; do
-      if [[ -n $(diff /dev/shm/1 /dev/shm/2|grep -m1 "$dev ") ]]; then
+      active=$(hdparm -C /dev/$dev 2>/dev/null|grep active)
+      diskio=($(grep -Pho "^$dev \K\d+" /dev/shm/1 /dev/shm/2))
+      if [[ -n $active || ${diskio[0]} != ${diskio[1]} ]]; then
         result=1
         break;
       fi
@@ -330,9 +329,9 @@ post_sleep_activity() {
 system_sleep() {
 # Do pre-sleep activities
   pre_sleep_activity
-# Go to sleep (s1 or s3)
+# Go to sleep
   log "Enter sleep state now"
-  echo -n $state >/sys/power/state
+  echo -n mem >/sys/power/state
 # Do post-sleep activities
   log "Wake-up now"
   post_sleep_activity
@@ -341,7 +340,13 @@ system_sleep() {
 system_down() {
   log "Shutdown system now"
 # Perform a 'clean' powerdown
-  /usr/local/sbin/powerdown
+  if [[ -x /sbin/poweroff ]]; then
+    /sbin/poweroff
+  elif [[ -x /user/local/sbin/powerdown ]]; then
+    /usr/local/sbin/powerdown
+  else
+    log "No powerdown script present"
+  fi
 }
 
 # Immediate sleep or shutdown
@@ -419,7 +424,6 @@ fi
 
 # main (continuous loop)
 extraDelay=$delayInit
-state=$(sed 's:freeze ::' /sys/power/state)
 [[ $checkTCP == yes ]] && start=0 || start=-1
 while [[ -f $lockfile ]]; do
   if [[ -z $(exclude_period) ]]; then

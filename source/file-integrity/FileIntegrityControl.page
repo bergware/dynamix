@@ -2,7 +2,7 @@ Menu="Integrity"
 Title="File Integrity Control"
 ---
 <?PHP
-/* Copyright 2015-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,7 +13,7 @@ Title="File Integrity Control"
  */
 ?>
 <?
-if ($var['fsState']!="Started") {
+if ($var['fsState']=="Stopped") {
   echo "<p class='notice'>Array must be <strong>STARTED</strong> to use this feature.</p>";
   echo "<p><input type='button' value='Done' onclick='done()'></p>";
   return;
@@ -131,7 +131,6 @@ $(function() {
     $('input[type=submit]').not('input[name^="#"]').prop('disabled',true);
     $('input[value=Corz]').prop('disabled',true);
   }
-  $('.tabs').append("<span class='status' style='font-size:12px'>Include duplicate file hashes in <i>Find</i> command &nbsp;<input type='checkbox' name='#more'></span>");
 <?if (function_exists('plugin_update_available') && $version = plugin_update_available($plugin)):?>
   showNotice('Dynamix File Integrity <b><?=$version?></b> is available. <a>Download Now</a>','<?=$plugin?>');
 <?endif;?>
@@ -232,10 +231,11 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 <?if ($cfg['place']=='SystemInformation'):?>
   <input type="button" value=" Done" onclick="done()">
 <?endif;?>
+<span class="small" style="float:right">Include duplicate file hashes in <b>Find</b> command &nbsp;<input type='checkbox' name='#more'></span>
 </form>
 
 <table class='tablesorter'>
-<thead style='visibility:hidden'><tr><th style='width:40px'></th><th style='width:330px'></th><th></th><th></th><th style='width:50px'></th></tr></thead>
+<thead style='visibility:hidden'><tr><th style='width:56px'></th><th style='width:330px'></th><th></th><th></th><th style='width:50px'></th></tr></thead>
 </tbody>
 <?foreach ($disks as $disk):?>
 <?if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false):?>

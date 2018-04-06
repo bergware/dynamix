@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -12,7 +12,7 @@
 ?>
 
 <?
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 
 function bar_color($val) {
@@ -43,8 +43,8 @@ case 'sum':
   $data[] = "mybar ".bar_color($arraypercent)." align-left";
   $data[] = "$arraypercent%";
   $data[] = "mybar ".bar_color($arraypercent)." inside";
-  $data[] = "<strong>".my_scale($arrayused, $unit)." $unit <img src='/plugins/$plugin/images/arrow.png' style='margin-top:-3px'> $arraypercent%</strong><br><small>Total Space Used</small>";
-  $data[] = "<strong>".my_scale($arrayfree, $unit)." $unit <img src='/plugins/$plugin/images/arrow.png' style='margin-top:-3px'> $freepercent%</strong><br><small>Available for Data</small>";
+  $data[] = "<strong>".my_scale($arrayused,$unit,null,-1)." $unit <img src='/plugins/$plugin/images/arrow.png' style='margin-top:-3px'> $arraypercent%</strong><br><small>Total Space Used</small>";
+  $data[] = "<strong>".my_scale($arrayfree,$unit,null,-1)." $unit <img src='/plugins/$plugin/images/arrow.png' style='margin-top:-3px'> $freepercent%</strong><br><small>Available for Data</small>";
   echo implode(';',$data);
   exit;
 case 'sys':
@@ -96,7 +96,7 @@ case 'rts':
   $hdd = '$2=="tps"';
   $ram = '$2=="kbmemfree"';
   $com = '$2=="'.$_POST['port'].'"';
-  exec("sar 1 1 -u -b -r -n DEV|grep '^Average'|awk '$cpu {u=$3;n=$4;s=$5;}; $hdd {getline;r=$5;w=$6;}; $ram {getline;f=$2;c=$5+$6;d=$3-c;}; $com {x=$5;y=$6;} END{print u,n,s{$nl}r,w{$nl}f,c,d{$nl}x,y}'",$data);
+  exec("sar 1 1 -u -b -r -n DEV|grep -a '^A'|tr -d '\\0'|awk '$cpu {u=$3;n=$4;s=$5;}; $hdd {getline;r=$5;w=$6;}; $ram {getline;f=$2;c=$6+$7;d=$4-c;}; $com {x=$5;y=$6;} END{print u,n,s{$nl}r,w{$nl}f,c,d{$nl}x,y}'",$data);
   echo implode(' ', $data);
   exit;
 case 'cpu':
@@ -107,9 +107,9 @@ case 'cpu':
   break;
 case 'ram':
   $series = ['Free','Cached','Used'];
-  $data = '$4,$7+$8,$5-$7-$8';
+  $data = '$4,$8+$9,$6-$8-$9';
   $case = '-- -r';
-  $mask = ' && $4<100000000000 && $5<100000000000 && $7<100000000000 && $8<100000000000';
+  $mask = ' && $4<100000000000 && $6<100000000000 && $8<100000000000 && $9<100000000000';
   break;
 case 'com':
   $series = ['Receive','Transmit'];

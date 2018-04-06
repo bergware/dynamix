@@ -1,24 +1,43 @@
-#!/bin/bash
-plugin=dynamix.file.integrity
-cfg=/boot/config/plugins/$plugin/$plugin.cfg
-if [[ ! -e $cfg ]]; then
-  cfg=/usr/local/emhttp/plugins/$plugin/default.cfg
-fi
-conf=/etc/inotifywait.conf
+#!/usr/bin/php -q
+<?
+$plugin = 'dynamix.file.integrity';
 
-if [[ $(grep -Po '^service="\K[^"]+' $cfg) -eq 1 ]]; then
-  if [[ ! -s $conf ]]; then
-    source $cfg 2>/dev/null
-    exclude=${exclude/,/|}
-    list=; ifs=$IFS; IFS=','
-    for disk in $disks; do
-      list="$list ${disk/disk//mnt/disk}"
-    done
-    IFS=$ifs
-    echo "cmd=\"$cmd\"" > $conf
-    echo "method=\"$method\"" >> $conf
-    echo "exclude=\"$exclude\"" >> $conf
-    echo "disks=\"${list:1}\"" >> $conf
-  fi
-  /usr/local/emhttp/plugins/$plugin/scripts/rc.watcher start >/dev/null
-fi
+function expand_share($text) {
+  return $text.'/';
+}
+function expand_folder($text) {
+  $trim = trim($text);
+  return ($trim[0]=='*' ? '' : '*').$trim.'/';
+}
+function expand_file($text) {
+  $trim = trim($text);
+  return ($trim[0]=='*' ? '' : '*').$trim.'$';
+}
+function regex($text) {
+  return strtr($text,['.'=>'\.','['=>'\[',']'=>'\]','('=>'\(',')'=>'\)','{'=>'\{','}'=>'\}','+'=>'\+','-'=>'\-','*'=>'.*','&'=>'\&','?'=>'\?']);
+}
+$cfg  = "/boot/config/plugins/$plugin/$plugin.cfg";
+$deft = "/usr/local/emhttp/plugins/$plugin/default.cfg";
+$conf = "/etc/inotifywait.conf";
+$new  = parse_ini_file(file_exists($cfg) ? $cfg : $deft);
+
+if ($new['service'] == 1) {
+  if (!file_exists($conf)) {
+    $cmd = $new['cmd'];
+    $method = $new['method'];
+    $docker = @parse_ini_file('/boot/config/docker.cfg');
+    $img = 'DOCKER_IMAGE_FILE';
+    $map = [];
+    if (isset($docker[$img]) && strpos(dirname($docker[$img]),'/mnt/disk')!==false) $map[] = expand_file(basename($docker[$img]));
+    if ($new['folders']) $map = array_merge($map,array_map('expand_folder',explode(',',$new['folders'])));
+    if ($new['files'])   $map = array_merge($map,array_map('expand_file',explode(',',$new['files'])));
+    if ($new['exclude']) $map = array_merge($map,array_map('expand_share',explode(',',$new['exclude'])));
+    if ($new['apple'])   $map = array_merge($map,[expand_folder('.AppleDB'),expand_file('.DS_Store')]);
+    if (count($map)>1)   {$open = '('; $close = ')';} else {$open = $close = '';}
+    $exclude = $map ? $open.regex(implode('|',$map)).$close : '';
+    $disks = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
+    file_put_contents($conf, "cmd=\"$cmd\"\nmethod=\"$method\"\nexclude=\"$exclude\"\ndisks=\"$disks\"\n");
+  }
+  exec("/usr/local/emhttp/plugins/$plugin/scripts/rc.watcher start >/dev/null");
+}
+?>

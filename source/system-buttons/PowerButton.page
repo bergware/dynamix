@@ -1,6 +1,7 @@
 Menu="Buttons"
 Title=""
 Icon="power.png"
+Code="f011"
 ---
 <?PHP
 /* Copyright 2012-2017, Bergware International.
@@ -17,11 +18,15 @@ Icon="power.png"
 $unraid = parse_ini_file('/etc/unraid-version');
 $direct = version_compare($unraid['version'],'6.1.9','>');
 $force = $direct || file_exists('/var/log/plugins/powerdown-x86_64.plg') ? 'true' : 'false';
+$label = $display['theme']=='gray' || $display['theme']=='azure';
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <script src="/webGui/javascript/context.js"></script>
 <script>
 $(function() {
+<?if ($label):?>
+  $('#nav-item.PowerButton a').html('Buttons');
+<?endif;?>
   var opts = [{header:'Buttons', image:'/plugins/dynamix.system.buttons/icons/buttons.png'}];
   $('#nav-item.PowerButton a').prop('onclick', null).attr('id','nav-power');
   context.init({preventDoubleContext:false});

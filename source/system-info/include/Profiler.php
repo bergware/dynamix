@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@ function grep($key, $speed){
   if (!$match) return;
   $line = preg_split('/ +/',substr($match,22));
   $size = count($line);
-  return $speed ? $line[$size-2].' '.$line[$size-1] : $line[$size-3];
+  return $speed ? $line[$size-2].' '.$line[$size-1] : $line[2].' '.str_replace(',','',$line[3]);
 }
 $output = array();
 switch ($_POST['cmd']) {
@@ -26,9 +26,9 @@ case 'overview':
   echo "<tr><td style='font-weight:bold'>System Overview</td><td></td></tr>";
   echo "<tr><td>unRAID system:</td><td>unRAID server ".$_POST['regTy'].", version ".$_POST['version']."</td></tr>";
   echo "<tr><td>Model:</td><td>".$_POST['model']."</td></tr>";
-  echo "<tr><td>Motherboard:</td><td>".exec("dmidecode -q -t 2|awk -F: '/^\tManufacturer:/{m=$2;}; /^\tProduct Name:/{p=$2;} END{print m\" -\"p}'")."</td></tr>";
+  echo "<tr><td>Motherboard:</td><td>".exec("dmidecode -qt2|awk -F: '/^\tManufacturer:/{m=\$2};/^\tProduct Name:/{p=\$2} END{print m\" -\"p}'")."</td></tr>";
   echo "<tr><td>Processor:</td><td>";
-  $cpu = explode('#',exec("dmidecode -q -t 4|awk -F: '/^\tVersion:/{v=$2;}; /^\tCurrent Speed:/{s=$2;} END{print v\"#\"s}'"));
+  $cpu = explode('#',exec("dmidecode -qt4|awk -F: '/^\tVersion:/{v=\$2};/^\tCurrent Speed:/{s=\$2} END{print v\"#\"s}'"));
   $cpumodel = str_ireplace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&trade;"),$cpu[0]);
   if (strpos($cpumodel,'@')===false) {
     $cpuspeed = explode(' ',trim($cpu[1]));
@@ -65,7 +65,7 @@ case 'overview':
   echo "</td></tr>";
   echo "<tr><td>Cache:</td>";
   $empty = true;
-  $cache = explode('#',exec("dmidecode -q -t 7|awk -F: '/^\tSocket Designation:/{c=c$2\";\";}; /^\tInstalled Size:/{s=s$2\";\";}; /^\tMaximum Size:/{m=m$2\";\";} END{print c\"#\"s\"#\"m}'"));
+  $cache = explode('#',exec("dmidecode -qt7|awk -F: '/^\tSocket Designation:/{c=c\$2\";\"};/^\tInstalled Size:/{s=s\$2\";\"};/^\tMaximum Size:/{m=m\$2\";\"} END{print c\"#\"s\"#\"m}'"));
   $socket = array_map('trim',explode(';',$cache[0]));
   $volume = array_map('trim',explode(';',$cache[1]));
   $limit  = array_map('trim',explode(';',$cache[2]));
@@ -80,18 +80,23 @@ case 'overview':
   }
   if ($empty) echo "</tr>";
   echo "<tr><td>Memory:</td>";
-  $memory = explode('#',exec("dmidecode -q -t 17|awk -F: '/^\tBank Locator:/{b=b$2\";\";}; /^\tSize:/{split($2,s,\" \");t+=s[1];c=c$2\";\";}; /^\tSpeed:/{v=v$2\";\";} END{print t\"#\"b\"#\"c\"#\"v}'"));
-  $maximum = exec("dmidecode -t 16 | awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2} END{print t}'");
-  $memory[0] /= 1024;
-  if ($maximum < $memory[0]) {$maximum = pow(2,ceil(log($memory[0])/log(2))); $star = "*";} else $star = "";
-  echo "<td>{$memory[0]} GB (max. installable capacity $maximum GB)$star</td></tr>";
+  $memory = explode('#',exec("dmidecode -qt17|awk -F: '/^\tLocator:/{b=b\$2\";\"};/^\tSize: [0-9]+ MB\$/{t+=\$2;c=c\$2\";\"};/^\tSize: [0-9]+ GB\$/{t+=\$2*1024;c=c\$2\";\"};/^\tSize: No/{c=c\";\"};/^\tSpeed:/{v=v\$2\";\"} END{print t\"#\"b\"#\"c\"#\"v}'"));
+  $maximum = exec("dmidecode -qt16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB\$/{t+=\$2*1024} END{print t}'");
+  $available = $memory[0];
+  if ($available >= 1024) {
+    $available /= 1024;
+    $maximum /= 1024;
+    $unit = 'GB';
+  } else $unit = 'MB';
+  if ($maximum < $available) {$maximum = pow(2,ceil(log($available)/log(2))); $star = "*";} else $star = "";
+  echo "<td>$available $unit (max. installable capacity $maximum $unit)$star</td></tr>";
   $bank = array_map('trim',explode(';', $memory[1]));
   $size = array_map('trim',explode(';', $memory[2]));
   $speed = array_map('trim',explode(';', $memory[3]));
-  for ($i=0; $i<count($bank); $i++) if ($bank[$i] && strpos($size[$i],'No')===false) echo "<tr><td></td><td>{$bank[$i]} = {$size[$i]}, {$speed[$i]}</td></tr>";
-  echo "<tr><td>Network:</td>";
-  exec("ifconfig -s|grep -Po '^(bond|eth)\d+'",$sPorts);
+  for ($i=0; $i<count($bank); $i++) if ($bank[$i] && $size[$i]) echo "<tr><td></td><td>{$bank[$i]} = {$size[$i]}, {$speed[$i]}</td></tr>";
   $i = 0;
+  echo "<tr><td>Network:</td>";
+  exec("ifconfig -s -a|grep -Po '^(bond|eth)\d+ '",$sPorts);
   foreach ($sPorts as $port) {
     $mtu = file_get_contents("/sys/class/net/$port/mtu");
     if ($i++) echo "<tr><td></td>";
@@ -112,8 +117,7 @@ case 'overview':
   echo "<tr><td>OpenSSL:</td><td>".exec("openssl version|cut -d' ' -f2")."</td></tr>";
   echo "<tr><td>P + Q algorithm:</td>";
   exec("grep ' raid6: ' /var/log/dmesg", $raid6);
-  $way = grep('using \S+ recovery',false);
-  $p = max(grep("$way +gen",true),grep("$way +xor",true));
+  $p = grep("\.\.\.\. xor()",false);
   $q = grep('using algorithm ',true);
   echo "<td>$p + $q</td></tr>";
   echo "<tr><td>Uptime:</td>";
@@ -125,26 +129,27 @@ case 'overview':
   echo "<td>$days days, $hours hours, $min minutes, $sec seconds</td></tr>";
   return;
 case 'bios':
-  exec('dmidecode -q -t 0',$output);
+  exec("dmidecode -qt0|grep -v '^Invalid entry'",$output);
   break;
 case 'mb':
-  exec('dmidecode -q -t 2',$output);
+  exec("dmidecode -qt2|grep -v '^Invalid entry'",$output);
   break;
 case 'cpu':
-  exec('dmidecode -q -t 4',$output);
+  exec("dmidecode -qt4|grep -v '^Invalid entry'",$output);
   break;
 case 'cache':
-  exec('dmidecode -q -t 7',$output);
+  exec("dmidecode -qt7|grep -v '^Invalid entry'",$output);
   break;
 case 'memory':
-  exec('dmidecode -q -t 16',$output);
+  exec("dmidecode -qt16|grep -v '^Invalid entry'",$output);
   break;
 case 'device':
-  exec('dmidecode -q -t 17',$output);
+  exec("dmidecode -qt17|grep -v '^Invalid entry'",$output);
   break;
 case 'ethernet':
-  exec("ifconfig -s|grep -Po '^(bond|eth)\d+'",$ports);
+  exec("ifconfig -s -a|grep -Po '^(bond|eth)\d+ '",$ports);
   foreach ($ports as $port) {
+    $port = trim($port);
     if (substr($port,0,4)=='bond')
       exec("sed 's/Ethernet Channel Bonding.*/Port $port Information/' /proc/net/bonding/$port",$output);
     else

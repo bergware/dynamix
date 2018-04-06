@@ -2,4 +2,5 @@ Menu="/boot/config/plugins/dynamix.system.stats/dynamix.system.stats.cfg stats=T
 Type="xmenu"
 Title="System Stats"
 Icon="stats.png"
+Code="f1fe"
 Tabs="true"

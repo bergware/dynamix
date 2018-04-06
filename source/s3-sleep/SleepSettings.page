@@ -3,7 +3,7 @@ Title="Sleep Settings"
 Icon="dynamix.s3.sleep.png"
 ---
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2016, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,7 +17,7 @@ Icon="dynamix.s3.sleep.png"
 ?>
 <?
 $plugin = "dynamix.s3.sleep";
-$scripts = "$docroot/plugins/$plugin/scripts";
+$scripts = "/usr/local/emhttp/plugins/$plugin/scripts";
 $cfg = parse_plugin_cfg($plugin);
 $sName = "s3_sleep";
 $config = "/etc/s3_sleep.conf";

@@ -2,7 +2,7 @@ Menu="Stats:1"
 Title="Disk Stats"
 ---
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -42,7 +42,6 @@ case 'small': $rowHeight = 44; $y = 0; break;
 case 'wide':  $rowHeight = 60; $y = 4; break;
 default:      $rowHeight = 52; $y = 2; break;}
 
-$scale = $display['scale']; $display['scale'] = -1; //force autoscale for chart
 $rows = 0;
 foreach ($disks as $disk) {
   if (($disk['fsStatus']!='Mounted' && $disk['type']!='Parity') || strpos($disk['status'],'_NP')!==false) continue;
@@ -55,18 +54,17 @@ foreach ($disks as $disk) {
     $arrayfree += $disk['fsFree']*1024;
   case 'Flash':
     $series[] = "'".my_disk($disk['name'])."'";
-    $sizes[] = "'".my_scale($disk['size']*1024,$unit)." $unit'";
+    $sizes[] = "'".my_scale($disk['size']*1024,$unit,-1,-1)." $unit'";
     $rows++;
   break;
   case 'Cache':
     if ($disk['name']=='cache') {
       $series[] = "'Cache'";
-      $sizes[] = "'".my_scale($disk['fsSize']*1024,$unit)." $unit'";
+      $sizes[] = "'".my_scale($disk['fsSize']*1024,$unit,-1,-1)." $unit'";
       $rows++;
     }
   break;}
 }
-$display['scale'] = $scale;
 
 $arrayused = $arraysize-$arrayfree;
 $totalpercent = 100-round(100*$parity/($arraysize+$parity));
@@ -105,10 +103,11 @@ var systime,rtstime,cputime,ramtime,comtime,hddtime;
 var syschart,cpuchart,ramchart,comchart,hddchart;
 var interval = {1:60, 2:120, 3:300, 7:600, 14:1200, 21:1800, 31:3600, 3653:7200};
 
-function autoscale(value,text,size) {
-  var unit = ['','k','M','G','T'];
-  var base = value>1?Math.floor(Math.log(value)/Math.log(1000)):0;
-  var data = base<unit.length?value/Math.pow(1000, base):0;
+function autoscale(value,text,size,kilo) {
+  if (kilo==null) kilo = 1000;
+  var unit = kilo==1024 ? ['','ki','Mi','Gi','Ti','Pi','Ei'] : ['','k','M','G','T','P','E'];
+  var base = value>1?Math.floor(Math.log(value)/Math.log(kilo)):0;
+  var data = base<unit.length?value/Math.pow(kilo, base):0;
   var scale = (data<100?100:10)/size;
   if (data==0) base=0;
   return ((Math.round(scale*data)/scale)+' '+unit[base]+text).replace('.','<?=$display['number'][0]?>');
@@ -340,10 +339,10 @@ function scrollBarWidth() {
   fakeScrollBar.css('overflow-y','scroll');
   var w2 = $('#fakescrollbar').find('div').html('required to init new width.').innerWidth();
   fakeScrollBar.remove();
-  return (w1-w2);
+  return (w1-w2+1);
 }
 function getWidth(full) {
-  var width = Math.max(984, Math.min(1270, $(window).width()-scrollBarWidth()));
+  var width = $('.tabs').width()-scrollBarWidth();
   return full ? width : (width-<?=6*$cols?>)/<?=($cols+1)?>;
 }
 $(function() {
@@ -454,7 +453,7 @@ $(function() {
     plotOptions:{area:{stacking:'normal'}},
     title:{text:'Processor'},
     subtitle:{text:'CPU Load'},
-    yAxis:{labels:{formatter:function(){return this.value+' %';}}},
+    yAxis:{<?=$cfg['cpu']==100?'max:100,':''?>labels:{formatter:function(){return this.value+' %';}}},
     legend:{y:-11},
     tooltip:{formatter:function(){
      var s='<span style="color:#ccc;font-size:9px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M',this.x)+'</span>';
@@ -472,11 +471,11 @@ $(function() {
     plotOptions:{area:{stacking:'normal'}},
     title:{text:'Memory'},
     subtitle:{text:'RAM'},
-    yAxis:{labels:{formatter:function() {return autoscale(this.value*1000,'B',10);}}},
+    yAxis:{labels:{formatter:function() {return autoscale(this.value*1024,'B',100,1024);}}},
     legend:{y:-11},
     tooltip:{formatter:function(){
      var s='<span style="color:#ccc;font-size:9px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M',this.x)+'</span>';
-     $.each(this.points,function(i,point){s+='<br><span style="color:'+point.series.color+'">'+point.series.name+':</span>'+autoscale(point.y*1000,'B',1)});
+     $.each(this.points,function(i,point){s+='<br><span style="color:'+point.series.color+'">'+point.series.name+':</span>'+autoscale(point.y*1024,'B',1,1024)});
      return s;
     }}
   },function(chart){
@@ -505,10 +504,10 @@ $(function() {
     colors:['#E68A00','#EDC240'],
     title:{text:'Storage'},
     subtitle:{text:'<?=exec("ls /dev/[hs]d[a-z] | wc -l")?> disks'},
-    yAxis:{labels:{formatter:function() {return autoscale(this.value*512,'B/s',10);}}},
+    yAxis:{labels:{formatter:function() {return autoscale(this.value*500,'B/s',10);}}},
     tooltip:{formatter:function(){
      var s='<span style="color:#ccc;font-size:9px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M',this.x)+'</span>';
-     $.each(this.points,function(i,point){s+='<br><span style="color:'+point.series.color+'">'+point.series.name+':</span>'+autoscale(point.y*512,'B/s',1)});
+     $.each(this.points,function(i,point){s+='<br><span style="color:'+point.series.color+'">'+point.series.name+':</span>'+autoscale(point.y*500,'B/s',1)});
      return s;
     }}
   },function(chart){
@@ -519,10 +518,10 @@ $(function() {
 </script>
 <div class="mybar whitebar left" style="width:<?=$totalpercent?>%;"><span id="totalarray" class="mybar <?=bar_color($arraypercent)?> align-left" style="width:0"></span></div>
 <div class="mybar graybar right" style="width:<?=$totaldisk?>%"></div>
-<div class="left"><img src="<?="/plugins/$plugin/images"?>/array.png" class="left"><strong><?=my_scale($arraysize, $unit)." $unit"?></strong><br><small>Total Array Size</small></div>
-<div class="left"><span id="stats1" class="mybar <?=bar_color($arraypercent)?> inside"></span><span id="stats2"><strong> <?=my_scale($arrayused, $unit)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$arraypercent?>%</strong><br/><small>Total Space Used</small></span></div>
-<div class="left"><span class="mybar whitebar inside"></span><span id="stats3"><strong><?=my_scale($arrayfree, $unit)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$freepercent?>%</strong><br/><small>Available for Data</small></span></div>
-<div class="right"><span class="mybar graybar inside"></span><strong> <?=my_scale($parity, $unit)." $unit"?></strong><br><small>Used for Parity</small></div>
+<div class="left"><img src="<?="/plugins/$plugin/images"?>/array.png" class="left"><strong><?=my_scale($arraysize,$unit,-1,-1)." $unit"?></strong><br><small>Total Array Size</small></div>
+<div class="left"><span id="stats1" class="mybar <?=bar_color($arraypercent)?> inside"></span><span id="stats2"><strong> <?=my_scale($arrayused,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$arraypercent?>%</strong><br/><small>Total Space Used</small></span></div>
+<div class="left"><span class="mybar whitebar inside"></span><span id="stats3"><strong><?=my_scale($arrayfree,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$freepercent?>%</strong><br/><small>Available for Data</small></span></div>
+<div class="right"><span class="mybar graybar inside"></span><strong> <?=my_scale($parity,$unit,-1,-1)." $unit"?></strong><br><small>Used for Parity</small></div>
 <?if ($critical):?>
 <div class="right"><span class="mybar redbar inside"></span><strong>Above <?=$display['critical']?>%</strong><br><small>Low on Space</small></div>
 <?endif;?>
