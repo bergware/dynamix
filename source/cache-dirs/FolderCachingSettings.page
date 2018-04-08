@@ -62,8 +62,14 @@ $(function() {
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.cache.php">
 <input type="hidden" name="#config" value="<?=$config?>">
-<input type="hidden" name="#prefix" value="minimum=m&maximum=M&depth=d&exclude=e&include=i">
+<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
+
+> Folder Caching Info
+>
+> The folder caching (cache_dirs) reads directories continously to keep them in memory. The program does not know whether a directory is already in memory or need to be reread from disk. Therefore it cannot avoid spinning up disks when it happens that the linux memory cache evicts a directory and cache_dirs rescans the directoy. If a large number of files are being kept in memory then it seems inevitably that some diretories get evicted from the cache when the system is under load. The program by default uses an adaptive mode where it reduces the depth of the directory structure which it tries to keep in memory. When it detects a cache-miss (slow scan time) it will reduce the depth until disks are idle again, but will still be at risk of putting load on the disks for a minute or two until the program gives up and waits for idle disks. The less files the cache need to hold, the less likely it is that the program spins up disks.
+>
+
 
 Folder caching function:
 : <select name="service" size="1">
@@ -99,11 +105,19 @@ Maximum interval between folder scans (sec):
 
 > Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
 
-Adaptive scan level depth:
-: <input type="text" name="depth" class="narrow" maxlength="4" value="<?=$cfg['depth']?>" placeholder="auto">
+Max level depth:
+: <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="unlimited">
 
-> Defines how may folder levels deep scanning should continue. By default it is automatically set,
-> only change this to a fixed number when the scan needs to be limited to the first levels of the top folders.
+> Sets the maximum folder levels for the scan (parent > child folder > grand child). Set to 'unlimited' (or 0) to remove maximum
+
+Use Adaptive depth:
+: <select name="adaptive" size="1">
+  <?=mk_option($cfg['adaptive'], "1", "Adaptive")?>
+  <?=mk_option($cfg['adaptive'], "0", "Fixed")?>
+  </select>
+
+> If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth.
+> If adaptive is disabled then cache_dirs will always scan to the max level.
 
 Excluded folders:
 : <select id="s1" name="exclude" size="1" multiple style="display:none">
@@ -127,12 +141,20 @@ Included folders:
 >
 > It is recommended to use either excluded or included folders but not both when a restricted folder list is required.
 
+Logging:
+: <select name="log" size="1">
+  <?=mk_option($cfg['log'], "off", "Disabled")?>
+  <?=mk_option($cfg['log'], "on", "Enabled")?>
+  </select></td>
+
+> Select whether logging is enabled or disabled. Logging will be made to /var/log/cache_dirs.log and /var/log/cache_dirs_lost_cache.log. Be wary that the cache_dirs logs are placed in memory on unRAID and are not automatically rolled.
+
 User defined options:
 : <input id="pin" type="text" name="other" maxlength="200" value="<?=$cfg['other']?>" placeholder="Enter custom options here">see <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">unRAID forum</a></u>
 
 <input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
 
-> The cache_dirs script has additional options which may be used. Refer to the online documentation to use these as needed.
+> The cache_dirs script has additional options which may be used. Refer to the online documentation to use these as needed, or see the cache_dirs script itself located under /boot/config/plugins/dynamix.cache.dirs/cache_dirs.zip
 
 </form>

@@ -24,6 +24,12 @@ foreach ($new as $key => $value) {
   case 'service':
     $enable = $value;
     break;
+  case 'adaptive':
+    $adaptive = $value;
+    break;
+  case 'depth':
+    $depth = $value;
+    break;
   case 'exclude':
   case 'include':
     $list = explode(',', $value);
@@ -36,6 +42,15 @@ foreach ($new as $key => $value) {
 }
 $cachedirs = "/usr/local/emhttp/plugins/dynamix.cache.dirs/scripts/rc.cachedirs";
 exec("$cachedirs stop >/dev/null");
+if ($adaptive == 1) {
+  if ($depth > 0) $options .= "-d ".$depth;
+} else {
+  # Fixed specified so must set a value
+  if ($depth == 0) {
+    $depth=9999;
+  }
+  $options .= "-D ".$depth;
+} 
 $options = trim($options);
 $keys['options'] = $options;
 file_put_contents($config, $options);
