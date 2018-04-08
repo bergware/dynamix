@@ -62,7 +62,7 @@ $(function() {
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.cache.php">
 <input type="hidden" name="#config" value="<?=$config?>">
-<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l">
+<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&scanTimeoutBusy=Y&scanTimeoutIdle=X&scanTimeoutStable=Z">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
 > Folder Caching Info
@@ -85,50 +85,7 @@ Suspend during 'Mover' process:
   <?=mk_option($cfg['suspend'], "", "Yes")?>
   </select>
 
-> Stop caching while the mover is running to avoid conflicts. It is recommended to set this to YES.
-
-Scan user shares:
-: <select name="shares" size="1">
-  <?=mk_option($cfg['shares'], "", "No")?>
-  <?=mk_option($cfg['shares'], "-u", "Yes")?>
-  </select>
-
-> Perform additional caching on the share folders. This shouldn't be necessary as normally disk caching is sufficient.
-
-Minimum interval between folder scans (sec):
-: <input type="text" name="minimum" class="narrow" maxlength="3" value="<?=$cfg['minimum']?>" placeholder="1">
-
-> Tweaking of the caching interval can be done for slower systems. Default value is 1 second, should be alright for most systems.
-
-Maximum interval between folder scans (sec):
-: <input type="text" name="maximum" class="narrow" maxlength="3" value="<?=$cfg['maximum']?>" placeholder="10">
-
-> Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
-
-Max level depth:
-: <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="unlimited">
-
-> Sets the maximum folder levels for the scan (parent > child folder > grand child). Set to 'unlimited' (or 0) to remove maximum
-
-Use Adaptive depth:
-: <select name="adaptive" size="1">
-  <?=mk_option($cfg['adaptive'], "1", "Adaptive")?>
-  <?=mk_option($cfg['adaptive'], "0", "Fixed")?>
-  </select>
-
-> If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth.
-> If adaptive is disabled then cache_dirs will always scan to the max level.
-
-Excluded folders:
-: <select id="s1" name="exclude" size="1" multiple style="display:none">
-  <?foreach ($folders as $folder):?>
-  <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
-  <?endforeach;?>
-  </select>
-
-> The dropdown menu shows all available folders, by default no folders are excluded. Select here any folders to be excluded.
->
-> It is recommended to use either excluded or included folders but not both when a restricted folder list is required.
+> Stop caching while the mover is running to avoid conflicts. It is recommended to set this to NO when using adaptive depth, and YES when using FIXED depth.
 
 Included folders:
 : <select id="s2" name="include" size="1" multiple style="display:none">
@@ -139,7 +96,57 @@ Included folders:
 
 > The dropdown menu shows all available folders, by default all folders are included. Select here the restricted list of folders to be included.
 >
-> It is recommended to use either excluded or included folders but not both when a restricted folder list is required.
+> If an included folder is excluded, then the folder gets excluded. It is simplest to not use includes and excludes at the same time.
+
+Excluded folders:
+: <select id="s1" name="exclude" size="1" multiple style="display:none">
+  <?foreach ($folders as $folder):?>
+  <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
+  <?endforeach;?>
+  </select>
+
+> The dropdown menu shows all available folders, by default no folders are excluded. Select here any folders to be excluded.
+>
+> It is possible to exclude an included folder. It is simplest to not use includes and excludes at the same time.
+
+Use Adaptive depth:
+: <select name="adaptive" size="1">
+  <?=mk_option($cfg['adaptive'], "1", "Adaptive")?>
+  <?=mk_option($cfg['adaptive'], "0", "Fixed")?>
+  </select>
+
+> If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth. It will start at depth 1 and keep increasing the scan depth towards maximum level as long as scans do not take too long to complete (see scan timeout).
+> If adaptive is disabled then cache_dirs will always scan to the max level.
+
+Max level depth:
+: <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="unlimited">
+
+> Sets the maximum folder levels for the scan (parent > child folder > grand child). Set to 'unlimited' (or 0) to remove maximum
+
+Scan timeout for a scan during disk-idle period (sec):
+: <input type="text" name="scanTimeoutIdle" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutIdle']?>" placeholder="150">
+
+> Scan timeout is the maximum duration that a single scan through all directories at the current level af depth (which may change adaptively). Increase it if cache_dirs fails in caching all your files. This timeout is always used if adaptive is disabled.
+
+Scan timeout for a scan during initial startup or less-idle period (sec):
+: <input type="text" name="scanTimeoutBusy" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutBusy']?>" placeholder="30">
+
+> Increase it if you want cache_dirs too give more time in initial scan, and when filesystem may be busy.
+
+Scan timeout for a scan when all directories have been succesfully cached (sec):
+: <input type="text" name="scanTimeoutStable" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutStable']?>" placeholder="20">
+
+> Decrease it if you want cache_dirs to put less load on system when cache is evicted from memory, and disks are not idle. Increase if you want cache_dirs to have a greater chance af getting directories back into memory.
+
+Minimum interval between folder scans (sec):
+: <input type="text" name="minimum" class="narrow" maxlength="3" value="<?=$cfg['minimum']?>" placeholder="1">
+
+> Tweaking of the caching interval can be done for slower systems. Default value is 1 second, should be alright for most systems.
+
+Maximum interval between folder scans (sec):
+: <input type="text" name="maximum" class="narrow" maxlength="3" value="<?=$cfg['maximum']?>" placeholder="10">
+
+> Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
 
 Logging:
 : <select name="log" size="1">
