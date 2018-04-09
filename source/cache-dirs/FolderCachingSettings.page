@@ -62,7 +62,7 @@ $(function() {
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.cache.php">
 <input type="hidden" name="#config" value="<?=$config?>">
-<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&scanTimeoutBusy=Y&scanTimeoutIdle=X&scanTimeoutStable=Z">
+<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&diskIdleTimer=W&scanTimeoutIdle=X&scanTimeoutBusy=Y&scanTimeoutStable=Z">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
 > Folder Caching Info
@@ -81,7 +81,7 @@ Folder caching function:
 
 Suspend during 'Mover' process:
 : <select name="suspend" size="1">
-  <?=mk_option($cfg['suspend'], "-S", "No")?>
+  <?=mk_option($cfg['ssupend'], "-S", "No")?>
   <?=mk_option($cfg['suspend'], "", "Yes")?>
   </select>
 
@@ -122,6 +122,11 @@ Max level depth:
 : <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="unlimited">
 
 > Sets the maximum folder levels for the scan (parent > child folder > grand child). Set to 'unlimited' (or 0) to remove maximum
+
+Disk Idle Timer (sec):
+: <input type="text" name="diskIdleTimer" class="narrow" maxlength="4" value="<?=$cfg['diskIdleTimer']?>" placeholder="20">
+
+> When the disks have been idle this long, cache_dirs adaptive scan starts working towards building the cache.
 
 Scan timeout for a scan during disk-idle period (sec):
 : <input type="text" name="scanTimeoutIdle" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutIdle']?>" placeholder="150">
