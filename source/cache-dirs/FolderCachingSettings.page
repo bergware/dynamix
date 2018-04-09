@@ -85,7 +85,7 @@ Suspend during 'Mover' process:
   <?=mk_option($cfg['suspend'], "", "Yes")?>
   </select>
 
-> Stop caching while the mover is running to avoid conflicts. It is recommended to set this to NO when using adaptive depth, and YES when using FIXED depth.
+> Stop caching while the mover is running to avoid conflicts. When using adaptive depth it will probably work well NO. With fixed depth its will almost certainly put less load on the disks to choose YES.
 
 Included folders:
 : <select id="s2" name="include" size="1" multiple style="display:none">
