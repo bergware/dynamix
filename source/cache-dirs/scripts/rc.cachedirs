@@ -7,7 +7,7 @@ run=/tmp/$script.run
 
 cache_dirs.start() {
   if [[ -z $(pgrep -f $execute) ]]; then
-    $execute $(cat $options) 2> /dev/null
+    $execute $(cat $options) &>/dev/null &
     echo "$script started"
   else
     echo "$script already running!"
@@ -16,7 +16,7 @@ cache_dirs.start() {
 
 cache_dirs.stop() {
   if [[ -n $(pgrep -f $execute) ]]; then
-    $execute -q 1>/dev/null 2>&1
+    $execute -q &>/dev/null
     timer=5
     until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
       timer=$((timer-1))
@@ -25,7 +25,7 @@ cache_dirs.stop() {
     echo "$script stopped"
   else
     # Always execute because cache_dirs uses subprocesses and lock-file, and it may need to cleanup
-    $execute -q 1>/dev/null 2>&1
+    $execute -q &>/dev/null
     echo "$script not running!"
   fi
 }
