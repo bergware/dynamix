@@ -7,7 +7,10 @@ run=/tmp/$script.run
 
 cache_dirs.start() {
   if [[ -z $(pgrep -f $execute) ]]; then
-    $execute $(cat $options) &>/dev/null &
+    # Going via file to execute script, we get the shell to remove quotes around "dir"
+    echo "$execute $(cat $options) 2>/dev/null" >$run
+    source $run
+    rm -f $run
     echo "$script started"
   else
     echo "$script already running!"
