@@ -62,7 +62,7 @@ $(function() {
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.cache.php">
 <input type="hidden" name="#config" value="<?=$config?>">
-<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&diskIdleTimer=W&scanTimeoutIdle=X&scanTimeoutBusy=Y&scanTimeoutStable=Z">
+<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&diskIdleTimer=W&scanTimeoutIdle=X&scanTimeoutBusy=Y&scanTimeoutStable=Z&ulimit=U&cachePressure=p">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
 > Folder Caching Info
@@ -124,7 +124,7 @@ Max level depth:
 > Sets the maximum folder levels for the scan (parent > child folder > grand child). Set to 'unlimited' (or 0) to remove maximum
 
 Disk Idle Timer (sec):
-: <input type="text" name="diskIdleTimer" class="narrow" maxlength="4" value="<?=$cfg['diskIdleTimer']?>" placeholder="20">
+: <input type="text" name="diskIdleTimer" class="narrow" maxlength="4" value="<?=$cfg['diskIdleTimer']?>" placeholder="60">
 
 > When the disks have been idle this long, cache_dirs adaptive scan starts working towards building the cache.
 
@@ -152,6 +152,16 @@ Maximum interval between folder scans (sec):
 : <input type="text" name="maximum" class="narrow" maxlength="3" value="<?=$cfg['maximum']?>" placeholder="10">
 
 > Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
+
+Cache pressure of directories on system:
+: <input type="text" name="cachePressure" class="narrow" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10">
+
+> set cache_pressure to NN (by default = 10). 0 means never reclaim cache. See 'vfs_cache_pressure' in <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">kernel.org</a>. Warning: 0 will cause kernel never to release the memory of directories, and if too little memory is available, it will cause the system to crash. cache_dirs does not reset the cachePressure after quitting, to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100'.
+
+Limit the memory available to the shell in which the script runs (increase if it dies):
+: <input type="text" name="ulimit" class="narrow" maxlength="6" value="<?=$cfg['ulimit']?>" placeholder="50000">
+
+> set ulimit to NN to limit memory used by script (default=50000), '-U 0' sets no ulimit at all and inherits the shells default).
 
 Logging:
 : <select name="log" size="1">
