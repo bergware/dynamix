@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.12.05">
+<!ENTITY version   "2018.04.20">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed uninstaller for unRAID 6.4 and higher
+
+###2017.12.05
 - fixed "exclude" selection is not correctly set upon system startup
 - don't install b2sum package for unRAID 6.4, it is already included
 
@@ -501,10 +504,13 @@ echo ""
 
 # Uninstall the packages
 . /etc/unraid-version
+version=${version:0:3}
 
 removepkg &name;
-removepkg b2sum-20130305-x86_64-1
-if [[ ${version:0:3} != 6.3 ]]; then
+if [[ $version == 6.3 || $version == 6.2 || $version == 6.1 || $version == 6.0 ]]; then
+  removepkg b2sum-20130305-x86_64-1
+fi
+if [[ $version == 6.2 || $version == 6.1 || $version == 6.0 ]]; then
   removepkg inotify-tools-3.14-x86_64-1
 fi
 
