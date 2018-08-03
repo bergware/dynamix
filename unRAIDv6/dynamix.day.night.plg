@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.day.night">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.08.03f">
+<!ENTITY version   "2018.08.03g">
 <!ENTITY launch    "Settings/DayNightSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "29f228b85c2eed04adeaa975fcc611fc">
+<!ENTITY MD5       "a3413bd9afbe4626340e335bf73bf0eb">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.5.0">
