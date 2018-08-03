@@ -3,12 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2018.04.12">
 <!ENTITY launch    "Settings/FolderCachingSettings">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/arberg/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3194b87ae645916c81336d524d65af78">
-<!ENTITY ZIP       "66f967028c64aea77135a8469640bc0d">
+<!ENTITY MD5       "9b2519aeef2972c56e3c570ddfa6743a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,7 +15,13 @@
 <CHANGES>
 ##&name;
 
-###&version;
+###2018.04.12;
+- by arberg
+- added cache_dirs directly to txz, to avoid mismatch between plugin and another cache_dirs repository and simpler release of updates
+- Updated FolderCaching page with help and new options
+- added copy to /usr/local/bin and /etc/rc.d
+
+###2016.08.26;
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
@@ -113,7 +118,7 @@ fi
 
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/arberg/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
@@ -128,6 +133,12 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+# Copy cache_dirs startup to rc.d and /usr/local/bin for easy user access
+cp /usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs /etc/rc.d
+cp /usr/local/emhttp/plugins/&name;/scripts/cache_dirs /usr/local/bin
+
+# Below start service does not seem to work when installing, but isn't really necessary
+
 cfg=&source;.cfg
 if [[ ! -e $cfg ]]; then
   cfg=/usr/local/emhttp/plugins/&name;/default.cfg
@@ -141,23 +152,6 @@ getkey(){
   fi
 }
 
-# Install cache_dirs script
-zip=/boot/config/plugins/&name;/cache_dirs.zip
-MD5=$(md5sum $zip 2>/dev/null|grep -Po '^\S+')
-if [[ $MD5 != &ZIP; ]]; then
-  echo -n " downloading cache_dirs script ... "
-  wget -q -O $zip "https://raw.githubusercontent.com/dlandon/cache_dirs/master/cache_dirs.zip"
-  if [[ $? -eq 0 ]]; then
-    echo "done"
-  else
-    echo "failed"
-    logger "cache_dirs script failed to download. Abort installation."
-    exit 1
-  fi
-fi
-unzip -o -q $zip -d /usr/local/emhttp/plugins/&name;/scripts
-chmod +x /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
-
 # Start service
 enable=$(grep -Po '^service="\K[^"]+' $cfg)
 conf=/etc/cache_dirs.conf
@@ -167,6 +161,9 @@ if [[ $enable -eq 1 ]]; then
   fi
   if [[ $(getkey mdState) == STARTED ]]; then
     at -M -f /tmp/start_service now 2>/dev/null
+  elif [[ -d /mnt/disk1 ]]; then
+    # Above getkey does not work unRaid 6.4, so now do simple check /mnt/disk1 existence to determine if array is mounted. 
+    /usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs start
   fi
 fi
 rm -f /tmp/start_service
@@ -178,6 +175,7 @@ echo " This plugin requires Dynamix webGui to operate"
 echo " Copyright 2016, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
+echo "The cache_dirs script is not under copyright by Bergware"
 echo ""
 </INLINE>
 </FILE>
@@ -190,7 +188,8 @@ echo ""
 
 # Remove plugin related files
 rm -rf /boot/config/plugins/&name;
-rm -f /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
+rm -f /etc/rc.d/rc.cachedirs
+rm -f /usr/local/bin/cache_dirs
 
 # Uninstall the 'source' package
 removepkg &name;
