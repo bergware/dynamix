@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.day.night">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.08.02a">
+<!ENTITY version   "2018.08.03">
 <!ENTITY launch    "Settings/DayNightSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "bc85c8cd8832edd27479ac112e822b4f">
+<!ENTITY MD5       "e5aa34334d646ad9cfce3ac6b3e2205c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.5.0">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added geocoding service selection (Google or Bing)
+
+###2018.08.02
 - initial release for unRAID v6
 </CHANGES>
 
