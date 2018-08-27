@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.08.27">
+<!ENTITY version   "2018.08.27a">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -168,7 +168,7 @@ echo " Copyright 2018, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo " The included cache_dirs script is a third party script"
-echo " Copyright by the respective owner and maintainers
+echo " Copyright by the respective owner and maintainers"
 echo "-----------------------------------------------------------"
 echo ""
 </INLINE>
