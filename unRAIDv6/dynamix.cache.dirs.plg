@@ -3,12 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.08.26">
+<!ENTITY version   "2018.08.27">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3194b87ae645916c81336d524d65af78">
-<!ENTITY ZIP       "66f967028c64aea77135a8469640bc0d">
+<!ENTITY MD5       "53c7a47bba2a7ca8e258c3ff9b6f5c39">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -17,6 +16,13 @@
 ##&name;
 
 ###&version;
+- fixed folders with parentheses and brackets in their name not working in include/exclude list
+
+- **next modifications and enhancements are courtesy of Alex R. Berg**
+- updated FolderCaching page with extensive help and new options
+- added cache_dirs directly to txz, to avoid mismatch between plugin and another cache_dirs repository
+
+###2016.08.26
 - fixed folders and files permissions
 - added minimum unRAID version 6.1.9
 
@@ -93,7 +99,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2018, Bergware International
 Dynamix Folder Caching - Store names in memory to avoid disk spin-ups. Makes use of cache_dirs script written by Joe L. and updated by Alex R. Berg
 -->
 
@@ -141,23 +147,6 @@ getkey(){
   fi
 }
 
-# Install cache_dirs script
-zip=/boot/config/plugins/&name;/cache_dirs.zip
-MD5=$(md5sum $zip 2>/dev/null|grep -Po '^\S+')
-if [[ $MD5 != &ZIP; ]]; then
-  echo -n " downloading cache_dirs script ... "
-  wget -q -O $zip "https://raw.githubusercontent.com/dlandon/cache_dirs/master/cache_dirs.zip"
-  if [[ $? -eq 0 ]]; then
-    echo "done"
-  else
-    echo "failed"
-    logger "cache_dirs script failed to download. Abort installation."
-    exit 1
-  fi
-fi
-unzip -o -q $zip -d /usr/local/emhttp/plugins/&name;/scripts
-chmod +x /usr/local/emhttp/plugins/&name;/scripts/cache_dirs
-
 # Start service
 enable=$(grep -Po '^service="\K[^"]+' $cfg)
 conf=/etc/cache_dirs.conf
@@ -175,8 +164,11 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2018, Bergware International"
 echo " Version: &version;"
+echo "-----------------------------------------------------------"
+echo " The included cache_dirs script is a third party script"
+echo " Copyright by the respective owner and maintainers
 echo "-----------------------------------------------------------"
 echo ""
 </INLINE>
