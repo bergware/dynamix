@@ -1,10 +1,4 @@
-/*
- Highcharts JS v2.3.5 (2012-12-19)
-
- (c) 2009-2012 Torstein Hønsi
-
- License: www.highcharts.com/license
-*/
+/* Highcharts JS v2.3.5 (2012-12-19) (c) 2009-2012 Torstein Hønsi License: www.highcharts.com/license */
 (function(){function x(a,b){var c;a||(a={});for(c in b)a[c]=b[c];return a}function ia(){for(var a=0,b=arguments,c=b.length,d={};a<c;a++)d[b[a++]]=b[a];return d}function z(a,b){return parseInt(a,b||10)}function ja(a){return typeof a==="string"}function Y(a){return typeof a==="object"}function Ia(a){return Object.prototype.toString.call(a)==="[object Array]"}function Da(a){return typeof a==="number"}function ka(a){return K.log(a)/K.LN10}function aa(a){return K.pow(10,a)}function ta(a,b){for(var c=a.length;c--;)if(a[c]===
 b){a.splice(c,1);break}}function r(a){return a!==A&&a!==null}function w(a,b,c){var d,e;if(ja(b))r(c)?a.setAttribute(b,c):a&&a.getAttribute&&(e=a.getAttribute(b));else if(r(b)&&Y(b))for(d in b)a.setAttribute(d,b[d]);return e}function la(a){return Ia(a)?a:[a]}function n(){var a=arguments,b,c,d=a.length;for(b=0;b<d;b++)if(c=a[b],typeof c!=="undefined"&&c!==null)return c}function I(a,b){if(Ea&&b&&b.opacity!==A)b.filter="alpha(opacity="+b.opacity*100+")";x(a.style,b)}function T(a,b,c,d,e){a=C.createElement(a);
 b&&x(a,b);e&&I(a,{padding:0,border:Q,margin:0});c&&I(a,c);d&&d.appendChild(a);return a}function ba(a,b){var c=function(){};c.prototype=new a;x(c.prototype,b);return c}function Ja(a,b,c,d){var e=N.lang,f=a;b===-1?(b=(a||0).toString(),a=b.indexOf(".")>-1?b.split(".")[1].length:0):a=isNaN(b=M(b))?2:b;var b=a,c=c===void 0?e.decimalPoint:c,d=d===void 0?e.thousandsSep:d,e=f<0?"-":"",a=String(z(f=M(+f||0).toFixed(b))),g=a.length>3?a.length%3:0;return e+(g?a.substr(0,g)+d:"")+a.substr(g).replace(/(\d{3})(?=\d)/g,

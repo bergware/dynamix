@@ -98,7 +98,7 @@
 #				- Show type of scanning being done - adaptive or fixed when cache_dirs is started.
 # dlandon
 #
-# Version 2.2.0 - When cache lost, don't wait for disks idle, instead decrease depth
+# Version 2.2.0j- When cache lost, don't wait for disks idle, instead decrease depth
 #               - Now scans each disks and cache in separate processes. Thus removed option -u for scan user
 #               - Fixed loss of adaptive after 1 week
 #               - Weekly rescan only when disks been idle long
@@ -107,7 +107,7 @@
 #               - Added file-count and depth adjustment by filecount
 # arberg
 ####################################################################################
-version=2.2.0
+version=2.2.0j
 program_name=$(basename "$0")
 arg_count=$#
 

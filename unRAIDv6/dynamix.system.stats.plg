@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.02.04">
+<!ENTITY version   "2018.08.28">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c44da410b27669ccdb48325e12d39c7d">
+<!ENTITY MD5       "72fa78d2fc3a46d467b5db39f3eff64c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- updated sysstat files to version 11.6.4
+- fixed selection display
+
+###2018.02.04
 - show rounded numbers
 
 ###2018.01.20

@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,7 +10,10 @@
  */
 ?>
 <?
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$cachedirs = "$docroot/plugins/dynamix.cache.dirs/scripts/rc.cachedirs";
 $new = isset($default) ? array_replace_recursive($_POST, $default) : $_POST;
+
 foreach ($new as $key => $value) {
   if (!strlen($value)) continue;
   switch ($key) {
@@ -33,24 +36,20 @@ foreach ($new as $key => $value) {
   case 'exclude':
   case 'include':
     $list = explode(',', $value);
-    foreach ($list as $insert) $options .= "-{$prefix[$key]} \"".str_replace(' ','\ ',trim($insert))."\" ";
+    foreach ($list as $insert) $options .= "-{$prefix[$key]} \"".str_replace([' ','[',']','(',')'],['\ ','\[','\]','\(','\)'],trim($insert))."\" ";
     break;
   default:
     if ($key[0]!='#') $options .= (isset($prefix[$key]) ? "-{$prefix[$key]} " : "")."$value ";
     break;
   }
 }
-$cachedirs = "/usr/local/emhttp/plugins/dynamix.cache.dirs/scripts/rc.cachedirs";
+
 exec("$cachedirs stop >/dev/null");
 if ($adaptive == 1) {
   if ($depth > 0) $options .= "-d ".$depth;
 } else {
-  # Fixed specified so must set a value
-  if ($depth == 0) {
-    $depth=9999;
-  }
-  $options .= "-D ".$depth;
-} 
+  $options .= "-D ".($depth ?: 9999);
+}
 $options = trim($options);
 $keys['options'] = $options;
 file_put_contents($config, $options);

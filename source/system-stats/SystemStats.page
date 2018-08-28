@@ -23,7 +23,8 @@ endif;
 
 function selector() {
   global $graph, $frame;
-  echo "<span id='selector' class='status topright1'><span><select size='1' onchange='modeller(this.value)'>";
+  echo "<span class='status'>";
+  echo "<span id='selector'><select size='1' onchange='modeller(this.value)'>";
   echo mk_option($graph, '0', 'Real-time');
   echo mk_option($graph, '1', 'Last day');
   echo mk_option($graph, '2', 'Last 2 days');
@@ -33,7 +34,8 @@ function selector() {
   echo mk_option($graph, '21', 'Last 3 weeks');
   echo mk_option($graph, '31', 'Last month');
   echo mk_option($graph, '3653', 'Since start');
-  echo "</select></span><span id='monitor' class='status topright2'><select size='1' onchange='resizer(this.value)'>";
+  echo "</select></span>";
+  echo "<span id='monitor'><select size='1' onchange='resizer(this.value)'>";
   echo mk_option($frame, '15', '30 seconds');
   echo mk_option($frame, '30', '1 minute');
   echo mk_option($frame, '60', '2 minutes');
@@ -42,7 +44,8 @@ function selector() {
   echo mk_option($frame, '900', '30 minutes');
   echo mk_option($frame, '1800', '1 hour');
   echo mk_option($frame, '3600', '2 hours');
-  echo "</select><input type='button' value='Reset' onclick='modeller(0)'></span></span>";
+  echo "</select><input type='button' value='Reset' onclick='modeller(0)'></span>";
+  echo "</span>";
 }
 
 $cols++;
@@ -65,11 +68,12 @@ $tag4 = $tag.$last;
 $('.tabs').append("<?=selector()?>");
 <?if ($cfg['first']):?>
 $.cookie('one','tab2',{path:'/'});
-$(function() {
-  $('#selector').show();
+$(function(){
+  $('span.status').show();
   systemStats();
 });
 <?else:?>
+$('span.status').hide();
 $.removeCookie('one',{path:'/'});
 <?endif;?>
 </script>

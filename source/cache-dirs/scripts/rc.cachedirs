@@ -7,7 +7,7 @@ run=/tmp/$script.run
 
 cache_dirs.start() {
   if [[ -z $(pgrep -f $execute) ]]; then
-    # Going via file to execute script, we get the shell to remove quotes around "dir"
+    # ensure folder names are properly quoted
     echo "$execute $(cat $options) 2>/dev/null" >$run
     source $run
     rm -f $run
@@ -27,7 +27,7 @@ cache_dirs.stop() {
     done
     echo "$script stopped"
   else
-    # Always execute because cache_dirs uses subprocesses and lock-file, and it may need to cleanup
+    # run, to do cleanup
     $execute -q &>/dev/null
     echo "$script not running!"
   fi

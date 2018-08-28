@@ -3,7 +3,7 @@ Title="Folder Caching"
 Icon="dynamix.cache.dirs.png"
 ---
 <?PHP
-/* Copyright 2015, Bergware International.
+/* Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -15,10 +15,10 @@ Icon="dynamix.cache.dirs.png"
 ?>
 <?
 $plugin = 'dynamix.cache.dirs';
-$cfg = parse_plugin_cfg($plugin);
+$cfg = parse_plugin_cfg($plugin,false,INI_SCANNER_RAW);
 
 $sName = "cache_dirs";
-$fName = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
+$fName = "$docroot/plugins/$plugin/scripts/$sName";
 $config = "/etc/cache_dirs.conf";
 $cache = isset($disks['cache']) ? '/mnt/cache' : '';
 
@@ -67,9 +67,15 @@ $(function() {
 
 > Folder Caching Info
 >
-> The folder caching (cache_dirs) reads directories continously to keep them in memory. The program does not know whether a directory is already in memory or need to be reread from disk. Therefore it cannot avoid spinning up disks when it happens that the linux memory cache evicts a directory and cache_dirs rescans the directoy. If a large number of files are being kept in memory then it seems inevitably that some diretories get evicted from the cache when the system is under load. The program by default uses an adaptive mode where it reduces the depth of the directory structure which it tries to keep in memory. When it detects a cache-miss (slow scan time) it will reduce the depth until disks are idle again, but will still be at risk of putting load on the disks for a minute or two until the program gives up and waits for idle disks. The less files the cache need to hold, the less likely it is that the program spins up disks.
+> The folder caching (cache_dirs) reads directories continously to keep them in memory.
+> The program does not know whether a directory is already in memory or need to be reread from disk.
+> Therefore it cannot avoid spinning up disks when it happens that the linux memory cache evicts a directory and cache_dirs rescans the directoy.
+> If a large number of files are being kept in memory then it seems inevitably that some diretories get evicted from the cache when the system is under load.
 >
-
+> The program by default uses an adaptive mode where it reduces the depth of the directory structure which it tries to keep in memory.
+> When it detects a cache-miss (slow scan time) it will reduce the depth until disks are idle again,
+> but will still be at risk of putting load on the disks for a minute or two until the program gives up and waits for idle disks.
+> The less files the cache need to hold, the less likely it is that the program spins up disks.
 
 Folder caching function:
 : <select name="service" size="1">
@@ -77,7 +83,8 @@ Folder caching function:
   <?=mk_option($cfg['service'], "1", "Enabled")?>
   </select></td>
 
-> Select whether folder caching is enabled or disabled. Caching will only effectively occur when the array is started. The caching function is automatically restarted or stopped when the array goes online or offline.
+> Select whether folder caching is enabled or disabled. Caching will only effectively occur when the array is started.
+> The caching function is automatically restarted or stopped when the array goes online or offline.
 
 Suspend during 'Mover' process:
 : <select name="suspend" size="1">
@@ -85,7 +92,8 @@ Suspend during 'Mover' process:
   <?=mk_option($cfg['suspend'], "", "Yes")?>
   </select>
 
-> Stop caching while the mover is running to avoid conflicts. When using adaptive depth it will probably work well NO. With fixed depth its will almost certainly put less load on the disks to choose YES.
+> Stop caching while the mover is running to avoid conflicts. When using adaptive depth it will probably work well NO.
+> With fixed depth it will almost certainly put less load on the disks to choose YES.
 
 Included folders:
 : <select id="s2" name="include" size="1" multiple style="display:none">
@@ -115,7 +123,8 @@ Use Adaptive depth:
   <?=mk_option($cfg['adaptive'], "0", "Fixed")?>
   </select>
 
-> If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth. It will start at depth 1 and keep increasing the scan depth towards maximum level as long as scans do not take too long to complete (see scan timeout).
+> If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth.
+> It will start at depth 1 and keep increasing the scan depth towards maximum level as long as scans do not take too long to complete (see scan timeout).
 > If adaptive is disabled then cache_dirs will always scan to the max level.
 
 Max level depth:
@@ -131,7 +140,8 @@ Disk Idle Timer (sec):
 Scan timeout for a scan during disk-idle period (sec):
 : <input type="text" name="scanTimeoutIdle" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutIdle']?>" placeholder="150">
 
-> Scan timeout is the maximum duration that a single scan through all directories at the current level af depth (which may change adaptively). Increase it if cache_dirs fails in caching all your files. This timeout is always used if adaptive is disabled.
+> Scan timeout is the maximum duration that a single scan through all directories at the current level af depth (which may change adaptively).
+> Increase it if cache_dirs fails in caching all your files. This timeout is always used if adaptive is disabled.
 
 Scan timeout for a scan during initial startup or less-idle period (sec):
 : <input type="text" name="scanTimeoutBusy" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutBusy']?>" placeholder="30">
@@ -141,7 +151,8 @@ Scan timeout for a scan during initial startup or less-idle period (sec):
 Scan timeout for a scan when all directories have been succesfully cached (sec):
 : <input type="text" name="scanTimeoutStable" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutStable']?>" placeholder="20">
 
-> Decrease it if you want cache_dirs to put less load on system when cache is evicted from memory, and disks are not idle. Increase if you want cache_dirs to have a greater chance af getting directories back into memory.
+> Decrease it if you want cache_dirs to put less load on system when cache is evicted from memory, and disks are not idle.
+> Increase if you want cache_dirs to have a greater chance af getting directories back into memory.
 
 Minimum interval between folder scans (sec):
 : <input type="text" name="minimum" class="narrow" maxlength="3" value="<?=$cfg['minimum']?>" placeholder="1">
@@ -156,7 +167,12 @@ Maximum interval between folder scans (sec):
 Cache pressure of directories on system:
 : <input type="text" name="cachePressure" class="narrow" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10">
 
-> set cache_pressure to NN (by default = 10). 0 means never reclaim cache. See 'vfs_cache_pressure' in <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">kernel.org</a>. Warning: 0 will cause kernel never to release the memory of directories, and if too little memory is available, it will cause the system to crash. cache_dirs does not reset the cachePressure after quitting, to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100'.
+> set cache_pressure to NN (by default = 10). 0 means never reclaim cache.
+> See 'vfs_cache_pressure' in <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">kernel.org</a>.
+>
+> Warning: 0 will cause kernel never to release the memory of directories, and if too little memory is available,
+> it will cause the system to crash. cache_dirs does not reset the cachePressure after quitting,
+> to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100'.
 
 Limit the memory available to the shell in which the script runs (increase if it dies):
 : <input type="text" name="ulimit" class="narrow" maxlength="6" value="<?=$cfg['ulimit']?>" placeholder="50000">
@@ -169,7 +185,8 @@ Logging:
   <?=mk_option($cfg['log'], "on", "Enabled")?>
   </select></td>
 
-> Select whether logging is enabled or disabled. Logging will be made to /var/log/cache_dirs.log and /var/log/cache_dirs_lost_cache.log. Be wary that the cache_dirs logs are placed in memory on unRAID and are not automatically rolled.
+> Select whether logging is enabled or disabled. Logging will be made to /var/log/cache_dirs.log and /var/log/cache_dirs_lost_cache.log.
+> Be wary that the cache_dirs logs are placed in memory on unRAID and are not automatically rolled.
 
 User defined options:
 : <input id="pin" type="text" name="other" maxlength="200" value="<?=$cfg['other']?>" placeholder="Enter custom options here">see <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">unRAID forum</a></u>
@@ -177,6 +194,8 @@ User defined options:
 <input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
 
-> The cache_dirs script has additional options which may be used. Refer to the online documentation to use these as needed, or see the cache_dirs script itself located under /boot/config/plugins/dynamix.cache.dirs/cache_dirs.zip
+> The cache_dirs script has additional options which may be used.
+> Refer to the online documentation to use these as needed,
+> or see the cache_dirs script itself located under /boot/config/plugins/dynamix.cache.dirs/cache_dirs.zip
 
 </form>
