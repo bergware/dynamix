@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.08.28">
+<!ENTITY version   "2018.08.29">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "72fa78d2fc3a46d467b5db39f3eff64c">
+<!ENTITY MD5       "1b5429e0c8b4d86a95ebc98338b5fbf5">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- reverted to sysstat version 11.6.2
+
+###2018.08.28
 - updated sysstat files to version 11.6.4
 - fixed selection display
 
