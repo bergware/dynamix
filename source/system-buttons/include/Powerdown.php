@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,22 +10,10 @@
  */
 ?>
 <?
-if (file_exists("/usr/local/sbin/powerdown")) {
-  switch ($_POST['cmd']) {
-    case 'shutdown': $option = ''; break;
-    case 'reboot'  : $option = '-r'; break;
-    default        : $option = ''; break;
-  }
-  exec("/usr/local/sbin/powerdown $option 1>/dev/null 2>&1 &");
-  $timer = 15;
-  while ($timer>10) {
-    sleep(1);
-    $timer--;
-  }
-  while (file_exists("/var/run/powerdown.pid") && $timer) {
-    sleep(1);
-    $timer--;
-  }
+switch ($_POST['cmd']) {
+  case 'shutdown': $cmd = 'poweroff'; break;
+  case 'reboot'  : $cmd = 'reboot'; break;
 }
+exec("/sbin/$cmd 1>/dev/null 2>&1 &");
 echo $_POST['cmd'];
 ?>

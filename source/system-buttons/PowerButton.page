@@ -4,7 +4,7 @@ Icon="power.png"
 Code="f011"
 ---
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -21,7 +21,6 @@ $force = $direct || file_exists('/var/log/plugins/powerdown-x86_64.plg') ? 'true
 $label = $display['theme']=='gray' || $display['theme']=='azure';
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
-<script src="/webGui/javascript/context.js"></script>
 <script>
 $(function() {
 <?if ($label):?>
