@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.08.27a">
+<!ENTITY version   "2018.10.14">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "53c7a47bba2a7ca8e258c3ff9b6f5c39">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed service not starting upon system reboot
+- minimum Unraid version 6.4
+
+###2018.08.27
 - fixed folders with parentheses and brackets in their name not working in include/exclude list
 
 - **next modifications and enhancements are courtesy of Alex R. Berg**
@@ -141,9 +145,10 @@ fi
 
 # get unRAID key
 getkey(){
-  if [[ -e /proc/mdcmd ]]; then
+  local mdcmd=/proc/mdstat
+  if [[ -e $mdcmd ]]; then
     local key=$1
-    grep -Po "^$key=\K.*" /proc/mdcmd
+    grep -Po "^$key=\K.*" $mdcmd
   fi
 }
 
