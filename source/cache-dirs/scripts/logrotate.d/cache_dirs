@@ -1,0 +1,11 @@
+/var/log/cache_dirs.log /var/log/cache_dirs_lost_cache.csv {
+    size 2M
+    rotate 2
+    dateext
+    dateformat -%Y%m%d_%s
+    extension .log
+    postrotate
+#		/etc/logrotate.d/bin/move_logs_to_user.sh $1 cache_dirs
+		touch /var/log/cache_dirs.log
+    endscript 
+}

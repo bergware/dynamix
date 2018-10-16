@@ -12,6 +12,7 @@ cache_dirs.start() {
     source $run
     rm -f $run
     echo "$script started"
+    echo "cache_dirs service $(basename "$0"): Started: '$execute $(cat $options) 2>/dev/null'" | logger "-tcache_dirs"
   else
     echo "$script already running!"
   fi
@@ -26,8 +27,9 @@ cache_dirs.stop() {
       sleep 1
     done
     echo "$script stopped"
+    echo "cache_dirs service $(basename "$0"): Stopped" | logger "-tcache_dirs"
   else
-    # run, to do cleanup
+    # Always execute because cache_dirs uses subprocesses and lock-file, and it may need to cleanup
     $execute -q &>/dev/null
     echo "$script not running!"
   fi
