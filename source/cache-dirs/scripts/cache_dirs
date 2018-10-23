@@ -109,7 +109,7 @@
 #                - Added diagnostics generate zip, flag -L
 #                - Added -P print file count flag
 #                - Disk idle times sometimes reported as crazy high numbers (when disks spun down on some systems). Report 9999 instead of crazy idle-times
-#                - Added option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk*
+#                - Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk*
 # arberg
 ####################################################################################
 version=2.2.1

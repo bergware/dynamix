@@ -189,7 +189,7 @@ Include user share (/mnt/user) in scan:
   <?=mk_option($cfg['scan_user_share'], "-u", "Yes")?>
   </select>
 
-> User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 and should not be necessary to avoid disks spinning up. However it seems to be for some users.
+> User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 but is reported by numerous users to be necessary to avoid disks spinning up.
 
 Limit the memory available to the shell in which the script runs (increase if it dies):
 : <input type="text" name="ulimit" class="narrow" maxlength="6" value="<?=$cfg['ulimit']?>" placeholder="50000">
