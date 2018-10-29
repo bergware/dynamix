@@ -129,7 +129,7 @@ fi
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
 <!-- INSTEAD JUST manually place txz under test in plugins/dynamix.cache.dirs -->
-<URL>https://raw.githubusercontent.com/arberg/dynamix/master/archive/&name;.txz</URL>
+<URL>https://github.com/arberg/dynamix/releases/download/2.2.1/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
