@@ -207,7 +207,7 @@ Logging:
   <?=mk_option($cfg['log'], "on", "Enabled")?>
   </select></td>
 
-> Select whether logging is enabled or disabled. Logging will be made to /var/log/cache_dirs.log and /var/log/cache_dirs_lost_cache.log.
+> Select whether logging is enabled or disabled. Logging will be made to /var/log/cache_dirs.log and /var/log/cache_dirs_lost_cache.csv.
 > Be wary that the cache_dirs logs are placed in memory on unRAID and are not automatically rolled.
 
 User defined options:
