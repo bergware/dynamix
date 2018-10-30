@@ -62,7 +62,7 @@ $(function() {
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.cache.php">
 <input type="hidden" name="#config" value="<?=$config?>">
-<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&diskIdleTimer=W&scanTimeoutIdle=X&scanTimeoutBusy=Y&scanTimeoutStable=Z&ulimit=U&cachePressure=p">
+<input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&diskIdleTimer=W&scanTimeoutIdle=X&scanTimeoutBusy=Y&scanTimeoutStable=Z&ulimit=U&cachePressure=p&minDepth=c">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
 > Folder Caching Info
@@ -126,6 +126,11 @@ Use Adaptive depth:
 > If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth.
 > It will start at depth 1 and keep increasing the scan depth towards maximum level as long as scans do not take too long to complete (see scan timeout).
 > If adaptive is disabled then cache_dirs will always scan to the max level.
+
+Minimum level depth (for adaptive depth):
+: <input type="text" name="minDepth" class="narrow" maxlength="3" value="<?=$cfg['minDepth']?>" placeholder="4">
+
+> Sets the minimum folder level for the adaptive scan (user-share > child folder > grand child is two levels). Default is 4.
 
 Max level depth:
 : <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="unlimited">

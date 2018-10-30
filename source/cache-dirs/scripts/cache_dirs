@@ -110,9 +110,10 @@
 #                - Added -P print file count flag
 #                - Disk idle times sometimes reported as crazy high numbers (when disks spun down on some systems). Report 9999 instead of crazy idle-times
 #                - Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk*
+# Version 2.2.2 - Added minimum depth param -c for adaptive depth scanning
 # arberg
 ####################################################################################
-version=2.2.1
+version=2.2.2
 program_name=$(basename "$0")
 arg_count=$#
 
@@ -202,6 +203,7 @@ min_no_scans_at_new_level=3
 multithreaded_scan=1
 ulimit_mem=50000
 do_print_file_counts=0
+minDepth="4"
 
 # Constants
 NANO_PR_SEC=1000000000
@@ -228,6 +230,11 @@ log() {
 
 syslog() {
 	log $1
+	echo "$1" | logger "-t$program_name"
+}
+
+syslogerror() {
+	[ "$run_log" != "" ] && [ -f "$run_log" ] && echo "$*" >> $run_log
 	echo "$1" | logger "-t$program_name"
 }
 
@@ -266,8 +273,11 @@ run_diagnostics() {
 	top -b -n1 | head -20
 }
 
-while getopts "p:m:M:c:d:D:e:i:l:FszBbwuvVahqSU:t:W:X:Y:Z:LTP" opt; do
+while getopts "p:m:M:c:d:D:e:i:l:FszBbwuvVahqSc:U:t:W:X:Y:Z:LTP" opt; do
 	case $opt in
+	c ) minDepth="$OPTARG" 
+		((minDepth < 1)) && minDepth=1 
+		;; 
 	m ) min_seconds=$OPTARG ;;
 	M ) max_seconds=$OPTARG ;;
 	F ) background=no ;;
@@ -329,7 +339,7 @@ while getopts "p:m:M:c:d:D:e:i:l:FszBbwuvVahqSU:t:W:X:Y:Z:LTP" opt; do
 		exit 0	
 		;;
 	P ) do_print_file_counts=1 ;;
-	T ) multithreaded_scan=0 ;;
+	T ) multithreaded_scan=0 ;;	
 	W ) min_disk_idle_before_restarting_scan_sec="$OPTARG" ;;
 	X ) scan_timeout_sec_idle="$OPTARG" ;;
 	Y ) scan_timeout_sec_busy="$OPTARG" ;;
@@ -456,7 +466,6 @@ if [ "$ulimit_mem" -gt 0 ] ; then
 else
 	log "No Memory ulimit applied"
 fi
-log "Setting maxdepth=$maxDepth"
 
 # validate the cache pressure
 cc="$(echo $cache_pressure | sed 's/[0-9]//g')"
@@ -500,6 +509,10 @@ if [ ! -z "$cc" ] ; then
 	usage >&2
 	exit 2
 fi
+if (( minDepth > maxDepth )) ; then 
+	syslog "WARNING: minDepth > maxDepth - corrected"
+	minDepth="$maxDepth"
+fi
 
 shift $((OPTIND - 1))
 
@@ -536,8 +549,8 @@ fnc_time_since_last_disk_access() {
 
 depthMinusOne() {
 	depth=$1
-	if (( depth == 1 )) ; then
-		echo 1
+	if (( depth <= minDepth )) ; then
+		echo "$minDepth"
 	elif (( depth == maxDepth)) ; then
 		echo "$depth_max_incremental_depth"
 	else
@@ -555,8 +568,8 @@ depthMinusPercent() {
 	local filesAtDepth="${files_at_depth_map[$depth]}"
 	local depth_minus_one_value
 	depth_minus_one_value=$(depthMinusOne "$depth")
-	local result=1
-	for ((i=depth_minus_one_value; i > 1; i--)) ; do
+	local result=$minDepth
+	for ((i=depth_minus_one_value; i > 1 && i >= minDepth; i--)) ; do
 		# bash need $ on $appliedDepth inside hashmap inside (())
 		if (( files_at_depth_map[$i] <= filesAtDepth*(100-percent)/100 )); then
 			result=$i
@@ -770,39 +783,37 @@ else
 	scan_depth=$fixdepth
 fi
 
-if ((scan_depth == maxDepth)) ; then
+if (( scan_depth == 9999 )) ; then
 	scan_depth="none"
 fi
 
 if [ "$concise_log" = "no" ] ; then
-	echo "==============================================" | logger "-t$program_name"
-	echo "Starting $program_name:" | logger "-t$program_name"
-	echo "Arguments=$commandargs" | logger "-t$program_name"
-	echo "Cache Pressure=$cache_pressure" | logger "-t$program_name"
-	echo "Max Scan Secs=$max_seconds, Min Scan Secs=$min_seconds (min scan seconds ignored, always sleep max)" | logger "-t$program_name"
-	echo "Scan Type=$scan_type" | logger "-t$program_name"
-	echo "Max Scan Depth=$scan_depth" | logger "-t$program_name"
-	echo "Use Command='$command $args'" | logger "-t$program_name"
-	echo "Version=$version" | logger "-t$program_name"
-	echo "---------- Caching Directories ---------------" | logger "-t$program_name"
-	echo "$log_list" | logger "-t$program_name"
-	echo "----------------------------------------------" | logger "-t$program_name"
+	syslog "Arguments=$commandargs"
+	syslog "Max Scan Secs=$max_seconds, Min Scan Secs=$min_seconds"
+	syslog "Scan Type=$scan_type"
+	if ((fixdepth == -1)) ; then
+		syslog "Min Scan Depth=$minDepth"
+	fi
+	syslog "Max Scan Depth=$scan_depth"
+	syslog "Use Command='$command $args'"
+	syslog "---------- Caching Directories ---------------"
+	# syslog "$(join , ${dir_list[@]})"
+	syslog "$log_list"
+	syslog "----------------------------------------------"
+	syslog "Setting Included dirs: $(join , ${include_array[@]})"
+	syslog "Setting Excluded dirs: $(join , ${exclude_array[@]})"
+	syslog "min_disk_idle_before_restarting_scan_sec=$min_disk_idle_before_restarting_scan_sec"
+	syslog "scan_timeout_sec_idle=$scan_timeout_sec_idle"
+	syslog "scan_timeout_sec_busy=$scan_timeout_sec_busy"
+	syslog "scan_timeout_sec_stable=$scan_timeout_sec_stable"
+	syslog "frequency_of_full_depth_scan_sec=$frequency_of_full_depth_scan_sec"
+	if (( include_scan_of_user_share == 1 )) ; then
+		syslog "Including /mnt/user in scan"
+	fi
 else
 	echo "Arguments=$commandargs, Version=$version, Cache Pressure=$cache_pressure, Max Scan Secs=$max_seconds, Min Scan Secs=$min_seconds, Scan Type=$scan_type, Max Depth=$scan_depth, Use Command='$command $args'" | paste -s -d "," - | logger "-t$program_name"
 	echo "$log_list" | paste -s -d "," - | logger "-t$program_name"
 fi
-log "Setting Included dirs: $(join , ${include_array[@]})"
-log "Setting Excluded dirs: $(join , ${exclude_array[@]})"
-log "Currently monitored dirs: $(join , ${dir_list[@]})"
-if (( include_scan_of_user_share == 1 )) ; then
-	log "Including /mnt/user in scan"
-fi
-log "min_disk_idle_before_restarting_scan_sec=$min_disk_idle_before_restarting_scan_sec"
-log "scan_timeout_sec_idle=$scan_timeout_sec_idle"
-log "scan_timeout_sec_busy=$scan_timeout_sec_busy"
-log "scan_timeout_sec_stable=$scan_timeout_sec_stable"
-log "frequency_of_full_depth_scan_sec=$frequency_of_full_depth_scan_sec"
-log "command-args=$commandargs"
 
 logLostCacheHeader
 
@@ -811,8 +822,7 @@ while test $a -lt $exclude_array_count
 do
 	list=$(eval ls /mnt/disk*/"${exclude_array[$a]}" /mnt/cache/"${exclude_array[$a]}" 2>/dev/null)
 	if [ "$list" = "" ] ; then
-		echo "ERROR: excluded directory '${exclude_array[$a]}'' does not exist." >&2
-		echo "ERROR: excluded directory '${exclude_array[$a]}' does not exist." | logger "-t$program_name"
+		syslogerror "ERROR: excluded directory '${exclude_array[$a]}' does not exist."
 	fi
 	a=$((a+1))
 done
@@ -822,8 +832,7 @@ while test $a -lt $include_array_count
 do
 	list=$(eval ls /mnt/disk*/"${include_array[$a]}" /mnt/cache/"${include_array[$a]}" 2>/dev/null)
 	if [ "$list" = "" ] ; then
-		echo "ERROR: included directory '${include_array[$a]}' does not exist." >&2
-		echo "ERROR: included directory '${include_array[$a]}' does not exist." | logger "-t$program_name"
+		syslogerror "ERROR: included directory '${include_array[$a]}' does not exist."
 	fi
 	a=$((a+1))
 done
@@ -856,7 +865,7 @@ if ((fixdepth >= 0)) ; then
 	isPreviousMaxDepthComputed=1
 	scan_timeout_sec=${scan_timeout_sec_idle}
 else
-	appliedDepth=1
+	appliedDepth=$minDepth
 	scan_timeout_sec=${scan_timeout_sec_busy}
 	isPreviousMaxDepthComputed=0
 fi
@@ -935,18 +944,29 @@ declare -A files_at_depth_map
 			files_at_depth_map[$appliedDepth]+="$(count_files $appliedDepth)"
 			if ((appliedDepth == maxDepth)) ; then
 				depth_max_incremental_depth=$(depthMinus20Percent $maxDepth)
-				log "depth_max_incremental_depth=$depth_max_incremental_depth"
-				# Debug logging of levels
-				# log "depthMinus20Percent($maxDepth)=$(depthMinus20Percent $maxDepth)"
-				# for ((i=1; i < 20; i++)) ; do
+				#################################
+				# Debugging of functions below
+				# log "depth_max_incremental_depth=$depth_max_incremental_depth"
+
+				# # Debug logging of levels
+				# for ((i=1; i < depth_max_incremental_depth; i++)) ; do
+				# 	# bash need $ on $appliedDepth inside hashmap inside (())
+				# 	log "depthMinusOne($i)=$(depthMinusOne $i)"
+				# done
+				# log "depthMinusOne($maxDepth)=$(depthMinusOne $maxDepth)"
+
+				# for ((i=1; i < depth_max_incremental_depth; i++)) ; do
 				# 	# bash need $ on $appliedDepth inside hashmap inside (())
 				# 	log "depthMinus20Percent($i)=$(depthMinus20Percent $i)"
 				# done
-				# log "depthMinus50Percent($maxDepth)=$(depthMinus50Percent $maxDepth)"
-				# for ((i=1; i < 20; i++)) ; do
+				# log "depthMinus20Percent($maxDepth)=$(depthMinus20Percent $maxDepth)"
+
+				# for ((i=1; i < depth_max_incremental_depth; i++)) ; do
 				# 	# bash need $ on $appliedDepth inside hashmap inside (())
 				# 	log "depthMinus50Percent($i)=$(depthMinus50Percent $i)"
 				# done
+				# log "depthMinus50Percent($maxDepth)=$(depthMinus50Percent $maxDepth)"
+				#################################
 			fi
 		fi
 
@@ -1137,7 +1157,6 @@ if [ $background = "no" ] ; then
 	wait
 	echo "Stopped"
 else
-	echo "$program_name process ID $background_pid started" >&2
-	echo "$program_name process ID $background_pid started" | logger "-t$program_name"
+	syslogerror"$program_name process ID $background_pid started"
 	disown %%
 fi

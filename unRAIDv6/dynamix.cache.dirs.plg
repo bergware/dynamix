@@ -3,11 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.10.29">
+<!ENTITY version   "2018.10.30">
+<!ENTITY releaseName   "2.2.2">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/arberg/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0611d731709c8b72850fa6cfa1933710">
+<!ENTITY MD5       "66d6618e1f78a907e02adfb7b4c66dff">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -16,7 +17,12 @@
 ##&name;
 
 ###&version;
-- Temporary release by arberg til dynamix updates the plugin
+###2018.10.30
+- Possibly temporary release by arberg til dynamix updates the plugin
+- Added minDepth parameter to adaptive scan
+
+###2018.10.29
+- Possibly temporary release by arberg til dynamix updates the plugin
 - Added logrotate for cache-dirs so its crazy spamming debuggingly logs does not overflow user memory-mapped root (when logs are enabled)
 - Linked cache-dirs rc.d script to /etc/rc.d and cache_dirs to /usr/local/bin
 
@@ -129,7 +135,7 @@ fi
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
 <!-- INSTEAD JUST manually place txz under test in plugins/dynamix.cache.dirs -->
-<URL>https://github.com/arberg/dynamix/releases/download/2.2.1/&name;.txz</URL>
+<URL>https://github.com/arberg/dynamix/releases/download/&releaseName;/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
