@@ -1055,7 +1055,7 @@ declare -A files_at_depth_map
 		CPU="$(format_two_digit $cpu_usage)"
 		# Note elapsed_secs is an integer, so we need to recompute it from elapsed_time in the awk command below
 		avg_text=$(awk "BEGIN{ printf \"%05.2fs, wavg=%05.2fs\n\", ($elapsed_time/$NANO_PR_SEC), ($avg_elapsed_time/$NANO_PR_SEC) ; }")
-		log "$start_time_txt Executed $command in (${elapsed_secs}s)${logline_deep_scan_detailed_info} $avg_text ${log_disk_access_msg} $scanned_depth_msg slept ${next_sleep_duration}s Disks idle before/after ${time_since_disk_access_before_scan_sec}s/${time_since_disk_access_after_scan_sec}s suc/fail cnt=$depth_scan_counter/$depth_success_idle_incr_counter/$depth_slow_scan_counter mode=$mode scan_tmo=${scan_timeout_sec}s maxCur=$appliedMaxDepthCurrent maxWeek=$appliedMaxDepth isMaxDepthComputed=$isPreviousMaxDepthComputed CPU=${CPU}%, filecount[$appliedDepth]=${files_at_depth_map[$appliedDepth]}"
+		log "$start_time_txt Executed $command in (${elapsed_secs}s)${logline_deep_scan_detailed_info} $avg_text ${log_disk_access_msg} $scanned_depth_msg slept ${next_sleep_duration}s Disks idle before/after scan ${time_since_disk_access_before_scan_sec}s/${time_since_disk_access_after_scan_sec}s Scan completed/timedOut counter cnt=$depth_scan_counter/$depth_success_idle_incr_counter/$depth_slow_scan_counter mode=$mode scan_tmo=${scan_timeout_sec}s maxCur=$appliedMaxDepthCurrent maxWeek=$appliedMaxDepth isMaxDepthComputed=$isPreviousMaxDepthComputed CPU=${CPU}%, filecount[$appliedDepth]=${files_at_depth_map[$appliedDepth]}"
 
 		if ((fixdepth == -1)) ; then
 			time_since_last_disk_access_sec=$(fnc_time_since_last_disk_access)

@@ -4,6 +4,7 @@
     dateext
     dateformat -%Y%m%d_%s
     extension .log
+    missingok
     postrotate
 #		/etc/logrotate.d/bin/cache_dirs_move_logs_to_user.sh $1 cache_dirs
 		touch /var/log/cache_dirs.log

@@ -86,6 +86,19 @@ Folder caching function:
 > Select whether folder caching is enabled or disabled. Caching will only effectively occur when the array is started.
 > The caching function is automatically restarted or stopped when the array goes online or offline.
 
+Cache pressure of directories on system (Important - check help if disks spin up):
+: <input type="text" name="cachePressure" class="narrow" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10">
+
+> set cache_pressure to NN (by default = 10). 0 means never reclaim cache.
+>
+> 1 works great for many users. If your disks spin up or cache_dirs logging indicates it frequently has accessed disks after scan, try lowering cache-pressure to 1. If the system runs out of memory increase cache-pressure.
+>
+> Warning: 0 will cause kernel never to release the memory of directories, and if too little memory is available,
+> it will cause the system to crash. cache_dirs does not reset the cachePressure after quitting,
+> to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100', or run cache-dirs with cache_pressure 100.
+> 
+> See 'vfs_cache_pressure' in <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">kernel.org</a>.
+
 Suspend during 'Mover' process:
 : <select name="suspend" size="1">
   <?=mk_option($cfg['ssupend'], "-S", "No")?>
@@ -168,16 +181,6 @@ Maximum interval between folder scans (sec):
 : <input type="text" name="maximum" class="narrow" maxlength="3" value="<?=$cfg['maximum']?>" placeholder="10">
 
 > Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
-
-Cache pressure of directories on system:
-: <input type="text" name="cachePressure" class="narrow" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10">
-
-> set cache_pressure to NN (by default = 10). 0 means never reclaim cache.
-> See 'vfs_cache_pressure' in <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">kernel.org</a>.
->
-> Warning: 0 will cause kernel never to release the memory of directories, and if too little memory is available,
-> it will cause the system to crash. cache_dirs does not reset the cachePressure after quitting,
-> to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100', or run cache-dirs with cache_pressure 100.
 
 Run scan of each disk in a separate thread:
 : <select name="mulithreaded" size="1">
