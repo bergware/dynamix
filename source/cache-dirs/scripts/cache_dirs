@@ -112,9 +112,10 @@
 #                - Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk*
 # Version 2.2.2 - Added minimum depth param -c for adaptive depth scanning
 # Version 2.2.3 - Logging
+# Version 2.2.4 - Added rolled logs to -L diagnostics archive
 # arberg
 ####################################################################################
-version=2.2.3
+version=2.2.4
 program_name=$(basename "$0")
 arg_count=$#
 
@@ -333,7 +334,7 @@ while getopts "p:m:M:c:d:D:e:i:l:FszBbwuvVahqSc:U:t:W:X:Y:Z:LTP" opt; do
 	L )	
 		run_diagnostics | tee cache_dirs_diagnostics_processes.log
 		[ -f cache_dirs_diagnostics.zip ] && rm cache_dirs_diagnostics.zip
-		zip -j cache_dirs_diagnostics.zip cache_dirs_diagnostics_processes.log /var/log/cache_dirs.log /var/log/syslog
+		zip -j cache_dirs_diagnostics.zip cache_dirs_diagnostics_processes.log /var/log/syslog /var/log/cache_dirs*
 		rm cache_dirs_diagnostics_processes.log
 		echo
 		echo "Generated cache_dirs_diagnostics.zip"
