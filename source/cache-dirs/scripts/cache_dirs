@@ -111,9 +111,10 @@
 #                - Disk idle times sometimes reported as crazy high numbers (when disks spun down on some systems). Report 9999 instead of crazy idle-times
 #                - Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk*
 # Version 2.2.2 - Added minimum depth param -c for adaptive depth scanning
+# Version 2.2.3 - Logging
 # arberg
 ####################################################################################
-version=2.2.2
+version=2.2.3
 program_name=$(basename "$0")
 arg_count=$#
 
