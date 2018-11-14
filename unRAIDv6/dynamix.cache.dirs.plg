@@ -3,12 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.11.06-1">
+<!ENTITY version   "2018.11.14">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/arberg/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b22ee041285ea8cf766e5e144d986f3a">
-<!ENTITY releaseTag   "cache_dirs_2.2.4">
+<!ENTITY MD5       "d9b42eada2e4d5c4d56387fbd844aa76">
+<!ENTITY releaseTag   "cache_dirs_2.2.4a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -17,6 +17,9 @@
 ##&name;
 
 ###&version;
+###2018.11.14
+- Updated help of plugin-page
+
 ###2018.10.30
 - Possibly temporary release by arberg til dynamix updates the plugin
 - Added minDepth parameter to adaptive scan

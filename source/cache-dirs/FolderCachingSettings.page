@@ -99,6 +99,14 @@ Cache pressure of directories on system (Important - check help if disks spin up
 > 
 > See 'vfs_cache_pressure' in <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">kernel.org</a>.
 
+Include user share (/mnt/user) in scan (Important - check help if disks spin up):
+: <select name="scan_user_share" size="1">
+  <?=mk_option($cfg['scan_user_share'], "", "No")?>
+  <?=mk_option($cfg['scan_user_share'], "-u", "Yes")?>
+  </select>
+
+> User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 but is reported by numerous users to be necessary to avoid disks spinning up when accessing directories.
+
 Suspend during 'Mover' process:
 : <select name="suspend" size="1">
   <?=mk_option($cfg['ssupend'], "-S", "No")?>
@@ -188,16 +196,8 @@ Run scan of each disk in a separate thread:
   <?=mk_option($cfg['mulithreaded'], "-T", "No")?>
   </select>
 
-> Stop caching while the mover is running to avoid conflicts. When using adaptive depth it will probably work well NO. 
-> With fixed depth its will almost certainly put less load on the disks to choose YES.
-
-Include user share (/mnt/user) in scan:
-: <select name="scan_user_share" size="1">
-  <?=mk_option($cfg['scan_user_share'], "", "No")?>
-  <?=mk_option($cfg['scan_user_share'], "-u", "Yes")?>
-  </select>
-
-> User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 but is reported by numerous users to be necessary to avoid disks spinning up.
+> Each disk will be scanned in a separate thread, so the disks will be read concurrently. If user share is also scanned the user
+> share will be scanned in a single thread after all disks scans are completed, to avoid thrashing disks.
 
 Limit the memory available to the shell in which the script runs (increase if it dies):
 : <input type="text" name="ulimit" class="narrow" maxlength="6" value="<?=$cfg['ulimit']?>" placeholder="50000">
