@@ -113,9 +113,10 @@
 # Version 2.2.2 - Added minimum depth param -c for adaptive depth scanning
 # Version 2.2.3 - Logging
 # Version 2.2.4 - Added rolled logs to -L diagnostics archive
+# Version 2.2.5 - Improved diagnostics info
 # arberg
 ####################################################################################
-version=2.2.4
+version=2.2.5
 program_name=$(basename "$0")
 arg_count=$#
 
@@ -273,6 +274,11 @@ run_diagnostics() {
 	pstree -p | grep -2 cache_dirs
 	echo "################## TOP #######################"
 	top -b -n1 | head -20
+	echo "################## MEMORY #######################"
+	free -m
+	echo "################## unRAID Version #######################"
+	cat /proc/version
+	head -1 /boot/changes.txt
 }
 
 while getopts "p:m:M:c:d:D:e:i:l:FszBbwuvVahqSc:U:t:W:X:Y:Z:LTP" opt; do
