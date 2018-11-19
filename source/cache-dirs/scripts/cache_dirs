@@ -113,7 +113,7 @@
 # Version 2.2.2 - Added minimum depth param -c for adaptive depth scanning
 # Version 2.2.3 - Logging
 # Version 2.2.4 - Added rolled logs to -L diagnostics archive
-# Version 2.2.5 - Improved diagnostics info
+# Version 2.2.5 - Improved diagnostics info. Fixed sleep duration, before fixed depth always slept 1s, now it depends on disks idle and avg scan time.
 # arberg
 ####################################################################################
 version=2.2.5
@@ -445,6 +445,7 @@ if [ -f "${lockfile}" ] ; then
 		fi
 	else
 		if [ "$quit_flag" = "yes" ] ; then
+			echo "Stopping $program_name process $lock_pid"
 			syslog "Stopping $program_name process $lock_pid"
 			# 1. Remove lock-file so we don't spawn new find-processes
 			rm "${lockfile}"
@@ -912,32 +913,6 @@ declare -A files_at_depth_map
 		done
 
 		time_since_disk_access_before_scan_sec=$(fnc_time_since_last_disk_access)
-		if ((fixdepth == -1)) ; then
-			(( time_since_disk_access_before_scan_sec >= min_disk_idle_before_restarting_scan_sec )) && hasBeenIdleLong=1 || hasBeenIdleLong=0
-			if (( depth_scan_counter >= min_no_scans_at_new_level )) ; then
-				# never change mode before having tried a few times to build cache pressure at level
-				if (( hasBeenIdleLong )) ; then
-					if (( mode == MODE_STABLE )) ; then
-						mode=$MODE_STABLE_IDLE
-					elif (( mode == MODE_BUSY_RESCANNING )) ; then
-						mode=$MODE_IDLE_RESCANNING
-					fi
-				elif (( time_since_disk_access_before_scan_sec == 0 )) ; then
-					if ((mode == MODE_IDLE_RESCANNING)) ; then
-						# We have slept a second, so if disks have not been idle for a second, it means they are busy again. It does not hurt if we move back and forth between the two modes
-						if (( appliedDepth <= 3 )) ; then
-							mode=$MODE_BUSY_RESCANNING
-						else
-							# It seems to work great to do all scanning work when we know system is idle, and stop immediately with the scanning of deeper levels when disks are not idle.
-							mode=$MODE_STABLE
-						fi
-					elif ((mode == MODE_STABLE_IDLE)) ; then
-						# It seems to work great to do all scanning work when we know system is idle, and stop immediately with the scanning of deeper levels when disks are not idle.
-						mode=$MODE_STABLE
-					fi 
-				fi
-			fi	
-		fi
 
 		############## Here the actual find is executed ################
 		start_time_nano=$(date +%s%N)
@@ -1017,6 +992,7 @@ declare -A files_at_depth_map
 		elif [ $avg_elapsed_time -eq 0 ] ; then
 			avg_elapsed_time=$elapsed_time
 		fi
+		avg_elapsed_secs=$(( avg_elapsed_time / NANO_PR_SEC ))
 
 		# Only decrease sleep when non-idle scan, note avg is computed over scan with idle disks, but not necessary at current depth level
 		if (( !were_disks_idle_during_scan && avg_elapsed_time * 3 < elapsed_time && num_seconds > min_seconds )) ; then
@@ -1029,6 +1005,40 @@ declare -A files_at_depth_map
 		is_slow_scan=0
 		is_depth_reduced=0
 		log_disk_access_msg=""
+		######### Update mode and hasBeenIdleLong ###
+		if ((fixdepth == -1)) ; then
+			(( time_since_disk_access_before_scan_sec >= min_disk_idle_before_restarting_scan_sec )) && hasBeenIdleLong=1 || hasBeenIdleLong=0
+			if (( depth_scan_counter >= min_no_scans_at_new_level )) ; then
+				# never change mode before having tried a few times to build cache pressure at level
+				if (( hasBeenIdleLong )) ; then
+					if (( mode == MODE_STABLE )) ; then
+						mode=$MODE_STABLE_IDLE
+					elif (( mode == MODE_BUSY_RESCANNING )) ; then
+						mode=$MODE_IDLE_RESCANNING
+					fi
+				elif (( time_since_disk_access_before_scan_sec == 0 )) ; then
+					if ((mode == MODE_IDLE_RESCANNING)) ; then
+						# We have slept a second, so if disks have not been idle for a second, it means they are busy again. It does not hurt if we move back and forth between the two modes
+						if (( appliedDepth <= 3 )) ; then
+							mode=$MODE_BUSY_RESCANNING
+						else
+							# It seems to work great to do all scanning work when we know system is idle, and stop immediately with the scanning of deeper levels when disks are not idle.
+							mode=$MODE_STABLE
+						fi
+					elif ((mode == MODE_STABLE_IDLE)) ; then
+						# It seems to work great to do all scanning work when we know system is idle, and stop immediately with the scanning of deeper levels when disks are not idle.
+						mode=$MODE_STABLE
+					fi 
+				fi
+			fi	
+		else
+			if (( time_since_disk_access_after_scan_sec >= 2 || avg_elapsed_secs + 2 >= elapsed_secs )) ; then
+				mode=$MODE_STABLE_IDLE
+			else
+				mode=$MODE_BUSY_RESCANNING
+			fi
+			# log "Fixed sleep time_since_disk_access_after_scan_sec($time_since_disk_access_after_scan_sec) >= 2 || avg_elapsed_secs($avg_elapsed_secs) + 2 >= elapsed_secs($elapsed_secs) => mode=$mode"
+		fi
 
 		current_time_sec=$(date +%s)
 		skip_sleep=0
@@ -1142,7 +1152,7 @@ declare -A files_at_depth_map
 			fi	
 		fi
 
-		(( mode == MODE_STABLE && !is_last_depth_scan_timed_out )) && next_sleep_duration=$num_seconds || next_sleep_duration=1
+		(( (mode == MODE_STABLE || mode == MODE_STABLE_IDLE) && !is_last_depth_scan_timed_out )) && next_sleep_duration=$num_seconds || next_sleep_duration=1
 		# we only skip sleep when scan is taking long, so it cannot significantly change impact whether or not we sleep 1 sec. We skip sleep to help cache pressure to build
 		if ((!skip_sleep)) ; then
 			sleep ${next_sleep_duration}
