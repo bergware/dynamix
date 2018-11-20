@@ -114,13 +114,15 @@
 # Version 2.2.3 - Logging
 # Version 2.2.4 - Added rolled logs to -L diagnostics archive
 # Version 2.2.5 - Improved diagnostics info. Fixed sleep duration, before fixed depth always slept 1s, now it depends on disks idle and avg scan time.
+# Version 2.2.6 - CSV logging with all scan timings
 # arberg
 ####################################################################################
-version=2.2.5
+version=2.2.6
 program_name=$(basename "$0")
 arg_count=$#
 
 run_log="/var/log/cache_dirs.log"
+csv_log="/var/log/cache_dirs.csv"
 lost_cache_log="/var/log/cache_dirs_lost_cache.csv"
 
 usage() {
@@ -128,8 +130,8 @@ usage() {
 	echo "Usage: $program_name [-m min_seconds] [-M max_seconds] [-F] [-d maxdepth(adaptive)] [-D maxdepth(fixed)] [-c command] [-a args] [-e exclude_dir] [-i include_dir]"
 	echo "       $program_name -V      = print program version"
 	echo "       $program_name -q"
-	echo "       $program_name -l on   = turn on logging to $run_log and $lost_cache_log"
-	echo "       $program_name -l off  = turn off logging to $run_log and $lost_cache_log"
+	echo "       $program_name -l on   = turn on logging to $run_log and $lost_cache_log and $csv_log"
+	echo "       $program_name -l off  = turn off logging to $run_log and $lost_cache_log and $csv_log"
 	echo " -m NN    =   minimum seconds to wait between directory scans (default=1)"
 	echo " -M NN    =   maximum seconds to wait between directory scans (default=10)"
 	echo " -U NN    =   set ulimit to NN to limit memory used by script (default=50000), '-U 0' sets no ulimit at all)"
@@ -231,6 +233,7 @@ log() {
 	[ "$run_log" != "" ] && [ -f "$run_log" ] && echo "$*" >> $run_log
 }
 
+
 syslog() {
 	log $1
 	echo "$1" | logger "-t$program_name"
@@ -241,27 +244,50 @@ syslogerror() {
 	echo "$1" | logger "-t$program_name"
 }
 
-logLostCache() {
-	if [ "$lost_cache_log" != "" ] && [ -f "$lost_cache_log" ] ; then
+logCsvFile() {
+	theLogFile="$1"
+	shift
+	if [ "$theLogFile" != "" ] && [ -f "$theLogFile" ] ; then
 		first=1
 		for var in "$@"
 		do
 			if ((first == 0)) ; then
-				echo -n ' '
+				echo -n ';'
 			fi
 			echo -n "\"$var\""
 			first=0
-		done >> $lost_cache_log
-		echo >> $lost_cache_log
+		done >> $theLogFile
+		echo >> $theLogFile
 	fi
 }
+
+logLostCache() {
+	logCsvFile $lost_cache_log $*
+}
+
+
 logLostCacheSimple() {
-	logLostCache $start_time_txt ${elapsed_secs} ${prev_sleep_duration} ${time_since_disk_access_before_scan_sec} $appliedDepth $appliedMaxDepthCurrent $appliedMaxDepth $1 $depth_slow_scan_counter $depth_success_idle_incr_counter
+	logLostCache $start_time_txt ${elapsed_secs} ${prev_sleep_duration} ${time_since_disk_access_before_scan_sec} ${time_since_disk_access_after_scan_sec} $appliedDepth $appliedMaxDepthCurrent $appliedMaxDepth $1 $depth_slow_scan_counter $depth_success_idle_incr_counter
 }
 
 logLostCacheHeader() {
+	# Cannot be logged with logCsv because the for-loop breaks on spaces, not param numbers
 	if [ "$lost_cache_log" != "" ] && [ -f "$lost_cache_log" ] ; then
-		echo '"Date" "Time" "ScanTime" "PrevSleep" "IdleTimeBeforeScan" "Depth" "MaxDepthCurrent" "MaxDepthWeek" "ForcedRestartDepthScan" "Scans at depth" "Scans succes count"' >> $lost_cache_log
+		echo '"Date";"Time";"ScanTime";"PrevSleep";"IdleTimeBeforeScan";"IdleTimeAfterScan";"Depth";"MaxDepthCurrent";"MaxDepthWeek";"ForcedRestartDepthScan";"Scans at depth";"Scans succes count"' >> $lost_cache_log
+	fi
+}
+
+logCsv() {
+	logCsvFile "$csv_log" $*
+}
+logCsvSimple() {
+	logCsv $(date "+%Y.%m.%d") $(date "+%H:%M:%S") ${elapsed_secs} ${prev_sleep_duration} ${time_since_disk_access_before_scan_sec} ${time_since_disk_access_after_scan_sec} $appliedDepth $appliedMaxDepthCurrent $appliedMaxDepth $depth_slow_scan_counter $depth_success_idle_incr_counter
+}
+
+logCsvHeader() {
+	# Cannot be logged with logCsv because the for-loop breaks on spaces, not param numbers
+	if [ "$lost_cache_log" != "" ] && [ -f "$lost_cache_log" ] ; then
+		echo '"Date";"Time";"ScanTime";"PrevSleep";"IdleTimeBeforeScan";"IdleTimeAfterScan";"Depth";"MaxDepthCurrent";"MaxDepthWeek";"Scans at depth";"Scans at depth with idle disks"' >> $csv_log
 	fi
 }
 
@@ -320,11 +346,13 @@ while getopts "p:m:M:c:d:D:e:i:l:FszBbwuvVahqSc:U:t:W:X:Y:Z:LTP" opt; do
 		on)
 			touch $run_log
 			touch $lost_cache_log
-			echo "Logging enabled to $run_log and $lost_cache_log"
+			touch $csv_log
+			echo "Logging enabled to $run_log and $lost_cache_log and $csv_log"
 			;;
 		off)
 			rm "$run_log"
 			rm "$lost_cache_log"
+			rm "$csv_log"
 			echo "Logging to $run_log stopped"
 			;;
 		*)
@@ -825,6 +853,7 @@ else
 fi
 
 logLostCacheHeader
+logCsvHeader
 
 a=0
 while test $a -lt $exclude_array_count
@@ -1074,6 +1103,7 @@ declare -A files_at_depth_map
 		# Note elapsed_secs is an integer, so we need to recompute it from elapsed_time in the awk command below
 		avg_text=$(awk "BEGIN{ printf \"%05.2fs, wavg=%05.2fs\n\", ($elapsed_time/$NANO_PR_SEC), ($avg_elapsed_time/$NANO_PR_SEC) ; }")
 		log "$start_time_txt Executed $command in (${elapsed_secs}s)${logline_deep_scan_detailed_info} $avg_text ${log_disk_access_msg} $scanned_depth_msg slept ${next_sleep_duration}s Disks idle before/after scan ${time_since_disk_access_before_scan_sec}s/${time_since_disk_access_after_scan_sec}s Scan completed/timedOut counter cnt=$depth_scan_counter/$depth_success_idle_incr_counter/$depth_slow_scan_counter mode=$mode scan_tmo=${scan_timeout_sec}s maxCur=$appliedMaxDepthCurrent maxWeek=$appliedMaxDepth isMaxDepthComputed=$isPreviousMaxDepthComputed CPU=${CPU}%, filecount[$appliedDepth]=${files_at_depth_map[$appliedDepth]}"
+		logCsvSimple
 
 		if ((fixdepth == -1)) ; then
 			time_since_last_disk_access_sec=$(fnc_time_since_last_disk_access)
