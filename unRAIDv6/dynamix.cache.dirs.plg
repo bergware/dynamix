@@ -3,12 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.12.03">
+<!ENTITY version   "2018.12.04">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/arberg/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7e3c37dfe6160c435afb89ca7bdbc32d">
-<!ENTITY releaseTag   "cache_dirs_2.2.7">
+<!ENTITY MD5       "5782e246727bb897fdaacf01157df3f4">
+<!ENTITY releaseTag   "cache_dirs_2.2.7-2">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">

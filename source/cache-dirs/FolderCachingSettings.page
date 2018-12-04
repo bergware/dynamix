@@ -214,13 +214,20 @@ Logging:
 > Be wary that the cache_dirs logs are placed in memory on unRAID and are not automatically rolled.
 
 User defined options:
-: <input id="pin" type="text" name="other" maxlength="200" value="<?=$cfg['other']?>" placeholder="Enter custom options here">see <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">unRAID forum</a></u>
-
-<input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input id="pin" type="text" name="other" maxlength="200" value="<?=$cfg['other']?>" placeholder="Enter custom options here"><span class="strong orange-text">Check HELP for filter example</span>
+or see <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">unRAID forum</a></u>
 
 > The cache_dirs script has additional options which may be used.
 > Refer to the online documentation to use these as needed,
-> or see the cache_dirs script itself located under /boot/config/plugins/dynamix.cache.dirs/cache_dirs.zip
+> or see the cache_dirs script itself located under /usr/local/emhttp/plugins/dynamix.cache.dirs/scripts/cache_dirs
+>
+> Its possible to tell cache_dirs to avoid traversing all directories with a certain name. The following example avoids '.Recycle.Bin' and 'temp' and 'log' folders: 
+>
+> <span class="strong orange-text">-a '-noleaf -name .Recycle.Bin -prune -o -name log -prune -o -name temp -prune -o -print'</span>
+>
+> Note that the single quotes around argument to -a is important. Double-quotes do not work in the current version, so unfortunately its not currently possible to filter with '-name "*Old" -prune'.
+
+<input type="submit" name="#default" value="Default">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
 
 </form>
