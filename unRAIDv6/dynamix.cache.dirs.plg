@@ -3,11 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.11.18">
+<!ENTITY version   "2018.12.03">
 <!ENTITY launch    "Settings/FolderCachingSettings">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/arberg/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "87294850444efdb496df9d08a6d36452">
+<!ENTITY MD5       "7e3c37dfe6160c435afb89ca7bdbc32d">
+<!ENTITY releaseTag   "cache_dirs_2.2.7">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -134,8 +135,10 @@ fi
 </FILE>
 
 <!-- SOURCE PACKAGE -->
+<!-- dynamix: https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz -->
+<!-- arberg: https://github.com/arberg/dynamix/releases/download/&releaseTag;/&name;.txz -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://github.com/arberg/dynamix/releases/download/&releaseTag;/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 

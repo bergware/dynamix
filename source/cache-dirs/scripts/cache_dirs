@@ -115,9 +115,10 @@
 # Version 2.2.4 - Added rolled logs to -L diagnostics archive
 # Version 2.2.5 - Improved diagnostics info. Fixed sleep duration, before fixed depth always slept 1s, now it depends on disks idle and avg scan time.
 # Version 2.2.6 - CSV logging with all scan timings
+# Version 2.2.7 - Fixed -a option which was broken in 2.2
 # arberg
 ####################################################################################
-version=2.2.6
+version=2.2.7
 program_name=$(basename "$0")
 arg_count=$#
 
@@ -307,7 +308,7 @@ run_diagnostics() {
 	head -1 /boot/changes.txt
 }
 
-while getopts "p:m:M:c:d:D:e:i:l:FszBbwuvVahqSc:U:t:W:X:Y:Z:LTP" opt; do
+while getopts "a:p:m:M:c:d:D:e:i:l:FszBbwuvVhqSc:U:t:W:X:Y:Z:LTP" opt; do
 	case $opt in
 	c ) minDepth="$OPTARG" 
 		((minDepth < 1)) && minDepth=1 
