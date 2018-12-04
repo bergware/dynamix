@@ -1,0 +1,16 @@
+Below are arberg variants that allow me to send people back to master if they switch to my 'beta' fork. I could have my own plugin-file for this, and then change pluginURL back to point to dynamix to send people back.
+
+
+<!DOCTYPE PLUGIN [
+<!ENTITY pluginURL "https://raw.githubusercontent.com/arberg/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;">
+<!ENTITY MD5       "d9b42eada2e4d5c4d56387fbd844aa76">
+<!ENTITY releaseTag   "cache_dirs_2.2.4a">
+]>
+
+<!-- SOURCE PACKAGE -->
+<FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
+<!-- INSTEAD JUST manually place txz under test in plugins/dynamix.cache.dirs -->
+<URL>https://github.com/arberg/dynamix/releases/download/&releaseTag;/&name;.txz</URL>
+<MD5>&MD5;</MD5>
+</FILE>

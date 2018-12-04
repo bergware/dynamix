@@ -75,7 +75,7 @@ $(function() {
 > The program by default uses an adaptive mode where it reduces the depth of the directory structure which it tries to keep in memory.
 > When it detects a cache-miss (slow scan time) it will reduce the depth until disks are idle again,
 > but will still be at risk of putting load on the disks for a minute or two until the program gives up and waits for idle disks.
-> The less files the cache need to hold, the less likely it is that the program spins up disks.
+> The less files the cache needs to hold, the less likely it is that the program spins up disks.
 
 Folder caching function:
 : <select name="service" size="1">
@@ -86,26 +86,18 @@ Folder caching function:
 > Select whether folder caching is enabled or disabled. Caching will only effectively occur when the array is started.
 > The caching function is automatically restarted or stopped when the array goes online or offline.
 
-Cache pressure of directories on system (Important - check help if disks spin up):
-: <input type="text" name="cachePressure" class="narrow" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10">
+Cache pressure of directories on system:
+: <input type="text" name="cachePressure" class="narrow" style="margin-right:20px" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10"><span class="strong orange-text">Important - check HELP if disks spin up</span>
 
-> set cache_pressure to NN (by default = 10). 0 means never reclaim cache.
+> Set cache_pressure to NN (default = 10). A value of 0 means never reclaim cache.
 >
-> 1 works great for many users. If your disks spin up or cache_dirs logging indicates it frequently has accessed disks after scan, try lowering cache-pressure to 1. If the system runs out of memory increase cache-pressure.
+> A value of 1 works great for many users. If your disks spin up or cache_dirs logging indicates it frequently has accessed disks after scan, try lowering cache-pressure to 1. If the system runs out of memory increase cache-pressure.
 >
-> Warning: 0 will cause kernel never to release the memory of directories, and if too little memory is available,
+> Warning: a value of 0 will cause kernel never to release the memory of directories, and if too little memory is available,
 > it will cause the system to crash. cache_dirs does not reset the cachePressure after quitting,
 > to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100', or run cache-dirs with cache_pressure 100.
-> 
-> See 'vfs_cache_pressure' in <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">kernel.org</a>.
-
-Include user share (/mnt/user) in scan (Important - check help if disks spin up):
-: <select name="scan_user_share" size="1">
-  <?=mk_option($cfg['scan_user_share'], "", "No")?>
-  <?=mk_option($cfg['scan_user_share'], "-u", "Yes")?>
-  </select>
-
-> User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 but is reported by numerous users to be necessary to avoid disks spinning up when accessing directories.
+>
+> See 'vfs_cache_pressure' in [kernel.org](https://www.kernel.org/doc/Documentation/sysctl/vm.txt).
 
 Suspend during 'Mover' process:
 : <select name="suspend" size="1">
@@ -115,6 +107,14 @@ Suspend during 'Mover' process:
 
 > Stop caching while the mover is running to avoid conflicts. When using adaptive depth it will probably work well NO.
 > With fixed depth it will almost certainly put less load on the disks to choose YES.
+
+Scan user shares (/mnt/user):
+: <select name="shares" size="1" style="margin-right:20px">
+  <?=mk_option($cfg['shares'], "", "No")?>
+  <?=mk_option($cfg['shares'], "-u", "Yes")?>
+  </select><span class="strong orange-text">Important - check HELP if disks spin up</span>
+
+> User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 but is reported by numerous users to be necessary to avoid disks spinning up when accessing directories.
 
 Included folders:
 : <select id="s2" name="include" size="1" multiple style="display:none">

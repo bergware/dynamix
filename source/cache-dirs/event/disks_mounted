@@ -1,15 +1,10 @@
 #!/bin/bash
 plugin=dynamix.cache.dirs
-cfg="/boot/config/plugins/$plugin/$plugin.cfg"
-if [ ! -e $cfg ]; then
-  cfg="/usr/local/emhttp/plugins/$plugin/default.cfg"
-fi
 conf=/etc/cache_dirs.conf
+cfg=/boot/config/plugins/$plugin/$plugin.cfg
+[[ ! -e $cfg ]] && cfg=/usr/local/emhttp/plugins/$plugin/default.cfg
 
 enable=$(grep "^service=" $cfg|cut -d'"' -f2)
-
-echo "cache_dirs event $(basename "$0"): enable=$enable" | logger "-tcache_dirs"
-
 if [[ $enable == 1 ]]; then
   if [[ ! -f $conf ]]; then
     grep '^options=' $cfg|cut -d'"' -f2-|sed 's:"$::'|tr -d "\n" > $conf
