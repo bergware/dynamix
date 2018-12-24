@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.04.24a">
+<!ENTITY version   "2018.12.24">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "56e444586517facbf5aba5799b1dc051">
+<!ENTITY MD5       "db9e469ea90744b93df0f73cb0cfc5fe">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- updated handling of plex streams
+- GUI adjustments
+
+###2017.04.24
 - adjusted table header
 - fixed regression error
 - fixed potential conflict with unassigned devices plugin
@@ -78,7 +82,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2018, Bergware International
 Dynamix Active Streams - Real-time monitoring of SMB shares
 -->
 
@@ -106,7 +110,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2017, Bergware International"
+echo " Copyright 2018, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
