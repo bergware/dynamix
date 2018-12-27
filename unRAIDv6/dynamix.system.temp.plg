@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.03.18">
+<!ENTITY version   "2018.12.27">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "6dfdb98b0e70f9b6b0f22cc0c1e3ac3d">
+<!ENTITY MD5       "5485d8b19428c84bc5d53fe2e6489335">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- updated icons
+- added support for Unraid 6.7
+
+###2018.03.18
 - fixed sensors sometimes not displayed
 
 ###2017.12.06
