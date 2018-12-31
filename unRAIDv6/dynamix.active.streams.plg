@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.12.24">
+<!ENTITY version   "2018.12.31">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "db9e469ea90744b93df0f73cb0cfc5fe">
+<!ENTITY MD5       "944c813d7f33ec944d7a40d119a593ca">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- fixed errors when plex not active/not installed
+- fixed active streams should not include appdata
+
+###2018.12.24
 - updated handling of plex streams
 - GUI adjustments
 
