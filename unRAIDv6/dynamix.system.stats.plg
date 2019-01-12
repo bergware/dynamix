@@ -3,19 +3,24 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.08.29a">
+<!ENTITY version   "2019.01.12">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "bd5395ac71344b7d925e5d4110324ee6">
+<!ENTITY MD5       "ea5e3ed8e4d6e3c2cc33f1d309f58f45">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.7.0">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- updated sysstat files to version 12.0.2
+- fixed settings width
+- minimum Unraid version 6.7.0
+
+###2018.08.29
 - reverted to sysstat version 11.6.2
 
 ###2018.08.28
@@ -67,7 +72,7 @@
 - fixed display when either critical level or warning level or both are set to zero
 
 ###2016.04.01
-- make  *nice* a separate value to display in the processor load graph (previously it was combined with *user*)
+- make *nice* a separate value to display in the processor load graph (previously it was combined with *user*)
 
 ###2016.03.19
 - made compatible with unRAID v6.2
@@ -142,7 +147,7 @@
 </CHANGES>
 
 <!--
-Copyright 2012-2018, Bergware International
+Copyright 2012-2019, Bergware International
 Dynamix System Stats - disk and system usage graphs
 -->
 
@@ -195,7 +200,7 @@ fi
 cron=/boot/config/plugins/&name;/sysstats.cron
 if [[ ! -f $cron ]]; then
   echo '# Generated system data collection schedule:' >$cron
-  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;>/dev/null\n' >>$cron
+  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
   /usr/local/sbin/update_cron
 fi
 
@@ -203,7 +208,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2012-2018, Bergware International"
+echo " Copyright 2012-2019, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
