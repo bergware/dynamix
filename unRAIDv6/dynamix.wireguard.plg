@@ -41,7 +41,7 @@ if [[ $MD5 != &MD5; ]]; then
   rm -f &source;.txz
 fi
 # Remove wgX files
-rm -f /usr/local/emhttp/plugins/&name/WG*.page
+rm -f /usr/local/emhttp/plugins/&name;/WG*.page
 </INLINE>
 </FILE>
 
