@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.04.01a">
+<!ENTITY version   "2019.04.01b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "0d3446b1fb46b0f87e015d3ab6e17e70">
@@ -41,7 +41,7 @@ if [[ $MD5 != &MD5; ]]; then
   rm -f &source;.txz
 fi
 # Remove wgX files
-rm -f /usr/local/emhttp/plugins/&name;/WG*.page
+rm -f /usr/local/emhttp/webGui/WG*.page
 </INLINE>
 </FILE>
 
