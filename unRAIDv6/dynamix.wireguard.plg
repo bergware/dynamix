@@ -6,7 +6,7 @@
 <!ENTITY version   "2019.04.01i">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ef3ca908056b4ebbaeded1f44228ccc4">
+<!ENTITY MD5       "b30b909f0e88e32744f4f66c75c4054d">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc0a">
