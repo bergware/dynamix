@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.04.22">
+<!ENTITY version   "2019.04.23">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cdd025be87d6b97721f2fdaa775d6f99">
+<!ENTITY MD5       "4de33d8dae5cdbf4e92ee738152e886e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc0d">
