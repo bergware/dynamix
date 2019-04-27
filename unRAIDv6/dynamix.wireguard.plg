@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.04.27a">
+<!ENTITY version   "2019.04.27b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "b69aaf754e1482935661d2f65423067c">
@@ -51,10 +51,19 @@ rm -f /usr/local/emhttp/webGui/WG*.page
 <MD5>&MD5;</MD5>
 </FILE>
 
+<!-- WORKAROUND -->
+<FILE Name="/tmp/start_poller" Mode="0770">
+<INLINE>
+#!/bin/bash
+/usr/local/emhttp/webGui/event/driver_loaded/upnp_poller_start
+</INLINE>
+</FILE>
+
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-/usr/local/emhttp/webGui/event/driver_loaded/upnp_poller_start
+at -M -f /tmp/start_poller now 2>/dev/null
+rm -f /tmp/start_poller
 
 echo ""
 echo "-----------------------------------------------------------"
