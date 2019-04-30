@@ -54,7 +54,7 @@ rm -f /usr/local/emhttp/webGui/WG*.page
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
-pkill -f /usr/local/emhttp/webGui/scripts/upnp_poller
+#pkill -f /usr/local/emhttp/webGui/scripts/upnp_poller
 
 echo ""
 echo "-----------------------------------------------------------"
