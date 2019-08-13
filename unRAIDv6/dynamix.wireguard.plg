@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.06.08">
+<!ENTITY version   "2019.08.13">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c9538e56a0a188f3a65f8ebebb6efbc4">
+<!ENTITY MD5       "387456315671be51e5e88286062d3403">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc0d">
@@ -28,7 +28,8 @@ Dynamix WireGuard - Impatience is a virtue!
 <INLINE>
 **Dynamix WireGuard**
 
-This package contains the latest developments for WireGuard support. For those people who can not wait and want to try the latest and greatest!
+This package contains GUI support for WireGuard.
+WireGuard allows to set up VPN tunnels for various requirements, such as remote server access or Internet over VPN.
 </INLINE>
 </FILE>
 
@@ -78,6 +79,8 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;
+
+echo "Remove successful - PLEASE REBOOT YOUR SERVER"
 </INLINE>
 </FILE>
 
