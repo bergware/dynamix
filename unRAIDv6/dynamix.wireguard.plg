@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.09.03">
+<!ENTITY version   "2019.09.08">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "2e646480309dbf9305bd93cf16b227b0">
+<!ENTITY MD5       "b5a7b9d4d3b9dc5dc2f921d88a7a1913">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc0d">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- Force advanced mode in "server-to-server" and "LAN-to-LAN" connections
+- Make HELP unconditional
+
+###2019.09.03
 - initial release
 </CHANGES>
 
@@ -76,8 +80,6 @@ rm -rf /boot/config/plugins/&name;
 
 # Uninstall the 'source' package
 removepkg &name;
-
-echo "Remove successful - PLEASE REBOOT YOUR SERVER"
 </INLINE>
 </FILE>
 
