@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.09.08a">
+<!ENTITY version   "2019.09.11">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cf5e2e919ae6644b11cb5e95e3a5ec57">
+<!ENTITY MD5       "32704f6ec9e3fc719eacd08c8afdaeaf">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc0d">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Fix alternating active/inactive state when UPnP fails
+
+###2019.09.08
 - Force advanced mode in "server-to-server" and "LAN-to-LAN" connections
 - Make HELP unconditional
 - Add auto address calculation
