@@ -3,18 +3,22 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.09.11">
+<!ENTITY version   "2019.10.12">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "32704f6ec9e3fc719eacd08c8afdaeaf">
+<!ENTITY MD5       "c9aa8c1174439f092606a4e8ff9c94ac">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc0d">
+<PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- Allow multiple Unraid servers to use UPnP
+- Minimum required Unraid version is 6.8.0-rc1
+
+###2019.09.11
 - Fix alternating active/inactive state when UPnP fails
 
 ###2019.09.08
