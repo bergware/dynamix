@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.10.13">
+<!ENTITY version   "2019.10.20">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0b6747632212344df9a594c3c9d65c2d">
+<!ENTITY MD5       "e8e9b18df6d52f2b2158c745187b9b8e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Added DNS server field for peers
+
+###2019.10.13
 - Fixed missing address when "Remote tunneled access" is selected
 
 ###2019.10.12
