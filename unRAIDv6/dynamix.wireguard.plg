@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.10.21a">
+<!ENTITY version   "2019.10.25">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "688a62196d5d62388b7228636789d05b">
+<!ENTITY MD5       "d1028cdc6b32af8b3a82bfec4840530e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
@@ -15,6 +15,11 @@
 ##&name;
 
 ###&version;
+- Change label "Local gateway uses LAN" to "Local server uses LAN"
+- Updated help textobject
+- Added remark when local router needs additional route
+
+###2019.10.21
 - Made UPnP and NAT settings unrelated
 - Disabled Peer DNS server for "VPN tunneled access"
 - Various updates + corrections
