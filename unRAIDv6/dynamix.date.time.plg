@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.date.time">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.03.08a">
+<!ENTITY version   "2019.11.02">
 <!ENTITY launch    "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- use new icon when Unraid version is 6.7+
+
+###2018.03.08
 - added fourth NTP server entry (supported from unRAID 6.5)
 
 ###2017.09.01
@@ -65,6 +68,13 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+source /etc/unraid-version
+version=${version:0:3}
+# Update icon if Unraid version is 6.7+
+if [[ $((${version/./}*1)) -ge 67 ]]; then
+  sed -ri 's/date-time.png/icon-clock/' /usr/local/emhttp/plugins/dynamix.date.time/DateTime.page
+fi
+
 echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
