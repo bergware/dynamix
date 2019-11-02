@@ -129,10 +129,10 @@ rm -f /usr/sbin/sensors-detect
 </FILE>
 
 <!-- SENSORS-DETECT SCRIPT -->
-<FILE Name="&flash;/sensors-detect" Max="6.7.9">
+<FILE Name="&flash;/sensors-detect" Max="6.7.2">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sensors-detect</URL>
 </FILE>
-<FILE Name="/usr/sbin/sensors-detect" Mode="0755">
+<FILE Name="/usr/sbin/sensors-detect" Mode="0755" Max="6.7.2">
 <LOCAL>&flash;/sensors-detect</LOCAL>
 </FILE>
 
