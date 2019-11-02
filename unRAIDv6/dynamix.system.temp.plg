@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.11.02">
+<!ENTITY version   "2019.11.02a">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
@@ -96,7 +96,7 @@
 </CHANGES>
 
 <!--
-Copyright 2017, Bergware International
+Copyright 2019, Bergware International
 Dynamix System Temperature - Real-time monitoring of CPU and MB temperatures
 -->
 
@@ -117,8 +117,12 @@ if [[ $MD5 != &MD5; ]]; then
   rm -f &flash;/&name;*.txz
 fi
 
-# Remove sensors-detect script
-rm -f /usr/sbin/sensors-detect
+# Remove sensors-detect script (Unraid 6.7 and earlier)
+source /etc/unraid-version
+version=${version:0:3}
+if [[ $((${version/./}*1)) -lt 68 ]]; then
+  rm -f /usr/sbin/sensors-detect
+fi
 </INLINE>
 </FILE>
 
@@ -155,7 +159,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2017, Bergware International"
+echo " Copyright 2019, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
