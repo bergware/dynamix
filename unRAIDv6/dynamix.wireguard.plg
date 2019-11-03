@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.10.26b">
+<!ENTITY version   "2019.11.03">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "e0dd0609b9fde857bd2334c9eb06c0d1">
+<!ENTITY MD5       "e3bd2a421ff94336fda831db00cd70bb">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Accept TLD names up to 8 characters
+
+###2019.10.26
 - Suppress remarks for "VPN tunneled access"
 - Suppress routing remark when server is endpoint
 - Disable (forced) "Local server uses NAT" for "VPN tunneled access"
