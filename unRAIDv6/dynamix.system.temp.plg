@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.11.02a">
+<!ENTITY version   "2019.11.03">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "af98cd82a0d0768e140f94a9e3ca26f6">
+<!ENTITY MD5       "2bac222db5fec74586c507fdb746cba4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- Added busy spinner when detection is running
+
+###2019.11.03
 - Do not load script 'sensors-detect' when Unraid version is 6.8 or higher
 
 ###2019.01.12
