@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.11.12c">
+<!ENTITY version   "2019.12.22">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b3f01a18c2e2b7ade05e343f23b05b01">
+<!ENTITY MD5       "46311b94426d989f58b56a74d74aff32">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Validate FQDN against all top level domains (TLD) defined by IANA - version 2019122100
+
+###2019.11.12
 - Fixed import function, skip comments
 
 ###2019.11.10
