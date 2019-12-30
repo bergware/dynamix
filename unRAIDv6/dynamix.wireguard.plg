@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.12.28">
+<!ENTITY version   "2019.12.30">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "241cbab28100f126dc3c80a6ffdcbf10">
+<!ENTITY MD5       "77a646bc41d50dfeeb59f048abee4621">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- Added local tunnel firewall. This is used to restrict remote access to the specified addresses
+- Improved IPv6 support
+
+###2019.12.28
 - Removed debug code
 
 ###2019.12.27
