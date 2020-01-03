@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.01.02">
+<!ENTITY version   "2020.01.03">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3efabed1820ab9a29881fe3f805f5144">
+<!ENTITY MD5       "dde2f99d9ca5247834ac7d0f15cc33b4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- updated firewall rules and help text
+
+###2020.01.02
 - Added rule "deny" or "allow" for firewall function
 
 ###2019.12.30
