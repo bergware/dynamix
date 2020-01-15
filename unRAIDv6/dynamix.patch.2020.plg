@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.patch.2020">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.01.14c">
+<!ENTITY version   "2020.01.15">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.6.0" max="6.8.2">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.6.0" max="6.7.2">
 
 <CHANGES>
 ##&name;
@@ -97,7 +97,7 @@ w/2a+kezcmOTiBWczVf+/jFfT33F5nzYqp6Nyuqs1TseEOAwR872zmuTBgERIkX/3MLobJ1Oo+F6
 </FILE>
 
 <!-- PATCHED CODE -->
-<FILE Name="/tmp/code" Mode="0644">
+<FILE Name="/tmp/patch" Mode="0644">
 <INLINE>
 <![CDATA[
 $name = $_GET['name'];
@@ -112,10 +112,10 @@ $path = substr(explode('?', $_SERVER['REQUEST_URI'])[0], 1);
 <FILE Run="/bin/bash">
 <INLINE>
 # update template.php file
-sed -i '/^\/\/ Extract/,/^\/\/ The/{//!d};/^\/\/ Extract/r/tmp/code' /usr/local/emhttp/webGui/template.php
+sed -i '/^\/\/ Extract/,/^\/\/ The/{//!d};/^\/\/ Extract/r/tmp/patch' /usr/local/emhttp/webGui/template.php
 
 # cleanup
-rm -f /tmp/code
+rm -f /tmp/patch
 
 echo ""
 echo "-----------------------------------------------------------"
