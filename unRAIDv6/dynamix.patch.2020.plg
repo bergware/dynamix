@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.patch.2020">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.01.15">
+<!ENTITY version   "2020.01.15a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -93,6 +93,7 @@ w/2a+kezcmOTiBWczVf+/jFfT33F5nzYqp6Nyuqs1TseEOAwR872zmuTBgERIkX/3MLobJ1Oo+F6
 +5u23RIWy2n1YudkeLj0fr1EuO13HT+lI2IO+W8UoyuVM44wJoYtby59O2vPbtmFSlrpxmCVmbpL
 /Z3tAl0jTiexdv0VBughSY5H/M5+rzBukWN1y6cXSHRCuJTqZp5tAw2jESFKjCgRJAE2CxRYoIhT
 1QyBRBDgs923TQ30ZTYeJQoolWLNx8XBqfnsQQMtYdPn1AEuHk7lqcu9rM9O/apG7P5cZxdoF2gX
+aBdo8/g38tD5svDWboYAAAAASUVORK5CYII=
 </INLINE>
 </FILE>
 
