@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.patch.2020">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.01.14a">
+<!ENTITY version   "2020.01.14b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -373,6 +373,7 @@ AABJRU5ErkJggg==
 $name = $_GET['name'];
 $dir = $_GET['dir'];
 $path = substr(explode('?', $_SERVER['REQUEST_URI'])[0], 1);
+
 
 ]]>
 </INLINE>
