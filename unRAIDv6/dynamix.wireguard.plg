@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.01.27">
+<!ENTITY version   "2020.02.23">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ab6ff94cfb6a294ab7be72066808f1d1">
+<!ENTITY MD5       "e4c52c833d02779eb24ef3fc1c0a551e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
@@ -15,6 +15,11 @@
 ##&name;
 
 ###&version;
+- added remarks for "type of access" selection
+- added remark for docker custom networks
+- restricted "Server hub &amp; spoke access" to tunnel addresses only
+
+###2020.01.27
 - removed unused confirmation setting
 
 ###2020.01.25
