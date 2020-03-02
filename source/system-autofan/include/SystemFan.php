@@ -9,6 +9,8 @@
  * all copies or substantial portions of the Software.
  *
  * Plugin development contribution by gfjardim
+ * Version log:
+ * Version 1.6   Modified by InfinityMod - added multifan support
  */
 ?>
 <?
@@ -87,5 +89,30 @@ if (is_file( $_GET['pwm']) && is_file( $_GET['fan'])) {
   file_put_contents($pwm."_enable", $default_method);
   exec("$autofan start >/dev/null");
 }
+break;
+case 'settings':
+   $fan_id = $_GET['fan_id'];
+   $plugin="dynamix.system.autofan";
+   $settings_root = "/boot/config/plugins/$plugin";
+   $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+   $std_settings = "$docroot/plugins/$plugin/default.cfg";
+   $settings = "$settings_root/$plugin.$fan_id.cfg";
+
+   if(!file_exists ($settings)){
+    $settings = $std_settings;
+   }
+   
+   $file_handle = fopen($settings, "rb");
+   $response = [];
+   while (!feof($file_handle) ) {
+    $line_of_text = fgets($file_handle);
+    $parts = explode('=', $line_of_text);
+    if ($parts[0] != ""){
+        $response[$parts[0]] = substr(substr($parts[1], 1), 0, -2);
+    }
+   }
+   fclose($file_handle);
+   echo json_encode($response);   
 break;}
+
 ?>
