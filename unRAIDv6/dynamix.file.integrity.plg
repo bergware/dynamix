@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.04.20">
+<!ENTITY version   "2020.03.08">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "37bc19ea444c04cf630725f7e51014d4">
+<!ENTITY MD5       "c7cc7020e4d657e457ffbfbade2754dc">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- make plugin compatible with Unraid 6.8 and higher
+
+###2018.04.20
 - fixed uninstaller for unRAID 6.4 and higher
 
 ###2017.12.05
