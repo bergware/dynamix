@@ -20,14 +20,19 @@ cache_dirs.start() {
 
 cache_dirs.stop() {
   if [[ -n $(pgrep -f $execute) ]]; then
-    $execute -q &>/dev/null
+    $execute -q 
     timer=5
     until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
       timer=$((timer-1))
       sleep 1
     done
-    echo "$script stopped"
-    echo "cache_dirs service $(basename "$0"): Stopped" | logger "-tcache_dirs"
+    if  [[ -z $(pgrep -f $execute) ]]; then
+      echo "$script stopped"
+      echo "cache_dirs service $(basename "$0"): Stopped" | logger "-tcache_dirs"
+    else
+      echo "$script process still running" 
+      echo "$script process still running" | logger "-tcache_dirs"
+    fi
   else
     # Always execute because cache_dirs uses subprocesses and lock-file, and it may need to cleanup
     $execute -q &>/dev/null

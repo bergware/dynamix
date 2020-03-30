@@ -3,11 +3,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.11.18">
+<!ENTITY version   "2018.12.04">
 <!ENTITY launch    "Settings/FolderCachingSettings">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/arberg/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "87294850444efdb496df9d08a6d36452">
+<!ENTITY MD5       "5782e246727bb897fdaacf01157df3f4">
+<!ENTITY releaseTag   "cache_dirs_2.2.7-2">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -134,8 +135,10 @@ fi
 </FILE>
 
 <!-- SOURCE PACKAGE -->
+<!-- dynamix: https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz -->
+<!-- arberg: https://github.com/arberg/dynamix/releases/download/&releaseTag;/&name;.txz -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://github.com/arberg/dynamix/releases/download/&releaseTag;/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
@@ -150,6 +153,21 @@ fi
 <!-- POST-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
+# We need cache_dirs to be executable for the link to work, so users can run it directly from shell, doing stuff like 'cache_dirs -L'
+chmod 755 /usr/local/emhttp/plugins/&name;/scripts/*
+chmod 755 /usr/local/emhttp/plugins/&name;/scripts/logrotate.d/*
+chmod 755 /usr/local/emhttp/plugins/&name;/scripts/logrotate.d/bin/*
+
+# Copy cache_dirs startup to rc.d and /usr/local/bin for easy user access
+ln -s /usr/local/emhttp/plugins/&name;/scripts/rc.cachedirs /etc/rc.d
+ln -s /usr/local/emhttp/plugins/&name;/scripts/cache_dirs /usr/local/bin
+
+cp -r /usr/local/emhttp/plugins/&name;/scripts/logrotate.d/* /etc/logrotate.d
+chmod 755 /etc/logrotate.d/cache_dirs
+echo "Installed cache_dirs /usr/local/emhttp/plugins/&name;/scripts/logrotate.d/* /etc/logrotate.d"
+
+# Below start service does not seem to work when installing, but isn't really necessary
+
 cfg=&source;.cfg
 if [[ ! -e $cfg ]]; then
   cfg=/usr/local/emhttp/plugins/&name;/default.cfg
