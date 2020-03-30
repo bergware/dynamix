@@ -1,27 +1,52 @@
 #!/bin/bash
+#=======================================================================================
+#  Name:  rc.autofan
+#=======================================================================================
+#  Description:
+#
+#  This script has the aim to control autofan script
+#  How to invoke in your "go" script (copy to /boot/scripts):
+#  chmod +x /boot/scripts/fan_speed.sh -- superseeded by Dynamix plugin
+#  /boot/fan_speed.sh                  -- superseeded by Dynamix plugin
+#=======================================================================================
+# Version 1.0   Authored by Aiden
+# Version 1.1   Modified by Dan Stroot to run in a loop. Does not require the user
+#               to add this to cron  - just start it in your go file.
+# Version 1.2   Modified by Guzzi    - removed -d ata to work on sas controllers
+# Version 1.3   Modified by gfjardim - added to dynamix.system.autofan
+# Version 1.4   Modified by Bergware - added additional line parameters
+#                                    - start/stop control by Dynamix plugin
+#                                    - celsius/fahrenheit conversion
+# Version 1.5   Modified by Bergware - added nvme devices temperature reading (contributed by syntactic-salt)
+#                                    - added exclude disks from temperature reading (contributed by andreiio)
+# Version 1.6   Modified by InfinityMod - added multifan support
+#                                       - added fan spin up/down offset 
 plugin=dynamix.system.autofan
 script=autofan
 execute=/usr/local/emhttp/plugins/$plugin/scripts/$script
+cfg_path=/boot/config/plugins/$plugin
 
-if [[ -f /boot/config/plugins/$plugin/$plugin.cfg ]]; then
-  . /boot/config/plugins/$plugin/$plugin.cfg
+if [[ -f $cfg_path/$plugin.cfg ]]; then
+  . $cfg_path/$plugin.cfg
 else
   echo "No config file, aborting."
   exit 2
 fi
 
 autofan.start() {
-  if [[ -z $(pgrep -f $execute) ]]; then
-    $execute $options 1>/dev/null 2>&1
-    echo "$script started"
-  else
-    echo "$script already running!"
-  fi
+  for i in $cfg_path/$plugin.*.cfg; do
+    . $i
+    if [ "$service" -eq "1" ]; then
+      $execute $options 1>/dev/null 2>&1
+      echo "$script started"
+    fi
+  done 
 }
 
 autofan.stop() {
-  if [[ -n $(pgrep -f $execute) ]]; then
-    $execute -q 1>/dev/null 2>&1
+  for i in $cfg_path/$plugin.*.cfg; do
+    . $i
+    $execute -c $controller -f $fan -q 1>/dev/null 2>&1
     timer=5
     until [[ -z $(pgrep -f $execute) || $timer -eq 0 ]]; do
       timer=$((timer-1))
@@ -30,9 +55,7 @@ autofan.stop() {
     # set fan to max
     echo 255 > $controller
     echo "$script stopped"
-  else
-    echo "$script not running!"
-  fi
+  done
 }
 
 autofan.speed() {
@@ -45,7 +68,7 @@ autofan.speed() {
 
 autofan.restart() {
   autofan.stop
-  sleep 1
+  sleep 2
   autofan.start
 }
 

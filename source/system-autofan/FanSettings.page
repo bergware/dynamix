@@ -13,6 +13,8 @@ Icon="dynamix.system.autofan.png"
  * all copies or substantial portions of the Software.
  *
  * Plugin development contribution by gfjardim
+ * Version log:
+ * Version 1.6   Modified by InfinityMod - added multifan support
  */
 ?>
 <?
@@ -21,6 +23,7 @@ $cfg    = parse_plugin_cfg($plugin);
 $sName  = "autofan";
 $fName  = "$docroot/plugins/$plugin/scripts/$sName";
 $width  = strstr('gray,azure',$display['theme']) ? 305:300;
+$fan_id = 1;
 
 function temp_val($val) {
   global $display;
@@ -95,14 +98,39 @@ function tempVal(form) {
   item.value = exclude;
   item.selected = true;
 }
+
+function getSettings(fan_id){
+    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'settings',fan_id:fan_id},function(txt) {
+        data = JSON.parse(txt);
+        Object.keys(data).forEach(key => {
+            var value = data[key];
+            if(key == "service")
+            {
+                $("select[name="+ key +"]")[0].selectedIndex = parseInt(value);
+            }else{
+                $("input[name="+ key +"]").val(value);
+            }
+        });
+        
+        $(document).ready(function(){
+            file_el =  $('input[name="#file"]');
+            file_el.attr("value", file_el.attr("file").replace(".cfg", "." + fan_id.toString() + ".cfg"));
+        })
+    });
+}
+
+
 $(function() {
   showStatus('<?=$sName?>');
   $('#s1').dropdownchecklist({emptyText:'None', width:<?=$width?>, explicitClose:'...close'});
 });
+
+getSettings(0);
+
 </script>
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="tempVal(this)">
-<input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#file" file="<?=$plugin?>/<?=$plugin?>.cfg" value="<?=$plugin?>/<?=$plugin?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.autofan.php">
 <input type="hidden" name="#prefix" value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m&exclude=e">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
@@ -114,7 +142,7 @@ Fan control function:
   </select>
 
 PWM controller:
-: <select name="controller" size="1">
+: <select name="controller" size="1" onChange="getSettings(this.selectedIndex)">
   <?=mk_option($cfg['controller'], "", "None")?>
   <?foreach (list_pwm() as $pwm):?>
   <?=mk_option($cfg['controller'], $pwm['sensor'], "{$pwm['chip']} - {$pwm['name']}")?>
