@@ -1,9 +1,8 @@
 Menu="Scheduler"
 Title="SSD TRIM Settings"
-Cond="((isset($disks['cache']))&&($disks['cache']['status']!='DISK_NP'))"
 ---
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,12 +12,18 @@ Cond="((isset($disks['cache']))&&($disks['cache']['status']!='DISK_NP'))"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 $plugin = 'dynamix.ssd.trim';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/TrimSettings.page"))?>
+<?else:?>
+<?
 $cron = parse_plugin_cfg($plugin);
-$mode = array('Disabled','Hourly','Daily','Weekly','Monthly');
-$days = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+$mode = ['Disabled','Hourly','Daily','Weekly','Monthly'];
+$days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 ?>
 <script>
 function presetTrim(form) {
@@ -58,61 +63,70 @@ $(function() {
 <input type="hidden" name="#file" value="<?=$plugin.'/'.$plugin?>.cfg">
 <input type="hidden" name="#include" value="/plugins/<?=$plugin?>/include/update.trim.php">
 <input type="hidden" name="hour" value="">
-SSD TRIM schedule:
-: <select name="mode" size="1" onchange="presetTrim(this.form)">
+_(SSD TRIM schedule)_:
+: <select name="mode" onchange="presetTrim(this.form)">
   <?for ($m=0; $m<count($mode); $m++):?>
-  <?=mk_option($cron['mode'], strval($m), $mode[$m])?>
+  <?=mk_option($cron['mode'], strval($m), _($mode[$m]))?>
   <?endfor;?>
   </select>
 
+:help1
 > Choose a trim schedule ranging from hourly, daily, weekly and monthly.
 >
 > The interval determines how often SSD trim will run, it runs in the background.
+:end
 
-Day of the week:
-: <select name="day" size="1">
+_(Day of the week)_:
+: <select name="day">
   <?for ($d=0; $d<count($days); $d++):?>
-  <?=mk_option($cron['day'], strval($d), $days[$d])?>
+  <?=mk_option($cron['day'], strval($d), my_lang($days[$d]))?>
   <?endfor;?>
-  <?=mk_option($cron['day'], "*", "--------", "disabled")?>
+  <?=mk_option($cron['day'], "*", "--------", _("disabled"))?>
   </select>
 
+:help2
 > Choose a day when the weekly schedule is selected. Otherwise disabled.
+:end
 
-Day of the month:
-: <select name="dotm" size="1">
+_(Day of the month)_:
+: <select name="dotm">
   <?for ($d=1; $d<=31; $d++):?>
   <?=mk_option($cron['dotm'], strval($d), sprintf("%02d", $d))?>
   <?endfor;?>
-  <?=mk_option($cron['dotm'], "*", "--------", "disabled")?>
+  <?=mk_option($cron['dotm'], "*", "--------", _("disabled"))?>
   </select>
 
+:help3
 > Choose a date when the monthly schedule is selected. Otherwise disabled.
+:end
 
-Time of the day:
-: <span id="hour1" style="display:none"><select name="hour1" size="1" class="narrow">
+_(Time of the day)_:
+: <span id="hour1" style="display:none"><select name="hour1" class="narrow">
   <?for ($d=0; $d<=23; $d++):?>
   <?=mk_option($cron['hour'], strval($d), sprintf("%02d", $d))?>
   <?endfor;?>
   </select>
-  <select name="min" size="1" class="narrow">
+  <select name="min" class="narrow">
   <?for ($d=0; $d<=55; $d+=5):?>
   <?=mk_option($cron['min'], strval($d), sprintf("%02d", $d))?>
   <?endfor;?>
-  </select>&nbsp;&nbsp;HH:MM</span>
-: <span id="hour2" style="display:none"><select name="hour2" size="1">
-  <?=mk_option($cron['hour'], "*/1", "Every hour")?>
-  <?=mk_option($cron['hour'], "*/2", "Every 2 hours")?>
-  <?=mk_option($cron['hour'], "*/3", "Every 3 hours")?>
-  <?=mk_option($cron['hour'], "*/4", "Every 4 hours")?>
-  <?=mk_option($cron['hour'], "*/6", "Every 6 hours")?>
-  <?=mk_option($cron['hour'], "*/8", "Every 8 hours")?>
+  </select>&nbsp;&nbsp;_(HH:MM)_</span>
+: <span id="hour2" style="display:none"><select name="hour2">
+  <?=mk_option($cron['hour'], "*/1", _("Every hour"))?>
+  <?=mk_option($cron['hour'], "*/2", _("Every 2 hours"))?>
+  <?=mk_option($cron['hour'], "*/3", _("Every 3 hours"))?>
+  <?=mk_option($cron['hour'], "*/4", _("Every 4 hours"))?>
+  <?=mk_option($cron['hour'], "*/6", _("Every 6 hours"))?>
+  <?=mk_option($cron['hour'], "*/8", _("Every 8 hours"))?>
   </select></span>
 
+:help4
 > When an hourly schedule is selected this will set the interval in hours. An interval always starts on the whole hour (minute 0).
 >
 > For the other schedules choose here the time of the day trim should start.
+:end
 
 &nbsp;
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="#apply" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()">
 </form>
+<?endif;?>

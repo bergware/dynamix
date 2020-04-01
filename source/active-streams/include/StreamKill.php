@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -9,7 +9,6 @@
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 exec("kill ".$_GET['pid']);
 ?>

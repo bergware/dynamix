@@ -4,7 +4,7 @@ Icon="power.png"
 Code="f011"
 ---
 <?PHP
-/* Copyright 2012-2018, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -14,6 +14,14 @@ Code="f011"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$plugin = 'dynamix.system.buttons';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/PowerButton.page"))?>
+<?else:?>
 <?
 $unraid = parse_ini_file('/etc/unraid-version');
 $direct = version_compare($unraid['version'],'6.1.9','>');
@@ -26,52 +34,44 @@ $(function() {
 <?if ($label):?>
   $('#nav-item.PowerButton a').html('Buttons');
 <?endif;?>
-  var opts = [{header:'Buttons', image:'/plugins/dynamix.system.buttons/icons/buttons.png'}];
+  var opts = [{header:'_(Buttons)_', image:'/plugins/<?=$plugin?>/icons/buttons.png'}];
   $('#nav-item.PowerButton a').prop('onclick', null).attr('id','nav-power');
   context.init({preventDoubleContext:false});
 <?if ($var['mdState']=='STARTED'):?>
-  opts.push({text:'Stop Array',icon:'fa-dot-circle-o',action:function(e){e.preventDefault();StopArray();}});
+  opts.push({text:'_(Stop Array)_',icon:'fa-dot-circle-o',action:function(e){e.preventDefault();StopArray();}});
   opts.push({divider:true});
 <?else:?>
-  opts.push({text:'Start Array',icon:'fa-play-circle-o',action:function(e){e.preventDefault();StartArray();}});
+  opts.push({text:'_(Start Array)_',icon:'fa-play-circle-o',action:function(e){e.preventDefault();StartArray();}});
   opts.push({divider:true});
 <?endif;?>
 <?if (isset($display['sleep'])):?>
-  opts.push({text:'Sleep',icon:'fa-moon-o',action:function(e){e.preventDefault();Sleep(e.shiftKey|e.ctrlKey);}});
+  opts.push({text:'_(Sleep)_',icon:'fa-moon-o',action:function(e){e.preventDefault();Sleep(e.shiftKey|e.ctrlKey);}});
   opts.push({divider:true});
 <?endif;?>
-  opts.push({text:'Shutdown',icon:'fa-power-off',action:function(e){e.preventDefault();Shutdown(<?=$force?>);}});
+  opts.push({text:'_(Shutdown)_',icon:'fa-power-off',action:function(e){e.preventDefault();Shutdown(<?=$force?>);}});
   opts.push({divider:true});
-  opts.push({text:'Reboot',icon:'fa-refresh',action:function(e){e.preventDefault();Reboot(<?=$force?>);}});
+  opts.push({text:'_(Reboot)_',icon:'fa-refresh',action:function(e){e.preventDefault();Reboot(<?=$force?>);}});
   context.attach('#nav-power',opts);
 });
-
 function pageDisable() {
   for (var i=0,element; element=document.querySelectorAll('input,button,select')[i]; i++) element.disabled = true;
   for (var i=0,link; link=document.getElementsByTagName('a')[i]; i++) link.style.color = 'gray'; //fake disable
 }
-
 function pageLoad(page) {
   if (page) location.replace('/'+page+'.htm'); else location = location;
 }
-
 function infoBox(title,text) {
   pageDisable();
   Shadowbox.open({title:title,content:'<div style="margin-top:36px;text-align:center">'+text+'</div>',player:'html',height:120,width:300,options:{modal:false}});
   $('#sb-nav-close').css('background','none');
 }
-
-function alertBox(title,text) {
-  swal({title:title,text:text,type:'error'});
-}
-
 function Shutdown(force) {
-  $.get('/plugins/dynamix.system.buttons/include/ArrayBusy.php',function(busy) {
+  $.get('/plugins/<?=$plugin?>/include/ArrayBusy.php',function(busy) {
     if (busy && !force) {
-      alertBox('Array busy','Parity operation or mover is running');
+      swal({title:'_(Array busy)_',text:'_(Parity operation or mover is running)_',type:'error',confirmButtonText:'_(Ok)_'});
     } else {
 <?if ($confirm['down']):?>
-      swal({title:'Proceed?',text:'This will shutdown the system',type:'warning',showCancelButton:true},function(){ShutdownNow(force);});
+      swal({title:'_(Proceed)_?',text:'_(This will shutdown the system)_',type:'warning',showCancelButton:true,confirmButtonText:'_(Proceed)_',cancelButtonText:'_(Cancel)_'},function(){ShutdownNow(force);});
 <?else:?>
       ShutdownNow(force);
 <?endif;?>
@@ -83,22 +83,21 @@ function ShutdownNow(force) {
    document.directOps.cmd.value = 'shutdown';
    document.directOps.submit();
 <?else:?>
-  infoBox('Shutdown','<i class="fa fa-spinner fa-spin icon"></i>Please wait... preparing for shutdown!');
+  infoBox('_(Shutdown)_','<i class="fa fa-spinner fa-spin icon"></i>_(Please wait)_... _(preparing for shutdown)_!');
   if (force) {
-    $.post('/plugins/dynamix.system.buttons/include/Powerdown.php',{cmd:'shutdown'},function(p){pageLoad(p);});
+    $.post('/plugins/<?=$plugin?>/include/Powerdown.php',{cmd:'shutdown'},function(p){pageLoad(p);});
   } else {
     $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'},function(){$.post('/update.htm',{shutdown:'Power down'},pageLoad('shutdown'));});
   }
 <?endif;?>
 }
-
 function Reboot(force) {
-  $.get('/plugins/dynamix.system.buttons/include/ArrayBusy.php',function(busy) {
+  $.get('/plugins/<?=$plugin?>/include/ArrayBusy.php',function(busy) {
     if (busy && !force) {
-      alertBox('Array busy','Parity operation or mover is running');
+      swal({title:'_(Array busy)_',text:'_(Parity operation or mover is running)_',type:'error',confirmButtonText:'_(Ok)_'});
     } else {
 <?if ($confirm['down']):?>
-      swal({title:'Proceed?',text:'This will reboot the system',type:'warning',showCancelButton:true},function(){RebootNow(force);});
+      swal({title:'_(Proceed)_?',text:'_(This will reboot the system)_',type:'warning',showCancelButton:true,confirmButtonText:'_(Proceed)_',cancelButtonText:'_(Cancel)_'},function(){RebootNow(force);});
 <?else:?>
       RebootNow(force);
 <?endif;?>
@@ -110,23 +109,22 @@ function RebootNow(force) {
    document.directOps.cmd.value = 'reboot';
    document.directOps.submit();
 <?else:?>
-  infoBox('Reboot','<i class="fa fa-spinner fa-spin icon"></i>Please wait... preparing for reboot!');
+  infoBox('_(Reboot)_','<i class="fa fa-spinner fa-spin icon"></i>_(Please wait)_... _(preparing for reboot)_!');
   if (force) {
-    $.post('/plugins/dynamix.system.buttons/include/Powerdown.php',{cmd:'reboot'},function(p){pageLoad(p);});
+    $.post('/plugins/<?=$plugin?>/include/Powerdown.php',{cmd:'reboot'},function(p){pageLoad(p);});
   } else {
     $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'},function(){$.post('/update.htm',{reboot:'Reboot'},pageLoad('reboot'));});
   }
 <?endif;?>
 }
-
 <?if (isset($display['sleep'])):?>
 function Sleep(force) {
-  $.get('/plugins/dynamix.system.buttons/include/ArrayBusy.php',function(busy) {
+  $.get('/plugins/<?=$plugin?>/include/ArrayBusy.php',function(busy) {
     if (busy && !force) {
-      alertBox('Array busy','Parity operation or mover is running');
+      swal({title:'_(Array busy)_',text:'_(Parity operation or mover is running)_',type:'error',confirmButtonText:'_(Ok)_'});
     } else {
 <?if ($confirm['sleep']):?>
-      swal({title:'Proceed?',text:'This will put the system to sleep',type:'warning',showCancelButton:true},function(){SleepNow();});
+      swal({title:'_(Proceed)_?',text:'_(This will put the system to sleep)_',type:'warning',showCancelButton:true,confirmButtonText:'_(Proceed)_',cancelButtonText:'_(Cancel)_'},function(){SleepNow();});
 <?else:?>
       SleepNow();
 <?endif;?>
@@ -135,19 +133,19 @@ function Sleep(force) {
 }
 function SleepNow() {
   pageDisable();
-  $('#statusraid').append('&nbsp;&bullet;&nbsp;<span class="warning" style="font-weight:bold">System in sleep mode</span>');
+  $('#statusraid').append('&nbsp;&bullet;&nbsp;<span class="warning" style="font-weight:bold">_(System in sleep mode)_</span>');
   $.get('/plugins/dynamix.s3.sleep/include/SleepMode.php',pageLoad());
 }
 <?endif;?>
 
 <?if ($var['mdState']=='STARTED'):?>
 function StopArray() {
-  $.get('/plugins/dynamix.system.buttons/include/ArrayBusy.php',function(busy) {
+  $.get('/plugins/<?=$plugin?>/include/ArrayBusy.php',function(busy) {
     if (busy) {
-      alertBox('Array busy','Parity operation or mover is running');
+      swal({title:'_(Array busy)_',text:'_(Parity operation or mover is running)_',type:'error',confirmButtonText:'_(Ok)_'});
     } else {
 <?if ($confirm['stop']):?>
-      swal({title:'Proceed?',text:'This will stop the array',type:'warning',showCancelButton:true},function(){StopArrayNow();});
+      swal({title:'_(Proceed)_?',text:'_(This will stop the array)_',type:'warning',showCancelButton:true,confirmButtonText:'_(Proceed)_',cancelButtonText:'_(Cancel)_'},function(){StopArrayNow();});
 <?else:?>
       StopArrayNow();
 <?endif;?>
@@ -155,19 +153,19 @@ function StopArray() {
   });
 }
 function StopArrayNow() {
-  infoBox('Stop Array','<i class="fa fa-spinner fa-spin icon"></i>Please wait... stopping the array!');
+  infoBox('_(Stop Array)_','<i class="fa fa-spinner fa-spin icon"></i>_(Please wait)_... _(stopping the array)_!');
   $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop'<?if ($direct):?>,csrf_token:'<?=$var['csrf_token']?>'<?endif;?>},pageLoad());
 }
 <?else:?>
 function StartArray() {
 <?if ($confirm['stop']):?>
-  swal({title:'Proceed?',text:'This will start the array',type:'warning',showCancelButton:true},function(){StartArrayNow();});
+  swal({title:'_(Proceed)_?',text:'_(This will start the array)_',type:'warning',showCancelButton:true,confirmButtonText:'_(Proceed)_',cancelButtonText:'_(Cancel)_'},function(){StartArrayNow();});
 <?else:?>
   StartArrayNow();
 <?endif;?>
 }
 function StartArrayNow() {
-  infoBox('Start Array','<i class="fa fa-spinner fa-spin icon"></i>Please wait... starting the array!');
+  infoBox('_(Start Array)_','<i class="fa fa-spinner fa-spin icon"></i>_(Please wait)_... _(starting the array)_!');
   $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStart:'Start'<?if ($direct):?>,csrf_token:'<?=$var['csrf_token']?>'<?endif;?>},pageLoad());
 }
 <?endif;?>
@@ -177,4 +175,5 @@ function StartArrayNow() {
 <input type='hidden' name='csrf_token' value='<?=$var['csrf_token']?>'>
 <input type='hidden' name='cmd' value=''>
 </form>
+<?endif;?>
 <?endif;?>

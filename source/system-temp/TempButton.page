@@ -2,7 +2,7 @@ Menu="Buttons:1"
 Link="nav-user"
 ---
 <?PHP
-/* Copyright 2012-2018, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -14,13 +14,28 @@ Link="nav-user"
  * Plugin development contribution by gfjardim
  */
 ?>
-
+<?
+$plugin = 'dynamix.system.temp';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/TempButton.page"))?>
+<?else:?>
 <script>
 function systemTemp() {
-  $.post('/plugins/dynamix.system.temp/include/SystemTemp.php',{unit:'<?=$display['unit']?>',dot:'<?=$display['number'][0]?>'},function(data) {
+  $.post('/plugins/<?=$plugin?>/include/SystemTemp.php',{unit:'<?=$display['unit']?>',dot:'<?=$display['number'][0]?>'},function(data) {
     showFooter(data,'temp');
+    if ($('#mb-temp').length) {
+      var temp = $('span#temp').text();
+      var unit = temp.indexOf('C')>0 ? 'C' : 'F';
+      temp = temp.split(unit);
+      if (temp[0]) $('#cpu-temp').html('_(Temperature)_: '+temp[0]+unit);
+      if (temp[1]) $('#mb-temp').html('_(Temperature)_: '+temp[1]+unit);
+    }
     timers.systemTemp = setTimeout(systemTemp,10000);
   });
 }
 setTimeout(systemTemp,100);
 </script>
+<?endif;?>

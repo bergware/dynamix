@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.02.04">
+<!ENTITY version   "2020.03.31">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c7f4136cd6ab5d3fd5c6ff063062424f">
+<!ENTITY MD5       "fe9861609bfd18a4375a83aed323a41a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- added multi-language support
+- added multi cache pool support
+- added new setting: monitor status and/or counters of devices
+
+###2018.02.04
 - made S3_sleep script compatible with unRAID 6.4
 - fixed cache pool list
 
@@ -119,7 +124,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2020, Bergware International
 Dynamix S3 Sleep - Manual and automatic sleep mode
 -->
 
@@ -229,7 +234,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

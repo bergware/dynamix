@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.stats">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.01.31c">
+<!ENTITY version   "2020.03.31">
 <!ENTITY launch    "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "8b493ff75c0eda1bc32928cb713b8426">
+<!ENTITY MD5       "7fda2709f7c47bd4f4c4a989018227c3">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.7.0-rc1" icon="area-chart">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- added multi-language support
+- added multi cache pool support
+- minor updates
+
+###2019.01.31
 - fixed memory graph
 - updated font-awesome icons
 - fixed bar color regression
@@ -153,7 +158,7 @@
 </CHANGES>
 
 <!--
-Copyright 2012-2019, Bergware International
+Copyright 2020, Bergware International
 Dynamix System Stats - disk and system usage graphs
 -->
 
@@ -214,7 +219,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2012-2019, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

@@ -1,6 +1,6 @@
 #!/usr/bin/php -q
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -12,6 +12,6 @@
 ?>
 <?
 $lmb = exec("nmblookup -M -- - 2>/dev/null|grep -Pom1 '^\S+'");
-$self = exec("ifconfig|grep -om1 'inet $lmb '");
+$self = exec("ip addr show|grep -om1 'inet $lmb '");
 file_put_contents("/var/local/emhttp/localmaster.htm", $self ? "<img src='/plugins/dynamix.local.master/icons/localmaster.png' class='icon'>" : "");
 ?>

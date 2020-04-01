@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.09.08">
+<!ENTITY version   "2020.03.31">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "330a026b9db22a9b7e6073980a8dbf7f">
+<!ENTITY MD5       "79006e0bf97541c0caa6ad1201d2e6ea">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- added multi-language support
+
+###2018.09.08
 - make plugin compatible with latest version of Unraid
 
 ###2017.12.30
@@ -99,7 +102,7 @@
 </CHANGES>
 
 <!--
-Copyright 2018, Bergware International
+Copyright 2020, Bergware International
 Dynamix System Buttons - Single click system reboot and system shutdown
 -->
 
@@ -127,7 +130,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2018, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

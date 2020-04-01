@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.11.03">
+<!ENTITY version   "2020.03.31">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "2bac222db5fec74586c507fdb746cba4">
+<!ENTITY MD5       "a851c0ba856abd75a7df1077052821e5">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- added multi-language support
+- added multi fan selection
+- minor updates
+
+###2019.11.03
 - Added busy spinner when detection is running
 
 ###2019.11.03
@@ -99,7 +104,7 @@
 </CHANGES>
 
 <!--
-Copyright 2019, Bergware International
+Copyright 2020, Bergware International
 Dynamix System Temperature - Real-time monitoring of CPU and MB temperatures
 -->
 
@@ -162,7 +167,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2019, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

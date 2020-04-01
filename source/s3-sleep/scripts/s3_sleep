@@ -33,28 +33,30 @@
 # Version 3.0.3   Changed HDD activity check to allow RAID controllers (courtesy Michael A.)
 # Version 3.0.4   Fixed full path to powerdown script
 # Version 3.0.5   HDD activity check includes both disk state and disk I/O activity
-# Version 3.0.6   Support for unRAID 6.4
+# Version 3.0.6   Support for Unraid 6.4
+# Version 3.0.7   Support for multi cache pool - added in Unraid 6.9
 #                 Correction for Cache pool
+#                 Added monitor option: both (default), status only, counters only
 #
 # Bergware International
 ####################################################################################
-version=3.0.6
+version=3.0.7
 program=$(basename $0)
 ini=/var/local/emhttp/disks.ini
 
 # Get flash device
 getFlash() {
-  flash=$(grep -A1 '^name="flash' $ini|sed -r '/^--/d;/^name=/d;s/"//g;s/^device=//')
+  flash=($(grep -PB10 '^type="Flash' $ini|grep -Po '^device="\K[^"]+'))
 }
 
 # Get list of cache devices (if present)
 getCache() {
-  cache=$(grep -A1 '^name="cache' $ini|sed -r '/^--/d;/^name=/d;s/"//g;s/^device=//')
+  cache=($(grep -PB10 '^type="Cache' $ini|grep -Po '^device="\K[^"]+'))
 }
 
 # Get list of array devices
 getArray() {
-  array=($(grep -PA1 '^name="(parity|disk)' $ini|sed -r '/^--/d;/^name=/d;s/"//g;s/^device=//'))
+  array=($(grep -PB10 '^type="(Parity|Data)' $ini|grep -Po '^device="\K[^"]+'))
 }
 
 # Get list of all devices
@@ -67,8 +69,8 @@ if [[ $1 == -ED ]]; then
   getFlash
   getCache
   getArray
-  array+=($flash);
-  [[ -n $cache ]] && array+=($cache)
+  array+=(${flash[@]});
+  [[ -n $cache ]] && array+=(${cache[@]})
   getDisks
   # Remove not excludable devices from list
   for dev in ${array[@]}; do
@@ -80,9 +82,10 @@ fi
 
 usage() {
  echo
- echo "Usage: $program [-acnRFSLlVq] [-I disk] [-N idle] [-i ip] [-d day] [-h hour] [-m time] [-t time] [-e eth] [-w wol] [-b name] [-p name] [-C case] [-D 0-4] [-ED]"
+ echo "Usage: $program [-acnRFSLlVq] [-f type] [-I disk] [-N idle] [-i ip] [-d day] [-h hour] [-m time] [-t time] [-e eth] [-w wol] [-b name] [-p name] [-C case] [-D 0-4] [-ED]"
  echo " -a          wait for array inactivity"
  echo " -c          exclude cache drive from array monitoring"
+ echo " -f type     1 = device status monitoring only, 2 = device counters monitoring only"
  echo " -I disk     include outside of array disk (may be repeated for other disks)"
  echo " -n          wait for network inactivity"
  echo " -N idle     set TCP idle threshold"
@@ -117,6 +120,7 @@ delayInit=30          # delay in minutes after HDD spindown and before checking 
 
 # control of internal conditions
 checkHDD=no           # check if HDDs are parked before counting down towards sleep
+monitor=0             # device hardware monitoring and device counters monitoring
 outside=()            # list of drives outside array to include in monitoring
 skipDay=()            # only countdown towards sleep outside these days
                       # example: <skipDay="0 6"> (skip Sunday and Saturday)
@@ -146,10 +150,11 @@ quit_flag=no          # signal program exit
 sleepNow=no           # force immediate sleep now
 
 # options to overwrite defaults
-while getopts "acnN:i:I:d:h:m:t:e:C:w:RFqVSLlb:p:D:" opt; do
+while getopts "acnN:i:f:I:d:h:m:t:e:C:w:RFqVSLlb:p:D:" opt; do
   case $opt in
     a) checkHDD=yes ;;
     c) checkCache=no ;;
+    f) monitor=$OPTARG ;;
     I) outside+=($OPTARG) ;;
     n) checkTCP=yes ;;
     N) idle=$OPTARG ;;
@@ -229,8 +234,8 @@ HDD_activity() {
     [[ -f /dev/shm/2 ]] && cp -f /dev/shm/2 /dev/shm/1 || touch /dev/shm/1
     awk '/(sd[a-z]*|nvme[0-9]n1) /{print $3,$6+$10}' /proc/diskstats >/dev/shm/2
     for dev in ${array[@]}; do
-      active=$(hdparm -C /dev/$dev 2>/dev/null|grep active)
-      diskio=($(grep -Pho "^$dev \K\d+" /dev/shm/1 /dev/shm/2))
+      [[ $monitor -ne 2 ]] && active=$(hdparm -C /dev/$dev 2>/dev/null|grep -o active) || active=
+      [[ $monitor -ne 1 ]] && diskio=($(grep -Pho "^$dev \K\d+" /dev/shm/1 /dev/shm/2)) || diskio=
       if [[ -n $active || ${diskio[0]} != ${diskio[1]} ]]; then
         result=1
         break;
@@ -360,7 +365,7 @@ getFlash
 getCache
 getArray
 getDisks
-[[ $checkCache == yes ]] && array+=($cache)
+[[ $checkCache == yes ]] && array+=(${cache[@]})
 for dev in ${outside[@]}; do
   array+=($dev)
 done

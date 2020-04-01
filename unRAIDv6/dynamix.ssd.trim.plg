@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.ssd.trim">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.04.23a">
+<!ENTITY version   "2020.03.31">
 <!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9fe95b31aefb3bbe1b7b404f0c54fe3c">
+<!ENTITY MD5       "798e399ece0bf42e9dd6e99bdb12dd45">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added multi-language support
+
+###2017.04.23
 - made trim operation on all mount points which support it
 - made plugin autonomous
 - added shortcut link on plugins page
@@ -37,7 +40,7 @@
 </CHANGES>
 
 <!--
-Copyright 2017, Bergware International
+Copyright 2020, Bergware International
 Dynamix SSD trim - create a cronjob to do regular SSD TRIM operations
 -->
 
@@ -71,7 +74,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2017, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

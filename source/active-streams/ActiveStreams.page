@@ -5,7 +5,7 @@ Icon="dynamix.active.streams.png"
 Tabs="true"
 ---
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -15,26 +15,40 @@ Tabs="true"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 $plugin = 'dynamix.active.streams';
-$mounts = '';
-$plex = exec("docker ps --format='{{.Names}}'|grep -Pim1 '^(plex|plexmediaserver)$'");
-if ($plex) {
-  $mounts = explode('|',exec("docker inspect --format='{{range .Mounts}}{{.Source}}:{{.Destination}}|{{end}}' $plex"));
-  rsort($mounts);
-  $mounts = implode('|',$mounts);
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/ActiveStreams.page"))?>
+<?else:?>
+<?
+$plex = $pid = $ipv4 = $ipv6 = $mounts = "";
+if (is_file('/var/run/dockerd.pid')) {
+  $plex = exec("docker ps --format='{{.Names}}'|grep -Pim1 '^(plex|plexmediaserver|pms)$'");
+  if ($plex) {
+    $ppid = exec("docker inspect --format='{{.State.Pid}}' $plex 2>/dev/null");
+    $ipv4 = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $plex 2>/dev/null");
+    $ipv6 = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.GlobalIPv6Address}}{{end}}' $plex 2>/dev/null");
+    $mounts = substr(exec("docker inspect --format='{{range .Mounts}}{{.Source}}:{{.Destination}}|{{end}}' $plex 2>/dev/null"),0,-1);
+  }
 }
 ?>
-
 <script>
 function streamList() {
-  $('#streams').load('/plugins/<?=$plugin?>/include/StreamList.php','plugin=<?=$plugin?>&plex=<?=urlencode($mounts)?>'<?if ($var['fsState']=='Started'):?>,function(){setTimeout(streamList,1000);}<?endif;?>);
+  $.post('/plugins/<?=$plugin?>/include/StreamList.php',{plex:'<?=$plex?>',pid:'<?=$ppid?>',ipv4:'<?=$ipv4?>',ipv6:'<?=$ipv6?>',mounts:'<?=urlencode($mounts)?>'},function(data){
+    $('#streams').html(data);
+<?if ($var['fsState']=='Started'):?>
+    setTimeout(streamList,1000);
+<?endif;?>
+  });
 }
 $(streamList);
 </script>
-<table class='share_status small'>
-<thead><tr><td width='12%'>Host/User</td><td width='9%'>Share</td><td width='5%'>Type</td><td width='auto'>Stream</td><td width='8%'>Duration</td><td width='8%'>Size</td><td width='3%' style='text-align:center'>Halt</td></tr></thead>
+<table class='share_status'>
+<thead><tr><td width='14%'>_(Host)_</td><td width='14%'>_(User)_</td><td width='9%'>_(Share)_</td><td width='5%'>_(Type)_</td><td width='auto'>_(Stream)_</td><td width='8%'>_(Playtime)_</td><td width='8%'>_(Size)_</td><td width='3%' style='text-align:center'>_(Halt)_</td></tr></thead>
 <tbody id="streams"></tbody>
 </table>
-<input type="button" value="Done" onclick="done()">
+<input type="button" value="_(Done)_" onclick="done()">
+<?endif;?>
