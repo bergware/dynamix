@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2020.03.31">
+<!ENTITY version   "2020.04.11">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7ff0a4932eb1c94d0d09e0497609a98e">
+<!ENTITY MD5       "f3b468f8d81abd3ff2ee4f3a304c2c83">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed NMVE exclusion (courtesy of Leoyzen)
+
+###2020.03.31
 - added multi-language support
 - added multi fan selection
 
