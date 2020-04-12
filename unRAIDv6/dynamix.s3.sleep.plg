@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.04.04a">
+<!ENTITY version   "2020.04.12">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7318dd237843360af5e9bf5c298c576d">
+<!ENTITY MD5       "674d8dac796df331f79ce22f8cfe758c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed missing legacy files in Sleep.php
+
+### 2020.04.04
 - fixed mdstat reading
 - fixed ref string in Sleep.php
 
