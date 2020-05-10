@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.03.31">
+<!ENTITY version   "2020.05.10">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "80a320ff927f476a38802f1d83953019">
+<!ENTITY MD5       "16fb3e7d14acfbef74d5f6c85ee77ad3">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- updated multi-language support
+
+###2020.03.31
 - added multi-language support
 
 ###2016.09.13

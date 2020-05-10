@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.03.31">
+<!ENTITY version   "2020.05.10">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "a851c0ba856abd75a7df1077052821e5">
+<!ENTITY MD5       "91a87a919014211d240df44f9c75a3ac">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- updated multi-language support
+
+###2020.03.31
 - added multi-language support
 - added multi fan selection
 - minor updates
