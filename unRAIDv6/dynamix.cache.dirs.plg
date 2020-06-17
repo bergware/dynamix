@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.05.10">
+<!ENTITY version   "2020.06.17">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
