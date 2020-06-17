@@ -7,7 +7,7 @@
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "92204be9e67bfbb37cdc6cf43e50b550">
+<!ENTITY MD5       "27d6363ea65d56885a24b21f9d73f9a4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- updated multi-language support
+
+###2020.05.10
 - updated multi-language support
 
 ###2020.03.31
