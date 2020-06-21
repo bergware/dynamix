@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.06.20">
+<!ENTITY version   "2020.06.21">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f59d2c1dad8465fdef82500438056ed0">
+<!ENTITY MD5       "be2a5a726e2ff01cbaffaece5eeada5b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed regression error
+
+###2020.06.20
 - updated multi-language support
 
 ###2020.05.10

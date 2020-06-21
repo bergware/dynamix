@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.ssd.trim">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.06.20">
+<!ENTITY version   "2020.06.21">
 <!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ea7e31f85ac841ad0ed75ccaea352caa">
+<!ENTITY MD5       "87b84a6b910c627c962446abb589939a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fiexed regression error
+
+###2020.06.20
 - updated multi-language support
 
 ###2020.05.10
