@@ -7,7 +7,7 @@
 <!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "87b84a6b910c627c962446abb589939a">
+<!ENTITY MD5       "fa2b24f814c15db984a65072246f6b82">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
