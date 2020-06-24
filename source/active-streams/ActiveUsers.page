@@ -52,7 +52,7 @@ $(function() {
 });
 </script>
 
-:help1001
+:streams_plug:
 > Give symbolic names to IP addresses, which are displayed on the active streams page.
 >
 > New IP addresses are automatically added to the list when detected.

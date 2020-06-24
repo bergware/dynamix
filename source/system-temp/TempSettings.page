@@ -199,7 +199,7 @@ $(function() {
 _(Available drivers)_:
 : <input type="text" name="drivers" value="<?=$all_modules?>" placeholder="_(Click DETECT)_">
 
-:help1001
+:temp_drivers_plug:
 > Use 'detect' to search for available drivers using the 'sensors-detect' script. After detection proceed with saving the list.<br>
 > Use 'save' to store the drivers list to disk, the drivers field may be edited before saving (e.g. add a non-specified driver). Saving is mandatory.<br>
 > Use 'load drivers / unload drivers' to manually load or unload the available driver modules.
@@ -223,7 +223,7 @@ _(Processor temperature)_:
   <?=$cpu_options?>
   </select>
 
-:help1002
+:temp_processor_plug:
 > Select one of the available probes as the processor temperature indicator.
 > The output of this probe is shown at the bottom of the page.
 > Select 'Not used' to suppress display of this probe.
@@ -234,7 +234,7 @@ _(Mainboard temperature)_:
   <?=$mb_options?>
   </select>
 
-:help1003
+:temp_mainboard_plug:
 > Select one of the available probes as the mainboard temperature indicator.
 > The output of this probe is shown at the bottom of the page.
 > Select 'Not used' to suppress display of this probe.
@@ -245,7 +245,7 @@ _(Array fan speed)_:
   <?=$fan_options?>
   </select>
 
-:help1004
+:temp_fan_plug:
 > Select one of the available probes as the array fan speed indicator.
 > The output of this probe is shown at the bottom of the page.
 > Select 'Not used' to suppress display of this probe.
@@ -254,7 +254,7 @@ _(Array fan speed)_:
 &nbsp;
 : <input type="submit" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()"><?if (!$disabled):?><input type="submit" name="rescan" value="_(Rescan)_"><?endif;?>
 
-:help1005
+:temp_rescan_plug:
 > 'Rescan' refreshes the selection list and can be used when new probes are available, e.g. a new fan probe has been installed.
 :end
 

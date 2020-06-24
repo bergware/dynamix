@@ -41,7 +41,7 @@ $(getMaster);
 _(Workgroup)_:
 : <input type="text" name="WORKGROUP" maxlength="40" value="<?=htmlspecialchars($var['WORKGROUP'])?>" class="narrow"<?if ($var['fsState']=="Started"):?> disabled<?endif;?>>
 
-:help1001
+:smb_workgroup_plug:
 > Enter your local network Workgroup name. Usually this is "WORKGROUP".
 :end
 
@@ -51,7 +51,7 @@ _(Local master)_:
   <?=mk_option($var['localMaster'], "yes", _('Yes'))?>
   </select>
 
-:help1002
+:smb_master_plug:
 > If set to 'Yes' then the server will fully participate in browser elections, and in the absense
 > of other servers, will usually become the local Master Browser.
 :end
@@ -62,7 +62,7 @@ _(Monitor local master election)_:
   <?=mk_option($display['monitor'], "1", _("Enabled"))?>
   </select>
 
-:help1003
+:smb_master_election_plug:
 > Enable or disable background monitoring of the local master election.
 > The result of the monitoring is displayed in the header at the top-right position.
 :end
@@ -70,7 +70,7 @@ _(Monitor local master election)_:
 _(Current elected master)_:
 : <span id="elected">_(please wait, obtaining)_...</span>
 
-:help1004
+:smb_master_current_plug:
 > Shows in real-time the current elected local master browser.
 :end
 

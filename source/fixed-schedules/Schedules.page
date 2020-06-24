@@ -60,7 +60,7 @@ _(Weekly schedule)_:
   <span class="time"><input type="number" name="weeklyMM" value="<?=$cfg['weeklyMM']?>" min="0" max="59" maxlength="2" class="cast" required></span>
   <span class="date"><select name="weeklyDD" class="cast">
   <?for ($d=0; $d<count($days); $d++):?>
-  <?=mk_option($cfg['weeklyDD'], strval($d), my_lang($days[$d]))?>
+  <?=mk_option($cfg['weeklyDD'], strval($d), _($days[$d]),0)?>
   <?endfor;?>
   </select></span>
   <span class="auto"><?=$tasks3 ? implode(", ", $tasks3) : '<_(none)_>'?></span>

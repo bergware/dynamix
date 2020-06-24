@@ -151,7 +151,7 @@ _(Placement of file integrity control)_:
   <?=mk_option($cfg['place'], "SystemInformation", _("Tools menu"))?>
   </select>
 
-:help1001
+:integrity_control_plug:
 > Select the placement of the file integrity control page. By default it is placed under the *Tools* menu, but it may be moved under the *header* menu.
 >
 > Keep in mind that the *header* menu has limited space.
@@ -163,7 +163,7 @@ _(Automatically protect new and modified files)_:
   <?=mk_option($cfg['service'], "1", _("Enabled"))?>
   </select></td>
 
-:help1002
+:integrity_service_plug:
 > When enabled a checksum value is automatically calculated and added to the extended attributes of the newly created or modified file.
 > When it is detected that a file change has occured, but its modification time hasn't changed, then an automatic checksum verification is performed to check for any silent file corruption.
 >
@@ -179,7 +179,7 @@ _(Hashing method)_:
   <?=mk_option($cfg['method'], "-b2", _("BLAKE2"), exec($check))?>
   </select><?if ($hash):?><span style="font-style:italic"><a href="/Settings/FileIntegrity/Browse?dir=/boot/config/plugins/<?=$plugin?>/export"><img src="/webGui/images/explore.png"></a>&nbsp; _(view hash files)_</span><?endif?>
 
-:help1003
+:integrity_hashing_plug:
 > Select the preferred hashing method. SHA2 generates a 256 bits checksum value, MD5 generates a 128 bits checksum value, while BLAKE2 generates a 512 bits checksum value per file.
 >
 > MD5 is the most commonly used method and should be selected when compatibility with external programs is required, BLAKE2 is the fastest method and has the highest detection grade, this is a proprietary solution though.
@@ -193,7 +193,7 @@ _(Save new hashing results to flash)_:
   <?=mk_option($cfg['cmd'], "A", _("Enabled"))?>
   </select><span id="showInfo1" style="display:none;font-style:italic"><a href="/Settings/FileIntegrity/Browse?dir=/boot/config/plugins/<?=$plugin?>/saved"><img src="/webGui/images/explore.png"></a>&nbsp; _(view saved files)_</span>
 
-:help1004
+:integrity_flash_plug:
 > When enabled a daily file on the flash device will be created, holding the checksum results for all newly or modified files of that particular day.
 > The format of this file is the same as the standard export file. The daily file is saved as */config/plugins/dynamix.file.integrity/saved/disks.export.&lt;date&gt;.new.hash*
 :end
@@ -208,7 +208,7 @@ _(Excluded folders and files)_:
   <span style="margin:0 8px;font-weight:bold">_(Custom files)_:</span><input type="text" name="files" value="<?=$cfg['files']?>" class="narrow">
   <span style="margin:0 8px;font-weight:bold">_(Apple metadata)_:</span><input type="checkbox" name="apple" <?=$cfg['apple']?'checked':''?>>
 
-:help1005
+:integrity_exluded_plug:
 > Select here any folders (shares) you want to exclude from the automatic hashing and verification functionality. A share existing on multiple disks will be skipped on any disk where it is present.
 >
 > Use **Custom folders / Custom files** to manually enter exclusions. Multiple exclusions are separated by a comma.<br>
@@ -224,7 +224,7 @@ _(Disk verification schedule)_:
   <?endfor;?>
   </select>
 
-:help1006
+:integrity_verification_plug:
 > When enabled a cron schedule is created to do file verification in the background. You need to select which disks participate in the automatic hashing and verification process (see table below).
 > The cron schedule can run on a selectable daily, weekly or monthly basis.
 >
@@ -246,7 +246,7 @@ _(Process priority)_:
   <?=mk_option($cfg['priority'], "-n19,-c2 -n7", _("Low"))?>
   </select>
 
-:help1007
+:integrity_priority_plug:
 > Background processes can be run in either normal or low priority mode.
 :end
 
@@ -256,7 +256,7 @@ _(When parity operation is running)_:
   <?=mk_option($cfg['parity'], "1", _("Don't start"))?>
   </select></td>
 
-:help1008
+:integrity_parity_plug:
 > Before a verification task starts it can either continue as usual when a parity operation is running, or the verification task doesn't start at all.
 > In the latter case you need to wait for the next scheduled time to execute the task.
 :end
@@ -264,12 +264,12 @@ _(When parity operation is running)_:
 _(Day of the week)_:
 : <select name="day">
   <?for ($d=0; $d<count($days); $d++):?>
-  <?=mk_option($cfg['day'], strval($d), my_lang($days[$d]))?>
+  <?=mk_option($cfg['day'], strval($d), _($days[$d]),0)?>
   <?endfor;?>
   <?=mk_option($cfg['day'], "*", "--------", _("disabled"))?>
   </select>
 
-:help1009
+:integrity_day_of_the_week_plug:
 > When a weekly schedule is chosen, then select here the day of execution.
 :end
 
@@ -281,7 +281,7 @@ _(Day of the month)_:
   <?=mk_option($cfg['dotm'], "*", "--------", _("disabled"))?>
   </select>
 
-:help1010
+:integrity_day_of_the_month_plug:
 > When a monthly schedule is chosen, then select here the date of execution.
 :end
 
@@ -297,7 +297,7 @@ _(Time of the day)_:
   <?endfor;?>
   </select>&nbsp;&nbsp;_(HH:MM)_
 
-:help1011
+:integrity_time_of_the_day_plug:
 > Select the hour and minute at which time the scheduled task will be executed. Granularity is 5 minutes.
 :end
 
@@ -307,7 +307,7 @@ _(Send notifications)_:
   <?=mk_option($cfg['notify'], "-n", _("Yes"))?>
   </select>
 
-:help1012
+:integrity_notifications_plug:
 > Set to YES if you want to receive notifications when file corruption is detected.
 > See the notification settings on how to set up and receive "alert" notifications.
 :end
@@ -320,7 +320,7 @@ _(Error logging)_:
   <?=mk_option($cfg['log'], "-L -f", _("Syslog & Output file"))?>
   </select><span id="showInfo2" style="display:none;font-style:italic"><a href="/Settings/FileIntegrity/Browse?dir=/boot/config/plugins/<?=$plugin?>/logs"><img src="/webGui/images/explore.png"></a>&nbsp; _(view log files)_</span>
 
-:help1013
+:integrity_logging_plug:
 > Error logging, including file corruption detection information can be given in the system log, or saved as a file on flash.
 > Disabling error logging will suppress log creation, but it is still possible to receive notifications.
 :end
@@ -338,7 +338,7 @@ echo str_repeat("<td>-</td>", $x);
 echo "</thead><tbody>";
 foreach ($data as $disk) {
   $name = $disk['name'];
-  echo "<tr><td>".my_lang(my_disk($name),3)."</td>";
+  echo "<tr><td>"._(my_disk($name),3)."</td>";
   for ($n = 1; $n < $i; $n++) echo "<td style='text-align:center'><span class='$name t$n'><input type='checkbox' name='$name-$n' class='$name t$n thin' onclick='updateMatrix(this.checked,\"$name\",\"t$n\")'".($cfg["$name-$n"]=='on'?' checked':'')."></span></td>";
   echo str_repeat("<td></td>", $x);
   echo "</tr>\n";

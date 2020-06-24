@@ -140,7 +140,7 @@ case 'overview':
   $hours = sprintf("%2d", $time/3600%24);
   $min = sprintf("%2d", $time/60%60);
   $sec = sprintf("%2d", $time%60);
-  echo "<td>".my_lang("$days days, $hours hours, $min minutes, $sec seconds",2)."</td></tr>";
+  echo "<td>"._("$days days, $hours hours, $min minutes, $sec seconds",2)."</td></tr>";
   return;
 case 'bios':
   exec("dmidecode -qt0|grep -v '^Invalid entry'",$output);

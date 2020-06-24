@@ -172,21 +172,21 @@ $(function() {
 _(Hashing method)_:
 : <span style='font-size:12px;margin-right:8px'><?=$cfg['method']?str_replace(['-b2','-md5'],[_('BLAKE2'),_('MD5')],$cfg['method']):_('SHA2')?></span>
 
-:help1001
+:integrity_control_hashing_plug:
 > This is the hash method as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 :end
 
 _(Excluded folders)_:
 : <span style='font-size:12px'><?=$folders?></span>
 
-:help1002
+:integrity_control_folders_plug:
 > This is the list of excluded folders as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 :end
 
 _(Excluded files)_:
 : <span style='font-size:12px'><?=$files?></span>
 
-:help1003
+:integrity_control_files_plug:
 > This is the list of excluded files as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 :end
 
@@ -206,7 +206,7 @@ echo str_repeat("<td></td>", $x);
 echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 ?>
 
-:help1004
+:integrity_control_overview_plug:
 > Select the disks which you want to let participate in any of the commands below. You can execute a command multiple times with different selections.
 >
 > For each disk the build and export state is maintained in near real-time.
@@ -258,7 +258,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 <thead style='visibility:hidden'><tr><th style='width:56px'></th><th style='width:330px'></th><th></th><th></th><th style='width:50px'></th></tr></thead>
 </tbody>
 <?foreach ($data as $disk):?>
-<tr id='row<?=$disk['idx']?>' style='display:none'><td><?=my_lang(my_disk($disk['name']),3)?></td><td><div class='usage-disk'><span id='<?=$disk['name']?>' style='width:0'></span></div></td><td id='count<?=$disk['idx']?>'></td><td id='eta<?=$disk['idx']?>'></td><td id='button<?=$disk['idx']?>'></td></tr>
+<tr id='row<?=$disk['idx']?>' style='display:none'><td><?=_(my_disk($disk['name']),3)?></td><td><div class='usage-disk'><span id='<?=$disk['name']?>' style='width:0'></span></div></td><td id='count<?=$disk['idx']?>'></td><td id='eta<?=$disk['idx']?>'></td><td id='button<?=$disk['idx']?>'></td></tr>
 <?endforeach;?>
 </tbody>
 </table>

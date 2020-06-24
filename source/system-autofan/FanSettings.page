@@ -177,13 +177,13 @@ _(Refresh interval)_ (_(minutes)_):
 _(Exclude drives)_:
 : <select id="s1" name="exclude" style="display:none" multiple>
   <?foreach (array_filter($disks,'parity_disks') as $disk):?>
-  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',my_lang(my_disk($disk['name']),3),$disk['device']))?>
+  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
   <?endforeach;?>
   <?foreach (array_filter($disks,'data_disks') as $disk):?>
-  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',my_lang(my_disk($disk['name']),3),$disk['device']))?>
+  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
   <?endforeach;?>
   <?foreach (array_filter($disks,'cache_disks') as $disk):?>
-  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',my_lang(my_disk($disk['name']),3),$disk['device']))?>
+  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
   <?endforeach;?>
   </select>
 

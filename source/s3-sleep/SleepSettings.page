@@ -127,7 +127,7 @@ _(Execute function)_:
   <?=mk_option($cfg['service'], "2", _("Shutdown"))?>
   </select>
 
-:help1001
+:s3sleep_function_plug:
 > Select the mode of operation. The system can be either put to sleep (and wake-up) or completely shutdown.
 >
 > The next settings determine the conditions under which the system will be put to sleep or shutdown.
@@ -136,11 +136,11 @@ _(Execute function)_:
 _(Excluded days)_:
 : <select id="s1" name="stopDay" style="display:none" multiple>
   <?for ($d=0; $d<count($days); $d++):?>
-  <?=mk_option_check($cfg['stopDay'], strval($d), my_lang($days[$d]))?>
+  <?=mk_option_check($cfg['stopDay'], strval($d), _($days[$d]),0)?>
   <?endfor;?>
   </select>
 
-:help1002
+:s3sleep_excluded_days_plug:
 > By default all days are included, select here the days that sleep or shutdown is not effective. This setting works in combination with excluded hours.
 :end
 
@@ -151,7 +151,7 @@ _(Excluded hours)_:
   <?endfor;?>
   </select>
 
-:help1003
+:s3sleep_excluded_hours_plug:
 > By default all hours are included, select here the hours that sleep or shutdown is not effective. This setting works in combination with excluded days.
 :end
 
@@ -164,7 +164,7 @@ _(Wait for array inactivity)_:
 <?endif;?>
   </select>
 
-:help1004
+:s3sleep_inactivity_plug:
 > Select whether the array must be completely inactive (all disks are spun down) before sleep or shutdown can take place.
 >
 > The Cache disk can be included or excluded in this setting, e.g. when the Cache disk is used continuously and never spins down.
@@ -177,7 +177,7 @@ _(Device activity monitoring)_:
   <?=mk_option($cfg['hdparm'], "-f 2", _("Counters only"))?>
   </select>
 
-:help1005
+:s3sleep_activity_plug:
 > *Status* monitors the hardware status of the device
 >
 > *Counters* monitors the read/write counters of the device
@@ -192,7 +192,7 @@ _(Monitor disks outside array)_:
   <?endforeach;?>
   </select>
 
-:help1006
+:s3sleep_outside_plug:
 > If there any other disks present outside the array, then these can be monitored separately.
 :end
 
@@ -200,7 +200,7 @@ _(Monitor disks outside array)_:
 _(Extra delay after array inactivity)_:
 : <input type="text" name="timeout" maxlength="2" value="<?=$cfg['timeout']?>" class="narrow" placeholder="30">
 
-:help1007
+:s3sleep_extra_delay_plug:
 > Specify an additional delay after the array has become inactive. Value may be 0 for no delay.
 :end
 
@@ -210,7 +210,7 @@ _(Wait for network inactivity)_:
   <?=mk_option($cfg['checkTCP'], "-n", _("Yes"))?>
   </select>
 
-:help1008
+:s3sleep_network_plug:
 > Select whether network activity must be taken as a condition before going to sleep or shutdown.
 :end
 
@@ -221,7 +221,7 @@ _(Ethernet interface)_:
   <?endforeach;?>
   </select>
 
-:help1009
+:s3sleep_ethernet_plug:
 > In case of multiple network interfaces, select here the interface to use for checking the network activity.
 :end
 
@@ -234,14 +234,14 @@ _(Network idle threshold)_:
   <?=mk_option($cfg['idle'], "125000", _('Mega traffic')." [1 Mb/s]")?>
   </select>
 
-:help1010
+:s3sleep_idle_plug:
 > Network activity is measured under different thresholds. Ranging from completely silent to megabit traffic. Experiment with this setting to find to right balance for your situation.
 :end
 
 _(Wait for host inactivity)_ (_(IP address)_):
 : <input type="text" name="pingIP" maxlength="200" value="<?=$cfg['pingIP']?>" class="narrow" placeholder="_(no host)_">
 
-:help1011
+:s3sleep_host_plug:
 > Select whether external hosts need to be monitored and non-responding as a sleep or shutdown condition.
 >
 > External hosts are given by their IP address, use a comma to separate multiple IP addresses. As long as one of the external hosts responds to a ping then sleep/shutdown won't be invoked.
@@ -255,7 +255,7 @@ _(Wait for user login inactivity)_:
   <?=mk_option($cfg['login'], "-l -L", _("Local & Remote"))?>
   </select>
 
-:help1012
+:s3sleep_login_plug:
 > Select whether local (console) or remote (telnet or ssh) logged in users need to log out first before sleep or shutdown can proceed.
 :end
 
@@ -269,7 +269,7 @@ _(Set WOL options before sleep)_:
   <?endforeach;?>
   </select>
 
-:help1013
+:s3sleep_wol_plug:
 > Set additional WOL options for proper support of S3 sleep. Refer to your system documentation for possibilities.
 :end
 
@@ -277,14 +277,14 @@ _(Set WOL options before sleep)_:
 _(Custom commands before sleep)_:
 : <textarea name="preRun" rows="3" columns="120" wrap="off" placeholder="_(Enter custom commands here)_"><?=urldecode($cfg['preRun'])?></textarea>
 
-:help1014
+:s3sleep_before_plug:
 > Any extra commands before sleep or shutdown is invoked can be placed here. This maybe cleanup or other desirable actions.
 :end
 
 _(Custom commands after wake-up)_:
 : <textarea name="postRun" rows="3" columns="120" wrap="off" placeholder="_(Enter custom commands here)_"><?=urldecode($cfg['postRun'])?></textarea>
 
-:help1015
+:s3sleep_after_plug:
 > Any extra commands after wake-up of sleep can be placed here. This might be helpful for restoring a previous situation.
 :end
 
@@ -294,7 +294,7 @@ _(Force gigabit speed after wake-up)_:
   <?=mk_option($cfg['forceGb'], "-F", _("Yes"))?>
   </select>
 
-:help1016
+:s3sleep_gigabit_plug:
 > Leave this default OFF, in case the interface doesn't start properly after wake-up, see if forcing this setting helps.
 :end
 
@@ -304,7 +304,7 @@ _(DHCP renewal after wake-up)_:
   <?=mk_option($cfg['dhcpRenew'], "-R", _("Yes"))?>
   </select>
 
-:help1017
+:s3sleep_dhcp_plug:
 > Leave this default OFF, in case the system doesn't start properly after wake-up, see if forcing this setting helps.
 :end
 
@@ -317,7 +317,7 @@ _(Enable DEBUG mode)_:
   <?=mk_option($cfg['debug'], "4", _("Console"))?>
   </select><span id="note" style="color:red;display:none">_(Log will be stored in **/boot/logs/s3_sleep.log**)_</span>
 
-:help1018
+:s3sleep_debug_plug:
 > By default debug is OFF. Use this setting only in case of troubleshooting, it will generate additional messages to report the various stages within the s3_sleep script.
 :end
 

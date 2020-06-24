@@ -70,7 +70,7 @@ _(SSD TRIM schedule)_:
   <?endfor;?>
   </select>
 
-:help1
+:trim_schedule_plug:
 > Choose a trim schedule ranging from hourly, daily, weekly and monthly.
 >
 > The interval determines how often SSD trim will run, it runs in the background.
@@ -79,12 +79,12 @@ _(SSD TRIM schedule)_:
 _(Day of the week)_:
 : <select name="day">
   <?for ($d=0; $d<count($days); $d++):?>
-  <?=mk_option($cron['day'], strval($d), my_lang($days[$d]))?>
+  <?=mk_option($cron['day'], strval($d), _($days[$d]),0)?>
   <?endfor;?>
   <?=mk_option($cron['day'], "*", "--------", _("disabled"))?>
   </select>
 
-:help2
+:trim_day_of_the_week_plug:
 > Choose a day when the weekly schedule is selected. Otherwise disabled.
 :end
 
@@ -96,7 +96,7 @@ _(Day of the month)_:
   <?=mk_option($cron['dotm'], "*", "--------", _("disabled"))?>
   </select>
 
-:help3
+:trim_day_of_the_month_plug:
 > Choose a date when the monthly schedule is selected. Otherwise disabled.
 :end
 
@@ -120,7 +120,7 @@ _(Time of the day)_:
   <?=mk_option($cron['hour'], "*/8", _("Every 8 hours"))?>
   </select></span>
 
-:help4
+:trim_time_of_the_day_plug:
 > When an hourly schedule is selected this will set the interval in hours. An interval always starts on the whole hour (minute 0).
 >
 > For the other schedules choose here the time of the day trim should start.

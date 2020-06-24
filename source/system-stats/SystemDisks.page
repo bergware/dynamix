@@ -57,7 +57,7 @@ foreach ($disks as $disk) {
     $arraysize += $disk['size']*1024;
     $arrayfree += $disk['fsFree']*1024;
   case 'Flash':
-    $series[] = "'".my_lang(my_disk($disk['name']),3)."'";
+    $series[] = "'"._(my_disk($disk['name']),3)."'";
     $sizes[] = "'".my_scale($disk['size']*1024,$unit,-1,-1)." $unit'";
     $rows++;
     break;

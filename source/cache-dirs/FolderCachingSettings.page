@@ -73,7 +73,7 @@ $(function() {
 <input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&diskIdleTimer=W&scanTimeoutIdle=X&scanTimeoutBusy=Y&scanTimeoutStable=Z&ulimit=U&cachePressure=p&minDepth=c">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
-:help1001
+:cachedirs_info_plug:
 > Folder Caching Info
 >
 > The folder caching (cache_dirs) reads directories continously to keep them in memory.
@@ -93,7 +93,7 @@ _(Folder caching function)_:
   <?=mk_option($cfg['service'], "1", _("Enabled"))?>
   </select></td>
 
-:help1002
+:cachedirs_function_plug:
 > Select whether folder caching is enabled or disabled. Caching will only effectively occur when the array is started.
 > The caching function is automatically restarted or stopped when the array goes online or offline.
 :end
@@ -101,7 +101,7 @@ _(Folder caching function)_:
 _(Cache pressure of directories on system)_:
 : <input type="text" name="cachePressure" class="narrow" style="margin-right:20px" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10"><span class="orange-text">_(Important - check HELP if disks spin up)_</span>
 
-:help1003
+:cachedirs_pressure_plug:
 > Set cache_pressure to NN (default = 10). A value of 0 means never reclaim cache.
 >
 > A value of 1 works great for many users. If your disks spin up or cache_dirs logging indicates it frequently has accessed disks after scan, try lowering cache-pressure to 1. If the system runs out of memory increase cache-pressure.
@@ -119,7 +119,7 @@ _(Suspend during 'Mover' process)_:
   <?=mk_option($cfg['suspend'], "", _("Yes"))?>
   </select>
 
-:help1004
+:cachedirs_suspend_plug:
 > Stop caching while the mover is running to avoid conflicts. When using adaptive depth it will probably work well NO.
 > With fixed depth it will almost certainly put less load on the disks to choose YES.
 :end
@@ -130,7 +130,7 @@ _(Scan user shares (/mnt/user))_:
   <?=mk_option($cfg['shares'], "-u", _("Yes"))?>
   </select><span class="orange-text">_(Important - check HELP if disks spin up)_</span>
 
-:help1005
+:cache_dirs_shares_plug:
 > User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 but is reported by numerous users to be necessary to avoid disks spinning up when accessing directories.
 :end
 
@@ -141,7 +141,7 @@ _(Included folders)_:
   <?endforeach;?>
   </select>
 
-:help1006
+:cachedirs_included_folders_plug:
 > The dropdown menu shows all available folders, by default all folders are included. Select here the restricted list of folders to be included.
 >
 > If an included folder is excluded, then the folder gets excluded. It is simplest to not use includes and excludes at the same time.
@@ -154,7 +154,7 @@ _(Excluded folders)_:
   <?endforeach;?>
   </select>
 
-:help1007
+:cachedirs_excluded_folders_plug:
 > The dropdown menu shows all available folders, by default no folders are excluded. Select here any folders to be excluded.
 >
 > It is possible to exclude an included folder. It is simplest to not use includes and excludes at the same time.
@@ -166,7 +166,7 @@ _(Use Adaptive depth)_:
   <?=mk_option($cfg['adaptive'], "0", _("Fixed"))?>
   </select>
 
-:help1008
+:cachedirs_adaptive_depth_plug:
 > If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth.
 > It will start at depth 1 and keep increasing the scan depth towards maximum level as long as scans do not take too long to complete (see scan timeout).
 > If adaptive is disabled then cache_dirs will always scan to the max level.
@@ -175,28 +175,28 @@ _(Use Adaptive depth)_:
 _(Minimum level depth)_ (_(for adaptive depth)_):
 : <input type="text" name="minDepth" class="narrow" maxlength="3" value="<?=$cfg['minDepth']?>" placeholder="4">
 
-:help1009
+:cachedirs_min_level_plug:
 > Sets the minimum folder level for the adaptive scan (user-share > child folder > grand child is two levels). Default is 4.
 :end
 
 _(Maximum level depth)_:
 : <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="_(unlimited)_">
 
-:help1010
+:cachedirs_max_level_plug:
 > Sets the maximum folder levels for the scan (parent > child folder > grand child). Set to 'unlimited' (or 0) to remove maximum
 :end
 
 _(Disk Idle Timer)_ (_(sec)_):
 : <input type="text" name="diskIdleTimer" class="narrow" maxlength="4" value="<?=$cfg['diskIdleTimer']?>" placeholder="60">
 
-:help1011
+:cachedirs_idle_timer_plug:
 > When the disks have been idle this long, cache_dirs adaptive scan starts working towards building the cache.
 :end
 
 _(Scan timeout for a scan during disk-idle period)_ (_(sec)_):
 : <input type="text" name="scanTimeoutIdle" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutIdle']?>" placeholder="150">
 
-:help1012
+:cachedirs_timeout_scan_plug:
 > Scan timeout is the maximum duration that a single scan through all directories at the current level af depth (which may change adaptively).
 > Increase it if cache_dirs fails in caching all your files. This timeout is always used if adaptive is disabled.
 :end
@@ -204,14 +204,14 @@ _(Scan timeout for a scan during disk-idle period)_ (_(sec)_):
 _(Scan timeout for a scan during initial startup or less-idle period)_ (_(sec)_):
 : <input type="text" name="scanTimeoutBusy" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutBusy']?>" placeholder="30">
 
-:help1013
+:cachedirs_timeout_initial_plug:
 > Increase it if you want cache_dirs too give more time in initial scan, and when filesystem may be busy.
 :end
 
 _(Scan timeout for a scan when all directories have been succesfully cached)_ (_(sec)_):
 : <input type="text" name="scanTimeoutStable" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutStable']?>" placeholder="20">
 
-:help1014
+:cachedirs_timeout_cached_plug:
 > Decrease it if you want cache_dirs to put less load on system when cache is evicted from memory, and disks are not idle.
 > Increase if you want cache_dirs to have a greater chance af getting directories back into memory.
 :end
@@ -219,14 +219,14 @@ _(Scan timeout for a scan when all directories have been succesfully cached)_ (_
 _(Minimum interval between folder scans)_ (_(sec)_):
 : <input type="text" name="minimum" class="narrow" maxlength="3" value="<?=$cfg['minimum']?>" placeholder="1">
 
-:help1015
+:cachedirs_min_interval_plug:
 > Tweaking of the caching interval can be done for slower systems. Default value is 1 second, should be alright for most systems.
 :end
 
 _(Maximum interval between folder scans)_ (_(sec)_):
 : <input type="text" name="maximum" class="narrow" maxlength="3" value="<?=$cfg['maximum']?>" placeholder="10">
 
-:help1016
+:cachedirs_max_interval_plug:
 > Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
 :end
 
@@ -236,7 +236,7 @@ _(Run scan of each disk in a separate thread)_:
   <?=mk_option($cfg['mulithreaded'], "-T", _("No"))?>
   </select>
 
-:help1017
+:cachedirs_scan_disk_plug:
 > Each disk will be scanned in a separate thread, so the disks will be read concurrently. If user share is also scanned the user
 > share will be scanned in a single thread after all disks scans are completed, to avoid thrashing disks.
 :end
@@ -244,7 +244,7 @@ _(Run scan of each disk in a separate thread)_:
 _(Limit the memory available to the shell in which the script runs (increase if it dies))_:
 : <input type="text" name="ulimit" class="narrow" maxlength="6" value="<?=$cfg['ulimit']?>" placeholder="50000">
 
-:help1018
+:cachedirs_limit_memory_plug:
 > set ulimit to NN to limit memory used by script (default=50000), '-U 0' sets no ulimit at all and inherits the shells default).
 :end
 
@@ -254,7 +254,7 @@ _(Logging)_:
   <?=mk_option($cfg['log'], "on", _("Enabled"))?>
   </select></td>
 
-:help1019
+:cachedirs_logging_plug:
 > Select whether logging is enabled or disabled. Logging will be made to /var/log/cache_dirs.log and /var/log/cache_dirs_lost_cache.csv.
 > Be wary that the cache_dirs logs are placed in memory on unRAID and are not automatically rolled.
 :end
@@ -263,7 +263,7 @@ _(User defined options)_:
 : <input id="pin" type="text" name="other" class="narrow" maxlength="200" value="<?=$cfg['other']?>" placeholder="_(User defined options)_"><span class="orange-text">_(Check HELP for filter example)_</span>
 _(or see)_ <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">_(Unraid forum)_</a></u>
 
-:help1020
+:cachedirs_user_defined_plug:
 > The cache_dirs script has additional options which may be used.
 > Refer to the online documentation to use these as needed,
 > or see the cache_dirs script itself located under /usr/local/emhttp/plugins/dynamix.cache.dirs/scripts/cache_dirs
