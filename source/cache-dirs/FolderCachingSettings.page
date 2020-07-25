@@ -106,6 +106,8 @@ _(Cache pressure of directories on system)_:
 >
 > A value of 1 works great for many users. If your disks spin up or cache_dirs logging indicates it frequently has accessed disks after scan, try lowering cache-pressure to 1. If the system runs out of memory increase cache-pressure.
 >
+> If CPU and disks is heavily affected by cache_dirs on frequent intervals this is also an indication that cache_dirs has to rescan everything.
+>
 > Warning: a value of 0 will cause kernel never to release the memory of directories, and if too little memory is available,
 > it will cause the system to crash. cache_dirs does not reset the cachePressure after quitting,
 > to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100', or run cache-dirs with cache_pressure 100.
