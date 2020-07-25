@@ -1,0 +1,171 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.wireguard">
+<!ENTITY author    "Bergware">
+<!ENTITY version   "2020.07.10b">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY source    "/boot/config/plugins/&name;/&name;">
+<!ENTITY MD5       "d701c5e07e7dc4810d82f2694fc251e4">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
+
+<CHANGES>
+##&name;
+
+###&version;
+- added multi-language handling
+
+###2020.02.23
+- added remarks for "type of access" selection
+- added remark for docker custom networks
+- restricted "Server hub &amp; spoke access" to tunnel addresses only
+
+###2020.01.27
+- removed unused confirmation setting
+
+###2020.01.25
+- fixed wrong firewall rules in iptables
+
+###2020.01.17
+- re-arranged buttons
+
+###2020.01.03
+- updated firewall rules and help text
+
+###2020.01.02
+- Added rule "deny" or "allow" for firewall function
+
+###2019.12.30
+- Added local tunnel firewall. This is used to restrict remote access to the specified addresses
+- Improved IPv6 support
+
+###2019.12.28
+- Removed debug code
+
+###2019.12.27
+- Fixed regression errors
+- Improved field logic
+
+###2019.12.26
+- Fixed regression error: Apply sometimes unavailable
+- Fixed VPN tunneled access
+- Set DNS as "not used" instead of disabled
+
+###2019.12.25
+- Added IPv4 only, IPv6 only and IPv4 + IPv6 tunnels
+- Miscellaneous updates and corrections
+
+###2019.11.22
+- Validate FQDN against all top level domains (TLD) defined by IANA - version 2019122100
+
+###2019.11.12
+- Fixed import function, skip comments
+
+###2019.11.10
+- Revised tunnel active/inactive detection
+
+###2019.11.03
+- Accept TLD names up to 8 characters
+
+###2019.10.26
+- Suppress remarks for "VPN tunneled access"
+- Suppress routing remark when server is endpoint
+- Disable (forced) "Local server uses NAT" for "VPN tunneled access"
+
+###2019.10.25
+- Change label "Local gateway uses LAN" to "Local server uses LAN"
+- Updated help textobject
+- Added remark when local router needs additional route
+- Updated iptables NAT rules
+
+###2019.10.21
+- Made UPnP and NAT settings unrelated
+- Disabled Peer DNS server for "VPN tunneled access"
+- Various updates + corrections
+
+###2019.10.20
+- Added DNS server field for peers
+
+###2019.10.13
+- Fixed missing address when "Remote tunneled access" is selected
+
+###2019.10.12
+- Allow multiple Unraid servers to use UPnP
+- Minimum required Unraid version is 6.8.0-rc1
+
+###2019.09.11
+- Fix alternating active/inactive state when UPnP fails
+
+###2019.09.08
+- Force advanced mode in "server-to-server" and "LAN-to-LAN" connections
+- Make HELP unconditional
+- Add auto address calculation
+
+###2019.09.03
+- initial release
+</CHANGES>
+
+<!--
+Copyright 2019, Bergware International
+Dynamix WireGuard - Impatience is a virtue!
+-->
+
+<!-- README FILE -->
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<INLINE>
+**Dynamix WireGuard**
+
+This package contains GUI support for WireGuard.
+WireGuard allows to set up VPN tunnels for various requirements, such as remote server access or Internet over VPN.
+</INLINE>
+</FILE>
+
+<!-- PRE-INSTALL SCRIPT -->
+<FILE Run="/bin/bash">
+<INLINE>
+# Remove old 'source' packages
+MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
+if [[ $MD5 != &MD5; ]]; then
+  rm -f &source;.txz
+fi
+
+# Remove wgX files
+rm -f /usr/local/emhttp/webGui/WG*.page
+</INLINE>
+</FILE>
+
+<!-- SOURCE PACKAGE -->
+<FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<MD5>&MD5;</MD5>
+</FILE>
+
+<!-- POST-INSTALL SCRIPT -->
+<FILE Run="/bin/bash">
+<INLINE>
+echo ""
+echo "-----------------------------------------------------------"
+echo " Plugin &name; is installed."
+echo " This plugin requires Dynamix webGui to operate"
+echo " Copyright 2019, Bergware International"
+echo " Version: &version;"
+echo ""
+echo "-----------------------------------------------------------"
+echo ""
+</INLINE>
+</FILE>
+
+<!-- REMOVE SCRIPT -->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+# Remove plugin related files
+rm -rf /boot/config/plugins/&name;
+
+# Uninstall the 'source' package
+removepkg &name;
+</INLINE>
+</FILE>
+
+</PLUGIN>

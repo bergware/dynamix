@@ -1,21 +1,32 @@
-<?xml version='1.0' standalone='yes'?>
-
+<?xml version="1.0" standalone="yes"?>
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.system.stats">
-<!ENTITY author    "Bergware">
-<!ENTITY version   "2019.01.31c">
-<!ENTITY launch    "Settings/StatSettings">
+<!ENTITY name "dynamix.system.stats">
+<!ENTITY author "Bergware">
+<!ENTITY version "2020.06.21">
+<!ENTITY launch "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
-<!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "8b493ff75c0eda1bc32928cb713b8426">
+<!ENTITY source "/boot/config/plugins/&name;/&name;">
+<!ENTITY MD5 "19d183fc3e5a26b21bacc2162d7881ae">
 ]>
-
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.7.0-rc1" icon="area-chart">
-
-<CHANGES>
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.7.0-rc1" icon="area-chart" support="http://lime-technology.com/forum/index.php?topic=36543.0">
+  <CHANGES>
 ##&name;
 
 ###&version;
+- fixed regression error
+
+###2020.06.20
+- updated multi-language support
+
+###2020.05.10
+- updated multi-language support
+
+###2020.03.31
+- added multi-language support
+- added multi cache pool support
+- minor updates
+
+###2019.01.31
 - fixed memory graph
 - updated font-awesome icons
 - fixed bar color regression
@@ -151,20 +162,19 @@
 ###2014.11.28
 - initial release for unRAID v6
 </CHANGES>
-
-<!--
-Copyright 2012-2019, Bergware International
+  <!--
+Copyright 2020, Bergware International
 Dynamix System Stats - disk and system usage graphs
 -->
+  <!-- PRE-INSTALL SCRIPT -->
 
-<!-- PRE-INSTALL SCRIPT -->
 <FILE Run="/bin/bash">
 <INLINE>
 # Remove legacy cron entry (if existing)
 crontab -l|sed '/^# System data collection/d;/\/usr\/lib\/sa\/sa1/d'|crontab -
 
 # Remove old 'source' packages
-MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
+MD5=$(md5sum &source;.txz 2&gt;/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f &source;*.txz
 fi
@@ -190,13 +200,13 @@ chmod 755 $new
 # Convert legacy files
 if [[ -d $old ]]; then
   for sa in $old/sa* ; do
-    /usr/bin/sadf -c $sa >$new/$(basename $sa) 2>/dev/null
+    /usr/bin/sadf -c $sa &gt;$new/$(basename $sa) 2&gt;/dev/null
   done
   rm -rf $old
 elif [[ $(ls -A $new|wc -l) -gt 0 ]]; then
   mkdir -p $tmp
   for sa in $new/sa* ; do
-    /usr/bin/sadf -c $sa >$tmp/$(basename $sa) 2>/dev/null
+    /usr/bin/sadf -c $sa &gt;$tmp/$(basename $sa) 2&gt;/dev/null
   done
   mv -f $tmp/sa* $new
   rm -rf $tmp
@@ -205,8 +215,8 @@ fi
 # Create cron entry
 cron=/boot/config/plugins/&name;/sysstats.cron
 if [[ ! -f $cron ]]; then
-  echo '# Generated system data collection schedule:' >$cron
-  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;> /dev/null\n' >>$cron
+  echo '# Generated system data collection schedule:' &gt;$cron
+  echo -e '*/1 * * * * /usr/local/emhttp/plugins/&name;/scripts/sa1 1 1 &amp;&gt; /dev/null\n' &gt;&gt;$cron
   /usr/local/sbin/update_cron
 fi
 
@@ -214,7 +224,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2012-2019, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -234,5 +244,4 @@ removepkg &name;
 /usr/local/sbin/update_cron
 </INLINE>
 </FILE>
-
 </PLUGIN>

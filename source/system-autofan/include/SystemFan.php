@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -9,31 +9,33 @@
  * all copies or substantial portions of the Software.
  *
  * Plugin development contribution by gfjardim
+ *
+ * Version log:
+ * Version 1.6   Modified by InfinityMod - added multifan support
  */
 ?>
 <?
-function scan_dir($dir, $type = "") {
-  $out = array();
-  foreach (array_diff(scandir($dir), array('.','..')) as $f){
-    $out[] = realpath($dir).'/'.$f ;
-  }
+$plugin = 'dynamix.system.autofan';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+
+function scan_dir($dir) {
+  $out = [];
+  foreach (array_diff(scandir($dir), ['.','..']) as $f) $out[] = realpath($dir).'/'.$f;
   return $out;
 }
 function list_fan() {
-  $out = array();
+  $out = [];
   exec("find /sys/devices -type f -iname 'fan[0-9]_input' -exec dirname \"{}\" +|uniq", $chips);
   foreach ($chips as $chip) {
-    $name = is_file("$chip/name") ? file_get_contents("$chip/name") : "";
-    foreach (preg_grep("/fan\d+_input/", scan_dir($chip)) as $fan) {
-      $out[] = array('chip'=>$name, 'name'=>end(explode('/',$fan)), 'sensor'=>$fan , 'rpm'=>file_get_contents($fan));
-    }
+    $name = is_file("$chip/name") ? file_get_contents("$chip/name") : false;
+    if ($name) foreach (preg_grep("/fan\d+_input/", scan_dir($chip)) as $fan) $out[] = ['chip'=>$name, 'name'=>end(explode('/',$fan)), 'sensor'=>$fan , 'rpm'=>file_get_contents($fan)];
   }
   return $out;
 }
 
 switch ($_GET['op']) {
 case 'detect':
-if (is_file( $_GET['pwm'])) {
+if (is_file($_GET['pwm'])) {
   $pwm = $_GET['pwm'];
   $default_method = file_get_contents($pwm."_enable");
   $default_rpm    = file_get_contents($pwm);
@@ -47,7 +49,7 @@ if (is_file( $_GET['pwm'])) {
   file_put_contents($pwm, $default_rpm);
   file_put_contents($pwm."_enable", $default_method);
   for ($i=0; $i < count($final_fans); $i++) {
-    if (($final_fans[$i]['rpm'] - $init_fans[$i]['rpm'])>10) {
+    if (($final_fans[$i]['rpm'] - $init_fans[$i]['rpm'])>0) {
       echo $init_fans[$i]['sensor'];
       break;
     }
@@ -55,9 +57,8 @@ if (is_file( $_GET['pwm'])) {
 }
 break;
 case 'pwm':
-if (is_file( $_GET['pwm']) && is_file( $_GET['fan'])) {
-  $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-  $autofan = "$docroot/plugins/dynamix.system.autofan/scripts/rc.autofan";
+if (is_file($_GET['pwm']) && is_file($_GET['fan'])) {
+  $autofan = "$docroot/plugins/$plugin/scripts/rc.autofan";
   exec("$autofan stop >/dev/null");
   $pwm = $_GET['pwm'];
   $fan = $_GET['fan'];
@@ -76,9 +77,7 @@ if (is_file( $_GET['pwm']) && is_file( $_GET['fan'])) {
     sleep(2);
     if ((file_get_contents($fan) - $min_rpm) > 15) {
       # Debounce
-      for ($i=0; $i <= 10; $i++) { 
-        if (file_get_contents($fan) == 0) {$is_lowest = FALSE; break;} else {$is_lowest = TRUE; sleep(1);};
-      }
+      for ($i=0; $i <= 10; $i++) if (file_get_contents($fan) == 0) {$is_lowest = false; break;} else {$is_lowest = true; sleep(1);};
       if ($is_lowest) {echo $val; break;}
     }
   }

@@ -3,7 +3,7 @@ Title="Folder Caching"
 Icon="dynamix.cache.dirs.png"
 ---
 <?PHP
-/* Copyright 2012-2018, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -15,47 +15,55 @@ Icon="dynamix.cache.dirs.png"
 ?>
 <?
 $plugin = 'dynamix.cache.dirs';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/FolderCachingSettings.page"))?>
+<?else:?>
+<?
 $cfg = parse_plugin_cfg($plugin,false,INI_SCANNER_RAW);
 
-$sName = "cache_dirs";
-$fName = "$docroot/plugins/$plugin/scripts/$sName";
+$fName  = "$docroot/plugins/$plugin/scripts/cache_dirs";
 $config = "/etc/cache_dirs.conf";
-$cache = isset($disks['cache']) ? '/mnt/cache' : '';
+$pools  = $pools ?? ['cache'];
+$search = ['/mnt/disk[0-9]*'];
 
-exec("find /mnt/disk* $cache -type d -maxdepth 1 -mindepth 1 -exec basename {} \;|uniq|sort -u", $folders);
+foreach ($pools as $pool) if (isset($disks[$pool])) $search[] = "/mnt/$pool";
+$search = implode(' ',$search);
+
+exec("find $search -type d -maxdepth 1 -mindepth 1 -exec basename \"{}\" \;|sort -u|uniq", $folders);
 ?>
 <script>
 function prepareCache(form) {
 // Simulate a single input field
-  var exclude = '';
+  var exclude = [];
   for (var i=0,item; item=form.exclude.options[i]; i++) {
     if (item.selected) {
-      if (exclude.length) exclude += ',';
-      exclude += item.value;
+      exclude.push(item.value);
       item.selected = false;
     }
   }
   item = form.exclude.options[0];
-  item.value = exclude;
+  item.value = exclude.join(',');
   item.selected = true;
 // Simulate a single input field
-  var include = '';
+  var include = [];
   for (var i=0,item; item=form.include.options[i]; i++) {
     if (item.selected) {
-      if (include.length) include += ',';
-      include += item.value;
+      include.push(item.value);
       item.selected = false;
     }
   }
   item = form.include.options[0];
-  item.value = include;
+  item.value = include.join(',');
   item.selected = true;
 }
 $(function() {
   var size = Math.max(window.innerHeight-$('#pin').offset().top-150,150);
-  $('#s1').dropdownchecklist({maxDropHeight:size, width:300, explicitClose:'...close'});
-  $('#s2').dropdownchecklist({maxDropHeight:size, width:300, explicitClose:'...close'});
-  showStatus('<?=$sName?>');
+  $('#s1').dropdownchecklist({maxDropHeight:size, width:166, explicitClose:'..._(close)_'});
+  $('#s2').dropdownchecklist({maxDropHeight:size, width:166, explicitClose:'..._(close)_'});
+  showStatus('cache_dirs');
 });
 </script>
 <form markdown="1" name="cache_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareCache(this)">
@@ -65,6 +73,7 @@ $(function() {
 <input type="hidden" name="#prefix" value="minimum=m&maximum=M&exclude=e&include=i&log=l&diskIdleTimer=W&scanTimeoutIdle=X&scanTimeoutBusy=Y&scanTimeoutStable=Z&ulimit=U&cachePressure=p&minDepth=c">
 <span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
+:cachedirs_info_plug:
 > Folder Caching Info
 >
 > The folder caching (cache_dirs) reads directories continously to keep them in memory.
@@ -76,19 +85,23 @@ $(function() {
 > When it detects a cache-miss (slow scan time) it will reduce the depth until disks are idle again,
 > but will still be at risk of putting load on the disks for a minute or two until the program gives up and waits for idle disks.
 > The less files the cache needs to hold, the less likely it is that the program spins up disks.
+:end
 
-Folder caching function:
-: <select name="service" size="1">
-  <?=mk_option($cfg['service'], "0", "Disabled")?>
-  <?=mk_option($cfg['service'], "1", "Enabled")?>
+_(Folder caching function)_:
+: <select name="service">
+  <?=mk_option($cfg['service'], "0", _("Disabled"))?>
+  <?=mk_option($cfg['service'], "1", _("Enabled"))?>
   </select></td>
 
+:cachedirs_function_plug:
 > Select whether folder caching is enabled or disabled. Caching will only effectively occur when the array is started.
 > The caching function is automatically restarted or stopped when the array goes online or offline.
+:end
 
-Cache pressure of directories on system:
-: <input type="text" name="cachePressure" class="narrow" style="margin-right:20px" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10"><span class="strong orange-text">Important - check HELP if disks spin up</span>
+_(Cache pressure of directories on system)_:
+: <input type="text" name="cachePressure" class="narrow" style="margin-right:20px" maxlength="4" value="<?=$cfg['cachePressure']?>" placeholder="10"><span class="orange-text">_(Important - check HELP if disks spin up)_</span>
 
+:cachedirs_pressure_plug:
 > Set cache_pressure to NN (default = 10). A value of 0 means never reclaim cache.
 >
 > A value of 1 works great for many users. If your disks spin up or cache_dirs logging indicates it frequently has accessed disks after scan, try lowering cache-pressure to 1. If the system runs out of memory increase cache-pressure.
@@ -98,125 +111,159 @@ Cache pressure of directories on system:
 > to reset the cache-pressure execute 'sudo sysctl vm.vfs_cache_pressure=100', or run cache-dirs with cache_pressure 100.
 >
 > See 'vfs_cache_pressure' in [kernel.org](https://www.kernel.org/doc/Documentation/sysctl/vm.txt).
+:end
 
-Suspend during 'Mover' process:
-: <select name="suspend" size="1">
-  <?=mk_option($cfg['ssupend'], "-S", "No")?>
-  <?=mk_option($cfg['suspend'], "", "Yes")?>
+_(Suspend during 'Mover' process)_:
+: <select name="suspend">
+  <?=mk_option($cfg['ssupend'], "-S", _("No"))?>
+  <?=mk_option($cfg['suspend'], "", _("Yes"))?>
   </select>
 
+:cachedirs_suspend_plug:
 > Stop caching while the mover is running to avoid conflicts. When using adaptive depth it will probably work well NO.
 > With fixed depth it will almost certainly put less load on the disks to choose YES.
+:end
 
-Scan user shares (/mnt/user):
-: <select name="shares" size="1" style="margin-right:20px">
-  <?=mk_option($cfg['shares'], "", "No")?>
-  <?=mk_option($cfg['shares'], "-u", "Yes")?>
-  </select><span class="strong orange-text">Important - check HELP if disks spin up</span>
+_(Scan user shares (/mnt/user))_:
+: <select name="shares" style="margin-right:20px">
+  <?=mk_option($cfg['shares'], "", _("No"))?>
+  <?=mk_option($cfg['shares'], "-u", _("Yes"))?>
+  </select><span class="orange-text">_(Important - check HELP if disks spin up)_</span>
 
+:cache_dirs_shares_plug:
 > User share /mnt/user will also be scanned in addition to /mnt/disk* and /mnt/cache. This seems to increase CPU usage by a factor of x10 but is reported by numerous users to be necessary to avoid disks spinning up when accessing directories.
+:end
 
-Included folders:
-: <select id="s2" name="include" size="1" multiple style="display:none">
+_(Included folders)_:
+: <select id="s2" name="include" style="display:none" multiple>
   <?foreach ($folders as $folder):?>
   <?=mk_option_check($cfg['include'], $folder, $folder)?>
   <?endforeach;?>
   </select>
 
+:cachedirs_included_folders_plug:
 > The dropdown menu shows all available folders, by default all folders are included. Select here the restricted list of folders to be included.
 >
 > If an included folder is excluded, then the folder gets excluded. It is simplest to not use includes and excludes at the same time.
+:end
 
-Excluded folders:
-: <select id="s1" name="exclude" size="1" multiple style="display:none">
+_(Excluded folders)_:
+: <select id="s1" name="exclude" style="display:none" multiple>
   <?foreach ($folders as $folder):?>
   <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
   <?endforeach;?>
   </select>
 
+:cachedirs_excluded_folders_plug:
 > The dropdown menu shows all available folders, by default no folders are excluded. Select here any folders to be excluded.
 >
 > It is possible to exclude an included folder. It is simplest to not use includes and excludes at the same time.
+:end
 
-Use Adaptive depth:
-: <select name="adaptive" size="1">
-  <?=mk_option($cfg['adaptive'], "1", "Adaptive")?>
-  <?=mk_option($cfg['adaptive'], "0", "Fixed")?>
+_(Use Adaptive depth)_:
+: <select name="adaptive">
+  <?=mk_option($cfg['adaptive'], "1", _("Adaptive"))?>
+  <?=mk_option($cfg['adaptive'], "0", _("Fixed"))?>
   </select>
 
+:cachedirs_adaptive_depth_plug:
 > If adaptive is enabled the depth will be automatically adjusted but will never exceed max level depth.
 > It will start at depth 1 and keep increasing the scan depth towards maximum level as long as scans do not take too long to complete (see scan timeout).
 > If adaptive is disabled then cache_dirs will always scan to the max level.
+:end
 
-Minimum level depth (for adaptive depth):
+_(Minimum level depth)_ (_(for adaptive depth)_):
 : <input type="text" name="minDepth" class="narrow" maxlength="3" value="<?=$cfg['minDepth']?>" placeholder="4">
 
+:cachedirs_min_level_plug:
 > Sets the minimum folder level for the adaptive scan (user-share > child folder > grand child is two levels). Default is 4.
+:end
 
-Max level depth:
-: <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="unlimited">
+_(Maximum level depth)_:
+: <input type="text" name="depth" class="narrow" maxlength="3" value="<?=$cfg['depth']?>" placeholder="_(unlimited)_">
 
+:cachedirs_max_level_plug:
 > Sets the maximum folder levels for the scan (parent > child folder > grand child). Set to 'unlimited' (or 0) to remove maximum
+:end
 
-Disk Idle Timer (sec):
+_(Disk Idle Timer)_ (_(sec)_):
 : <input type="text" name="diskIdleTimer" class="narrow" maxlength="4" value="<?=$cfg['diskIdleTimer']?>" placeholder="60">
 
+:cachedirs_idle_timer_plug:
 > When the disks have been idle this long, cache_dirs adaptive scan starts working towards building the cache.
+:end
 
-Scan timeout for a scan during disk-idle period (sec):
+_(Scan timeout for a scan during disk-idle period)_ (_(sec)_):
 : <input type="text" name="scanTimeoutIdle" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutIdle']?>" placeholder="150">
 
+:cachedirs_timeout_scan_plug:
 > Scan timeout is the maximum duration that a single scan through all directories at the current level af depth (which may change adaptively).
 > Increase it if cache_dirs fails in caching all your files. This timeout is always used if adaptive is disabled.
+:end
 
-Scan timeout for a scan during initial startup or less-idle period (sec):
+_(Scan timeout for a scan during initial startup or less-idle period)_ (_(sec)_):
 : <input type="text" name="scanTimeoutBusy" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutBusy']?>" placeholder="30">
 
+:cachedirs_timeout_initial_plug:
 > Increase it if you want cache_dirs too give more time in initial scan, and when filesystem may be busy.
+:end
 
-Scan timeout for a scan when all directories have been succesfully cached (sec):
+_(Scan timeout for a scan when all directories have been succesfully cached)_ (_(sec)_):
 : <input type="text" name="scanTimeoutStable" class="narrow" maxlength="4" value="<?=$cfg['scanTimeoutStable']?>" placeholder="20">
 
+:cachedirs_timeout_cached_plug:
 > Decrease it if you want cache_dirs to put less load on system when cache is evicted from memory, and disks are not idle.
 > Increase if you want cache_dirs to have a greater chance af getting directories back into memory.
+:end
 
-Minimum interval between folder scans (sec):
+_(Minimum interval between folder scans)_ (_(sec)_):
 : <input type="text" name="minimum" class="narrow" maxlength="3" value="<?=$cfg['minimum']?>" placeholder="1">
 
+:cachedirs_min_interval_plug:
 > Tweaking of the caching interval can be done for slower systems. Default value is 1 second, should be alright for most systems.
+:end
 
-Maximum interval between folder scans (sec):
+_(Maximum interval between folder scans)_ (_(sec)_):
 : <input type="text" name="maximum" class="narrow" maxlength="3" value="<?=$cfg['maximum']?>" placeholder="10">
 
+:cachedirs_max_interval_plug:
 > Tweaking of the caching interval can be done for slower systems. Default value is 10 seconds, should be alright for most systems.
+:end
 
-Run scan of each disk in a separate thread:
-: <select name="mulithreaded" size="1">
-  <?=mk_option($cfg['mulithreaded'], "", "Yes")?>
-  <?=mk_option($cfg['mulithreaded'], "-T", "No")?>
+_(Run scan of each disk in a separate thread)_:
+: <select name="mulithreaded">
+  <?=mk_option($cfg['mulithreaded'], "", _("Yes"))?>
+  <?=mk_option($cfg['mulithreaded'], "-T", _("No"))?>
   </select>
 
+:cachedirs_scan_disk_plug:
 > Each disk will be scanned in a separate thread, so the disks will be read concurrently. If user share is also scanned the user
 > share will be scanned in a single thread after all disks scans are completed, to avoid thrashing disks.
+:end
 
-Limit the memory available to the shell in which the script runs (increase if it dies):
+_(Limit the memory available to the shell in which the script runs (increase if it dies))_:
 : <input type="text" name="ulimit" class="narrow" maxlength="6" value="<?=$cfg['ulimit']?>" placeholder="50000">
 
+:cachedirs_limit_memory_plug:
 > set ulimit to NN to limit memory used by script (default=50000), '-U 0' sets no ulimit at all and inherits the shells default).
+:end
 
-Logging:
-: <select name="log" size="1">
-  <?=mk_option($cfg['log'], "off", "Disabled")?>
-  <?=mk_option($cfg['log'], "on", "Enabled")?>
+_(Logging)_:
+: <select name="log">
+  <?=mk_option($cfg['log'], "off", _("Disabled"))?>
+  <?=mk_option($cfg['log'], "on", _("Enabled"))?>
   </select></td>
 
+:cachedirs_logging_plug:
 > Select whether logging is enabled or disabled. Logging will be made to /var/log/cache_dirs.log and /var/log/cache_dirs_lost_cache.csv.
 > Be wary that the cache_dirs logs are placed in memory on unRAID and are not automatically rolled.
+:end
 
-User defined options:
-: <input id="pin" type="text" name="other" maxlength="200" value="<?=$cfg['other']?>" placeholder="Enter custom options here"><span class="strong orange-text">Check HELP for filter example</span>
-or see <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">unRAID forum</a></u>
+_(User defined options)_:
+: <input id="pin" type="text" name="other" class="narrow" maxlength="200" value="<?=$cfg['other']?>" placeholder="_(User defined options)_"><span class="orange-text">_(Check HELP for filter example)_</span>
+_(or see)_ <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" target="_blank">_(Unraid forum)_</a></u>
 
+:cachedirs_user_defined_plug:
 > The cache_dirs script has additional options which may be used.
 > Refer to the online documentation to use these as needed,
 > or see the cache_dirs script itself located under /usr/local/emhttp/plugins/dynamix.cache.dirs/scripts/cache_dirs
@@ -226,8 +273,10 @@ or see <u><a href="http://lime-technology.com/forum/index.php?topic=4500.0" targ
 > <span class="strong orange-text">-a '-noleaf -name .Recycle.Bin -prune -o -name log -prune -o -name temp -prune -o -print'</span>
 >
 > Note that the single quotes around argument to -a is important. Double-quotes do not work in the current version, so unfortunately its not currently possible to filter with '-name "*Old" -prune'.
+:end
 
-<input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+<input type="submit" name="#default" value="_(Default)_">
+: <input type="submit" name="#apply" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()">
 
 </form>
+<?endif;?>

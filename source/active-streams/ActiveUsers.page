@@ -2,7 +2,7 @@ Menu="ActiveStreams"
 Title="User Names"
 ---
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -12,25 +12,59 @@ Title="User Names"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 $plugin = 'dynamix.active.streams';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
 ?>
-
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/ActiveUsers.page"))?>
+<?else:?>
+<style>
+td.host{width:86%}
+table.share_status tbody tr:nth-child(even){background-color:transparent}
+table.share_status.online tbody tr>td:first-child{padding:6px 10px}
+table.share_status.online tbody tr>td+td{padding:6px 0}
+</style>
 <script>
+function done_plus(button) {
+  try {button.click();}
+  catch(e) {
+    var event = document.createEvent('MouseEvents');
+    event.initMouseEvent('click',true,true,window,0,0,0,0,0,false,false,false,false,0,null);
+    button.dispatchEvent(event);
+  }
+}
+$(function() {
+  $('input[value="_(Apply)_"]').prop('disabled',true);
+  $('form[name="host_names"]').find('input[type=text]').each(function(){$(this).on('input change',function() {
+    var form = $(this).parentsUntil('form').parent();
+    form.find('input[value="_(Apply)_"]').prop('disabled',false);
+    form.find('input[value="_(Done)_"]').val('_(Reset)_').prop('onclick',null).click(function(){refresh(form.offset().top)});
+  });});
+});
 function nameList() {
-  $('#names').load('/plugins/<?=$plugin?>/include/NameList.php','plugin=<?=$plugin?>&csrf=<?=$var['csrf_token']?>');
+  $('#names').load('/plugins/<?=$plugin?>/include/NameList.php','plex=<?=$plex?>');
 }
 $(function() {
   nameList();
   $('#tab2').bind({click:function(){nameList()}});
 });
 </script>
+
+:streams_plug:
 > Give symbolic names to IP addresses, which are displayed on the active streams page.
 >
 > New IP addresses are automatically added to the list when detected.
 >
 > To remove a name association, clear the respective user name box and press apply.
+:end
 
-<table class="tablesorter shift"><thead><tr><th style="width:33%;padding-left:12px">Host Address</th><th style="padding-left:0">User Name</th></tr></thead></table>
-<div id="names"></div>
+<form name="host_names" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file"  value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#cleanup" value="true">
+<table class="share_status online"><thead><tr><td>_(Host Address)_</td><td class="host">_(User Name)_</td></tr></thead>
+<tbody id="names"></tbody>
+</table>
+</form>
+<?endif;?>

@@ -1,9 +1,10 @@
 Menu="Stats:2"
 Title="System Stats"
+Tag="area-chart"
 Cond="(exec(\"awk -F= '/^show=/{print $2}' /boot/config/plugins/dynamix.system.stats/dynamix.system.stats.cfg 2>/dev/null\")!='\"\"')"
 ---
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -14,39 +15,19 @@ Cond="(exec(\"awk -F= '/^show=/{print $2}' /boot/config/plugins/dynamix.system.s
  * all copies or substantial portions of the Software.
  */
 ?>
-
+<?
+$plugin = 'dynamix.system.stats';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/SystemStats.page"))?>
+<?else:?>
 <?
 if ($var['fsState']=="Stopped"):
-  echo "<div class='notice'>Array must be <strong><big>started</big></strong> to view system stats.</div>";
+  echo "<div class='notice'>"._('Array must be **Started** to view system stats').".</div>";
   return;
 endif;
-
-function selector() {
-  global $graph, $frame;
-  echo "<span class='status'>";
-  echo "<span id='selector'><select size='1' onchange='modeller(this.value)'>";
-  echo mk_option($graph, '0', 'Real-time');
-  echo mk_option($graph, '1', 'Last day');
-  echo mk_option($graph, '2', 'Last 2 days');
-  echo mk_option($graph, '3', 'Last 3 days');
-  echo mk_option($graph, '7', 'Last week');
-  echo mk_option($graph, '14', 'Last 2 weeks');
-  echo mk_option($graph, '21', 'Last 3 weeks');
-  echo mk_option($graph, '31', 'Last month');
-  echo mk_option($graph, '3653', 'Since start');
-  echo "</select></span>";
-  echo "<span id='monitor'><select size='1' onchange='resizer(this.value)'>";
-  echo mk_option($frame, '15', '30 seconds');
-  echo mk_option($frame, '30', '1 minute');
-  echo mk_option($frame, '60', '2 minutes');
-  echo mk_option($frame, '150', '5 minutes');
-  echo mk_option($frame, '300', '10 minutes');
-  echo mk_option($frame, '900', '30 minutes');
-  echo mk_option($frame, '1800', '1 hour');
-  echo mk_option($frame, '3600', '2 hours');
-  echo "</select><input type='button' value='Reset' onclick='modeller(0)'></span>";
-  echo "</span>";
-}
 
 $cols++;
 $tag = $cols==1 ? 'graph2' : 'graph3';
@@ -63,6 +44,33 @@ $tag2 = $tag.(((!$com && !$hdd) || ($cols>1 ? $cell%$cols==0 : false)) ? $last :
 if ($ram) $cell++;
 $tag3 = $tag.((!$hdd || ($cols>1 ? $cell%$cols==0 : false)) ? $last : '');
 $tag4 = $tag.$last;
+
+function selector() {
+  global $graph, $frame;
+  echo "<span class='status'>";
+  echo "<span id='selector'><select onchange='modeller(this.value)'>";
+  echo mk_option($graph, '0', _('Real-time'));
+  echo mk_option($graph, '1', _('Last day'));
+  echo mk_option($graph, '2', _('Last 2 days'));
+  echo mk_option($graph, '3', _('Last 3 days'));
+  echo mk_option($graph, '7', _('Last week'));
+  echo mk_option($graph, '14', _('Last 2 weeks'));
+  echo mk_option($graph, '21', _('Last 3 weeks'));
+  echo mk_option($graph, '31', _('Last month'));
+  echo mk_option($graph, '3653', _('Since start'));
+  echo "</select></span>";
+  echo "<span id='monitor'><select onchange='resizer(this.value)'>";
+  echo mk_option($frame, '15', _('30 seconds'));
+  echo mk_option($frame, '30', _('1 minute'));
+  echo mk_option($frame, '60', _('2 minutes'));
+  echo mk_option($frame, '150', _('5 minutes'));
+  echo mk_option($frame, '300', _('10 minutes'));
+  echo mk_option($frame, '900', _('30 minutes'));
+  echo mk_option($frame, '1800', _('1 hour'));
+  echo mk_option($frame, '3600', _('2 hours'));
+  echo "</select><input type='button' value='"._('Reset')."' onclick='modeller(0)'></span>";
+  echo "</span>";
+}
 ?>
 <script>
 $('.tabs').append("<?=selector()?>");
@@ -90,5 +98,6 @@ $.removeCookie('one',{path:'/'});
 <span id='hdd' class='<?=$tag4?>'></span>
 <?endif;?>
 <?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>
-<p><input type="button" value="Done" onclick="done()"></p>
+<p><input type="button" value="_(Done)_" onclick="done()"></p>
+<?endif;?>
 <?endif;?>

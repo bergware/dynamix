@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.01.12a">
+<!ENTITY version   "2020.06.20">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "af98cd82a0d0768e140f94a9e3ca26f6">
+<!ENTITY MD5       "42cdd420ff319ad7381fab5935cf9eea">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,23 @@
 ##&name;
 
 ###&version;
+- updated multi-language support
+
+###2020.05.10
+- updated multi-language support
+
+###2020.03.31
+- added multi-language support
+- added multi fan selection
+- minor updates
+
+###2019.11.03
+- Added busy spinner when detection is running
+
+###2019.11.03
+- Do not load script 'sensors-detect' when Unraid version is 6.8 or higher
+
+###2019.01.12
 - fixed incorrect temperature display on dashboard
 
 ###2018.12.27
@@ -93,7 +110,7 @@
 </CHANGES>
 
 <!--
-Copyright 2017, Bergware International
+Copyright 2020, Bergware International
 Dynamix System Temperature - Real-time monitoring of CPU and MB temperatures
 -->
 
@@ -114,8 +131,12 @@ if [[ $MD5 != &MD5; ]]; then
   rm -f &flash;/&name;*.txz
 fi
 
-# Remove sensors-detect script
-rm -f /usr/sbin/sensors-detect
+# Remove sensors-detect script (Unraid 6.7 and earlier)
+source /etc/unraid-version
+version=${version:0:3}
+if [[ $((${version/./}*1)) -lt 68 ]]; then
+  rm -f /usr/sbin/sensors-detect
+fi
 </INLINE>
 </FILE>
 
@@ -126,10 +147,10 @@ rm -f /usr/sbin/sensors-detect
 </FILE>
 
 <!-- SENSORS-DETECT SCRIPT -->
-<FILE Name="&flash;/sensors-detect">
+<FILE Name="&flash;/sensors-detect" Max="6.7.2">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sensors-detect</URL>
 </FILE>
-<FILE Name="/usr/sbin/sensors-detect" Mode="0755">
+<FILE Name="/usr/sbin/sensors-detect" Mode="0755" Max="6.7.2">
 <LOCAL>&flash;/sensors-detect</LOCAL>
 </FILE>
 
@@ -152,7 +173,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2017, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

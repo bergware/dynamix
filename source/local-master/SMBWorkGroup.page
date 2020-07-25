@@ -3,8 +3,8 @@ Title="Workgroup Settings"
 Cond="($var['shareSMBEnabled']=='yes')"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2020, Lime Technology
+ * Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -14,44 +14,20 @@ Cond="($var['shareSMBEnabled']=='yes')"
  * all copies or substantial portions of the Software.
  */
 ?>
-<form markdown="1" name="WorkGroup" method="POST" action="/update.htm" target="progressFrame" onsubmit="setMonitor(this)">
-Workgroup:
-: <input type="text" name="WORKGROUP" maxlength="40" value="<?=$var['WORKGROUP'];?>" class="narrow">
-
-> Enter your local network Workgroup name. Usually this is "WORKGROUP".
-
-Local master browser:
-: <select name="localMaster">
-  <?=mk_option($var['localMaster'], "no", "No");?>
-  <?=mk_option($var['localMaster'], "yes", "Yes");?>
-  </select>
-
-> If set to 'Yes' then the server will fully participate in browser elections, and in the absense
-> of other servers, will usually become the local master browser (LMB).
-
-Monitor local master election:
-: <select name="monitor">
-  <?=mk_option($display['monitor'], "0", "Disabled");?>
-  <?=mk_option($display['monitor'], "1", "Enabled");?>
-  </select>
-
-> Enable or disable background monitoring of the local master election.
-> The result of the monitoring is displayed in the header at the top-right position.
-
-Current elected master:
-: <span id="elected">please wait, obtaining...</span>
-
-> Shows in real-time the current elected local master browser.
-
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
-</form>
+<?
+$plugin = 'dynamix.local.master';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/SMBWorkGroup.page"))?>
+<?else:?>
 <script>
 function setMonitor(form) {
-  $.get('/plugins/dynamix.local.master/include/LocalMaster.php',{monitor:form.monitor.value});
+  $.get('/plugins/<?=$plugin?>/include/LocalMaster.php',{monitor:form.monitor.value});
 }
 function getMaster() {
-  $.get('/plugins/dynamix.local.master/include/LocalMaster.php',{smb:true},function(data) {
+  $.get('/plugins/<?=$plugin?>/include/LocalMaster.php',{smb:true},function(data) {
     $('#elected').html(data);
 <?if ($update):?>
     setTimeout(getMaster,5000);
@@ -60,3 +36,45 @@ function getMaster() {
 }
 $(getMaster);
 </script>
+
+<form markdown="1" name="WorkGroup" method="POST" action="/update.htm" target="progressFrame" onsubmit="setMonitor(this)">
+_(Workgroup)_:
+: <input type="text" name="WORKGROUP" maxlength="40" value="<?=htmlspecialchars($var['WORKGROUP'])?>" class="narrow"<?if ($var['fsState']=="Started"):?> disabled<?endif;?>>
+
+:smb_workgroup_plug:
+> Enter your local network Workgroup name. Usually this is "WORKGROUP".
+:end
+
+_(Local master)_:
+: <select name="localMaster"<?if ($var['fsState']=="Started"):?> disabled<?endif;?>>
+  <?=mk_option($var['localMaster'], "no", _('No'))?>
+  <?=mk_option($var['localMaster'], "yes", _('Yes'))?>
+  </select>
+
+:smb_master_plug:
+> If set to 'Yes' then the server will fully participate in browser elections, and in the absense
+> of other servers, will usually become the local Master Browser.
+:end
+
+_(Monitor local master election)_:
+: <select name="monitor"<?if ($var['fsState']=="Started"):?> disabled<?endif;?>>
+  <?=mk_option($display['monitor'], "0", _("Disabled"))?>
+  <?=mk_option($display['monitor'], "1", _("Enabled"))?>
+  </select>
+
+:smb_master_election_plug:
+> Enable or disable background monitoring of the local master election.
+> The result of the monitoring is displayed in the header at the top-right position.
+:end
+
+_(Current elected master)_:
+: <span id="elected">_(please wait, obtaining)_...</span>
+
+:smb_master_current_plug:
+> Shows in real-time the current elected local master browser.
+:end
+
+&nbsp;
+: <input type="submit" name="changeShare" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()"><?if ($var['fsState']=="Started"):?>*_(Array must be **Stopped** to change)_*<?endif;?>
+</form>
+<?endif;?>

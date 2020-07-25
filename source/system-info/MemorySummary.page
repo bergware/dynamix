@@ -2,7 +2,7 @@ Menu="SystemProfiler:6"
 Title="Memory Summary"
 ---
 <?PHP
-/* Copyright 2012-2016, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -12,16 +12,24 @@ Title="Memory Summary"
  * all copies or substantial portions of the Software.
  */
 ?>
-
+<?
+$plugin = 'dynamix.system.info';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/MemorySummary.page"))?>
+<?else:?>
 <script>
 $(function() {
-  $.post("/plugins/dynamix.system.info/include/Profiler.php",{cmd:'memory'},function(data){$('#memory').html(data);});
+  $.post("/plugins/<?=$plugin?>/include/Profiler.php",{cmd:'memory'},function(data){$('#memory').html(data);});
 });
 </script>
 <table class='share_status small'>
-<thead><td style="width:33%">Title</td><td>Information</td></thead>
+<thead><td style="width:33%">_(Title)_</td><td>_(Information)_</td></thead>
 <tbody id="memory"></tbody>
 </table>
 <?if ($tabbed):?>
-<input type="button" value="Done" onclick="done()">
+<input type="button" value="_(Done)_" onclick="done()">
+<?endif;?>
 <?endif;?>

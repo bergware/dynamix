@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,48 +10,39 @@
  */
 ?>
 <?
+$plugin = 'dynamix.active.streams';
 $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+
+if ($translations) {
+  // add translations
+  $_SERVER['REQUEST_URI'] = '';
+  require_once "$docroot/webGui/include/Translations.php";
+} else {
+  // legacy support (without javascript)
+  $noscript = true;
+  require_once "$docroot/plugins/$plugin/include/Legacy.php";
+}
 require_once "$docroot/webGui/include/Wrappers.php";
 
-$plugin = $_GET['plugin'];
-$cfg = parse_plugin_cfg($plugin);
-?>
+$plex   = $_GET['plex'];
+$filter = $plex ? "^(smbd|$plex)" : "^smbd";
+$cfg    = parse_plugin_cfg('dynamix.active.streams');
+$online = [];
 
-<script>
-function done_plus(button) {
-  try {button.click();}
-  catch(e) {
-    var event = document.createEvent('MouseEvents');
-    event.initMouseEvent('click',true,true,window,0,0,0,0,0,false,false,false,false,0,null);
-    button.dispatchEvent(event);
-  }
-}
-$(function() {
-  $('input[value="Apply"]').prop('disabled',true);
-  $('form[name="host_names"]').find('input[type=text]').each(function(){$(this).on('input change',function() {
-    var form = $(this).parentsUntil('form').parent();
-    form.find('input[value="Apply"]').prop('disabled',false);
-    form.find('input[value="Done"]').val('Reset').prop('onclick',null).click(function(){refresh(form.offset().top)});
-  });});
-});
-</script>
-<form name="host_names" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#file"  value="<?=$plugin.'/'.$plugin?>.cfg">
-<input type="hidden" name="#cleanup" value="true">
-<input type="hidden" name="csrf_token" value="<?=$_GET['csrf']?>">
-<table class="settings">
-<?
-$online = array();
-exec("lsof -OwlnPi 2>/dev/null|awk -F'>' '/^(smbd|afpd|Plex).*ESTABLISHED\)$/{print $2}'|cut -d':' -f1",$online);
+exec("lsof -OwlnPi -sTCP:ESTABLISHED 2>/dev/null|awk 'NR>1 && \$1~/$filter/{print substr(\$9,index(\$9,\"->\")+2)}'",$online);
+
 foreach ($online as $host) {
-  $ip = str_replace('.','_',$host);
+  if ($host[0]=='[') {
+    $ip = substr($host,1,strpos($host,']')-1);
+  } else {
+    $ip = str_replace('.','_',substr($host,0,strpos($host,':')));
+  }
   if (!isset($cfg[$ip])) $cfg[$ip] = "";
 }
 ksort($cfg);
 foreach ($cfg as $ip => $name) {
   echo "<tr><td style='font-weight:normal'>".str_replace('_','.',$ip)."</td><td><input type='text' name='$ip' value=\"$name\"></td></tr>";
 }
+echo '<tr><td></td><td><input type="submit" name="#apply" value="'._('Apply').'"><input type="button" value="'._('Done').'" onclick="done_plus($(\'#tab1\'))"></td></tr>';
 ?>
-<tr><td></td><td><input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done_plus($('#tab1'))"></td></tr>
-</table>
-</form>

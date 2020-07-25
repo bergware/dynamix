@@ -1,9 +1,10 @@
 Menu="Utilities"
 Title="Stats Settings"
-Icon="dynamix.system.stats.png"
+Icon="area-chart"
+Tag="pie-chart"
 ---
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -14,12 +15,17 @@ Icon="dynamix.system.stats.png"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 $plugin = 'dynamix.system.stats';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/StatSettings.page"))?>
+<?else:?>
+<?
 $cfg = parse_plugin_cfg($plugin);
 extract(parse_ini_file('/etc/unraid-version'));
-$disabled = version_compare($version, '6.1.7', '>=') ? "" : " disabled";
 
 unset($sPorts);
 exec("ifconfig -s|awk '/^(bond|eth)/{print $1}'",$sPorts);
@@ -39,125 +45,144 @@ function prepareStats(form) {
   item.selected = true;
 }
 $(function(){
-  $('#s1').dropdownchecklist({emptyText:'None', width:<?=strstr('gray,azure',$display['theme'])?166:131?>, firstItemChecksAll: true, explicitClose:'...close'});
+  $('#s1').dropdownchecklist({emptyText:'None', width:166, firstItemChecksAll: true, explicitClose:'..._(close)_'});
 });
 </script>
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareStats(this)">
 <input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
-Placement of Stats menu:
-: <select name="stats" size="1"<?=$disabled?>>
-  <?=mk_option($cfg['stats'], "Tasks:90", "Header menu")?>
-  <?=mk_option($cfg['stats'], "SystemInformation", "Tools menu")?>
+_(Placement of Stats menu)_:
+: <select name="stats">
+  <?=mk_option($cfg['stats'], "Tasks:90", _("Header menu"))?>
+  <?=mk_option($cfg['stats'], "SystemInformation", _("Tools menu"))?>
   </select>
 
-Opening page:
-: <select name="first" size="1">
-  <?=mk_option($cfg['first'], "0", "Disk Stats")?>
-  <?=mk_option($cfg['first'], "1", "System Stats")?>
+_(Opening page)_:
+: <select name="first">
+  <?=mk_option($cfg['first'], "0", _("Disk Stats"))?>
+  <?=mk_option($cfg['first'], "1", _("System Stats"))?>
   </select>
 
-Position of disk utilization percentage:
-: <select name="text" size="1">
-  <?=mk_option($cfg['text'], "left", "Left")?>
-  <?=mk_option($cfg['text'], "right", "Right")?>
+_(Position of disk utilization percentage)_:
+: <select name="text">
+  <?=mk_option($cfg['text'], "left", _("Left"))?>
+  <?=mk_option($cfg['text'], "right", _("Right"))?>
   </select>
 
+:stats_utilization_plug:
 > The disk utilization percentage number can be positioned either at the start (left) or at the end (right) of the bar.
 >
 > Left will align all numbers, while right lets the number float depending on its value.
+:end
 
-Viewable system graphs:
-: <select id="s1" name="show" size="1" multiple style="display:none">
-  <option value=''>(All)</option>
-  <?=mk_option_check($cfg['show'], "cpu", "Processor")?>
-  <?=mk_option_check($cfg['show'], "ram", "Memory")?>
-  <?=mk_option_check($cfg['show'], "com", "Network")?>
-  <?=mk_option_check($cfg['show'], "hdd", "Storage")?>
+_(Viewable system graphs)_:
+: <select id="s1" name="show" multiple style="display:none">
+  <option value=''>(_(All)_)</option>
+  <?=mk_option_check($cfg['show'], "cpu", _("Processor"))?>
+  <?=mk_option_check($cfg['show'], "ram", _("Memory"))?>
+  <?=mk_option_check($cfg['show'], "com", _("Network"))?>
+  <?=mk_option_check($cfg['show'], "hdd", _("Storage"))?>
   </select>
 
+:stats_graphs_plug:
 > Select which system information needs to be displayed. Internally all information is always gathered and stored.
 >
 > This setting only affects what is being displayed.
+:end
 
-CPU graph scaling:
-: <select name="cpu" size="1">
-  <?=mk_option($cfg['cpu'], "0", "Automatic")?>
-  <?=mk_option($cfg['cpu'], "100", "Fixed")?>
+_(CPU graph scaling)_:
+: <select name="cpu">
+  <?=mk_option($cfg['cpu'], "0", _("Automatic"))?>
+  <?=mk_option($cfg['cpu'], "100", _("Fixed"))?>
   </select>
 
+:stats_scaling_plug:
 > Select the CPU graph scaling to be automatic or fixed at 100%.
+:end
 
-System graphs view per row:
-: <select name="cols" size="1">
-  <?=mk_option($cfg['cols'], "0", "Single")?>
-  <?=mk_option($cfg['cols'], "1", "Pair")?>
-  <?=mk_option($cfg['cols'], "2", "Three")?>
-  <?=mk_option($cfg['cols'], "3", "Four")?>
+_(System graphs view per row)_:
+: <select name="cols">
+  <?=mk_option($cfg['cols'], "0", _("Single"))?>
+  <?=mk_option($cfg['cols'], "1", _("Pair"))?>
+  <?=mk_option($cfg['cols'], "2", _("Three"))?>
+  <?=mk_option($cfg['cols'], "3", _("Four"))?>
   </select>
 
+:stats_view_plug:
 > Select how many graphs will be displayed in a single row. The width is automatically adjusted to the number of graphs and the screen resolution.
 >
 > Graph samples are internally done with a one minute interval, this setting does not change the resolution, just the width of a graph.
+:end
 
-Show disk size:
-: <select name="size" size="1">
-  <?=mk_option($cfg['size'], "0", "No")?>
-  <?=mk_option($cfg['size'], "1", "Yes")?>
+_(Show disk size)_:
+: <select name="size">
+  <?=mk_option($cfg['size'], "0", _("No"))?>
+  <?=mk_option($cfg['size'], "1", _("Yes"))?>
   </select>
 
+:stats_disk_size_plug:
 > Show the size of each disk at the right side of the disk usage graph. Size is always displayed using the highest possible unit.
+:end
 
-Ethernet interface:
-: <select name="port" size="1">
+_(Ethernet interface)_:
+: <select name="port">
   <?foreach ($sPorts as $port):?>
   <?=mk_option_check($cfg['port'], $port, $port)?>
   <?endforeach;?>
   </select>
 
+:stats_ethernet_plug:
 > When more than one interface is present then select the interface to be displayed. Internally statistics of all available interfaces is kept.
+:end
 
-Network graph display unit:
-: <select name="unit" size="1">
-  <?=mk_option($cfg['unit'], "b", "Bits per second")?>
-  <?=mk_option($cfg['unit'], "B", "Bytes per second")?>
+_(Network graph display unit)_:
+: <select name="unit">
+  <?=mk_option($cfg['unit'], "b", _("Bits per second"))?>
+  <?=mk_option($cfg['unit'], "B", _("Bytes per second"))?>
   </select>
 
+:stats_unit_plug:
 > Select how interface (network) speeds are displayed, common is bits per second.
+:end
 
-Initial graphing mode:
-: <select name="graph" size="1">
-  <?=mk_option($cfg['graph'], "0", "Real-time")?>
-  <?=mk_option($cfg['graph'], "1", "Last day")?>
-  <?=mk_option($cfg['graph'], "2", "Last 2 days")?>
-  <?=mk_option($cfg['graph'], "3", "Last 3 days")?>
-  <?=mk_option($cfg['graph'], "7", "Last week")?>
-  <?=mk_option($cfg['graph'], "14", "Last 2 weeks")?>
-  <?=mk_option($cfg['graph'], "21", "Last 3 weeks")?>
-  <?=mk_option($cfg['graph'], "31", "Last month")?>
-  <?=mk_option($cfg['graph'], "3653", "Since start")?>
+_(Initial graphing mode)_:
+: <select name="graph">
+  <?=mk_option($cfg['graph'], "0", _("Real-time"))?>
+  <?=mk_option($cfg['graph'], "1", _("Last day"))?>
+  <?=mk_option($cfg['graph'], "2", _("Last 2 days"))?>
+  <?=mk_option($cfg['graph'], "3", _("Last 3 days"))?>
+  <?=mk_option($cfg['graph'], "7", _("Last week"))?>
+  <?=mk_option($cfg['graph'], "14", _("Last 2 weeks"))?>
+  <?=mk_option($cfg['graph'], "21", _("Last 3 weeks"))?>
+  <?=mk_option($cfg['graph'], "31", _("Last month"))?>
+  <?=mk_option($cfg['graph'], "3653", _("Since start"))?>
   </select>
 
+:stats_initial_plug:
 > The system graphs can be viewd over different periods, select here the intial period. On the system stats page itself this can be changed to any of the other choices.
 >
 > Internally information is kept with a monthly rotating mechanism. Each day is stored in a separate file.
+:end
 
-Initial real-time sliding window:
-: <select name="frame" size="1">
-  <?=mk_option($cfg['frame'], "15", "30 seconds")?>
-  <?=mk_option($cfg['frame'], "30", "1 minute")?>
-  <?=mk_option($cfg['frame'], "60", "2 minutes")?>
-  <?=mk_option($cfg['frame'], "150", "5 minutes")?>
-  <?=mk_option($cfg['frame'], "300", "10 minutes")?>
-  <?=mk_option($cfg['frame'], "900", "30 minutes")?>
-  <?=mk_option($cfg['frame'], "1800", "1 hour")?>
-  <?=mk_option($cfg['frame'], "3600", "2 hours")?>
+_(Initial real-time sliding window)_:
+: <select name="frame">
+  <?=mk_option($cfg['frame'], "15", _("30 seconds"))?>
+  <?=mk_option($cfg['frame'], "30", _("1 minute"))?>
+  <?=mk_option($cfg['frame'], "60", _("2 minutes"))?>
+  <?=mk_option($cfg['frame'], "150", _("5 minutes"))?>
+  <?=mk_option($cfg['frame'], "300", _("10 minutes"))?>
+  <?=mk_option($cfg['frame'], "900", _("30 minutes"))?>
+  <?=mk_option($cfg['frame'], "1800", _("1 hour"))?>
+  <?=mk_option($cfg['frame'], "3600", _("2 hours"))?>
   </select>
 
+:stats_realtime_plug:
 > Real-time graphing is done in a sliding window fashion. E.g. 5 minutes are first filled and next start to slide with each new sample added at the end.
 >
 > This setting sets the initial duration of the sliding window, it can be changed on the system stats page itself.
+:end
 
-<input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+<input type="submit" name="#default" value="_(Default)_">
+: <input type="submit" name="#apply" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()">
 </form>
+<?endif;?>

@@ -3,7 +3,7 @@ Title="Fan Auto Control"
 Icon="dynamix.system.autofan.png"
 ---
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,24 +13,44 @@ Icon="dynamix.system.autofan.png"
  * all copies or substantial portions of the Software.
  *
  * Plugin development contribution by gfjardim
+ *
+ * Version log:
+ * Version 1.6   Modified by InfinityMod - added multifan support
  */
 ?>
 <?
 $plugin = "dynamix.system.autofan";
-$cfg    = parse_plugin_cfg($plugin);
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/FanSettings.page"))?>
+<?else:?>
+<?
+function parse_autofan_cfg($plugin,$index) {
+  global $docroot;
+  $ram = "$docroot/plugins/$plugin/default.cfg";
+  $rom = "/boot/config/plugins/$plugin/{$plugin}{$index}.cfg";
+  $cfg = file_exists($ram) ? parse_ini_file($ram) : [];
+  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom)) : $cfg;
+}
+
+$index  = $_POST['index']?:'';
+$cfg    = parse_autofan_cfg($plugin,$index);
 $sName  = "autofan";
 $fName  = "$docroot/plugins/$plugin/scripts/$sName";
 $width  = strstr('gray,azure',$display['theme']) ? 305:300;
+$fan_id = 1;
 
 function temp_val($val) {
   global $display;
   return $display['unit']=='C' ? $val : round(9/5*$val+32);
 }
-function scan_dir($dir, $type = "") {
+function scan_dir($dir) {
   $out = [];
-  foreach (array_slice(scandir($dir), 2) as $entry){
-    $sep   = (preg_match("/\/$/", $dir)) ? "" : "/";
-    $out[] = $dir.$sep.$entry ;
+  foreach (array_slice(scandir($dir),2) as $entry) {
+    $sep = preg_match("/\/$/", $dir) ? "" : "/";
+    $out[] = $dir.$sep.$entry;
   }
   return $out;
 }
@@ -38,112 +58,141 @@ function list_pwm() {
   $out = [];
   exec("find /sys/devices -type f -iname 'pwm[0-9]' -exec dirname \"{}\" +|uniq", $chips);
   foreach ($chips as $chip) {
-    $name = is_file("$chip/name") ? file_get_contents("$chip/name") : "";
-    foreach (preg_grep("/pwm\d+$/", scan_dir($chip)) as $pwm) {
-      $out[] = array('chip'=>$name, 'name'=>end(explode('/',$pwm)), 'sensor'=>$pwm);
-    }
+    $name = is_file("$chip/name") ? file_get_contents("$chip/name") : '';
+    foreach (preg_grep("/pwm\d+$/", scan_dir($chip)) as $pwm) $out[] = ['chip'=>$name, 'name'=>end(explode('/',$pwm)), 'sensor'=>$pwm];
   }
   return $out;
 }
-function disk_sort_by_device($a, $b) {
-  return strcmp($a['device'], $b['device']);
+function parity_disks($disk) {
+  return $disk['type']=='Parity' && strpos($disk['status'],'_NP')===false;
 }
-
-// get disk list
-$disks = array_filter($disks,'my_disks');
-usort($disks, 'disk_sort_by_device');
-
+function data_disks($disk) {
+  return $disk['type']=='Data' && strpos($disk['status'],'_NP')===false;
+}
+function cache_disks($disk) {
+  return $disk['type']=='Cache' && strpos($disk['status'],'_NP')===false;
+}
 ?>
 <script>
-function detectFan() {
-  var pwm = $("select[name=controller] option:selected").val();
-  if (pwm) {
-    $("input[name=fan]").val('Please wait...');
-    $("#fan").val('Detecting ...');
-    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'detect', pwm:pwm},function(data) {
-      $("input[name=fan]").val(data);
-      $("#fan").val('Detect');
-    });
-  }
-}
-function detectFanLow() {
-  var pwm = $("select[name=controller] option:selected").val();
-  var fan = $("input[name=fan]").val();
-  if (pwm && fan) {
-    $("input[name=pwm]").val('Please wait...');
-    $("#pwm").val('Detecting ...');
-    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'pwm',pwm:pwm,fan:fan},function(data) {
-      $("input[name=pwm]").val(data);
-      $("#pwm").val('Detect');
-    });
-  }
-}
 function tempVal(form) {
 <?if ($display['unit']=='F'):?>
   form.low.value = Math.round((form.low.value-32)*5/9);
   form.high.value = Math.round((form.high.value-32)*5/9);
 <?endif;?>
-  var exclude = '';
+  var exclude = [];
   for (var i=0,item; item=form.exclude.options[i]; i++) {
     if (item.selected) {
-      if (exclude.length) exclude += ',';
-      exclude += item.value;
+      exclude.push(item.value);
       item.selected = false;
     }
   }
   item = form.exclude.options[0];
-  item.value = exclude;
+  item.value = exclude.join(',');
   item.selected = true;
+}
+function detectFan() {
+  var pwm = $('select[name=controller]').val();
+  if (pwm) {
+    $('input[name=fan]').val('_(Please wait)_...');
+    $('#fan').prop('disabled',true);
+    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'detect', pwm:pwm},function(data) {
+      $('input[name=fan]').val(data).trigger('change');
+      $('#fan').prop('disabled',false);
+      if (data) {
+        $('input[name=pwm]').prop('placeholder','_(Click DETECT)_');
+        $('#pwm').prop('disabled',false);
+      }
+    });
+  }
+}
+function detectFanLow() {
+  var pwm = $('select[name=controller]').val();
+  var fan = $('input[name=fan]').val();
+  if (pwm && fan) {
+    $('input[name=pwm]').val('_(Please wait)_...');
+    $('#pwm').prop('disabled',true);
+    $.get('/plugins/<?=$plugin;?>/include/SystemFan.php',{op:'pwm',pwm:pwm,fan:fan},function(data) {
+      $('input[name=pwm]').val(data).prop('placeholder','').trigger('change');
+      $('#pwm').prop('disabled',false);
+    });
+  }
+}
+function changePWM(index,value) {
+  if (index > 0) index--;
+  $('input[name=index]').val(index);
+  $('input[name=controller]').val(value);
+  document.updatepwm.submit();
 }
 $(function() {
   showStatus('<?=$sName?>');
-  $('#s1').dropdownchecklist({emptyText:'None', width:<?=$width?>, explicitClose:'...close'});
+  $('#s1').dropdownchecklist({emptyText:'_(None)_', width:<?=$width?>, explicitClose:'..._(close)_'});
+  if (!$('select[name=controller]').val()) {
+    $('input[name=fan]').val('').prop('placeholder','');
+    $('input[name=pwm]').val('');
+    $('input[name=low]').val('');
+    $('input[name=high]').val('');
+    $('input[name=interval]').val('');
+    $('select[name=exclude]').val('');
+    $('#fan').prop('disabled',true);
+    $('#pwm').prop('disabled',true);
+  }
 });
 </script>
 
+<span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="tempVal(this)">
-<input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin?>.cfg">
+<input type="hidden" name="#file" value="<?=$plugin?>/<?=$plugin.$index?>.cfg">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.autofan.php">
 <input type="hidden" name="#prefix" value="controller=c&fan=f&pwm=l&low=t&high=T&interval=m&exclude=e">
-<span class="bitstream" style="float:right;margin-right:12px"><?=exec("$fName -V")?></span>
 
-Fan control function:
-: <select name="service" size="1">
-  <?=mk_option($cfg['service'], "0", "Disabled")?>
-  <?=mk_option($cfg['service'], "1", "Enabled")?>
+_(Fan control function)_:
+: <select name="service">
+  <?=mk_option($cfg['service'], "0", _("Disabled"))?>
+  <?=mk_option($cfg['service'], "1", _("Enabled"))?>
   </select>
 
-PWM controller:
-: <select name="controller" size="1">
-  <?=mk_option($cfg['controller'], "", "None")?>
+_(PWM controller)_:
+: <select name="controller" onchange="changePWM(this.selectedIndex,this.value)">
+  <?=mk_option($_POST['controller']??$cfg['controller'], "", _("None"))?>
   <?foreach (list_pwm() as $pwm):?>
-  <?=mk_option($cfg['controller'], $pwm['sensor'], "{$pwm['chip']} - {$pwm['name']}")?>
+  <?=mk_option($_POST['controller']??$cfg['controller'], $pwm['sensor'], "{$pwm['chip']} - {$pwm['name']}")?>
   <?endforeach;?>
   </select>
 
-PWM fan:
-: <input type="text" name="fan" value="<?=$cfg['fan']?>" placeholder="Click DETECT"><input type="button" value="Detect" onclick="detectFan();" id="fan" style="margin-top:0">
+_(PWM fan)_:
+: <input type="text" name="fan" value="<?=$cfg['fan']?>" placeholder="_(Click DETECT)_"><input type="button" id="fan" value="_(Detect)_" onclick="detectFan()" style="margin:0">
 
-Minimum PWM value:
-: <input type="text" name="pwm" value="<?=$cfg['pwm']?>" placeholder="Click DETECT"><input type="button" value="Detect" onclick="detectFanLow();" id="pwm" style="margin-top:0">
+_(Minimum PWM value)_:
+: <input type="text" name="pwm" value="<?=$cfg['pwm']?>" placeholder=""><input type="button" id="pwm" value="_(Detect)_" onclick="detectFanLow()" style="margin:0" <?=$cfg['fan']?'':'disabled'?>>
 
-Low temperature threshold (&deg;<?=$display['unit']?>):
-: <input type="number" min="0" max="300" name="low" value="<?=temp_val($cfg['low'])?>" class="narrow">
+_(Low temperature threshold)_ (&deg;<?=$display['unit']?>):
+: <input type="number" name="low" min="0" max="200" value="<?=temp_val($cfg['low'])?>">
 
-High temperature threshold (&deg;<?=$display['unit']?>):
-: <input type="number" min="0" max="300" name="high" value="<?=temp_val($cfg['high'])?>" class="narrow">
+_(High temperature threshold)_ (&deg;<?=$display['unit']?>):
+: <input type="number" name="high" min="0" max="200" value="<?=temp_val($cfg['high'])?>">
 
-Refresh interval (minutes):
-: <input type="text" name="interval" value="<?=$cfg['interval']?>" class="narrow">
+_(Refresh interval)_ (_(minutes)_):
+: <input type="text" name="interval" value="<?=$cfg['interval']?>">
 
-Exclude drives:
-: <select id="s1" name="exclude" size="1" multiple style="display:none">
-<?foreach ($disks as $disk):?>
-<?if (strtolower($disk['name'])=='flash') continue;?>
-<?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',my_disk($disk['name']),$disk['device']))?>
-<?endforeach;?>
+_(Exclude drives)_:
+: <select id="s1" name="exclude" style="display:none" multiple>
+  <?foreach (array_filter($disks,'parity_disks') as $disk):?>
+  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
+  <?endforeach;?>
+  <?foreach (array_filter($disks,'data_disks') as $disk):?>
+  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
+  <?endforeach;?>
+  <?foreach (array_filter($disks,'cache_disks') as $disk):?>
+  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
+  <?endforeach;?>
   </select>
 
-<input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+<input type="submit" name="#default" value="_(Default)_">
+: <input type="submit" name="#apply" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()">
 </form>
+
+<form name="updatepwm" method="POST" style="display:none">
+<input type="hidden" name="index" value="">
+<input type="hidden" name="controller" value="">
+</form>
+<?endif;?>

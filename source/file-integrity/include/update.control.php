@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,12 +10,26 @@
  */
 ?>
 <?
+$plugin = 'dynamix.file.integrity';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+
+if ($translations) {
+  // add translations
+  $_SERVER['REQUEST_URI'] = 'integrity';
+  require_once "$docroot/webGui/include/Translations.php";
+} else {
+  // legacy support (without javascript)
+  $noscript = true;
+  require_once "$docroot/plugins/$plugin/include/Legacy.php";
+}
+
 function regex($text) {
   return strtr($text,['.'=>'\.','['=>'\[',']'=>'\]','('=>'\(',')'=>'\)','{'=>'\{','}'=>'\}','/'=>'\/','+'=>'\+','-'=>'\-','*'=>'.*','&'=>'\&','?'=>'\?']);
 }
 
-$bunker = '/usr/local/emhttp/plugins/dynamix.file.integrity/scripts/bunker';
-$path   = '/boot/config/plugins/dynamix.file.integrity/export';
+$bunker = "/usr/local/emhttp/plugins/$plugin/scripts/bunker";
+$path   = "/boot/config/plugins/$plugin/export";
 $apple  = [regex('.AppleDB'),regex('.DS_Store')];
 $disks  = [];
 
@@ -55,7 +69,7 @@ switch ($_POST['cmd']) {
       if (file_exists("$path/$disk.export.hash")) {
         exec("$bunker -Cqx $m $l $n -f $path/$disk.export.hash >/dev/null &");
       } else {
-        file_put_contents("/var/tmp/$disk.tmp.end","100%#<span class='orange-text orange-button'>Check</span> Aborted - export file not found!#");
+        file_put_contents("/var/tmp/$disk.tmp.end","100%#<span class='orange-text orange-button'>"._('Check')."</span> "._('Aborted - export file not found')."!#");
       }
     }
   break;
@@ -64,7 +78,7 @@ switch ($_POST['cmd']) {
       if (file_exists("$path/$disk.export.hash")) {
         exec("$bunker -iqx $m $l -f $path/$disk.export.hash >/dev/null &");
       } else {
-        file_put_contents("/var/tmp/$disk.tmp.end","100%#<span class='orange-text orange-button'>Import</span> Aborted - export file not found!#");
+        file_put_contents("/var/tmp/$disk.tmp.end","100%#<span class='orange-text orange-button'>"._('Import')."</span> "._('Aborted - export file not found')."!#");
       }
     }
   break;

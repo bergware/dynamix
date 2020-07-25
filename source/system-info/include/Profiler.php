@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -11,6 +11,20 @@
  */
 ?>
 <?
+$plugin = 'dynamix.system.info';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+
+if ($translations) {
+  // add translations
+  $_SERVER['REQUEST_URI'] = 'systemprofiler';
+  require_once "$docroot/webGui/include/Translations.php";
+} else {
+  // legacy support (without javascript)
+  $noscript = true;
+  require_once "$docroot/plugins/$plugin/include/Legacy.php";
+}
+
 function grep($key, $speed){
   global $raid6;
   $match = '';
@@ -23,11 +37,11 @@ function grep($key, $speed){
 $output = array();
 switch ($_POST['cmd']) {
 case 'overview':
-  echo "<tr><td style='font-weight:bold'>System Overview</td><td></td></tr>";
-  echo "<tr><td>unRAID system:</td><td>unRAID server ".$_POST['regTy'].", version ".$_POST['version']."</td></tr>";
+  echo "<tr><td style='font-weight:bold'>"._('System Overview')."</td><td></td></tr>";
+  echo "<tr><td>"._('Unraid system').":</td><td>"._('Unraid server')." ".$_POST['regTy'].", version ".$_POST['version']."</td></tr>";
   echo "<tr><td>Model:</td><td>".$_POST['model']."</td></tr>";
-  echo "<tr><td>Motherboard:</td><td>".exec("dmidecode -qt2|awk -F: '/^\tManufacturer:/{m=\$2};/^\tProduct Name:/{p=\$2} END{print m\" -\"p}'")."</td></tr>";
-  echo "<tr><td>Processor:</td><td>";
+  echo "<tr><td>"._('Motherboard').":</td><td>".exec("dmidecode -qt2|awk -F: '/^\tManufacturer:/{m=\$2};/^\tProduct Name:/{p=\$2} END{print m\" -\"p}'")."</td></tr>";
+  echo "<tr><td>"._('Processor').":</td><td>";
   $cpu = explode('#',exec("dmidecode -qt4|awk -F: '/^\tVersion:/{v=\$2};/^\tCurrent Speed:/{s=\$2} END{print v\"#\"s}'"));
   $cpumodel = str_ireplace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&trade;"),$cpu[0]);
   if (strpos($cpumodel,'@')===false) {
@@ -41,7 +55,7 @@ case 'overview':
     echo $cpumodel;
   }
   echo "</td></tr>";
-  echo "<tr><td>HVM:</td><td>";
+  echo "<tr><td>"._('HVM').":</td><td>";
   exec('modprobe -a kvm_intel kvm_amd 2>/dev/null');
   $strLoadedModules = shell_exec("lsmod | grep '^kvm_\(amd\|intel\)'");
   $strCPUInfo = file_get_contents('/proc/cpuinfo');
@@ -53,7 +67,7 @@ case 'overview':
     echo '</a>';
   }
   echo "</td></tr>";
-  echo "<tr><td>IOMMU:</td><td>";
+  echo "<tr><td>"._('IOMMU').":</td><td>";
   $iommu_groups = shell_exec("find /sys/kernel/iommu_groups/ -type l");
   if (!empty($iommu_groups)) {
     echo 'Enabled';
@@ -63,7 +77,7 @@ case 'overview':
     echo '</a>';
   }
   echo "</td></tr>";
-  echo "<tr><td>Cache:</td>";
+  echo "<tr><td>"._('Cache').":</td>";
   $empty = true;
   $cache = explode('#',exec("dmidecode -qt7|awk -F: '/^\tSocket Designation:/{c=c\$2\";\"};/^\tInstalled Size:/{s=s\$2\";\"};/^\tMaximum Size:/{m=m\$2\";\"} END{print c\"#\"s\"#\"m}'"));
   $socket = array_map('trim',explode(';',$cache[0]));
@@ -79,7 +93,7 @@ case 'overview':
     }
   }
   if ($empty) echo "</tr>";
-  echo "<tr><td>Memory:</td>";
+  echo "<tr><td>"._('Memory').":</td>";
   $memory = explode('#',exec("dmidecode -qt17|awk -F: '/^\tLocator:/{b=b\$2\";\"};/^\tSize: [0-9]+ MB\$/{t+=\$2;c=c\$2\";\"};/^\tSize: [0-9]+ GB\$/{t+=\$2*1024;c=c\$2\";\"};/^\tSize: No/{c=c\";\"};/^\tSpeed:/{v=v\$2\";\"} END{print t\"#\"b\"#\"c\"#\"v}'"));
   $maximum = exec("dmidecode -qt16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB\$/{t+=\$2*1024} END{print t}'");
   $available = $memory[0];
@@ -89,13 +103,13 @@ case 'overview':
     $unit = 'GB';
   } else $unit = 'MB';
   if ($maximum < $available) {$maximum = pow(2,ceil(log($available)/log(2))); $star = "*";} else $star = "";
-  echo "<td>$available $unit (max. installable capacity $maximum $unit)$star</td></tr>";
+  echo "<td>$available $unit ("._('max. installable capacity')." $maximum $unit)$star</td></tr>";
   $bank = array_map('trim',explode(';', $memory[1]));
   $size = array_map('trim',explode(';', $memory[2]));
   $speed = array_map('trim',explode(';', $memory[3]));
   for ($i=0; $i<count($bank); $i++) if ($bank[$i] && $size[$i]) echo "<tr><td></td><td>{$bank[$i]} = {$size[$i]}, {$speed[$i]}</td></tr>";
   $i = 0;
-  echo "<tr><td>Network:</td>";
+  echo "<tr><td>"._('Network').":</td>";
   exec("ifconfig -s -a|grep -Po '^(bond|eth)\d+ '",$sPorts);
   foreach ($sPorts as $port) {
     $mtu = file_get_contents("/sys/class/net/$port/mtu");
@@ -111,22 +125,22 @@ case 'overview':
       echo (array_pop($info)=='yes' && $info[0]) ? "<td>$port: {$info[0]}, ".strtolower($info[1])." duplex, mtu $mtu</td></tr>" : "<td>$port: not connected</td></tr>";
     }
   }
-  if ($i==0) echo "Not available";
+  if ($i==0) echo _("Not available");
   echo "</td></tr>";
-  echo "<tr><td>Kernel:</td><td>".exec("uname -srm")."</td></tr>";
-  echo "<tr><td>OpenSSL:</td><td>".exec("openssl version|cut -d' ' -f2")."</td></tr>";
-  echo "<tr><td>P + Q algorithm:</td>";
+  echo "<tr><td>"._('Kernel').":</td><td>".exec("uname -srm")."</td></tr>";
+  echo "<tr><td>"._('OpenSSL').":</td><td>".exec("openssl version|cut -d' ' -f2")."</td></tr>";
+  echo "<tr><td>"._('P + Q algorithm').":</td>";
   exec("grep ' raid6: ' /var/log/dmesg", $raid6);
   $p = grep("\.\.\.\. xor()",false);
   $q = grep('using algorithm ',true);
   echo "<td>$p + $q</td></tr>";
-  echo "<tr><td>Uptime:</td>";
+  echo "<tr><td>"._('Uptime').":</td>";
   $time = strtok(exec("cat /proc/uptime"), ".");
   $days = sprintf("%2d", $time/86400);
   $hours = sprintf("%2d", $time/3600%24);
   $min = sprintf("%2d", $time/60%60);
   $sec = sprintf("%2d", $time%60);
-  echo "<td>$days days, $hours hours, $min minutes, $sec seconds</td></tr>";
+  echo "<td>"._("$days days, $hours hours, $min minutes, $sec seconds",2)."</td></tr>";
   return;
 case 'bios':
   exec("dmidecode -qt0|grep -v '^Invalid entry'",$output);
@@ -164,21 +178,21 @@ foreach ($output as $line) {
   if (!$line) continue;
   if (!$header || $line==$header || preg_match('/^Port (bond|eth)/',$line)) {
     if ($header) echo "<tr><td colspan='2'>&nbsp;</td></tr>"; else $header = $line;
-    echo "<tr><td style='font-weight:bold'>$line</td><td></td></tr>";
+    echo "<tr><td style='font-weight:bold'>"._($line)."</td><td></td></tr>";
     $join = false;
     continue;
   }
   if (strpos($line, ':')) {
     if ($join) {echo "<td></td></tr>"; $join = false;}
-    list($title,$info) = array_map('trim', explode(':', $line, 2));
-    echo "<tr><td>$title:</td>";
+    [$title,$info] = array_map('trim', explode(':', $line, 2));
+    echo "<tr><td>"._($title).":</td>";
     if ($info)
-      echo "<td>".str_replace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&#8482;"),$info)."</td></tr>";
+      echo "<td>"._(str_replace(["Processor","(C)","(R)","(TM)"],["","&#169;","&#174;","&#8482;"],$info))."</td></tr>";
     else
       $join = true;
   } else {
     if (preg_match('/Information|Memory Device/',$line)) {
-      echo "<tr><td>$line</td><td></td></tr>";
+      echo "<tr><td>"._($line)."</td><td></td></tr>";
     } else {
       if (!$join) echo "<tr><td></td>";
       echo "<td>$line</td></tr>";
@@ -186,5 +200,5 @@ foreach ($output as $line) {
     }
   }
 }
-if (!$header) echo "<tr><td colspan='2'><center><em>No information available</em></center></td></tr>";
+if (!$header) echo "<tr><td colspan='2'><center><em>"._('No information available')."</em></center></td></tr>";
 ?>

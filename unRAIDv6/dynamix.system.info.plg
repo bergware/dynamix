@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2017.11.18b">
+<!ENTITY version   "2020.06.21">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1b03116dc7232228c825a94bdfaf11b5">
+<!ENTITY MD5       "be2a5a726e2ff01cbaffaece5eeada5b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,18 @@
 ##&name;
 
 ###&version;
+- fixed regression error
+
+###2020.06.20
+- updated multi-language support
+
+###2020.05.10
+- updated multi-language support
+
+###2020.03.31
+- added multi-language support
+
+###2017.11.18
 - fixed memory calculation, sometimes wrong
 - fixed ethernet port listing, suppress VLANs
 
@@ -94,7 +106,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2020, Bergware International
 Dynamix System Information - System hardware and BIOS details
 -->
 
@@ -143,7 +155,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

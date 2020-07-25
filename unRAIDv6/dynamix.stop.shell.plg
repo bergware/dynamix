@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.stop.shell">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.01.13a">
+<!ENTITY version   "2020.03.31">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 ]>
 
@@ -13,6 +13,10 @@
 ##&name;
 
 ###&version;
+- added multi-language support
+- added multi cache pool support
+
+###2018.01.13
 - Added minimum unRAID version 6.4.0
 - Changed hi-res icon
 
@@ -21,7 +25,7 @@
 </CHANGES>
 
 <!--
-Copyright 2018, Bergware International
+Copyright 2020, Bergware International
 Dynamix Stop shell - Terminates open shells when stopping the array
 -->
 
@@ -999,8 +1003,14 @@ DwA77AlySGUFYgAAAABJRU5ErkJggg==
 <INLINE>
 <![CDATA[
 #!/bin/bash
+# read cache pools or fallback to legacy /mnt/cache
+if [[ -d /boot/config/pools ]]; then
+  cache=$(ls /boot/config/pools|sed 's:.cfg$::;s:^:/mnt/:')
+else
+  cache=/mnt/cache
+fi
 # stop any open shell which prevents unmounting of array
-for PID in $(lsof /mnt/disk[0-9]* /mnt/cache /mnt/user /mnt/user0 2>/dev/null|awk '/^(bash|sh|mc) /{print $2}'); do
+for PID in $(lsof /mnt/disk[0-9]* $cache /mnt/user /mnt/user0 2>/dev/null|awk '/^(bash|sh|mc) /{print $2}'); do
   kill $PID 1>/dev/null 2>&1
 done
 ]]>
@@ -1020,7 +1030,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2018, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

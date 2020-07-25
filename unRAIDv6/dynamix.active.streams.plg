@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.active.streams">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2019.01.03">
+<!ENTITY version   "2020.06.17">
 <!ENTITY launch    "Tools/ActiveStreams">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "323cd19b187fbd1b542bebbaae7c3d2c">
+<!ENTITY MD5       "3c0fbba75800727ed7006381fec035e4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,16 @@
 ##&name;
 
 ###&version;
+- updated multi-language support
+
+###2020.05.10
+- updated multi-language support
+
+###2020.03.31
+- added multi-language support
+- minor updates
+
+###2019.01.03
 - added ipv6 support
 
 ###2018.12.31
@@ -89,7 +99,7 @@
 </CHANGES>
 
 <!--
-Copyright 2018, Bergware International
+Copyright 2020, Bergware International
 Dynamix Active Streams - Real-time monitoring of SMB shares
 -->
 
@@ -117,7 +127,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2018, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

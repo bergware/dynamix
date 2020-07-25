@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2017.10.15">
+<!ENTITY version   "2020.06.21">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ad3af00081ad9a6cec8d27368f315449">
+<!ENTITY MD5       "0122ea8ba1111ce163ec8311b9a58274">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,22 @@
 ##&name;
 
 ###&version;
+- fixed regression error
+
+###2020.06.20
+- updated multi-language support
+
+###2020.05.10
+- updated multi-language support
+
+###2020.04.11
+- fixed NMVE exclusion (courtesy of Leoyzen)
+
+###2020.03.31
+- added multi-language support
+- added multi fan selection
+
+###2017.10.15
 - added temperature reading from NVMe devices (contributed by syntactic-salt)
 - added exclude disks option from temperature reading (contributed by andreiio)
 
@@ -65,7 +81,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2020, Bergware International
 Dynamix System Autofan - Fan speed control. Makes use of autofan script contributed by Aiden, Dan Stroot, Guzzi, gfjardim
 -->
 
@@ -116,7 +132,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

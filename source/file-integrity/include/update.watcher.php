@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2017, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -46,8 +46,10 @@ if ($new['files'])   $map = array_merge($map,array_map('expand_file',explode(','
 if ($new['exclude']) $map = array_merge($map,array_map('expand_share',explode(',',$new['exclude'])));
 if ($new['apple'])   $map = array_merge($map,[expand_folder('.AppleDB'),expand_file('.DS_Store')]);
 if (count($map)>1)   {$open = '('; $close = ')';} else {$open = $close = '';}
+
 $exclude = $map ? $open.regex(implode('|',$map)).$close : '';
 $disks = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
+
 file_put_contents($conf, "cmd=\"$cmd\"\nmethod=\"$method\"\nexclude=\"$exclude\"\ndisks=\"$disks\"\n");
 exec("/usr/local/emhttp/plugins/$plugin/scripts/rc.watcher ".($new['service'] ? 'restart' : 'stop')." &>/dev/null");
 
@@ -99,7 +101,7 @@ if ($new['schedule']>0 && $x>0) {
   }
   $text[] = "exit 0\n";
   file_put_contents($run, implode("\n",$text));
-  file_put_contents($cron, "# Generated file integrity check schedule:\n$time $run &> /dev/null\n\n");
+  file_put_contents($cron, "# Generated file integrity check schedule:\n$time bash $run &> /dev/null\n\n");
 } else {
   @unlink($run);
   @unlink($cron);

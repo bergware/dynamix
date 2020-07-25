@@ -14,18 +14,20 @@
 #=======================================================================================
 # Version 1.0   Authored by Aiden
 # Version 1.1   Modified by Dan Stroot to run in a loop. Does not require the user
-#               to add this to cron  - just start it in your go file.
-# Version 1.2   Modified by Guzzi    - removed -d ata to work on sas controllers
-# Version 1.3   Modified by gfjardim - added to dynamix.system.autofan
-# Version 1.4   Modified by Bergware - added additional line parameters
-#                                    - start/stop control by Dynamix plugin
-#                                    - celsius/fahrenheit conversion
-# Version 1.5   Modified by Bergware - added nvme devices temperature reading (contributed by syntactic-salt)
-#                                    - added exclude disks from temperature reading (contributed by andreiio)
+#               to add this to cron     - just start it in your go file.
+# Version 1.2   Modified by Guzzi       - removed -d ata to work on sas controllers
+# Version 1.3   Modified by gfjardim    - added to dynamix.system.autofan
+# Version 1.4   Modified by Bergware    - added additional line parameters
+#                                       - start/stop control by Dynamix plugin
+#                                       - celsius/fahrenheit conversion
+# Version 1.5   Modified by Bergware    - added nvme devices temperature reading (contributed by syntactic-salt)
+#                                       - added exclude disks from temperature reading (contributed by andreiio)
+# Version 1.6   Modified by InfinityMod - added mulifan support
+#                                       - added fan spin up/down offset 
 #=======================================================================================
 # Dependencies: grep,awk,smartctl,hdparm
 #=======================================================================================
-version=1.5
+version=1.6
 program_name="autofan"
 usage() {
  echo "Usage: $program_name [-t min_temp] [-T max_temp] [-m loop in minutes] [-c controller] [-f fan] [-l low]"
@@ -52,19 +54,21 @@ PWM_CONTROLLER=/sys/class/hwmon/hwmon2/pwm1 # Power (speed) setting
 PWM_FAN=/sys/class/hwmon/hwmon2/fan1_input  # Used to track actual rpm values
 
 # Temperature boundaries
-TEMP_LOW=35    # Anything this number and below - fan is *off*
-TEMP_HIGH=45   # Anything this number and above - fan is *full*
+TEMP_LOW=35        # Anything this number and below - fan is *off*
+TEMP_HIGH=45       # Anything this number and above - fan is *full*
 
 # Fan speed settings. Run pwmconfig (part of the lm_sensors package) to determine
 # what numbers you want to use for your fan pwm settings. Should not need to
 # change the OFF variable, only the LOW and maybe also HIGH to what you desire.
 # Any real number between 0 and 255.
-PWM_OFF=30     # Off Value (note: many PWM fans will not turn off)
-PWM_LOW=35     # Value to make your fan go slow
-PWM_HIGH=255   # Value to make your fan go fast
+PWM_OFF_OFFSET=30  # Offset on turning off PWM = (PWM_LOW - PWM_OFF_OFFSET)
+PWM_ON_OFFSET=30   # Offset on turning on PWM = (PWM_CALCULATED + PWM_ON_OFFSET)
+PWM_OFF=0          # Off Value (note: many PWM fans will not turn off)
+PWM_LOW=35         # Value to make your fan go slow
+PWM_HIGH=255       # Value to make your fan go fast
 
-INTERVAL=5     # The default number of minutes to loop
-EXCLUDE=""     # By default no disks are excluded
+INTERVAL=5         # The default number of minutes to loop
+EXCLUDE=""         # By default no disks are excluded
 #=======================================================================================
 # PROGRAM LOGIC - CHANGE AT YOUR PERIL ;)
 #=======================================================================================
@@ -84,6 +88,9 @@ while getopts "t:T:m:c:f:l:qhVe:" opt; do
    \?) usage >&2 ; exit 0 ;;
   esac
 done
+
+#PID_NAME
+PID_NAME="autofan_${PWM_CONTROLLER##*/}_${PWM_FAN##*/}"
 
 show_values() {
   echo TEMP_LOW=$TEMP_LOW
@@ -120,7 +127,7 @@ if [[ ! -z $cc ]]; then
 fi
 
 # Lockfile processing
-lockfile="/var/run/${program_name}.pid"
+lockfile="/var/run/${PID_NAME}.pid"
 if [[ -f $lockfile ]]; then
   # The file exists so read the PID
   # to see if it is still running
@@ -164,7 +171,7 @@ flash=/dev/$(ls -l /dev/disk/by-label| grep UNRAID | cut -d/ -f3 | cut -c 1-3)
 if [[ -z $EXCLUDE ]]; then
   DRIVES=$(ls /dev/{[hs]d*[a-z],nvme[0-9]} | grep -v "$flash")
 else
-  DRIVES=$(ls /dev/{[hs]d*[a-z],nvme[0-9]} | grep -v "$flash" | grep -v "/dev/$(echo $EXCLUDE | sed -e $'s/,/\\\n/g')")
+  DRIVES=$(ls /dev/{[hs]d*[a-z],nvme[0-9]} | grep -v "$flash" | grep -v "/dev/$(echo $EXCLUDE | sed -e $'s/,/\\\n/g' | sed -e 's/[np][0-9]//g')")
 fi
 
 # Count the number of drives in your array (ignoring the flash drive we identified)
@@ -228,6 +235,10 @@ function_calc_new_fan_speed() {
       ADJUSTED_FAN_SPEED=$PWM_HIGH
       ADJUSTED_PERCENT_SPEED=100
       ADJUSTED_OUTPUT="FULL"
+    elif [ "$ADJUSTED_OUTPUT" = "OFF" ]; then
+      ADJUSTED_FAN_SPEED=$(($(($(($HIGHEST_TEMP-$TEMP_LOW))*$FAN_PWM_INCREMENTS))+($PWM_LOW+$PWM_ON_OFFSET)))
+      ADJUSTED_PERCENT_SPEED=$(($(($ADJUSTED_FAN_SPEED*100))/$PWM_HIGH))
+      ADJUSTED_OUTPUT=$ADJUSTED_FAN_SPEED
     else
       ADJUSTED_FAN_SPEED=$(($(($(($HIGHEST_TEMP-$TEMP_LOW))*$FAN_PWM_INCREMENTS))+$PWM_LOW))
       ADJUSTED_PERCENT_SPEED=$(($(($ADJUSTED_FAN_SPEED*100))/$PWM_HIGH))
@@ -264,6 +275,7 @@ function_change_fan_speed() {
 }
 
 # Main Loop
+ADJUSTED_OUTPUT="OFF"
 while [[ -f $lockfile ]]; do
   # Just wait if modules aren't loaded
   if [[ ! -f $PWM_FAN || ! -f $PWM_CONTROLLER ]]; then
@@ -272,7 +284,11 @@ while [[ -f $lockfile ]]; do
   fi
 
   # Set PWM_OFF
-  PWM_OFF=$(($PWM_LOW-5))  # Off Value (note: many PWM fans will not turn off)
+  PWM_OFF=$(($PWM_LOW-$PWM_OFF_OFFSET))  # Off Value (note: many PWM fans will not turn off)
+
+  if [[ $PWM_OFF -lt 0 ]]; then
+    PWM_OFF=0
+  fi
 
   # Disable fan mininum RPM
   FAN_RPM_MIN=$(echo ${PWM_FAN} | cut -d"_" -f1)"_min"
@@ -304,8 +320,8 @@ done &
 # to get it to stop, type: rm /var/lock/fan_speed.LCK
 background_pid=$!
 echo $background_pid > "${lockfile}"
-echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q" >&2
-echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q" | logger -t$program_name
+echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q -c $PWM_CONTROLLER -f $PWM_FAN" >&2
+echo "$program_name process ID $background_pid started, To terminate it, type: $program_name -q -c $PWM_CONTROLLER -f $PWM_FAN" | logger -t$program_name
 if [[ -n $EXCLUDE ]]; then
 echo "$program_name excluding drives $EXCLUDE from max temp calculations" | logger -t$program_name
 fi

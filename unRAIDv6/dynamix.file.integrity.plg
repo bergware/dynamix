@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.04.20">
+<!ENTITY version   "2020.06.21">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "37bc19ea444c04cf630725f7e51014d4">
+<!ENTITY MD5       "0c2a39f5724b3c0529aec14469b1ea8b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,25 @@
 ##&name;
 
 ###&version;
+- fixed regression error
+
+###2020.06.20
+- updated multi-language support
+
+###2020.05.10
+- updated multi-language support
+
+###2020.04.04
+- fixed mdstat reading
+
+###2020.03.31
+- added multi-language support
+- minor updates
+
+###2020.03.08
+- make plugin compatible with Unraid 6.8 and higher
+
+###2018.04.20
 - fixed uninstaller for unRAID 6.4 and higher
 
 ###2017.12.05
@@ -258,7 +277,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2020, Bergware International
 Dynamix File Integrity - Real-time hashing and verification of files. Report on failed file content integrity (aka bit-rot).
 -->
 
@@ -466,9 +485,10 @@ fi
 [[ -e /proc/mdstat ]] &amp;&amp; mdcmd=mdstat || mdcmd=mdcmd
 # get unRAID key
 getkey(){
-  if [[ -e /proc/$mdcmd ]]; then
+  local mdcmd=/proc/mdstat
+  if [[ -e $mdcmd ]]; then
     local key=$1
-    grep -Po "^$key=\K.*" /proc/$mdcmd
+    grep -Po "^$key=\K.*" $mdcmd
   fi
 }
 
@@ -489,7 +509,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2017, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

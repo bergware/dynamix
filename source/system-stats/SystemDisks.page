@@ -1,8 +1,9 @@
 Menu="Stats:1"
 Title="Disk Stats"
+Tag="bar-chart"
 ---
 <?PHP
-/* Copyright 2012-2018, Bergware International.
+/* Copyright 2012-2020, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -14,12 +15,19 @@ Title="Disk Stats"
  */
 ?>
 <?
+$plugin = 'dynamix.system.stats';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/SystemDisks.page"))?>
+<?else:?>
+<?
 if ($var['fsState']=="Stopped"):
-  echo "<div class='notice'>Array must be <strong><big>started</big></strong> to view disk stats.</div>";
+  echo "<div class='notice'>"._('Array must be **Started** to view disk stats').".</div>";
   return;
 endif;
 
-$plugin = 'dynamix.system.stats';
 $cfg = parse_plugin_cfg($plugin);
 
 $stats  = "/plugins/$plugin/include/HardwareStats.php";
@@ -29,7 +37,7 @@ $port   = $cfg['port'];
 $show   = $cfg['show'];
 $text   = $cfg['text'];
 $cols   = $cfg['cols'];
-
+$pools  = $pools ?? ['cache'];
 $offset = $text=='left' ? 6 : -6;
 $index  = $text=='left' ? 2 : 0;
 $parity = $arraysize = $arrayfree = 0;
@@ -49,17 +57,18 @@ foreach ($disks as $disk) {
     $arraysize += $disk['size']*1024;
     $arrayfree += $disk['fsFree']*1024;
   case 'Flash':
-    $series[] = "'".my_disk($disk['name'])."'";
+    $series[] = "'"._(my_disk($disk['name']),3)."'";
     $sizes[] = "'".my_scale($disk['size']*1024,$unit,-1,-1)." $unit'";
     $rows++;
-  break;
+    break;
   case 'Cache':
-    if ($disk['name']=='cache') {
-      $series[] = "'Cache'";
+    if (in_array($disk['name'],$pools)) {
+      $series[] = "'".ucfirst($disk['name'])."'";
       $sizes[] = "'".my_scale($disk['fsSize']*1024,$unit,-1,-1)." $unit'";
       $rows++;
     }
-  break;}
+    break;
+  }
 }
 
 $arrayused = $arraysize-$arrayfree;
@@ -78,6 +87,9 @@ if ($display['time']=="%R") {
   $second = '%l:%M:%S %p';
 }
 
+$critical = $display['critical']>0;
+$warning = $display['warning']>0 && ($display['critical']==0 || $display['warning']<$display['critical']);
+
 function bar_color($val) {
   global $display;
   $critical = $display['critical'];
@@ -86,12 +98,9 @@ function bar_color($val) {
   if ($val>=$warning && $warning>0) return "orangebar";
   return "greenbar";
 }
-
-$critical = $display['critical']>0;
-$warning = $display['warning']>0 && ($display['critical']==0 || $display['warning']<$display['critical']);
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/<?=$plugin?>/styles/disk.stats.css">
-<script src="/plugins/<?=$plugin?>/javascript/jquery.highcharts.js"></script>
+<link type="text/css" rel="stylesheet" href="<?=autov("/plugins/$plugin/styles/disk.stats.css")?>">
+<script src="<?=autov("/plugins/$plugin/javascript/jquery.highcharts.js")?>"></script>
 <script>
 var graph = <?=$graph?>;
 var frame = <?=$frame?>;
@@ -239,7 +248,7 @@ function diskStats() {
 function sys(delay) {
   var series = [], i = 0;
   if (delay!=0) delay = 1200;
-  $.post('<?=$stats?>',{cmd:'sys',startMode:'<?=$var['startMode']?>'},function(string) {
+  $.post('<?=$stats?>',{cmd:'sys',startMode:'<?=$var["startMode"]?>',pools:'<?=implode(",",$pools)?>'},function(string) {
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     if ($('#tab1').is(':checked')) systime = setTimeout('sys(0)',<?=max(30000,abs($display['refresh']))?>);
 <?endif;?>
@@ -352,7 +361,7 @@ $(function() {
   Highcharts.setOptions({
     global:{useUTC:false},
     chart:{
-      style:{fontFamily:'arimo',fontSize:'10px'},
+      style:{fontFamily:'clear-sans',fontSize:'1rem'},
       backgroundColor:{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'rgb(96,96,96)'],[1,'rgb(16,16,16)']]},
       borderWidth:0,
       borderRadius:8,
@@ -421,8 +430,8 @@ $(function() {
     colors:[{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#941C00'],[1,'#DE1100']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#CE7C10'],[1,'#F0B400']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#17BF0B'],[1,'#127A05']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#D9D9D9'],[1,'#949494']]}],
     plotOptions:{series:{stacking:'normal',animation:{duration:1000},pointPadding:0.2,groupPadding:0,
     dataLabels:{enabled:true,color:'#fff',align:'<?=$text?>',verticalAlign:'top',x:<?=$offset?>,y:<?=$y?>,style:{opacity:0},formatter:function(){if (this.series.index==<?=$index?>) return this.total+' %';}}}},
-    title:{text:'Disk Usage'},
-    subtitle:{text:'utilization in percentage'},
+    title:{text:_('Disk Usage')},
+    subtitle:{text:_('utilization in percentage')},
 <?if ($cfg['size']):?>
     xAxis:[{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'12px'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
     {opposite:true,linkedTo:0,type:'linear',labels:{style:{fontSize:'12px'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$sizes)?>]}],
@@ -447,8 +456,8 @@ $(function() {
     chart:{renderTo:'cpu',events:{load:cpu}},
     colors:['#BDE5F8','#E68A00','#EDC240'],
     plotOptions:{area:{stacking:'normal'}},
-    title:{text:'Processor'},
-    subtitle:{text:'CPU Load'},
+    title:{text:_('Processor')},
+    subtitle:{text:_('CPU Load')},
     yAxis:{<?=$cfg['cpu']==100?'max:100,':''?>labels:{formatter:function(){return this.value+' %';}}},
     legend:{y:-11},
     tooltip:{formatter:function(){
@@ -465,9 +474,9 @@ $(function() {
     chart:{renderTo:'ram',events:{load:ram}},
     colors:['#4DA74D','#E68A00','#EDC240'],
     plotOptions:{area:{stacking:'normal'}},
-    title:{text:'Memory'},
-    subtitle:{text:'RAM'},
-    yAxis:{labels:{formatter:function() {return autoscale(this.value*1024,'B',100,1024);}}},
+    title:{text:_('Memory')},
+    subtitle:{text:_('RAM')},
+    yAxis:{labels:{formatter:function(){return autoscale(this.value*1024,'B',100,1024);}}},
     legend:{y:-11},
     tooltip:{formatter:function(){
      var s='<span style="color:#ccc;font-size:9px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M',this.x)+'</span>';
@@ -482,9 +491,9 @@ $(function() {
   comchart = new Highcharts.Chart({
     chart:{renderTo:'com',events:{load:com}},
     colors:['#E68A00','#EDC240'],
-    title:{text:'Network'},
+    title:{text:_('Network')},
     subtitle:{text:'<?=$cfg['port']?>'},
-    yAxis:{labels:{formatter:function() {return autoscale(this.value*<?=$cfg["unit"]=='b'?8000:1000?>,'<?=$cfg["unit"]?>/s',10);}}},
+    yAxis:{labels:{formatter:function(){return autoscale(this.value*<?=$cfg["unit"]=='b'?8000:1000?>,'<?=$cfg["unit"]?>/s',10);}}},
     tooltip:{formatter:function(){
      var s='<span style="color:#ccc;font-size:9px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M',this.x)+'</span>';
      $.each(this.points,function(i,point){s+='<br><span style="color:'+point.series.color+'">'+point.series.name+':</span>'+autoscale(point.y*<?=$cfg["unit"]=='b'?8000:1000?>,'<?=$cfg["unit"]?>/s',1)});
@@ -498,9 +507,9 @@ $(function() {
   hddchart = new Highcharts.Chart({
     chart:{renderTo:'hdd',events:{load:hdd}},
     colors:['#E68A00','#EDC240'],
-    title:{text:'Storage'},
-    subtitle:{text:'<?=exec("ls /dev/[hs]d[a-z] | wc -l")?> disks'},
-    yAxis:{labels:{formatter:function() {return autoscale(this.value*500,'B/s',10);}}},
+    title:{text:_('Storage')},
+    subtitle:{text:'<?=exec("ls /dev/[hs]d[a-z]|wc -l")?> _(disks)_'},
+    yAxis:{labels:{formatter:function(){return autoscale(this.value*500,'B/s',10);}}},
     tooltip:{formatter:function(){
      var s='<span style="color:#ccc;font-size:9px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M',this.x)+'</span>';
      $.each(this.points,function(i,point){s+='<br><span style="color:'+point.series.color+'">'+point.series.name+':</span>'+autoscale(point.y*500,'B/s',1)});
@@ -514,20 +523,21 @@ $(function() {
 </script>
 <div class="mybar whitebar left" style="width:<?=$totalpercent?>%;"><span id="totalarray" class="mybar <?=bar_color($arraypercent)?> align-left" style="width:0"></span></div>
 <div class="mybar graybar right" style="width:<?=$totaldisk?>%"></div>
-<div class="left"><img src="<?="/plugins/$plugin/images"?>/array.png" class="left"><strong><?=my_scale($arraysize,$unit,-1,-1)." $unit"?></strong><br><small>Total Array Size</small></div>
-<div class="left"><span id="stats1" class="mybar <?=bar_color($arraypercent)?> inside"></span><span id="stats2"><strong> <?=my_scale($arrayused,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$arraypercent?>%</strong><br/><small>Total Space Used</small></span></div>
-<div class="left"><span class="mybar whitebar inside"></span><span id="stats3"><strong><?=my_scale($arrayfree,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$freepercent?>%</strong><br/><small>Available for Data</small></span></div>
-<div class="right"><span class="mybar graybar inside"></span><strong> <?=my_scale($parity,$unit,-1,-1)." $unit"?></strong><br><small>Used for Parity</small></div>
+<div class="left"><img src="<?="/plugins/$plugin/images"?>/array.png" class="left"><strong><?=my_scale($arraysize,$unit,-1,-1)." $unit"?></strong><br><small>_(Total Array Size)_</small></div>
+<div class="left"><span id="stats1" class="mybar <?=bar_color($arraypercent)?> inside"></span><span id="stats2"><strong> <?=my_scale($arrayused,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$arraypercent?>%</strong><br/><small>_(Total Space Used)_</small></span></div>
+<div class="left"><span class="mybar whitebar inside"></span><span id="stats3"><strong><?=my_scale($arrayfree,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$freepercent?>%</strong><br/><small>_(Available for Data)_</small></span></div>
+<div class="right"><span class="mybar graybar inside"></span><strong> <?=my_scale($parity,$unit,-1,-1)." $unit"?></strong><br><small>_(Used for Parity)_</small></div>
 <?if ($critical):?>
-<div class="right"><span class="mybar redbar inside"></span><strong>Above <?=$display['critical']?>%</strong><br><small>Low on Space</small></div>
+<div class="right"><span class="mybar redbar inside"></span><strong>_(Above)_ <?=$display['critical']?>%</strong><br><small>_(Low on Space)_</small></div>
 <?endif;?>
 <?if ($warning):?>
-<div class="right"><span class="mybar orangebar inside"></span><strong>Above <?=$display['warning']?>%</strong><br><small>High on Usage</small></div>
+<div class="right"><span class="mybar orangebar inside"></span><strong>_(Above)_ <?=$display['warning']?>%</strong><br><small>_(High on Usage)_</small></div>
 <?endif;?>
 <?if ($critical || $warning):?>
-<div class="right"><span class="mybar greenbar inside"></span><strong>Below <?=$warning?$display['warning']:$display['critical']?>%</strong><br><small>Normal Usage</small></div>
+<div class="right"><span class="mybar greenbar inside"></span><strong>_(Below)_ <?=$warning?$display['warning']:$display['critical']?>%</strong><br><small>_(Normal Usage)_</small></div>
 <?endif;?>
 <span id="sys" class="graph1"></span>
 <?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>
-<p><input type="button" value="Done" onclick="done()"></p>
+<p><input type="button" value="_(Done)_" onclick="done()"></p>
+<?endif;?>
 <?endif;?>

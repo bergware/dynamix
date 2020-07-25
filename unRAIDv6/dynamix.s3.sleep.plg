@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2018.02.04">
+<!ENTITY version   "2020.06.21">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c7f4136cd6ab5d3fd5c6ff063062424f">
+<!ENTITY MD5       "d04aae83307bb40e67fea98532fe5d74">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,30 @@
 ##&name;
 
 ###&version;
+- fixed regression error
+
+###2020.06.20
+- updated multi-language support
+
+###2020.05.10
+- updated multi-language support
+
+###2020.04.13
+- minor style correction
+
+###2020.04.12
+- fixed missing legacy files in Sleep.php
+
+### 2020.04.04
+- fixed mdstat reading
+- fixed ref string in Sleep.php
+
+###2020.03.31
+- added multi-language support
+- added multi cache pool support
+- added new setting: monitor status and/or counters of devices
+
+###2018.02.04
 - made S3_sleep script compatible with unRAID 6.4
 - fixed cache pool list
 
@@ -119,7 +143,7 @@
 </CHANGES>
 
 <!--
-Copyright 2016, Bergware International
+Copyright 2020, Bergware International
 Dynamix S3 Sleep - Manual and automatic sleep mode
 -->
 
@@ -189,9 +213,10 @@ urldecode(){
 
 # get unRAID key
 getkey(){
-  if [[ -e /proc/mdcmd ]]; then
+  local mdcmd=/proc/mdstat
+  if [[ -e $mdcmd ]]; then
     local key=$1
-    grep -Po "^$key=\K.*" /proc/mdcmd
+    grep -Po "^$key=\K.*" $mdcmd
   fi
 }
 
@@ -229,7 +254,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2016, Bergware International"
+echo " Copyright 2020, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
