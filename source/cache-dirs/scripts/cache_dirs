@@ -10,115 +10,117 @@
 # buffer cache to allow disks to spin down and no need to spin-up
 # simply to get a directory listing on an unRAID server.
 #
-# Version 1.0   Initial proof of concept using "ls -R"
-# Version 1.1   Working version, using "ls -R" or "find -maxdepth"
-# Version 1.2   Able to be used with or without presence of user-shares.
-#               Removed "ls -R" as it was too easy to run out of ram. (ask me how I know)
-#               Added -i include_dir to explicitly state cached directories
-#               Added -v option, verbose statistics when run in foreground
-#               Added -q option, to easily terminate a process run in the background
-#               Added logging of command line parameters to syslog
-# Version 1.3   Added -w option, to wait till array comes online before starting scan
-#               of /mnt/disk* share folders.
-#               Changed min-seconds delay between scans to 1 instead of 0.
-#               Moved test of include/exclude directories to after array is on-line
-#               Added logging of mis-spelled/missing include/exclude dirs to syslog
-#               Added ability to have shell wildcard expansion in include/exclude names
-# Version 1.4   Fix bug with argument order passed to find when using -d option
-#               Fixed command submitted to "at" to use full path. Should not need to
-#              set PATH variable in "go" script.
-#               Added ability to also cache scan /mnt/user with -u option
-# Version 1.4.1 Fixed version comment so it is actually a comment.
-# Version 1.5   Added -V to print version number.
-#               Added explicit cache of root directories on disks and cache drive
-#               Modified "average" scan time statistic to be weighted average with a window
-#               of recent samples.
-#               Added -a args option to allow entry of args to commands after dir/file name
-#                 example: cache_dirs -a "-ls" -d 3
-#                 This will execute "find disk/share -ls -maxdepth 3"
-# Version 1.6   - Fixed bug... if -q was used, and cache_dirs not currently running,
-#               it started running in error. OOps... Added the missing "exit"
-#               - Changed vfs_cache_pressure setting to be 1 instead of 0 by default.
-#               - Added "-p cache_pressure" to allow experimentation with vfs_cache_pressure values
+# Version 1.0    Initial proof of concept using "ls -R"
+# Version 1.1    Working version, using "ls -R" or "find -maxdepth"
+# Version 1.2    Able to be used with or without presence of user-shares.
+#                Removed "ls -R" as it was too easy to run out of ram. (ask me how I know)
+#                Added -i include_dir to explicitly state cached directories
+#                Added -v option, verbose statistics when run in foreground
+#                Added -q option, to easily terminate a process run in the background
+#                Added logging of command line parameters to syslog
+# Version 1.3    Added -w option, to wait till array comes online before starting scan
+#                of /mnt/disk* share folders.
+#                Changed min-seconds delay between scans to 1 instead of 0.
+#                Moved test of include/exclude directories to after array is on-line
+#                Added logging of mis-spelled/missing include/exclude dirs to syslog
+#                Added ability to have shell wildcard expansion in include/exclude names
+# Version 1.4    Fix bug with argument order passed to find when using -d option
+#                Fixed command submitted to "at" to use full path. Should not need to
+#                set PATH variable in "go" script.
+#                Added ability to also cache scan /mnt/user with -u option
+# Version 1.4.1  Fixed version comment so it is actually a comment.
+# Version 1.5    Added -V to print version number.
+#                Added explicit cache of root directories on disks and cache drive
+#                Modified "average" scan time statistic to be weighted average with a window
+#                of recent samples.
+#                Added -a args option to allow entry of args to commands after dir/file name
+#                example: cache_dirs -a "-ls" -d 3
+#                This will execute "find disk/share -ls -maxdepth 3"
+# Version 1.6    Fixed bug... if -q was used, and cache_dirs not currently running,
+#                it started running in error. OOps... Added the missing "exit"
+#                Changed vfs_cache_pressure setting to be 1 instead of 0 by default.
+#                Added "-p cache_pressure" to allow experimentation with vfs_cache_pressure values
 #                (If not specified, default value of 1 will be used)
-#               - Made -noleaf the default behavior for the "find" command (use -a "" to disable).
-#               - Added logic to force all disks "busy" by starting a process with each as their
-#               current working directory.   This will prevent a user from seeing a frightening
-#               Unformatted description if they attempt to stop the array.  A second "Stop" will
-#               succeed (the scan is paused for 2 minutes, so it may be stopped cleanly)
-#               - Added new -B option to revert to the old behaviour and not force disks busy if by
-#               chance this new feature causes problems for some users.
-#               - Allow min seconds to be equal to max seconds in loop delay range.
-#               - Added run-time-logging, log name = /var/log/cache_dirs.log
-# Version 1.6.1 - Fixed bug. Added missing /mnt/cache disk to scanned directories
-# Version 1.6.2 - Added trap to clean up processes after kill signal when run in background
-# Version 1.6.3 - Modified to deal with new un-mounting message in syslog in 4.5b7 to
-#                 allow array shutdown to occur cleanly.
-# Version 1.6.4 - Modified to suspend scan during time "mover" script is running to prevent
-#                 DuplicateFile messages from occurring as file is being copied.
-#               - Added -S option to NOT suspend scan during mover process.
-#               - Added logic to re-invoke cache_dirs if array is stopped and then re-started
-#                 by submitting command string to "at" to re-invoke in a minute.
-#               - Added entry to "usage()" function for -B
-# Version 1.6.5 - Fixed what I broke in looking for "mover" pid to suspend during the "mover"
-#                 to eliminate warnings in syslog about duplicate files detected while files were
-#                 being copied.
-# Version 1.6.6 - Fixed mover-detection to use the exact same logic as "mover" (and fixed stupid typo I had made)
-# Version 1.6.7 - Added cache_pressure to "usage" statement, fixed bug where it reverted to 10 after being invoked through "at"
-#                 when used with the -w option.
-# Version 1.6.8 - Added -U NNNNN option to set ulimit, and detection of 64 bit OS so odds are this new option will not be needed.
-#                 by default, ulimit is set to 5000 on 32 bit OS, and 30000 on 64 bit OS.  Either can be over-ridden with -U NNNNN on command line
-# Version 1.6.9 - Removed exec of /bin/bash.  Newer bash was not setting SHELL variable causng infinate loop if invoked from "go" script.
-#                 Changed default ulimit on 64 bit systems to 50000.
-#                 by default, ulimit is now set to 5000 on 32 bit OS, and 50000 on 64 bit OS.  Either can be over-ridden with -U NNNNN on command line
-#                 Setting ulimit to zero ( with "-U 0" option) is now special, cache_dirs will not set any ulimit at all.  You'll inherit the system value, whatever it might be.
+#                Made -noleaf the default behavior for the "find" command (use -a "" to disable).
+#                Added logic to force all disks "busy" by starting a process with each as their
+#                current working directory.   This will prevent a user from seeing a frightening
+#                Unformatted description if they attempt to stop the array.  A second "Stop" will
+#                succeed (the scan is paused for 2 minutes, so it may be stopped cleanly)
+#                Added new -B option to revert to the old behaviour and not force disks busy if by
+#                chance this new feature causes problems for some users.
+#                Allow min seconds to be equal to max seconds in loop delay range.
+#                Added run-time-logging, log name = /var/log/cache_dirs.log
+# Version 1.6.1  Fixed bug. Added missing /mnt/cache disk to scanned directories
+# Version 1.6.2  Added trap to clean up processes after kill signal when run in background
+# Version 1.6.3  Modified to deal with new un-mounting message in syslog in 4.5b7 to
+#                allow array shutdown to occur cleanly.
+# Version 1.6.4  Modified to suspend scan during time "mover" script is running to prevent
+#                DuplicateFile messages from occurring as file is being copied.
+#                Added -S option to NOT suspend scan during mover process.
+#                Added logic to re-invoke cache_dirs if array is stopped and then re-started
+#                by submitting command string to "at" to re-invoke in a minute.
+#                Added entry to "usage()" function for -B
+# Version 1.6.5  Fixed what I broke in looking for "mover" pid to suspend during the "mover"
+#                to eliminate warnings in syslog about duplicate files detected while files were
+#                being copied.
+# Version 1.6.6  Fixed mover-detection to use the exact same logic as "mover" (and fixed stupid typo I had made)
+# Version 1.6.7  Added cache_pressure to "usage" statement, fixed bug where it reverted to 10 after being invoked through "at"
+#                when used with the -w option.
+# Version 1.6.8  Added -U NNNNN option to set ulimit, and detection of 64 bit OS so odds are this new option will not be needed.
+#                by default, ulimit is set to 5000 on 32 bit OS, and 30000 on 64 bit OS.  Either can be over-ridden with -U NNNNN on command line
+# Version 1.6.9  Removed exec of /bin/bash.  Newer bash was not setting SHELL variable causng infinate loop if invoked from "go" script.
+#                Changed default ulimit on 64 bit systems to 50000.
+#                by default, ulimit is now set to 5000 on 32 bit OS, and 50000 on 64 bit OS.  Either can be over-ridden with -U NNNNN on command line
+#                Setting ulimit to zero ( with "-U 0" option) is now special, cache_dirs will not set any ulimit at all.  You'll inherit the system value, whatever it might be.
 # Joe L.
 #
-# Version 2.0.0 - Added gradual depth to avoid continous scans of filesystem, monitor of disk-idle, and better user-feedback as to disk spin-up in log-file.
-#                 Now stops cache_dirs immediately on stop signal (eg array stop) including stopping the currently running find-process.
-#                 Force-disk-busy now defaults no and inverted flag (and changed -B to -b) because it was (mostly) unRaid 4 and its unnessary when using plg with unmount disk event.
-# Version 2.0.1 - Fixed missing sleep. Now decreases scan-depth after few seconds (20-40s) if cache is lost after many successful cache-hits, because we don't want cache_dirs to be a resource-hog when system is otherwise occupied.
-# Version 2.0.2 - Fixed looping bash check in unRaid 6, plus fixed some too aggressive depth checks.
-# Version 2.0.3 - Bugfix suspend mover, and added concise log of lost cache.
-# Version 2.0.4 - Added more lost cache log, enabled by creating log file /var/log/cache_dirs_lost_cache.log
-# Version 2.0.5 - Updated for unRaid 6.1.2 new location of mdcmd (used to find idle-times of disks)
-# Version 2.0.6 - Included original 'B' option, it is unused but kept for compatibility reasons
-#
+# Version 2.0.0  Added gradual depth to avoid continous scans of filesystem, monitor of disk-idle, and better user-feedback as to disk spin-up in log-file.
+#                Now stops cache_dirs immediately on stop signal (eg array stop) including stopping the currently running find-process.
+#                Force-disk-busy now defaults no and inverted flag (and changed -B to -b) because it was (mostly) unRaid 4 and its unnessary when using plg with unmount disk event.
+# Version 2.0.1  Fixed missing sleep. Now decreases scan-depth after few seconds (20-40s) if cache is lost after many successful cache-hits, because we don't want cache_dirs to be a resource-hog when system is otherwise occupied.
+# Version 2.0.2  Fixed looping bash check in unRaid 6, plus fixed some too aggressive depth checks.
+# Version 2.0.3  Bugfix suspend mover, and added concise log of lost cache.
+# Version 2.0.4  Added more lost cache log, enabled by creating log file /var/log/cache_dirs_lost_cache.log
+# Version 2.0.5  Updated for unRaid 6.1.2 new location of mdcmd (used to find idle-times of disks)
+# Version 2.0.6  Included original 'B' option, it is unused but kept for compatibility reasons
 # arberg
 #
-# Version 2.1.0 - Modified for unRaid V6.1 and above only.
-#				- Removed V5 specific code.
-#				- Removed disks busy code.
-#				- Removed wait for array to come on line.
-#				- Remove unused variables.
-#				- Modifications to improve readability.
-#
-# Version 2.1.1	- Removed additional unused variables.
-#				- Removed V5 ulimit usage info that doesn't apply.
-#				- Show type of scanning being done - adaptive or fixed when cache_dirs is started.
+# Version 2.1.0  Modified for unRaid V6.1 and above only.
+#                Removed V5 specific code.
+#                Removed disks busy code.
+#                Removed wait for array to come on line.
+#                Remove unused variables.
+#                Modifications to improve readability.
+# Version 2.1.1  Removed additional unused variables.
+#                Removed V5 ulimit usage info that doesn't apply.
+#                Show type of scanning being done - adaptive or fixed when cache_dirs is started.
 # dlandon
 #
-# Version 2.2.0j - When cache lost, don't wait for disks idle, instead decrease depth
-#               - Now scans each disks and cache in separate processes. Thus removed option -u for scan user
-#               - Fixed loss of adaptive after 1 week
-#               - Weekly rescan only when disks been idle long
-#               - Apaptive scan will not retry increasing level to previous seen stable level until disks have been idle for a long time (20s)
-#               - -q now also kills subproccesses immediately (so cache_dirs does not prevent stopping the array)
-#               - Added file-count and depth adjustment by filecount
-# Version 2.2.1 - Added disabling of multithreaded scan of disks flag -T
-#                - Added diagnostics generate zip, flag -L
-#                - Added -P print file count flag
-#                - Disk idle times sometimes reported as crazy high numbers (when disks spun down on some systems). Report 9999 instead of crazy idle-times
-#                - Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk*
-# Version 2.2.2 - Added minimum depth param -c for adaptive depth scanning
-# Version 2.2.3 - Logging
-# Version 2.2.4 - Added rolled logs to -L diagnostics archive
-# Version 2.2.5 - Improved diagnostics info. Fixed sleep duration, before fixed depth always slept 1s, now it depends on disks idle and avg scan time.
-# Version 2.2.6 - CSV logging with all scan timings
-# Version 2.2.7 - Fixed -a option which was broken in 2.2
+# Version 2.2.0  When cache lost, don't wait for disks idle, instead decrease depth
+#                Now scans each disks and cache in separate processes. Thus removed option -u for scan user
+#                Fixed loss of adaptive after 1 week
+#                Weekly rescan only when disks been idle long
+#                Apaptive scan will not retry increasing level to previous seen stable level until disks have been idle for a long time (20s)
+#                -q now also kills subproccesses immediately (so cache_dirs does not prevent stopping the array)
+#                Added file-count and depth adjustment by filecount
+# Version 2.2.1  Added disabling of multithreaded scan of disks flag -T
+#                Added diagnostics generate zip, flag -L
+#                Added -P print file count flag
+#                Disk idle times sometimes reported as crazy high numbers (when disks spun down on some systems). Report 9999 instead of crazy idle-times
+#                Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk[0-9]*
+# Version 2.2.2  Added minimum depth param -c for adaptive depth scanning
+# Version 2.2.3  Logging
+# Version 2.2.4  Added rolled logs to -L diagnostics archive
+# Version 2.2.5  Improved diagnostics info. Fixed sleep duration, before fixed depth always slept 1s, now it depends on disks idle and avg scan time.
+# Version 2.2.6  CSV logging with all scan timings
+# Version 2.2.7  Fixed -a option which was broken in 2.2
 # arberg
+#
+# Version 2.2.8  Added multi-cache pool support
+#                change disk* to disk[0-9]* to avoid issues with the UD plugin
+# bergware
 ####################################################################################
-version=2.2.7
+version=2.2.8
 program_name=$(basename "$0")
 arg_count=$#
 
@@ -154,9 +156,9 @@ usage() {
 	echo " -i include_dir  (may be repeated as many times as desired)"
 	echo " -p NN    =   set cache_pressure to NN (by default = 10). 0 means never reclaim cache. See 'vfs_cache_pressure' in https://www.kernel.org/doc/Documentation/sysctl/vm.txt"
 	echo " -S       =   do not suspend scan during 'mover' process"
-	echo ""	
-	echo "Diagnostics, log:"	
-	echo " -z       =   concise log (log run criteria on one line)"	
+	echo ""
+	echo "Diagnostics, log:"
+	echo " -z       =   concise log (log run criteria on one line)"
 	echo " -P       =   compute files in each share and exit. Can be used with maxdepth -d param, and include -i and exclude -e."
 	echo " -L       =   generate diagnostics zip-file and exit"
 	echo " -T       =   disable multithreaded scan of disks"
@@ -224,6 +226,10 @@ NANO_PR_MS=1000000
 # and the OOM (out-of-memory) state killing on your processes to free up some RAM.
 # 1 did not do it with my 500Meg of RAM... trying cache_pressure of 10, use -p 1 if you still want the old value
 cache_pressure=10
+
+# Array & pool devices
+array=/mnt/disk[0-9]*
+pools=$(ls -d /mnt/*|grep -Pv '(disk[0-9]+|disks|user|user0)$')
 
 verbose_echo() {
 	[ $background = "no" ] && [ $verbose = "yes" ] && echo "$1"
@@ -310,9 +316,9 @@ run_diagnostics() {
 
 while getopts "a:p:m:M:c:d:D:e:i:l:FszBbwuvVhqSc:U:t:W:X:Y:Z:LTP" opt; do
 	case $opt in
-	c ) minDepth="$OPTARG" 
-		((minDepth < 1)) && minDepth=1 
-		;; 
+	c ) minDepth="$OPTARG"
+		((minDepth < 1)) && minDepth=1
+		;;
 	m ) min_seconds=$OPTARG ;;
 	M ) max_seconds=$OPTARG ;;
 	F ) background=no ;;
@@ -342,7 +348,7 @@ while getopts "a:p:m:M:c:d:D:e:i:l:FszBbwuvVhqSc:U:t:W:X:Y:Z:LTP" opt; do
 	S ) suspend_during_mover="no" ;;
 	z ) concise_log="yes" ;;
 	t ) frequency_of_full_depth_scan_sec="$OPTARG" ;;
-	l ) 
+	l )
 		case "$OPTARG" in
 		on)
 			touch $run_log
@@ -366,17 +372,17 @@ while getopts "a:p:m:M:c:d:D:e:i:l:FszBbwuvVhqSc:U:t:W:X:Y:Z:LTP" opt; do
 			;;
 		esac
 		;;
-	L )	
+	L )
 		run_diagnostics | tee cache_dirs_diagnostics_processes.log
 		[ -f cache_dirs_diagnostics.zip ] && rm cache_dirs_diagnostics.zip
 		zip -j cache_dirs_diagnostics.zip cache_dirs_diagnostics_processes.log /var/log/syslog /var/log/cache_dirs*
 		rm cache_dirs_diagnostics_processes.log
 		echo
 		echo "Generated cache_dirs_diagnostics.zip"
-		exit 0	
+		exit 0
 		;;
 	P ) do_print_file_counts=1 ;;
-	T ) multithreaded_scan=0 ;;	
+	T ) multithreaded_scan=0 ;;
 	W ) min_disk_idle_before_restarting_scan_sec="$OPTARG" ;;
 	X ) scan_timeout_sec_idle="$OPTARG" ;;
 	Y ) scan_timeout_sec_busy="$OPTARG" ;;
@@ -395,7 +401,7 @@ function join { local IFS="$1"; shift; echo "$*"; }
 
 build_dir_list() {
 	# build a list of directories to cache.
-	#   If no "-i" options are given, this will be all the top level directories in /mnt/disk* and /mnt/cache
+	#   If no "-i" options are given, this will be all the top level directories in $array and $pools
 	#   If "-i" entries are given, they will be the only top level dirs cached.
 	#   If "-e" (exclude) directories are given, they are then deleted from the list by the comm -23 coommand.
 	if [ $include_array_count -gt 0 ] ; then
@@ -404,13 +410,13 @@ build_dir_list() {
 		a=0
 		while test $a -lt $include_array_count
 		do
-			included_excl=$(find /mnt/disk* /mnt/cache -type d -maxdepth 1 -mindepth 1 -name "${include_array[$a]}" -exec basename {} \; 2>/dev/null)
+			included_excl=$(find $array $pools -type d -maxdepth 1 -mindepth 1 -name "${include_array[$a]}" -exec basename {} \; 2>/dev/null)
 			echo "$included_excl" | sort -u
 			a=$((a+1))
 		done
 		)| sort -u`
 	else
-		top_dirs=$(find /mnt/disk* /mnt/cache -type d -maxdepth 1 -mindepth 1  -exec basename {} \; 2>/dev/null | sort -u)
+		top_dirs=$(find $array $pools -type d -maxdepth 1 -mindepth 1  -exec basename {} \; 2>/dev/null | sort -u)
 	fi
 
 	exclude_dirs=`(
@@ -418,7 +424,7 @@ build_dir_list() {
 		a=0
 		while test $a -lt $exclude_array_count
 		do
-			expanded_excl=$(find /mnt/disk* /mnt/cache -type d -maxdepth 1 -mindepth 1 -name "${exclude_array[$a]}" -exec basename {} \; 2>/dev/null)
+			expanded_excl=$(find $array $pools -type d -maxdepth 1 -mindepth 1 -name "${exclude_array[$a]}" -exec basename {} \; 2>/dev/null)
 			echo "$expanded_excl" | sort -u
 			a=$((a+1))
 		done
@@ -436,12 +442,12 @@ if (( do_print_file_counts == 1 )) ; then
 	else
 		echo "Computing number of files"
 	fi
-	for share_dir in $dir_list 
+	for share_dir in $dir_list
 	do
-		echo $share_dir: $(find /mnt/disk*/$share_dir /mnt/cache/$share_dir $depth_arg 2>/dev/null | wc -l )
+		echo $share_dir: $(find /mnt/disk[0-9]*/$share_dir $(echo $pools|tr ' ' '\n'|awk '{print $1"/$share_dir"}') $depth_arg 2>/dev/null | wc -l )
 	done
 	exit 0
-fi	
+fi
 
 # We need to use it with -KILL
 killtree() {
@@ -547,7 +553,7 @@ if [ ! -z "$cc" ] ; then
 	usage >&2
 	exit 2
 fi
-if (( minDepth > maxDepth )) ; then 
+if (( minDepth > maxDepth )) ; then
 	syslog "WARNING: minDepth > maxDepth - corrected"
 	minDepth="$maxDepth"
 fi
@@ -659,7 +665,7 @@ do_deep_scan() {
 	dir_list=$(build_dir_list)
 	scan_start=$(date +%s%N)
 	children_pids=()
-	for i in /mnt/disk* /mnt/cache
+	for i in $array $pools
 	do
 		{
 
@@ -757,15 +763,15 @@ exists() {
     echo 'examlpe1a: exists $i in files_at_depth_map && echo "It exists"'
     echo 'examlpe2: if ! exists $i in files_at_depth_map; then echo "Note there" ; fi'
     return
-  fi   
-  eval '[ ${'$3'[$1]+muahaha} ]'  
+  fi
+  eval '[ ${'$3'[$1]+muahaha} ]'
 }
 
 count_files() {
 	local depth_arg=""
 	[ "$1" -ne "$maxDepthUnbounded" ] && depth_arg="-maxdepth $1"
-	totalCount=0 
-	for i in /mnt/disk* /mnt/cache ; do
+	totalCount=0
+	for i in $array $pools; do
 		for share_dir in $dir_list ; do
 			dir_to_scan="$i/$share_dir"
 			if [ -d "$dir_to_scan" ] ; then
@@ -773,29 +779,29 @@ count_files() {
 				totalCount=$((totalCount+thisDirCount))
 			fi
 		done
-	done 
+	done
 	echo "$totalCount"
 }
 
 # does not work as function that echo result, missing cpu_last
 # First cpu measurement will be wrong, missing last
 update_cpu_usage() {
-	cpu_now=($(head -n1 /proc/stat)) 
-	# Get all columns but skip the first (which is the "cpu" string) 
-	cpu_sum="${cpu_now[@]:1}" 
-	# Replace the column seperator (space) with + 
-	cpu_sum=$((${cpu_sum// /+})) 
-	# Get the delta between two reads 
-	cpu_delta=$((cpu_sum - cpu_last_sum)) 
-	# Get the idle time Delta 
-	cpu_idle=$((cpu_now[4]- cpu_last[4])) 
-	# Calc time spent working 
-	cpu_used=$((cpu_delta - cpu_idle)) 
-	# Calc percentage 
-	cpu_usage=$((100 * cpu_used / cpu_delta)) 
+	cpu_now=($(head -n1 /proc/stat))
+	# Get all columns but skip the first (which is the "cpu" string)
+	cpu_sum="${cpu_now[@]:1}"
+	# Replace the column seperator (space) with +
+	cpu_sum=$((${cpu_sum// /+}))
+	# Get the delta between two reads
+	cpu_delta=$((cpu_sum - cpu_last_sum))
+	# Get the idle time Delta
+	cpu_idle=$((cpu_now[4]- cpu_last[4]))
+	# Calc time spent working
+	cpu_used=$((cpu_delta - cpu_idle))
+	# Calc percentage
+	cpu_usage=$((100 * cpu_used / cpu_delta))
 
-    # Keep this as last for our next read 
-    cpu_last=("${cpu_now[@]}") 
+    # Keep this as last for our next read
+    cpu_last=("${cpu_now[@]}")
     cpu_last_sum=$cpu_sum
 }
 
@@ -859,7 +865,7 @@ logCsvHeader
 a=0
 while test $a -lt $exclude_array_count
 do
-	list=$(eval ls /mnt/disk*/"${exclude_array[$a]}" /mnt/cache/"${exclude_array[$a]}" 2>/dev/null)
+	list=$(eval ls "$array/${exclude_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${exclude_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: excluded directory '${exclude_array[$a]}' does not exist."
 	fi
@@ -869,7 +875,7 @@ done
 a=0
 while test $a -lt $include_array_count
 do
-	list=$(eval ls /mnt/disk*/"${include_array[$a]}" /mnt/cache/"${include_array[$a]}" 2>/dev/null)
+	list=$(eval ls "$array/${include_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${include_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: included directory '${include_array[$a]}' does not exist."
 	fi
@@ -937,7 +943,7 @@ declare -A files_at_depth_map
 		fi
 
 		# always cache root dirs on each of the disks
-		for i in /mnt/disk* /mnt/cache
+		for i in $array $pools
 		do
 			find $i -maxdepth 1 -noleaf >/dev/null 2>/dev/null
 		done
@@ -1058,9 +1064,9 @@ declare -A files_at_depth_map
 					elif ((mode == MODE_STABLE_IDLE)) ; then
 						# It seems to work great to do all scanning work when we know system is idle, and stop immediately with the scanning of deeper levels when disks are not idle.
 						mode=$MODE_STABLE
-					fi 
+					fi
 				fi
-			fi	
+			fi
 		else
 			if (( time_since_disk_access_after_scan_sec >= 2 || avg_elapsed_secs + 2 >= elapsed_secs )) ; then
 				mode=$MODE_STABLE_IDLE
@@ -1079,7 +1085,7 @@ declare -A files_at_depth_map
 				((depth_success_idle_incr_counter++))
 				depth_slow_scan_counter=0
 			elif (( elapsed_secs < slow_scan_time_limit )) ; then
-				# Semi-INVARIANT: ! is_last_depth_scan_timed_out becasue probably slow_scan_time_limit < scan_timeout 
+				# Semi-INVARIANT: ! is_last_depth_scan_timed_out becasue probably slow_scan_time_limit < scan_timeout
 				# build cache-pressure by repeating successfull search, and give time for checking for disk-access
 				if (( elapsed_time <= avg_elapsed_time + 2*NANO_PR_SEC )) ; then
 					# depth_slow_scan_counter because we suspect its a scan which didn't access disks, since scan time was as fast as usual.
@@ -1131,7 +1137,7 @@ declare -A files_at_depth_map
 					depth_success_idle_incr_counter=0
 					depth_success_busy_incr_counter=0
 					depth_scan_counter=0
-					if (( hasBeenIdleLong && appliedDepth < appliedMaxDepth )) ; then	
+					if (( hasBeenIdleLong && appliedDepth < appliedMaxDepth )) ; then
 						mode=$MODE_IDLE_RESCANNING
 					fi
 				elif (( (appliedDepth == appliedMaxDepthCurrent && mode == MODE_BUSY_RESCANNING) || appliedDepth == appliedMaxDepth )) ; then
@@ -1146,9 +1152,9 @@ declare -A files_at_depth_map
 				# Reduce max-depth
 				appliedMaxDepthCurrent=$(depthMinusOne "$appliedDepth")
 				is_depth_reduced=1
-				if (( mode == MODE_STABLE )) ; then			
+				if (( mode == MODE_STABLE )) ; then
 					appliedDepth=$(depthMinus50Percent "$appliedDepth")
-				else 
+				else
 					appliedDepth=$(depthMinusOne "$appliedDepth")
 					if (( !isPreviousMaxDepthComputed && (mode == MODE_IDLE_RESCANNING || mode == MODE_STABLE_IDLE) )) ; then
 						# We were doing a scan during a time when disks have been idle, so system low was probably low. We take this to indicate this is the best depth the system can handle.
@@ -1176,11 +1182,11 @@ declare -A files_at_depth_map
 					scan_timeout_sec=${scan_timeout_sec_idle}
 				fi
 			fi
-			if (( is_depth_reduced )); then 
+			if (( is_depth_reduced )); then
 				logLostCacheSimple 1
 			elif (( is_slow_scan )); then
 				logLostCacheSimple 0
-			fi	
+			fi
 		fi
 
 		(( (mode == MODE_STABLE || mode == MODE_STABLE_IDLE) && !is_last_depth_scan_timed_out )) && next_sleep_duration=$num_seconds || next_sleep_duration=1
@@ -1189,7 +1195,7 @@ declare -A files_at_depth_map
 			sleep ${next_sleep_duration}
 		fi
 		prev_sleep_duration=$next_sleep_duration
-	done 
+	done
 	# This line will only be printed if for some odd reason the while loop terminates, without cache_dirs -q being executed (such as user deleting run-file)
 	log "cache_dirs stopped"
 } &

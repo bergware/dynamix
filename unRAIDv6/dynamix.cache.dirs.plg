@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.06.17">
+<!ENTITY version   "2020.07.31">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "27d6363ea65d56885a24b21f9d73f9a4">
+<!ENTITY MD5       "2a8b979d53cc35970ab7d03f756613aa">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- fixed multi cache pool support
+- logrotate updates by Alex R. Berg
+
+###2020.06.17
 - updated multi-language support
 
 ###2020.05.10
