@@ -865,7 +865,7 @@ logCsvHeader
 a=0
 while test $a -lt $exclude_array_count
 do
-	list=$(eval ls "$array/${exclude_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${exclude_array[$a]}\""}') 2>/dev/null)
+	list=$(eval ls $array/"${exclude_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${exclude_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: excluded directory '${exclude_array[$a]}' does not exist."
 	fi
@@ -875,7 +875,7 @@ done
 a=0
 while test $a -lt $include_array_count
 do
-	list=$(eval ls "$array/${include_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${include_array[$a]}\""}') 2>/dev/null)
+	list=$(eval ls $array/"${include_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${include_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: included directory '${include_array[$a]}' does not exist."
 	fi
