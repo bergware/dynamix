@@ -107,7 +107,7 @@
 #                Added diagnostics generate zip, flag -L
 #                Added -P print file count flag
 #                Disk idle times sometimes reported as crazy high numbers (when disks spun down on some systems). Report 9999 instead of crazy idle-times
-#                Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk[0-9]*
+#                Added '-u' option to scan user share again, because some users reports disks spinning up on access of /mnt/user, though not /mnt/disk*
 # Version 2.2.2  Added minimum depth param -c for adaptive depth scanning
 # Version 2.2.3  Logging
 # Version 2.2.4  Added rolled logs to -L diagnostics archive
@@ -227,9 +227,9 @@ NANO_PR_MS=1000000
 # 1 did not do it with my 500Meg of RAM... trying cache_pressure of 10, use -p 1 if you still want the old value
 cache_pressure=10
 
-# Array & pool devices
+# Array & Pool devices
 array=/mnt/disk[0-9]*
-pools=$(ls -d /mnt/*|grep -Pv '(disk[0-9]+|disks|user|user0)$')
+pools=$(ls -d /mnt/*|grep -Pv '/(disk[0-9]+|disks|user0?)/$')
 
 verbose_echo() {
 	[ $background = "no" ] && [ $verbose = "yes" ] && echo "$1"
@@ -444,7 +444,7 @@ if (( do_print_file_counts == 1 )) ; then
 	fi
 	for share_dir in $dir_list
 	do
-		echo $share_dir: $(find /mnt/disk[0-9]*/$share_dir $(echo $pools|tr ' ' '\n'|awk '{print $1"/$share_dir"}') $depth_arg 2>/dev/null | wc -l )
+		echo $share_dir: $(find $array/$share_dir $(echo $pools|tr ' ' '\n'|awk '{print $1"$share_dir"}') $depth_arg 2>/dev/null | wc -l )
 	done
 	exit 0
 fi
@@ -865,7 +865,7 @@ logCsvHeader
 a=0
 while test $a -lt $exclude_array_count
 do
-	list=$(eval ls $array/"${exclude_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${exclude_array[$a]}\""}') 2>/dev/null)
+	list=$(eval ls $array/"${exclude_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print $1"\"${exclude_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: excluded directory '${exclude_array[$a]}' does not exist."
 	fi
@@ -875,7 +875,7 @@ done
 a=0
 while test $a -lt $include_array_count
 do
-	list=$(eval ls $array/"${include_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print "\""$1"/${include_array[$a]}\""}') 2>/dev/null)
+	list=$(eval ls $array/"${include_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print $1"\"${include_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: included directory '${include_array[$a]}' does not exist."
 	fi
