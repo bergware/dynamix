@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.cache.dirs">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.08.01a">
+<!ENTITY version   "2020.08.03">
 <!ENTITY launch    "Settings/FolderCachingSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "161dcf66defcb76e3ce2c2f73c0422d6">
+<!ENTITY MD5       "6ac7d45b0a76b963713ec7b5487ff234">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.4.0">
@@ -16,8 +16,12 @@
 ##&name;
 
 ###&version;
+- fixed regression error in cache_dirs
+
+###2020.08.01
 - fixed multi cache pool support
 - logrotate updates by Alex R. Berg
+- never include Unassigned Devices (UD) shares
 
 ###2020.06.17
 - updated multi-language support

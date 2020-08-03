@@ -229,7 +229,7 @@ cache_pressure=10
 
 # Array & Pool devices
 array=/mnt/disk[0-9]*
-pools=$(ls -d /mnt/*|grep -Pv '/(disk[0-9]+|disks|user0?)/$')
+pools=$(ls -d /mnt/*|grep -Pv '/(disk[0-9]+|disks|user0?)$')
 
 verbose_echo() {
 	[ $background = "no" ] && [ $verbose = "yes" ] && echo "$1"
@@ -444,7 +444,7 @@ if (( do_print_file_counts == 1 )) ; then
 	fi
 	for share_dir in $dir_list
 	do
-		echo $share_dir: $(find $array/$share_dir $(echo $pools|tr ' ' '\n'|awk '{print $1"$share_dir"}') $depth_arg 2>/dev/null | wc -l )
+		echo $share_dir: $(find $array/$share_dir $(echo $pools|tr ' ' '\n'|awk '{print $1"/$share_dir"}') $depth_arg 2>/dev/null | wc -l )
 	done
 	exit 0
 fi
@@ -865,7 +865,7 @@ logCsvHeader
 a=0
 while test $a -lt $exclude_array_count
 do
-	list=$(eval ls $array/"${exclude_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print $1"\"${exclude_array[$a]}\""}') 2>/dev/null)
+	list=$(eval ls $array/"${exclude_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print $1"\"/${exclude_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: excluded directory '${exclude_array[$a]}' does not exist."
 	fi
@@ -875,7 +875,7 @@ done
 a=0
 while test $a -lt $include_array_count
 do
-	list=$(eval ls $array/"${include_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print $1"\"${include_array[$a]}\""}') 2>/dev/null)
+	list=$(eval ls $array/"${include_array[$a]}" $(echo $pools|tr ' ' '\n'|awk '{print $1"\"/${include_array[$a]}\""}') 2>/dev/null)
 	if [ "$list" = "" ] ; then
 		syslogerror "ERROR: included directory '${include_array[$a]}' does not exist."
 	fi
