@@ -33,20 +33,25 @@ foreach ($pools as $pool) if (isset($disks[$pool])) $search[] = "/mnt/$pool";
 $search = implode(' ',$search);
 
 exec("find $search -type d -maxdepth 1 -mindepth 1 -exec basename \"{}\" \;|sort -u|uniq", $folders);
+
+/* Folders that shouldn't be cached. */
+$no_cache = array( "appdata", "system" );
+
+/* Remove folders to not cache. */
+$folders = array_diff($folders, $no_cache);
+
+/* Default all disk shares cached. */
+if ($cfg['include'] == "") {
+	$cfg['include'] = implode(",", $folders);
+}
+
+/* Excluded shares are not used. */
+$cfg['exclude'] = "";
+
 ?>
 <script>
 function prepareCache(form) {
 // Simulate a single input field
-  var exclude = [];
-  for (var i=0,item; item=form.exclude.options[i]; i++) {
-    if (item.selected) {
-      exclude.push(item.value);
-      item.selected = false;
-    }
-  }
-  item = form.exclude.options[0];
-  item.value = exclude.join(',');
-  item.selected = true;
 // Simulate a single input field
   var include = [];
   for (var i=0,item; item=form.include.options[i]; i++) {
@@ -62,7 +67,6 @@ function prepareCache(form) {
 $(function() {
   var size = Math.max(window.innerHeight-$('#pin').offset().top-150,150);
   $('#s1').dropdownchecklist({maxDropHeight:size, width:166, explicitClose:'..._(close)_'});
-  $('#s2').dropdownchecklist({maxDropHeight:size, width:166, explicitClose:'..._(close)_'});
   showStatus('cache_dirs');
 });
 </script>
@@ -137,7 +141,7 @@ _(Scan user shares (/mnt/user))_:
 :end
 
 _(Included folders)_:
-: <select id="s2" name="include" style="display:none" multiple>
+: <select id="s1" name="include" style="display:none" multiple>
   <?foreach ($folders as $folder):?>
   <?=mk_option_check($cfg['include'], $folder, $folder)?>
   <?endforeach;?>
@@ -145,21 +149,6 @@ _(Included folders)_:
 
 :cachedirs_included_folders_plug:
 > The dropdown menu shows all available folders, by default all folders are included. Select here the restricted list of folders to be included.
->
-> If an included folder is excluded, then the folder gets excluded. It is simplest to not use includes and excludes at the same time.
-:end
-
-_(Excluded folders)_:
-: <select id="s1" name="exclude" style="display:none" multiple>
-  <?foreach ($folders as $folder):?>
-  <?=mk_option_check($cfg['exclude'], $folder, $folder)?>
-  <?endforeach;?>
-  </select>
-
-:cachedirs_excluded_folders_plug:
-> The dropdown menu shows all available folders, by default no folders are excluded. Select here any folders to be excluded.
->
-> It is possible to exclude an included folder. It is simplest to not use includes and excludes at the same time.
 :end
 
 _(Use Adaptive depth)_:
