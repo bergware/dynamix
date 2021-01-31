@@ -236,7 +236,8 @@ HDD_activity() {
     for dev in ${array[@]}; do
       [[ $monitor -ne 2 ]] && active=$(hdparm -C /dev/$dev 2>/dev/null|grep -o active) || active=
       [[ $monitor -ne 1 ]] && diskio=($(grep -Pho "^$dev \K\d+" /dev/shm/1 /dev/shm/2)) || diskio=
-      if [[ -n $active || ${diskio[0]} != ${diskio[1]} ]]; then
+      diff=`expr ${diskio[1]} - ${diskio[0]}`
+      if [[ -n $active || $diff -gt 0 ]]; then
         result=1
         break;
       fi
