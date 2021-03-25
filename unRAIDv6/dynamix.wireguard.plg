@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.03.25">
+<!ENTITY version   "2021.03.25a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "dca01ebbc97278c60274447cd00b3ff1">
@@ -154,8 +154,8 @@ rm -f /usr/local/emhttp/webGui/WG*.page
 
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-  <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
-  <MD5>&MD5;</MD5>
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<MD5>&MD5;</MD5>
 </FILE>
 
 <!-- POST-INSTALL SCRIPT -->
