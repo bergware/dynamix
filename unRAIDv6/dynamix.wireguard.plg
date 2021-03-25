@@ -15,12 +15,12 @@
 ##&name;
 
 ###&version;
-This version resolves:
+####This version resolves
 - the tunnel not restarting if changes were saved while connected through the tunnel
 - incorrect AllowedIPs setting for some peer configs
 - iptables not being updated after a reboot
 
-This version adds:
+####This version adds
 - many safety guards to prevent invalid configurations
 - remarks to help resolve conflicts between settings that prevent access to Docker containers with custom IPs over a tunnel
 - validation that the local endpoint url actually resolves to the external WAN IP
