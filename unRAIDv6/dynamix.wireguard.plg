@@ -3,18 +3,34 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.07.10b">
+<!ENTITY version   "2021.03.25">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "d701c5e07e7dc4810d82f2694fc251e4">
+<!ENTITY MD5       "dca01ebbc97278c60274447cd00b3ff1">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0-rc1">
+<PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0" max="6.9.9>
 
 <CHANGES>
 ##&name;
 
 ###&version;
+This version resolves:
+- the tunnel not restarting if changes were saved while connected through the tunnel
+- incorrect AllowedIPs setting for some peer configs
+- iptables not being updated after a reboot
+
+This version adds:
+- many safety guards to prevent invalid configurations
+- remarks to help resolve conflicts between settings that prevent access to Docker containers with custom IPs over a tunnel
+- validation that the local endpoint url actually resolves to the external WAN IP
+- notification on specifically which peer configs were modified when changes were saved, so the user knows to update those clients
+
+**IT IS STRONGLY RECOMMENDED TO RE-APPLY AND REGENERATE YOUR EXISTING CONFIGURATIONS**
+
+*Many thanks to ljm42 for his contributions to this release*
+
+###2020.07.10
 - added multi-language handling
 
 ###2020.02.23
@@ -138,8 +154,8 @@ rm -f /usr/local/emhttp/webGui/WG*.page
 
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
-<MD5>&MD5;</MD5>
+  <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+  <MD5>&MD5;</MD5>
 </FILE>
 
 <!-- POST-INSTALL SCRIPT -->
@@ -149,7 +165,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2019, Bergware International"
+echo " Copyright 2021, Bergware International"
 echo " Version: &version;"
 echo ""
 echo "-----------------------------------------------------------"
