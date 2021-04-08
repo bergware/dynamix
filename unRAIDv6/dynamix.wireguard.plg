@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.03.25b">
+<!ENTITY version   "2021.04.08">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "dca01ebbc97278c60274447cd00b3ff1">
+<!ENTITY MD5       "2ed2494b3d93dd9f31899396643b5917">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0" max="6.9.9">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- add automatically known LAN networks to peer AllowedIPs list
+- change VPN logo upon request of WireGuard
+
+###2021.03.25
 ####This version resolves
 - the tunnel not restarting if changes were saved while connected through the tunnel
 - incorrect AllowedIPs setting for some peer configs
