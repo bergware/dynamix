@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.04.08">
+<!ENTITY version   "2021.04.12">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "2ed2494b3d93dd9f31899396643b5917">
+<!ENTITY MD5       "6b8655bfb58c81c499f2bb069b54486b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0" max="6.9.9">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- added WireGuard trademark upon request
+- fixed translation support on legacy versions of Unraid
+
+###2021.04.08
 - add automatically known LAN networks to peer AllowedIPs list
 - change VPN logo upon request of WireGuard
 
