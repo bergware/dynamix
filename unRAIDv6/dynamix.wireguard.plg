@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.04.12">
+<!ENTITY version   "2021.05.10">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6b8655bfb58c81c499f2bb069b54486b">
+<!ENTITY MD5       "3eea61af0fd2bb4029527312cbaef53f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0" max="6.9.9">
@@ -15,6 +15,11 @@
 ##&name;
 
 ###&version;
+- made "peer DNS server" field mandatory when "Remote tunneled access" is chosen
+  this field will be preset by the DNS server defined for Unraid
+- bug fix for IPv6 network detection
+
+###2021.04.12
 - added WireGuard trademark upon request
 - fixed translation support on legacy versions of Unraid
 
