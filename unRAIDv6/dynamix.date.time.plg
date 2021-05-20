@@ -2,7 +2,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.date.time">
 <!ENTITY author "Bergware">
-<!ENTITY version "2020.06.21">
+<!ENTITY version "2021.05.20">
 <!ENTITY launch "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
@@ -13,6 +13,9 @@
 ##&name;
 
 ###&version;
+- made compatible with Unraid 6.10
+
+###2020.06.21
 - fixed regression error
 
 ###2020.06.17
@@ -52,7 +55,7 @@
 - initial release for unRAID v6.2
 </CHANGES>
   <!--
-Copyright 2020, Bergware International
+Copyright 2021, Bergware International
 Dynamix Date Time adds an interactive world map to the date and time settings.
 -->
 
@@ -77,9 +80,9 @@ fi
 <FILE Run="/bin/bash">
 <INLINE>
 source /etc/unraid-version
-version=${version:0:3}
+version=${version:2:2}
 # Update icon if Unraid version is 6.7+
-if [[ $((${version/./}*1)) -ge 67 ]]; then
+if [[ $((${version/./}*1)) -ge 7 ]]; then
   sed -ri 's/date-time.png/icon-clock/' /usr/local/emhttp/plugins/dynamix.date.time/DateTime.page
 fi
 
@@ -87,7 +90,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2020, Bergware International"
+echo " Copyright 2021, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
