@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.06.20">
+<!ENTITY version   "2021.05.20">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "42cdd420ff319ad7381fab5935cf9eea">
+<!ENTITY MD5       "d37780799561cb2040e4517671e2dfa6">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added sensors --buslist command
+- made compatible with Unraid 6.10
+
+###2020.06.20
 - updated multi-language support
 
 ###2020.05.10
@@ -133,7 +137,7 @@ fi
 
 # Remove sensors-detect script (Unraid 6.7 and earlier)
 source /etc/unraid-version
-version=${version:0:3}
+version=${version:0:4}
 if [[ $((${version/./}*1)) -lt 68 ]]; then
   rm -f /usr/sbin/sensors-detect
 fi
@@ -173,7 +177,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2020, Bergware International"
+echo " Copyright 2021, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
