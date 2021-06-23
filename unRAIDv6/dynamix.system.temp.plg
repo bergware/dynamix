@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.05.20a">
+<!ENTITY version   "2021.06.23">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "d37780799561cb2040e4517671e2dfa6">
+<!ENTITY MD5       "33a07f5db9c1ebbfddd2778e690d66df">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- added Nchan operation (Unraid 6.10)
+
+###2021.05.20
 - added sensors --buslist command
 - made compatible with Unraid 6.10
 
