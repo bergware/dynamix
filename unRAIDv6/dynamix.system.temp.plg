@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.06.23">
+<!ENTITY version   "2021.06.25">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "33a07f5db9c1ebbfddd2778e690d66df">
+<!ENTITY MD5       "0328f15c7968451db385bae92c6abf6b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
