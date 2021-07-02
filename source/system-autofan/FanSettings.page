@@ -185,6 +185,9 @@ _(Exclude drives)_:
   <?foreach (array_filter($disks,'cache_disks') as $disk):?>
   <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
   <?endforeach;?>
+  <?foreach ($devs as $disk):?>
+  <?=mk_option_check($cfg['exclude'], $disk['device'],sprintf('%s (%s)',_($disk['id'],3),$disk['device']))?>
+  <?endforeach;?>
   </select>
 
 <input type="submit" name="#default" value="_(Default)_">
