@@ -80,7 +80,8 @@ case 'sensors':
   foreach ($_POST as $key => $value) {
     switch ($key) {
     case 'mb_temp':
-    case 'cpu_temp':
+    case 'cpu0_temp':
+    case 'cpu1_temp':
       [$chip, $input, $label] = explode("|", $value = preg_match("/.*?\|.*?\|.*?/",$value) ? $value : "||");
       $content .= strlen($chip) ? sprintf("chip \"%s\"\nlabel \"%s\" \"%s\"\n", $chip, $input, $label) : "";
       break;
@@ -125,7 +126,8 @@ if (!$all_modules) $all_modules = implode(" ",get_modules());
 $disabled = file_exists($drivers_file) ? "" : "disabled";
 
 $mb_options  = "<option>_(Not used)_</option>";
-$cpu_options = "<option>_(Not used)_</option>";
+$cpu0_options = "<option>_(Not used)_</option>";
+$cpu1_options = "<option>_(Not used)_</option>";
 $fan_options = "";
 $temp_ignore = "";
 $fan_ignore  = "";
@@ -142,7 +144,8 @@ foreach ($sensors as $value) {
       $temp = str_replace('.',$dot,$unit=='C' ? $temp : round(9/5*$temp+32));
       $chip = explode("-", $value['ctrl'])[0];
       $mb_options .= mk_option(1,sprintf('%s|%s|MB Temp',$value['ctrl'],$input),sprintf('%s - %s - %s &deg;%s', $chip,$value['name'],$temp,$unit),$value['name']=='MB Temp'?'selected':'');
-      $cpu_options .= mk_option(1,sprintf('%s|%s|CPU Temp',$value['ctrl'],$input),sprintf('%s - %s - %s &deg;%s', $chip,$value['name'],$temp,$unit),$value['name']=='CPU Temp'?'selected':'');
+      $cpu0_options .= mk_option(1,sprintf('%s|%s|CPU0 Temp',$value['ctrl'],$input),sprintf('%s - %s - %s &deg;%s', $chip,$value['name'],$temp,$unit),$value['name']=='CPU0 Temp'?'selected':'');
+      $cpu1_options .= mk_option(1,sprintf('%s|%s|CPU1 Temp',$value['ctrl'],$input),sprintf('%s - %s - %s &deg;%s', $chip,$value['name'],$temp,$unit),$value['name']=='CPU1 Temp'?'selected':'');
     }
   } else if (preg_match("/fan\d+_input/", $value['attr'])) {
     preg_match("/(\d+)/", $value['val'], $rpm);
@@ -218,12 +221,23 @@ _(Available drivers)_:
 <input type="hidden" name="tag" value="sensors">
 <input type="hidden" name="temp_ignore" value="<?=$temp_ignore?>">
 <input type="hidden" name="fan_ignore" value="<?=$fan_ignore?>">
-_(Processor temperature)_:
-: <select name="cpu_temp" <?=$disabled?> class="align">
-  <?=$cpu_options?>
+_(Processor 0 temperature)_:
+: <select name="cpu0_temp" <?=$disabled?> class="align">
+  <?=$cpu0_options?>
   </select>
 
-:temp_processor_plug:
+:temp_processor0_plug:
+> Select one of the available probes as the processor temperature indicator.
+> The output of this probe is shown at the bottom of the page.
+> Select 'Not used' to suppress display of this probe.
+:end
+
+_(Processor 1 temperature)_:
+: <select name="cpu1_temp" <?=$disabled?> class="align">
+  <?=$cpu1_options?>
+  </select>
+
+:temp_processor1_plug:
 > Select one of the available probes as the processor temperature indicator.
 > The output of this probe is shown at the bottom of the page.
 > Select 'Not used' to suppress display of this probe.
