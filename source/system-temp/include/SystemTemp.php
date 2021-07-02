@@ -45,7 +45,7 @@ function get_autofan() {
 $set = [];
 $sensors = explode(' ',exec("sensors -A|awk 'BEGIN{cpu=\"\";mb=\"\";fan=\"\"}{if (/^CPU Temp/) cpu=$3*1; if (/^MB Temp/) mb=$3*1; if (/^Array Fan/) fan=fan\" \"$3*1} END{print cpu,mb fan}'"));
 $fans = get_autofan();
-$set[] = "<span title='"._('Procesor')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[0], $_POST['unit'], $_POST['dot'])."</span>";
+$set[] = "<span title='"._('Processor')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[0], $_POST['unit'], $_POST['dot'])."</span>";
 $set[] = "<span title='"._('Mainboard')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[1], $_POST['unit'], $_POST['dot'])."</span>";
 for ($i=2; $i<count($sensors); $i++) $set[] = "<span title='"._('Array fan')."'><i class='fa fa-flag-o' style='margin:0 6px 0 24px'></i>".my_rpm($sensors[$i]).($fans[$i-2]??'')."</span>";
 echo "<span id='temp' style='margin-right:24px'>".implode($set)."</span>";
