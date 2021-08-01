@@ -1,0 +1,3 @@
+#!/bin/bash
+b3sum /usr/local/emhttp/plugins/dynamix.file.integrity/FileIntegrity.page >/dev/null 2>&1
+[[ $? -eq 0 ]] && echo "" || echo "disabled"

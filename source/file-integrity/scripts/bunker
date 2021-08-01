@@ -17,7 +17,7 @@ version=2.5.1
 usage() {
   echo "bunker v$version - Copyright (c) 2015-2016 Bergware International"
   echo
-  echo "Usage: bunker -a|A|v|V|u|e|t|i|c|C|r|R [-fdDsSlLnq] [-md5|-b2] path [!] [mask]"
+  echo "Usage: bunker -a|A|v|V|u|e|t|i|c|C|r|R [-fdDsSlLnq] [-md5|-b2|-b3] path [!] [mask]"
   echo "  -a          add hash key attribute for files, specified in path and optional mask"
   echo "  -A          same as -a option with implicit export function (may use -f)"
   echo "  -v          verify hash key attribute and report mismatches (may use -f)"
@@ -42,6 +42,7 @@ usage() {
   echo "  -q          optional quiet mode, suppress all output. Use for background processing"
   echo "  -md5        optional use md5 hashing algorithm instead of sha256"
   echo "  -b2         optional use blake2 hashing algorithm instead of sha256"
+  echo "  -b3         optional use blake3 hashing algorithm instead of sha256"
   echo
   echo "  path        path to starting directory, mandatory with some exceptions (see examples)"
   echo "  mask        optional filter for file selection. Default is all files"
@@ -410,12 +411,15 @@ while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xjzE:F:" option; do
      fi
      proc=md5sum; hash=md5; code=32 ;;
   b) case $OPTARG in
-       2) argv=""; code=128 ;;
-      2b) argv="-a blake2b"; code=128 ;;
-      2s) argv="-a blake2s"; code=64 ;;
+       2) proc=b2sum; hash=blake2; argv=""; code=128 ;;
+      2b) proc=b2sum; hash=blake2; argv="-a blake2b"; code=128 ;;
+      2s) proc=b2sum; hash=blake2; argv="-a blake2s"; code=64 ;;
+      #force single threaded to behave same like other methods and to reduce overhead, no-mmap if single threaded
+      #if your CPU does support AVX you may not be able to have enough bandwidth to feed more than 1 core anyway
+      3) proc=b3sum; hash=blake3; argv="--num-threads=1 --no-mmap"; code=64 ;;
        *) usage; exit ;;
      esac
-     proc=b2sum; hash=blake2 ;;
+      ;;
   l) log=1 ;;
   L) log=2 ;;
   n) msg=1 ;;

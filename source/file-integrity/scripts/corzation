@@ -5,11 +5,7 @@ list=/tmp/$$_list
 
 hash=${1//,/ }
 
-case $2 in
- 32) method=MD5;;
- 64) method=SHA256;;
-128) method=BLAKE2;;
-esac
+method=$2
 
 update() {
   time=$SECONDS

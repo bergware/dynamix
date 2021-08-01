@@ -15,6 +15,9 @@
 <CHANGES>
 ##&name;
 
+###comming soon:
+- added blake3 hash support for 2-6 times more hash rate than blake2 (reduce CPU load up to 4 times at same data rate)
+
 ###&version;
 - fixed regression error
 
@@ -319,6 +322,8 @@ if [[ -z $method ]]; then
   hash=sha256
 elif [[ $method == -b2 ]]; then
   hash=blake2
+elif [[ $method == -b3 ]]; then
+  hash=blake3
 else
   hash=md5
 fi
@@ -466,6 +471,11 @@ exit 0
 <!-- B2SUM PACKAGE (prepared by Bergware) -->
 <FILE Name="/boot/packages/b2sum-20130305-x86_64-1.txz" Run="upgradepkg --install-new" Max="6.3.9">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/b2sum-20130305-x86_64-1.txz</URL>
+</FILE>
+
+<!-- B2SUM PACKAGE (prepared by falcosc) -->
+<FILE Name="/boot/packages/b3sum-1.0.0-x86_64-1.txz" Run="upgradepkg --install-new">
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/b3sum-1.0.0-x86_64-1.txz</URL>
 </FILE>
 
 <!-- SOURCE PACKAGE -->

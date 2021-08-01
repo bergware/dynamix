@@ -35,7 +35,8 @@ function disk($key) {
 $cfg   = parse_plugin_cfg($plugin);
 $sName = "disk-watch";
 $fName = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
-$check = "/usr/local/emhttp/plugins/$plugin/scripts/b2sum-check";
+$b2check = "/usr/local/emhttp/plugins/$plugin/scripts/b2sum-check";
+$b3check = "/usr/local/emhttp/plugins/$plugin/scripts/b3sum-check";
 $width = [166,300];
 
 $mode = ['Disabled','Daily','Weekly','Monthly'];
@@ -176,14 +177,18 @@ _(Hashing method)_:
 : <select name="method">
   <?=mk_option($cfg['method'], "", _("SHA2"))?>
   <?=mk_option($cfg['method'], "-md5", _("MD5"))?>
-  <?=mk_option($cfg['method'], "-b2", _("BLAKE2"), exec($check))?>
+  <?=mk_option($cfg['method'], "-b2", _("BLAKE2"), exec($b2check))?>
+  <?=mk_option($cfg['method'], "-b3", _("BLAKE3"), exec($b3check))?>
   </select><?if ($hash):?><span style="font-style:italic"><a href="/Settings/FileIntegrity/Browse?dir=/boot/config/plugins/<?=$plugin?>/export"><img src="/webGui/images/explore.png"></a>&nbsp; _(view hash files)_</span><?endif?>
 
 :integrity_hashing_plug:
-> Select the preferred hashing method. SHA2 generates a 256 bits checksum value, MD5 generates a 128 bits checksum value, while BLAKE2 generates a 512 bits checksum value per file.
+> Select the preferred hashing method. SHA2 and BLAKE3 generates a 256 bits checksum value, MD5 generates a 128 bits checksum value per file.
 >
-> MD5 is the most commonly used method and should be selected when compatibility with external programs is required, BLAKE2 is the fastest method and has the highest detection grade, this is a proprietary solution though.
-> SHA2 is the official standard and is selected by default. It is the slowest of all three methods though. The BLAKE2 option is disabled if it is not supported by your processor.
+> MD5 is the most commonly used method and should be selected when compatibility with external programs is required, BLAKE3 is the fastest method and has the highest detection grade, this is a proprietary solution, though.
+> SHA2 is the official standard and is selected by default. It is the slowest of all three methods, though. The BLAKE3 option is disabled if it is not supported by your processor.
+> BLAKE2 is only a backwards compatibility option because BLAKE2 checksums are incompatible with BLAKE3.
+> BLAKE3 is even faster than hardware accelerated SHA (Intel SHA extensions) it uses AVX extensions and can have high peeks in power consumtion. On CPUs without any AVX extension, BLAKE3 is "only" twice as fast as BLAKE2 per thread.
+> Because BLAKE3 is so fast and efficient, your storage becomes a bottleneck and you CPU needs 2-10 times less power than the other methods
 > All methods require substantial computing power from the processor and a too weak processor may not be able to perform up to expectations.
 :end
 

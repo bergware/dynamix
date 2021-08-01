@@ -39,6 +39,7 @@ $files = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
 $files = $files ? implode(' , ',$files) : _('None');
 
 $size = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
+$method = $cfg['method']?str_replace(['-b2','-b3','-md5'],[_('BLAKE2'),_('BLAKE3'),_('MD5')],$cfg['method']):_('SHA256');
 $root = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
 $data = array_filter($disks,'data_disks');
 
@@ -127,7 +128,7 @@ function corz() {
   $('input[class="selection"]').each(function() {
     if ($(this).prop('checked')) args += $(this).attr('name')+',';
   });
-  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$size?>','_(Generate Corz Files)_',490,430,false);
+  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>','_(Generate Corz Files)_',490,430,false);
 }
 $(function() {
   updater();
@@ -170,7 +171,7 @@ $(function() {
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.control.php">
 <input type="hidden" name="x" value="">
 _(Hashing method)_:
-: <span style='font-size:12px;margin-right:8px'><?=$cfg['method']?str_replace(['-b2','-md5'],[_('BLAKE2'),_('MD5')],$cfg['method']):_('SHA2')?></span>
+: <span style='font-size:12px;margin-right:8px'><?=$method?></span>
 
 :integrity_control_hashing_plug:
 > This is the hash method as selected on the settings page. Make sure it is correct before you perform any commands on this page.
