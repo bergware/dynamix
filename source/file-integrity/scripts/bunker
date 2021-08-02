@@ -213,6 +213,27 @@ prepare() {
   fi
 }
 
+calculate_hash_and_filestat() {
+  declare -a filestat=($(stat -c "%Y %s" "$file"))
+  filedate=${filestat[0]}
+  filesize=${filestat[1]}
+  if [[ $con -eq 0 ]]; then #don't waste ressources if no console output requested
+    key=$($exec $argv "$file")
+    key=${key%% *}
+  else
+    if [[ $filesize -gt $large_file_size ]]; then
+      #use expenive async processing with wait only for files which are taking longer then one secound to process
+      $exec $argv "$file" >$tmpfile.0 &
+      waitfor $! "Calculating ${hash^^} hash key of ${rt}$file"
+      key=$(grep -Po '^\S+' $tmpfile.0)
+    else
+      echo -en "\rCalculating ${hash^^} hash key of ${rt}$file..."
+      key=$($exec $argv "$file")
+      key=${key%% *}
+    fi
+  fi
+}
+
 # Convert value to bytes, used in find
 convert() {
   local unit
@@ -384,6 +405,7 @@ con=1
 mon=0
 job=0
 not=0
+large_file_size=100000000 #use size which can not be processed twice in one sec
 
 # Parse user options
 while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xjzE:F:" option; do
@@ -527,11 +549,7 @@ a|A)
     while read -r file; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files" $index
-      $exec $argv "$file" >$tmpfile.0 &
-      waitfor $! "Calculating ${hash^^} hash key of ${rt}$file"
-      key=$(grep -Po '^\S+' $tmpfile.0)
-      filedate=$(stat -c %Y "$file")
-      filesize=$(stat -c %s "$file")
+      calculate_hash_and_filestat
       setfattr -n user.$hash -v "$key" "$file"
       setfattr -n user.scandate -v "$scandate" "$file"
       setfattr -n user.filedate -v "$filedate" "$file"
@@ -579,15 +597,11 @@ v|V|u)
       userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
       if [[ -z $userdate || $((userdate/86400)) -le $epoch ]]; then
         [[ $cmd != v ]] && setfattr -n user.scandate -v "$scandate" "$file"
-        $exec $argv "$file" >$tmpfile.0 &
-        waitfor $! "Verifying ${hash^^} hash key of ${rt}$file"
-        key=$(grep -Po '^\S+' $tmpfile.0)
+        calculate_hash_and_filestat
         ((count++))
         if [[ $key != ${line:0:$code} ]]; then
           filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
           filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
-          filedate=$(stat -c %Y "$file")
-          filesize=$(stat -c %s "$file")
           ((fail++))
           if [[ $filedato -ne $filedate || $filesizo -ne $filesize ]]; then
             ((warning++))
@@ -687,8 +701,9 @@ i)
       if [[ -f $file ]]; then
         ((count++))
         key=${line:0:$code}
-        filedate=$(stat -c %Y "$file")
-        filesize=$(stat -c %s "$file")
+        declare -a filestat=($(stat -c "%Y %s" "$file"))
+        filedate=${filestat[0]}
+        filesize=${filestat[1]}
         setfattr -n user.$hash -v "$key" "$file"
         setfattr -n user.scandate -v "$scandate" "$file"
         setfattr -n user.filedate -v "$filedate" "$file"
@@ -722,13 +737,9 @@ c|C)
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $count
       file="${line:$name}"
       if [[ -f $file ]]; then
-        $exec $argv "$file" >$tmpfile.0 &
-        waitfor $! "Checking ${hash^^} hash key of ${rt}$file"
-        key=$(grep -Po '^\S+' $tmpfile.0)
+        calculate_hash_and_filestat
         ((count++))
         if [[ $key != ${line:0:$code} ]]; then
-          filedate=$(stat -c %Y "$file")
-          filesize=$(stat -c %s "$file")
           filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
           filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
           ((fail++))
