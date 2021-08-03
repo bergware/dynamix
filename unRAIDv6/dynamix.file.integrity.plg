@@ -402,6 +402,7 @@ day=0; new=0; old=0
 for disk in $disks; do
   hdd=${disk:5}
   [[ -n $gui && -z $(hdparm -C /dev/$(dev $hdd) 2>/dev/null|grep -o active) ]] && continue
+  [[ -n $gui && -f /var/tmp/${hdd}.tmp ]] && continue #skip disk monitoring if user is watching progressbar
   find $disk -type f -name "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
   # new files in the past 24 hours
   filter 0
