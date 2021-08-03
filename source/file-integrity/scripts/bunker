@@ -729,18 +729,21 @@ c|C)
   check_cmd
   [[ $cmd == c ]] && text="" || text=" (updated)"
   sed '/^$/d;/^#/d' "$store" >$tmpfile &
-  waitfor $! "Preparing for import"
+  waitfor $! "Preparing for check"
   prepare 2
   if [[ $files -gt 0 ]]; then
     [[ $job -ne 0 ]] && record start
-    while read -r line; do
+    sed -i 's/ ./  /' $tmpfile
+    while read -r checkresult; do
       ((index++))
+      ((count++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $count
-      file="${line:$name}"
-      if [[ -f $file ]]; then
-        calculate_hash_and_filestat
-        ((count++))
-        if [[ $key != ${line:0:$code} ]]; then
+      if [[ "${checkresult##*: }" != "OK" ]]; then
+        file=${checkresult%%: *}
+        if [[ -f $file ]]; then
+          declare -a filestat=($(stat -c "%Y %s" "$file"))
+          filedate=${filestat[0]}
+          filesize=${filestat[1]}
           filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
           filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
           ((fail++))
@@ -759,14 +762,14 @@ c|C)
             echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
             log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
           fi
+        else
+         ((skip++))
+          echo "$file is missing" >>$tmpfile.2
+          log "warning: $file is missing" 1
         fi
-      else
-        ((skip++))
-        echo "$file is missing" >>$tmpfile.2
-        log "warning: $file is missing" 1
       fi
       [[ $timer -ne $SECONDS ]] && update
-    done <$tmpfile
+    done < <($exec $argv -c $tmpfile)
     update
     [[ $job -ne 0 ]] && record stop
   fi
