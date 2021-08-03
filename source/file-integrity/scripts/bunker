@@ -69,11 +69,13 @@ usage() {
   echo "bunker -r -f /tmp/errors.hash                          remove SHA key for files listed in file errors.hash - no path"
 }
 
-# Screen controls
+# Screen controls needs to be manually defined because screen doesn't know tput rmam
 clr='\r\033[K'
 cln='\n\033[K'
 up='\033[A'
 rt='\033[K'
+rmam='\033[?7l'
+smam='\033[?7h'
 
 # Wait for background process to finish
 waitfor() {
@@ -94,7 +96,7 @@ waitfor() {
 
 # Print result on console
 con() {
-  [[ $con -ne 0 ]] && echo -en "${clr}$1${cln}"
+  [[ $con -ne 0 ]] && echo -en "${clr}$1${rt}${cln}"
   [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task</span> $1#" >$monitor
 }
 
@@ -360,6 +362,7 @@ function check_cmd() {
 
 # Give termination message
 function ctrl_c() {
+  echo -en ${smam}
   con=1
   con "Program terminated."
   exit
@@ -546,6 +549,7 @@ a|A)
   prepare 1
   if [[ $files -gt 0 ]]; then
     [[ $job -ne 0 ]] && record start
+    [[ $con -ne 0 ]] && echo -en ${rmam}
     while read -r file; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files" $index
@@ -560,6 +564,7 @@ a|A)
     update
     [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -fk2 -o "$store" $tmpfile.2
     [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >>"$store"
+    [[ $con -ne 0 ]] && echo -en ${smam}
     [[ $job -ne 0 ]] && record stop
   fi
   con "Finished - added $(plural $index file).$(score $index)"
@@ -591,6 +596,7 @@ v|V|u)
   if [[ $files -gt 0 ]]; then
      [[ $((scandate/86400)) -le $epoch ]] && scan_all=1 # skip getfattr syscalls
     [[ $job -ne 0 ]] && record start
+    [[ $con -ne 0 ]] && echo -en ${rmam}
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $index
@@ -633,6 +639,7 @@ v|V|u)
     [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >>$tmpfile.2
     [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -fk2 -o "$store" $tmpfile.2
     [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >>"$store"
+    [[ $con -ne 0 ]] && echo -en ${smam}
     [[ $job -ne 0 ]] && record stop
   fi
   [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker verify command"
@@ -733,6 +740,7 @@ c|C)
   prepare 2
   if [[ $files -gt 0 ]]; then
     [[ $job -ne 0 ]] && record start
+    [[ $con -ne 0 ]] && echo -en ${rmam}
     sed -i 's/ ./  /' $tmpfile
     while read -r checkresult; do
       ((index++))
@@ -771,6 +779,7 @@ c|C)
       [[ $timer -ne $SECONDS ]] && update
     done < <($exec $argv -c $tmpfile)
     update
+    [[ $con -ne 0 ]] && echo -en ${rmam}
     [[ $job -ne 0 ]] && record stop
   fi
   [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >>$tmpfile.2
