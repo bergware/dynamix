@@ -380,7 +380,7 @@ log=0
 one=0
 msg=0
 con=1
-mon=0
+mon=1 #allways write progress to file, even if not requested
 job=0
 not=0
 

@@ -42,6 +42,11 @@ $size = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
 $root = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
 $data = array_filter($disks,'data_disks');
 
+$existingDiskTasks=array();
+
+$command="ps -eo comm,args | gawk '$1==\"bunker\" && match($0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash$/,d){print substr($4,2,1) d[1]}'";
+exec($command, $existingDiskTasks);
+
 ?>
 <style>
 input.thin{margin:1px;}
@@ -130,9 +135,16 @@ function corz() {
   openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$size?>','_(Generate Corz Files)_',490,430,false);
 }
 $(function() {
+  var existingDiskTasks='<?=implode(",", $existingDiskTasks)?>';
+  var disksCookie = $.cookie('disks') != null ? $.cookie('disks') : '';
+  if(existingDiskTasks){
+    disksCookie = existingDiskTasks.split(",").filter(d => disksCookie.indexOf(d[1]) == -1)
+                      .concat(disksCookie.split(',')).filter(d=>d).join(',');
+    $.cookie('disks',disksCookie,{path:'/',expires:3650});
+  }
   updater();
-  if ($.cookie('disks') != null) {
-    var cookies = $.cookie('disks').split(',');
+  if (disksCookie) {
+    var cookies = disksCookie.split(',');
     for (var i=0,cookie; cookie=cookies[i]; i++) {
       var cmd = cookie.substr(0,1);
       var disk = cookie.substr(1);
