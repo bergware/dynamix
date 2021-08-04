@@ -589,12 +589,13 @@ v|V|u)
   fi
   prepare 2
   if [[ $files -gt 0 ]]; then
+     [[ $((scandate/86400)) -le $epoch ]] && scan_all=1 # skip getfattr syscalls
     [[ $job -ne 0 ]] && record start
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $index
       file="${line:$name}"
-      userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
+      [[ $scan_all -ne 1 ]] && userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
       if [[ -z $userdate || $((userdate/86400)) -le $epoch ]]; then
         [[ $cmd != v ]] && setfattr -n user.scandate -v "$scandate" "$file"
         calculate_hash_and_filestat
