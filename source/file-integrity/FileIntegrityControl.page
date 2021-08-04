@@ -139,8 +139,10 @@ $(function() {
   var existingDiskTasks='<?=implode(",", $existingDiskTasks)?>';
   var disksCookie = $.cookie('disks') != null ? $.cookie('disks') : '';
   if(existingDiskTasks){
-    disksCookie = existingDiskTasks.split(",").filter(d => disksCookie.indexOf(d[1]) == -1)
-                      .concat(disksCookie.split(',')).filter(d=>d).join(',');
+    disksCookie = existingDiskTasks.split(",").concat(disksCookie.split(','))
+      .filter(d=>!isNaN(d[1])) //remove unexpected ps parings errors
+      .filter((item, pos, self)=>self.findIndex(ele => ele.includes(item[1])) == pos) //remove unexpected duplicates
+      .join(',');
     $.cookie('disks',disksCookie,{path:'/',expires:3650});
   }
   updater();
