@@ -180,7 +180,7 @@ update() {
 
 # Prepare loop variables
 prepare() {
-  index=0; count=0; past=-1; skip=0; fail=0; bad=0; warning=0; complete=0; key=0; update=$(($con+$mon)); total=1; name=$(($code+2))
+  index=0; count=0; past=-1; skip=0; fail=0; bad=0; warning=0; complete=0; key=0; update=$(($con+$mon)); total=1
   ifs=$IFS; IFS=','
   if [[ $not -eq 0 ]]; then
     if [[ $1 -gt 0 ]]; then
@@ -571,7 +571,7 @@ v|V|u)
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $index
-      file="${line:$name}"
+      file="${line#*\*}"
       userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
       if [[ -z $userdate || $((userdate/86400)) -le $epoch ]]; then
         [[ $cmd != v ]] && setfattr -n user.scandate -v "$scandate" "$file"
@@ -579,7 +579,8 @@ v|V|u)
         waitfor $! "Verifying ${hash^^} hash key of ${rt}$file"
         key=$(grep -Po '^\S+' $tmpfile.0)
         ((count++))
-        if [[ $key != ${line:0:$code} ]]; then
+        storedKey=${line%% *}
+        if [[ $key != $storedKey ]]; then
           filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
           filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
           filedate=$(stat -c %Y "$file")
@@ -601,8 +602,13 @@ v|V|u)
               setfattr -n user.filedate -v "$filedate" "$file"
               setfattr -n user.filesize -v "$filesize" "$file"
             fi
-            echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
-            log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
+            if [[ ${#storedKey} -eq $code ]]; then
+              echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
+              log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
+            else
+              echo "${hash^^} hash key has unexpected length, $file" >>$tmpfile.2
+              log "error: ${hash^^} hash key has unexpected length, $file" 1
+            fi
           fi
         fi
       else
@@ -679,16 +685,23 @@ i)
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress2 "Currently importing file $index of $files. Skipped: $skip files" $count
-      file="${line:$name}"
+      file="${line#*\*}"
       if [[ -f $file ]]; then
-        ((count++))
-        key=${line:0:$code}
-        filedate=$(stat -c %Y "$file")
-        filesize=$(stat -c %s "$file")
-        setfattr -n user.$hash -v "$key" "$file"
-        setfattr -n user.scandate -v "$scandate" "$file"
-        setfattr -n user.filedate -v "$filedate" "$file"
-        setfattr -n user.filesize -v "$filesize" "$file"
+        key=${line%% *}
+        if [[ ${#key} -eq $code ]]; then
+          ((count++))
+          filedate=$(stat -c %Y "$file")
+          filesize=$(stat -c %s "$file")
+          setfattr -n user.$hash -v "$key" "$file"
+          setfattr -n user.scandate -v "$scandate" "$file"
+          setfattr -n user.filedate -v "$filedate" "$file"
+          setfattr -n user.filesize -v "$filesize" "$file"
+        else
+          ((skip++))
+          echo "$file has unexpected key length" >>$tmpfile.2
+          log "error: import failed, $file has unexpected key length" 1
+        fi
+
       else
         ((skip++))
         echo "$file not found" >>$tmpfile.2
@@ -716,13 +729,13 @@ c|C)
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $count
-      file="${line:$name}"
+      file="${line#*\*}"
       if [[ -f $file ]]; then
         $exec $argv "$file" >$tmpfile.0 &
         waitfor $! "Checking ${hash^^} hash key of ${rt}$file"
         key=$(grep -Po '^\S+' $tmpfile.0)
         ((count++))
-        if [[ $key != ${line:0:$code} ]]; then
+        if [[ $key != ${line%% *} ]]; then
           filedate=$(stat -c %Y "$file")
           filesize=$(stat -c %s "$file")
           filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
