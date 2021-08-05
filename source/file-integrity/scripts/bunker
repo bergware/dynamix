@@ -94,7 +94,7 @@ waitfor() {
 # Print result on console
 con() {
   [[ $con -ne 0 ]] && echo -en "${clr}$1${cln}"
-  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task</span> $1#" >$monitor
+  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task</span> $1 $errorlink#" >$monitor
 }
 
 # Log result to syslog
@@ -126,7 +126,8 @@ progress() {
     [[ -n $volume ]] && ((complete+=$volume))
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$complete'/'$total')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1#$eta" >$monitor
+    [[ $mon -ne 0 && -z $errorlink ]] && ((skip+fail+bad+warning)) > 0 && errorlink="<a onClick='showProblems(\"${tmpfile##*/}.2\",\"${monitor##*/}.end\")'><b class='icon-u-search'></b>Show Problems</a>"
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1 $errorlink#$eta" >$monitor
     past=$2
   fi
   update=0
@@ -346,6 +347,7 @@ function ctrl_c() {
 # Cleanup on exit
 function cleanup() {
   [[ -n $ifs ]] && IFS=$ifs
+  [[ -f $tmpfile.2 ]] && cat $tmpfile.2 >> $monitor #temporarly save problems in disk file for ui (will be overwritten by next disk task
   [[ -n $tmpfile ]] && rm -f $tmpfile*
   [[ -n $monitor ]] && mv -f $monitor $monitor.end
   exit 0
@@ -493,6 +495,7 @@ if [[ $mon -ne 0 ]]; then
     z=${store##*/}
     monitor=/var/tmp/${z%%.*}.tmp
   fi
+  errorlink=""
 fi
 
 # Time stamp

@@ -52,6 +52,7 @@ span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px so
 .blue-text{color:#00529B;}
 .usage-disk{height:auto}
 .usage-disk>span:first-child{height:auto;padding:0}
+.tablesorter a{cursor:pointer;color:red;}
 </style>
 <script>
 var disks = [];
@@ -128,6 +129,9 @@ function corz() {
     if ($(this).prop('checked')) args += $(this).attr('name')+',';
   });
   openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$size?>','_(Generate Corz Files)_',490,430,false);
+}
+function showProblems(monitorlog, diskendlog){
+  openBox('/plugins/<?=$plugin?>/scripts/showerror&arg1=' + monitorlog + '&arg2=' + diskendlog,'_(Show Problems)_',500,1200,false);
 }
 $(function() {
   updater();
