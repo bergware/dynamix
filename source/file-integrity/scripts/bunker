@@ -522,6 +522,7 @@ if [[ $mon -ne 0 ]]; then
     z=${store##*/}
     monitor=/var/tmp/${z%%.*}.tmp
   fi
+  rm -f $monitor.end #remove old monitor finish file from previous job to make sure that an unclean exit can be detected
 fi
 
 # Time stamp
