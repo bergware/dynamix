@@ -1,0 +1,12 @@
+#!/bin/bash
+monitor=/tmp/$1
+disktmpend=/var/tmp/$2
+if [[ -f "$monitor" ]]; then
+  tail --follow=name -n +1 "$monitor"
+else
+  if [[ -f "$disktmpend" ]]; then
+    tail -n +2 "$disktmpend"
+  else
+    echo "Temporary logfile got already removed, please look at your configured log file target or at /tmp/bunker.store.log"
+  fi
+fi

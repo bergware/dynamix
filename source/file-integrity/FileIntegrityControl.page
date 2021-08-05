@@ -58,6 +58,7 @@ span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px so
 .blue-text{color:#00529B;}
 .usage-disk{height:auto}
 .usage-disk>span:first-child{height:auto;padding:0}
+.tablesorter a{cursor:pointer;color:red;}
 </style>
 <script>
 var disks = [];
@@ -139,6 +140,9 @@ function toogleCommandHelp() {
   if (['button', 'input'].indexOf(event.target.localName) == -1) {
     $('.inline_help:last').toggle('slow');
   }
+}
+function showProblems(monitorlog, diskendlog){
+  openBox('/plugins/<?=$plugin?>/scripts/showerror&arg1=' + monitorlog + '&arg2=' + diskendlog,'_(Show Problems)_',500,1200,false);
 }
 $(function() {
   var existingDiskTasks='<?=implode(",", $existingDiskTasks)?>';
