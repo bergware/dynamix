@@ -177,7 +177,7 @@ $(function() {
  <span style="font-style:italic;display:block;text-align:right">_(saved files)_ &nbsp;<a href="<?=$root?>/Browse?dir=/boot/config/plugins/<?=$plugin?>/saved"><img src="/webGui/images/explore.png"></a></span>
  </div>
 
-<form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.x.value)">
+<form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.cmd.value)">
 <input type="hidden" name="#file" value="not-used">
 <input type="hidden" name="#method" value="<?=$cfg['method']?>">
 <input type="hidden" name="#exclude" value="<?=$cfg['exclude']?>">
@@ -188,7 +188,8 @@ $(function() {
 <input type="hidden" name="#priority" value="<?=$cfg['priority']?>">
 <input type="hidden" name="#log" value="<?=$cfg['log']?>">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.control.php">
-<input type="hidden" name="x" value="">
+<input type="hidden" name="cmd" value="">
+<input type="hidden" name="excludeonly" value="false">
 _(Hashing method)_:
 : <span style='font-size:12px;margin-right:8px'><?=$method?></span>
 
@@ -263,12 +264,12 @@ echo "</tr></tbody><tbody id='disk-status'></tbody>";
 
 <p onclick="toogleCommandHelp()" style="text-align: right; cursor: help;">
 <span class="small">
-  <input type="submit" name="cmd" value="_(Build)_"  onclick="this.form.x.value='a'">
-  <input type="submit" name="cmd" value="_(Export)_" onclick="this.form.x.value='e'">
-  <input type="submit" name="cmd" value="_(Check)_ _(Export)_"  onclick="this.form.x.value='C'">
-  <input type="submit" name="cmd" value="_(Import)_" onclick="this.form.x.value='i'">
-  <input type="submit" name="cmd" value="_(Remove)_" onclick="this.form.x.value='R'">
-  <input type="submit" name="cmd" value="_(Clear)_"  onclick="this.form.x.value='R'">
+  <input type="submit" value="_(Build)_"  onclick="this.form.cmd.value='a'">
+  <input type="submit" value="_(Export)_" onclick="this.form.cmd.value='e'">
+  <input type="submit" value="_(Check)_ _(Export)_" onclick="this.form.cmd.value='C'">
+  <input type="submit" value="_(Import)_" onclick="this.form.cmd.value='i'">
+  <input type="submit" value="_(Remove)_" onclick="this.form.cmd.value='R'">
+  <input type="submit" value="_(Clear)_"  onclick="this.form.cmd.value='R';this.form.excludeonly.value=true">
   <input type="button" value="_(Corz)_" onclick="corz()">
   <input type="button" value="_(Find)_" onclick="duplicates()">
 <?if ($cfg['place']=='SystemInformation'):?>
