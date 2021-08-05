@@ -50,8 +50,10 @@ if ($_POST['#priority']) {
   $bunker = "nice $nice ionice $ionice $bunker";
 }
 
+$z = $_POST['excludeonly'] == "true" ? "-z" : "";
+
 switch ($_POST['cmd']) {
-  case 'Build':
+  case 'a':
     $key = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
     if ($_POST['#apple']) $key[] = $apple[1];
     $key = $key ? '! "'.implode(',', $key).'"' : '';
@@ -59,12 +61,12 @@ switch ($_POST['cmd']) {
       exec("$bunker -aqx $m $l $e $f -f $path/$disk.export.hash /mnt/$disk $key >/dev/null &");
     }
   break;
-  case 'Export':
+  case 'e':
     foreach ($disks as $disk) {
       exec("$bunker -eqx $m $l $e $f -f $path/$disk.export.hash /mnt/$disk >/dev/null &");
     }
   break;
-  case 'Check':
+  case 'C':
     foreach ($disks as $disk) {
       if (file_exists("$path/$disk.export.hash")) {
         exec("$bunker -Cqx $m $l $n -f $path/$disk.export.hash >/dev/null &");
@@ -73,7 +75,7 @@ switch ($_POST['cmd']) {
       }
     }
   break;
-  case 'Import':
+  case 'i':
     foreach ($disks as $disk) {
       if (file_exists("$path/$disk.export.hash")) {
         exec("$bunker -iqx $m $l -f $path/$disk.export.hash >/dev/null &");
@@ -82,17 +84,12 @@ switch ($_POST['cmd']) {
       }
     }
   break;
-  case 'Remove':
-    foreach ($disks as $disk) {
-      exec("$bunker -Rqx $m $l $e $f /mnt/$disk >/dev/null &");
-    }
-  break;
-  case 'Clear':
+  case 'R':
     $key = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
     if ($_POST['#apple']) $key[] = $apple[1];
     $key = $key ? '"'.implode(',', $key).'"' : '';
     foreach ($disks as $disk) {
-      exec("$bunker -Rqxz $m $l $e $f /mnt/$disk $key >/dev/null &");
+      exec("$bunker -Rqx $z $m $l $e $f /mnt/$disk $key >/dev/null &");
     }
   break;
 }
