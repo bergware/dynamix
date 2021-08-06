@@ -60,7 +60,7 @@ var bunker = [];
 function updater() {
   $.post('/plugins/<?=$plugin?>/include/ProgressInfo.php',{disk:0,time:180},function(data){
     $('#disk-status').html(data);
-    $('input[value="_(Find)_"]').prop('disabled',$('#export-status').html().search('green-text')==-1);
+    $('#findbtn').prop('disabled',$('#export-status').html().search('green-text')==-1);
     setTimeout(updater,3000);
   });
 }
@@ -256,7 +256,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody>";
   <input type="submit" value="_(Remove)_" onclick="this.form.cmd.value='R'">
   <input type="submit" value="_(Clear)_"  onclick="this.form.cmd.value='R';this.form.excludeonly.value=true">
   <input type="button" value="_(Corz)_" onclick="corz()">
-  <input type="button" value="_(Find)_" onclick="duplicates()">
+  <input type="button" value="_(Find)_" id="findbtn" onclick="duplicates()">
 <?if ($cfg['place']=='SystemInformation'):?>
   <input type="button" value="_(Done)_" class="lock" onclick="done()">
 <?endif;?>
