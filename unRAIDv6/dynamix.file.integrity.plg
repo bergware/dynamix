@@ -345,7 +345,7 @@ filter() {
     files=$(cat $tmpfile|wc -l)
     if [[ $files -gt 0 ]]; then
       ((day+=$files))
-      sed -ri "s/(^$hdd=[^,]*),?build,?/\1/" $path/disks.ini
+      sed -ri "/$hdd/ s/,?build//g" $path/disks.ini
       echo -n "$hdd," >>$tmpfile.build
     else
       if ! grep -q "^$hdd=" $path/disks.ini; then
@@ -363,7 +363,7 @@ filter() {
     IFS=$ifs
     files=$(grep -c '^#file: ' $tmpfile) ;;
   2)
-    sed -ri "s/(^$hdd=[^,]*),?export,?/\1/" $path/disks.ini
+    sed -ri "/$hdd/ s/,?export//g" $path/disks.ini
     echo -n "$hdd," >>$tmpfile.export
     files=0 ;;
   esac
@@ -409,6 +409,7 @@ for disk in $disks; do
   hdd=${disk:5}
   [[ -n $gui && -z $(hdparm -C /dev/$(dev $hdd) 2>/dev/null|grep -o active) ]] && continue
   [[ -n $gui && -f /var/tmp/${hdd}.tmp ]] && continue #skip disk monitoring if user is watching progressbar
+  sed -ri "s/(^$hdd=.*)/\1,analyse/" $path/disks.ini
   find $disk -type f -name "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
   # new files in the past 24 hours
   filter 0
@@ -440,6 +441,7 @@ for disk in $disks; do
       echo -n "export"
     fi
   fi
+  sed -ri "/$hdd/ s/,?analyse//g" $path/disks.ini
 done
 
 if [[ -z $gui && -n $(get notify) ]]; then

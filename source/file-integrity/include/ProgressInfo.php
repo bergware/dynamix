@@ -27,6 +27,7 @@ if ($translations) {
 function status($cmd,$name,$file) {
   global $list;
   if (!$file) return "close blue-text";
+  if ($list && strpos($list[$name],"analyse")!==false) return "refresh grey-text";
   return ($list && strpos($list[$name],$cmd)!==false) ? "check green-text" : "circle-o orange-text";
 }
 
