@@ -307,6 +307,7 @@ plugin=dynamix.file.integrity
 conf=/etc/inotifywait.conf
 path=/boot/config/plugins/$plugin
 
+pidof -x exportrotate -o %PPID >/dev/null && exit 0 #is already running, don't execute this IO intensive task twice
 [[ -f /proc/mdstat ]] && mdstat=mdstat || mdstat=mdcmd
 [[ ! -f $conf || $(grep -Po '^mdState=\K.*' /proc/$mdstat) != STARTED || ! -f $path/disks.ini ]] && exit 0
 gui=$1
