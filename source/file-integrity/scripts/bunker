@@ -805,5 +805,6 @@ r|R)
   fi
   con "Finished - cleared $(plural $count file), skipped $(plural $skip file).$(score)"
   log "cleared $(plural $count file) from $path.$(score)" $count
+  [[ $mon -ne 0 ]] && sed -ri "/${path##*/}/ s/,?build//g" /boot/config/plugins/dynamix.file.integrity/disks.ini
 ;;
 esac
