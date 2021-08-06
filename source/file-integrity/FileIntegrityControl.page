@@ -44,7 +44,7 @@ $data = array_filter($disks,'data_disks');
 
 $existingDiskTasks=array();
 
-$command="ps -eo comm,args | gawk '$1==\"bunker\" && match($0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash$/,d){print substr($4,2,1) d[1]}'";
+$command="ps -eo comm,args | gawk '$1==\"bunker\" && match($0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash$/,d){print substr($4,2,1) d[1]d[2]}'";
 exec($command, $existingDiskTasks);
 
 ?>
