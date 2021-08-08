@@ -17,7 +17,7 @@ version=2.5.1
 usage() {
   echo "bunker v$version - Copyright (c) 2015-2016 Bergware International"
   echo
-  echo "Usage: bunker -a|A|v|V|u|e|t|i|c|C|r|R [-fdDsSlLnq] [-md5|-b2] path [!] [mask]"
+  echo "Usage: bunker -a|A|v|V|u|e|t|i|c|C|r|R [-fdDsSlLnq] [-md5|-b2|-b3] path [!] [mask]"
   echo "  -a          add hash key attribute for files, specified in path and optional mask"
   echo "  -A          same as -a option with implicit export function (may use -f)"
   echo "  -v          verify hash key attribute and report mismatches (may use -f)"
@@ -42,6 +42,7 @@ usage() {
   echo "  -q          optional quiet mode, suppress all output. Use for background processing"
   echo "  -md5        optional use md5 hashing algorithm instead of sha256"
   echo "  -b2         optional use blake2 hashing algorithm instead of sha256"
+  echo "  -b3         optional use blake3 hashing algorithm instead of sha256"
   echo
   echo "  path        path to starting directory, mandatory with some exceptions (see examples)"
   echo "  mask        optional filter for file selection. Default is all files"
@@ -68,11 +69,13 @@ usage() {
   echo "bunker -r -f /tmp/errors.hash                          remove SHA key for files listed in file errors.hash - no path"
 }
 
-# Screen controls
+# Screen controls needs to be manually defined because screen doesn't know tput rmam
 clr='\r\033[K'
 cln='\n\033[K'
 up='\033[A'
 rt='\033[K'
+rmam='\033[?7l'
+smam='\033[?7h'
 
 # Wait for background process to finish
 waitfor() {
@@ -93,8 +96,8 @@ waitfor() {
 
 # Print result on console
 con() {
-  [[ $con -ne 0 ]] && echo -en "${clr}$1${cln}"
-  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task</span> $1#" >$monitor
+  [[ $con -ne 0 ]] && echo -en "${clr}$1${rt}${cln}"
+  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task</span> $1 $errorlink#" >$monitor
 }
 
 # Log result to syslog
@@ -126,7 +129,8 @@ progress() {
     [[ -n $volume ]] && ((complete+=$volume))
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$complete'/'$total')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1#$eta" >$monitor
+    [[ $mon -ne 0 && -z $errorlink ]] && ((skip+fail+bad+warning)) > 0 && errorlink="<a onClick='showProblems(\"${tmpfile##*/}.2\",\"${monitor##*/}.end\")'><b class='icon-u-search'></b>Show Problems</a>"
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1 $errorlink#$eta" >$monitor
     past=$2
   fi
   update=0
@@ -180,7 +184,7 @@ update() {
 
 # Prepare loop variables
 prepare() {
-  index=0; count=0; past=-1; skip=0; fail=0; bad=0; warning=0; complete=0; key=0; update=$(($con+$mon)); total=1; name=$(($code+2))
+  index=0; count=0; past=-1; skip=0; fail=0; bad=0; warning=0; complete=0; key=0; update=$(($con+$mon)); total=1
   ifs=$IFS; IFS=','
   if [[ $not -eq 0 ]]; then
     if [[ $1 -gt 0 ]]; then
@@ -209,6 +213,27 @@ prepare() {
     [[ -z $total || $total -eq 0 ]] && total=1
   else
     files=$(grep -c '^# file' $tmpfile)
+  fi
+}
+
+calculate_hash_and_filestat() {
+  declare -a filestat=($(stat -c "%Y %s" "$file"))
+  filedate=${filestat[0]}
+  filesize=${filestat[1]}
+  if [[ $con -eq 0 ]]; then #don't waste ressources if no console output requested
+    key=$($exec $argv "$file")
+    key=${key%% *}
+  else
+    if [[ $filesize -gt $large_file_size ]]; then
+      #use expenive async processing with wait only for files which are taking longer then one secound to process
+      $exec $argv "$file" >$tmpfile.0 &
+      waitfor $! "Calculating ${hash^^} hash key of ${rt}$file"
+      key=$(grep -Po '^\S+' $tmpfile.0)
+    else
+      echo -en "\rCalculating ${hash^^} hash key of ${rt}$file..."
+      key=$($exec $argv "$file")
+      key=${key%% *}
+    fi
   fi
 }
 
@@ -338,6 +363,7 @@ function check_cmd() {
 
 # Give termination message
 function ctrl_c() {
+  echo -en ${smam}
   con=1
   con "Program terminated."
   exit
@@ -346,6 +372,7 @@ function ctrl_c() {
 # Cleanup on exit
 function cleanup() {
   [[ -n $ifs ]] && IFS=$ifs
+  [[ -f $tmpfile.2 ]] && cat $tmpfile.2 >> $monitor #temporarly save problems in disk file for ui (will be overwritten by next disk task
   [[ -n $tmpfile ]] && rm -f $tmpfile*
   [[ -n $monitor ]] && mv -f $monitor $monitor.end
   exit 0
@@ -380,9 +407,10 @@ log=0
 one=0
 msg=0
 con=1
-mon=0
+mon=1 #allways write progress to file, even if not requested
 job=0
 not=0
+large_file_size=100000000 #use size which can not be processed twice in one sec
 
 # Parse user options
 while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xjzE:F:" option; do
@@ -410,12 +438,15 @@ while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xjzE:F:" option; do
      fi
      proc=md5sum; hash=md5; code=32 ;;
   b) case $OPTARG in
-       2) argv=""; code=128 ;;
-      2b) argv="-a blake2b"; code=128 ;;
-      2s) argv="-a blake2s"; code=64 ;;
+       2) proc=b2sum; hash=blake2; argv=""; code=128 ;;
+      2b) proc=b2sum; hash=blake2; argv="-a blake2b"; code=128 ;;
+      2s) proc=b2sum; hash=blake2; argv="-a blake2s"; code=64 ;;
+      #force single threaded to behave same like other methods and to reduce overhead, no-mmap if single threaded
+      #if your CPU does support AVX you may not be able to have enough bandwidth to feed more than 1 core anyway
+      3) proc=b3sum; hash=blake3; argv="--num-threads=1 --no-mmap"; code=64 ;;
        *) usage; exit ;;
      esac
-     proc=b2sum; hash=blake2 ;;
+      ;;
   l) log=1 ;;
   L) log=2 ;;
   n) msg=1 ;;
@@ -493,6 +524,8 @@ if [[ $mon -ne 0 ]]; then
     z=${store##*/}
     monitor=/var/tmp/${z%%.*}.tmp
   fi
+  rm -f $monitor.end #remove old monitor finish file from previous job to make sure that an unclean exit can be detected
+  errorlink=""
 fi
 
 # Time stamp
@@ -520,14 +553,11 @@ a|A)
   prepare 1
   if [[ $files -gt 0 ]]; then
     [[ $job -ne 0 ]] && record start
+    [[ $con -ne 0 ]] && echo -en ${rmam}
     while read -r file; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files" $index
-      $exec $argv "$file" >$tmpfile.0 &
-      waitfor $! "Calculating ${hash^^} hash key of ${rt}$file"
-      key=$(grep -Po '^\S+' $tmpfile.0)
-      filedate=$(stat -c %Y "$file")
-      filesize=$(stat -c %s "$file")
+      calculate_hash_and_filestat
       setfattr -n user.$hash -v "$key" "$file"
       setfattr -n user.scandate -v "$scandate" "$file"
       setfattr -n user.filedate -v "$filedate" "$file"
@@ -538,6 +568,7 @@ a|A)
     update
     [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -fk2 -o "$store" $tmpfile.2
     [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >>"$store"
+    [[ $con -ne 0 ]] && echo -en ${smam}
     [[ $job -ne 0 ]] && record stop
   fi
   con "Finished - added $(plural $index file).$(score $index)"
@@ -567,23 +598,22 @@ v|V|u)
   fi
   prepare 2
   if [[ $files -gt 0 ]]; then
+     [[ $((scandate/86400)) -le $epoch ]] && scan_all=1 # skip getfattr syscalls
     [[ $job -ne 0 ]] && record start
+    [[ $con -ne 0 ]] && echo -en ${rmam}
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $index
-      file="${line:$name}"
-      userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
+      file="${line#*\*}"
+      [[ $scan_all -ne 1 ]] && userdate=$(getfattr -n user.scandate --only-values --absolute-names "$file" 2>/dev/null)
       if [[ -z $userdate || $((userdate/86400)) -le $epoch ]]; then
         [[ $cmd != v ]] && setfattr -n user.scandate -v "$scandate" "$file"
-        $exec $argv "$file" >$tmpfile.0 &
-        waitfor $! "Verifying ${hash^^} hash key of ${rt}$file"
-        key=$(grep -Po '^\S+' $tmpfile.0)
+        calculate_hash_and_filestat
         ((count++))
-        if [[ $key != ${line:0:$code} ]]; then
+        storedKey=${line%% *}
+        if [[ $key != $storedKey ]]; then
           filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
           filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
-          filedate=$(stat -c %Y "$file")
-          filesize=$(stat -c %s "$file")
           ((fail++))
           if [[ $filedato -ne $filedate || $filesizo -ne $filesize ]]; then
             ((warning++))
@@ -601,8 +631,13 @@ v|V|u)
               setfattr -n user.filedate -v "$filedate" "$file"
               setfattr -n user.filesize -v "$filesize" "$file"
             fi
-            echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
-            log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
+            if [[ ${#storedKey} -eq $code ]]; then
+              echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
+              log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
+            else
+              echo "${hash^^} hash key has unexpected length, $file" >>$tmpfile.2
+              log "error: ${hash^^} hash key has unexpected length, $file" 1
+            fi
           fi
         fi
       else
@@ -614,6 +649,7 @@ v|V|u)
     [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >>$tmpfile.2
     [[ -s $tmpfile.2 && $one -eq 0 ]] && sort -fk2 -o "$store" $tmpfile.2
     [[ -s $tmpfile.2 && $one -eq 1 ]] && cat $tmpfile.2 >>"$store"
+    [[ $con -ne 0 ]] && echo -en ${smam}
     [[ $job -ne 0 ]] && record stop
   fi
   [[ $msg -ne 0 && ($bad -ne 0 || $warning -ne 0) ]] && notify "bunker verify command"
@@ -679,16 +715,23 @@ i)
     while read -r line; do
       ((index++))
       [[ $update -ne 0 ]] && progress2 "Currently importing file $index of $files. Skipped: $skip files" $count
-      file="${line:$name}"
+      file="${line#*\*}"
       if [[ -f $file ]]; then
-        ((count++))
-        key=${line:0:$code}
-        filedate=$(stat -c %Y "$file")
-        filesize=$(stat -c %s "$file")
-        setfattr -n user.$hash -v "$key" "$file"
-        setfattr -n user.scandate -v "$scandate" "$file"
-        setfattr -n user.filedate -v "$filedate" "$file"
-        setfattr -n user.filesize -v "$filesize" "$file"
+        key=${line%% *}
+        if [[ ${#key} -eq $code ]]; then
+          ((count++))
+          declare -a filestat=($(stat -c "%Y %s" "$file"))
+          filedate=${filestat[0]}
+          filesize=${filestat[1]}
+          setfattr -n user.$hash -v "$key" "$file"
+          setfattr -n user.scandate -v "$scandate" "$file"
+          setfattr -n user.filedate -v "$filedate" "$file"
+          setfattr -n user.filesize -v "$filesize" "$file"
+        else
+          ((skip++))
+          echo "$file has unexpected key length" >>$tmpfile.2
+          log "error: import failed, $file has unexpected key length" 1
+        fi
       else
         ((skip++))
         echo "$file not found" >>$tmpfile.2
@@ -709,22 +752,22 @@ c|C)
   check_cmd
   [[ $cmd == c ]] && text="" || text=" (updated)"
   sed '/^$/d;/^#/d' "$store" >$tmpfile &
-  waitfor $! "Preparing for import"
+  waitfor $! "Preparing for check"
   prepare 2
   if [[ $files -gt 0 ]]; then
     [[ $job -ne 0 ]] && record start
-    while read -r line; do
+    [[ $con -ne 0 ]] && echo -en ${rmam}
+    sed -i 's/ ./  /' $tmpfile
+    while read -r checkresult; do
       ((index++))
+      ((count++))
       [[ $update -ne 0 ]] && progress "Currently processing file $index of $files. Skipped: $skip files. Found: $warning mismatches, $bad corruptions" $count
-      file="${line:$name}"
-      if [[ -f $file ]]; then
-        $exec $argv "$file" >$tmpfile.0 &
-        waitfor $! "Checking ${hash^^} hash key of ${rt}$file"
-        key=$(grep -Po '^\S+' $tmpfile.0)
-        ((count++))
-        if [[ $key != ${line:0:$code} ]]; then
-          filedate=$(stat -c %Y "$file")
-          filesize=$(stat -c %s "$file")
+      if [[ "${checkresult##*: }" != "OK" ]]; then
+        file=${checkresult%%: *}
+        if [[ -f $file ]]; then
+          declare -a filestat=($(stat -c "%Y %s" "$file"))
+          filedate=${filestat[0]}
+          filesize=${filestat[1]}
           filedato=$(getfattr -n user.filedate --only-values --absolute-names "$file" 2>/dev/null)
           filesizo=$(getfattr -n user.filesize --only-values --absolute-names "$file" 2>/dev/null)
           ((fail++))
@@ -743,15 +786,16 @@ c|C)
             echo "${hash^^} hash key mismatch, $file is corrupted" >>$tmpfile.2
             log "error: ${hash^^} hash key mismatch, $file is corrupted" 1
           fi
+        else
+         ((skip++))
+          echo "$file is missing" >>$tmpfile.2
+          log "warning: $file is missing" 1
         fi
-      else
-        ((skip++))
-        echo "$file is missing" >>$tmpfile.2
-        log "warning: $file is missing" 1
       fi
       [[ $timer -ne $SECONDS ]] && update
-    done <$tmpfile
+    done < <($exec $argv -c $tmpfile)
     update
+    [[ $con -ne 0 ]] && echo -en ${rmam}
     [[ $job -ne 0 ]] && record stop
   fi
   [[ -s $tmpfile.3 ]] && cat $tmpfile.3 >>$tmpfile.2
@@ -805,5 +849,6 @@ r|R)
   fi
   con "Finished - cleared $(plural $count file), skipped $(plural $skip file).$(score)"
   log "cleared $(plural $count file) from $path.$(score)" $count
+  [[ $mon -ne 0 ]] && sed -ri "/${path##*/}/ s/,?build//g" /boot/config/plugins/dynamix.file.integrity/disks.ini
 ;;
 esac

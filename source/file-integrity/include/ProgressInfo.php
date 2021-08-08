@@ -27,6 +27,7 @@ if ($translations) {
 function status($cmd,$name,$file) {
   global $list;
   if (!$file) return "close blue-text";
+  if ($list && strpos($list[$name],"analyse")!==false) return "refresh grey-text";
   return ($list && strpos($list[$name],$cmd)!==false) ? "check green-text" : "circle-o orange-text";
 }
 
@@ -37,7 +38,7 @@ if ($_POST['disk']>0) {
     echo file_get_contents($tmp);
   } else {
     echo file_exists($end) ? file_get_contents($end) : "100%#<span class='red-text red-button'>"._('Error')."</span>"._('Operation aborted')."#";
-    @unlink($end);
+    //don't delete end file because there could be a race condition if you submit forms or reload the page for any other reason
   }
 } else {
   $ctrl = "/var/tmp/ctrl.tmp";

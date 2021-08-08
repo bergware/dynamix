@@ -39,8 +39,14 @@ $files = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
 $files = $files ? implode(' , ',$files) : _('None');
 
 $size = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
+$method = $cfg['method']?str_replace(['-b2','-b3','-md5'],[_('BLAKE2'),_('BLAKE3'),_('MD5')],$cfg['method']):_('SHA256');
 $root = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
 $data = array_filter($disks,'data_disks');
+
+$existingDiskTasks=array();
+
+$command="ps -eo comm,args | gawk '$1==\"bunker\" && match($0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash$/,d){print substr($4,2,1) d[1]d[2]}'";
+exec($command, $existingDiskTasks);
 
 ?>
 <style>
@@ -52,6 +58,9 @@ span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px so
 .blue-text{color:#00529B;}
 .usage-disk{height:auto}
 .usage-disk>span:first-child{height:auto;padding:0}
+.tablesorter a{cursor:pointer;color:red;}
+.fa-refresh{animation: rotate 1.5s linear infinite;}
+@keyframes rotate{to{ transform: rotate(360deg);}}
 </style>
 <script>
 var disks = [];
@@ -60,7 +69,7 @@ var bunker = [];
 function updater() {
   $.post('/plugins/<?=$plugin?>/include/ProgressInfo.php',{disk:0,time:180},function(data){
     $('#disk-status').html(data);
-    $('input[value="_(Find)_"]').prop('disabled',$('#export-status').html().search('green-text')==-1);
+    $('#findbtn').prop('disabled',$('#export-status').html().search('green-text')==-1);
     setTimeout(updater,3000);
   });
 }
@@ -127,12 +136,29 @@ function corz() {
   $('input[class="selection"]').each(function() {
     if ($(this).prop('checked')) args += $(this).attr('name')+',';
   });
-  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$size?>','_(Generate Corz Files)_',490,430,false);
+  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>','_(Generate Corz Files)_',490,430,false);
+}
+function toogleCommandHelp() {
+  if (['button', 'input'].indexOf(event.target.localName) == -1) {
+    $('.inline_help:last').toggle('slow');
+  }
+}
+function showProblems(monitorlog, diskendlog){
+  openBox('/plugins/<?=$plugin?>/scripts/showerror&arg1=' + monitorlog + '&arg2=' + diskendlog,'_(Show Problems)_',500,1200,false);
 }
 $(function() {
+  var existingDiskTasks='<?=implode(",", $existingDiskTasks)?>';
+  var disksCookie = $.cookie('disks') != null ? $.cookie('disks') : '';
+  if(existingDiskTasks){
+    disksCookie = existingDiskTasks.split(",").concat(disksCookie.split(','))
+      .filter(d=>!isNaN(d[1])) //remove unexpected ps parings errors
+      .filter((item, pos, self)=>self.findIndex(ele => ele.includes(item[1])) == pos) //remove unexpected duplicates
+      .join(',');
+    $.cookie('disks',disksCookie,{path:'/',expires:3650});
+  }
   updater();
-  if ($.cookie('disks') != null) {
-    var cookies = $.cookie('disks').split(',');
+  if (disksCookie) {
+    var cookies = disksCookie.split(',');
     for (var i=0,cookie; cookie=cookies[i]; i++) {
       var cmd = cookie.substr(0,1);
       var disk = cookie.substr(1);
@@ -157,7 +183,7 @@ $(function() {
  <span style="font-style:italic;display:block;text-align:right">_(saved files)_ &nbsp;<a href="<?=$root?>/Browse?dir=/boot/config/plugins/<?=$plugin?>/saved"><img src="/webGui/images/explore.png"></a></span>
  </div>
 
-<form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.x.value)">
+<form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.cmd.value)">
 <input type="hidden" name="#file" value="not-used">
 <input type="hidden" name="#method" value="<?=$cfg['method']?>">
 <input type="hidden" name="#exclude" value="<?=$cfg['exclude']?>">
@@ -168,9 +194,10 @@ $(function() {
 <input type="hidden" name="#priority" value="<?=$cfg['priority']?>">
 <input type="hidden" name="#log" value="<?=$cfg['log']?>">
 <input type="hidden" name="#include" value="plugins/<?=$plugin?>/include/update.control.php">
-<input type="hidden" name="x" value="">
+<input type="hidden" name="cmd" value="">
+<input type="hidden" name="excludeonly" value="false">
 _(Hashing method)_:
-: <span style='font-size:12px;margin-right:8px'><?=$cfg['method']?str_replace(['-b2','-md5'],[_('BLAKE2'),_('MD5')],$cfg['method']):_('SHA2')?></span>
+: <span style='font-size:12px;margin-right:8px'><?=$method?></span>
 
 :integrity_control_hashing_plug:
 > This is the hash method as selected on the settings page. Make sure it is correct before you perform any commands on this page.
@@ -190,6 +217,7 @@ _(Excluded files)_:
 > This is the list of excluded files as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 :end
 
+<table class="share_status fixed" onclick="toogleCommandHelp()" style="margin:20px 0; cursor: help;">
 <?
 $row1 = $row2 = [];
 foreach ($data as $disk) {
@@ -197,14 +225,15 @@ foreach ($data as $disk) {
   $row2[] = "<td><input type='checkbox' name='{$disk['name']}' class='selection' onchange='updateList(this.checked,this.name)'></td>";
 }
 $x = 28-count($row1);
-echo "<table class='share_status fixed' style='margin:20px 0'><thead><tr><td id='delayed' style='width:10%'></td>";
+echo "<thead><tr><td id='delayed' style='width:10%'></td>";
 echo implode('',$row1);
 echo str_repeat("<td>-</td>", $x);
 echo "</tr></thead><tbody><tr><td style='font-weight:bold'>"._('Disk selection')."</td>";
 echo implode('',$row2);
 echo str_repeat("<td></td>", $x);
-echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
+echo "</tr></tbody><tbody id='disk-status'></tbody>";
 ?>
+</table>
 
 :integrity_control_overview_plug:
 > Select the disks which you want to let participate in any of the commands below. You can execute a command multiple times with different selections.
@@ -226,7 +255,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 > Use the **Export** command to generate checksum files which can be used for manual checking or restoration.
 > These files are stored on the flash disk under */config/plugins/dynamix.file.integrity/diskXX.export.hash*
 >
-> Use the **Check** command to verify files against a previously exported file. This allows for off-line verification in case of a local issue and the extended attributes can't be used.
+> Use the **Check Export** command to verify files against a previously exported file. This allows for off-line verification in case of a local issue and the extended attributes can't be used.
 >
 > Use the **Import** command to restore the extended attributes from a previously exported file. This *should* only be necessary in case the extended attributes got corrupted or went missing.
 >
@@ -239,19 +268,22 @@ echo "</tr></tbody><tbody id='disk-status'></tbody></table>";
 > Use the **Find** command to search for duplicate file names and file hashes in the exported *hash* files.
 :end
 
-&nbsp;
-: <input type="submit" name="cmd" value="_(Build)_"  onclick="this.form.x.value='a'">
-  <input type="submit" name="cmd" value="_(Export)_" onclick="this.form.x.value='e'">
-  <input type="submit" name="cmd" value="_(Check)_"  onclick="this.form.x.value='C'">
-  <input type="submit" name="cmd" value="_(Import)_" onclick="this.form.x.value='i'">
-  <input type="submit" name="cmd" value="_(Remove)_" onclick="this.form.x.value='R'">
-  <input type="submit" name="cmd" value="_(Clear)_"  onclick="this.form.x.value='R'">
+<p onclick="toogleCommandHelp()" style="text-align: right; cursor: help;">
+<span class="small">
+  <input type="submit" value="_(Build)_"  onclick="this.form.cmd.value='a'">
+  <input type="submit" value="_(Export)_" onclick="this.form.cmd.value='e'">
+  <input type="submit" value="_(Check)_ _(Export)_" onclick="this.form.cmd.value='C'">
+  <input type="submit" value="_(Import)_" onclick="this.form.cmd.value='i'">
+  <input type="submit" value="_(Remove)_" onclick="this.form.cmd.value='R'">
+  <input type="submit" value="_(Clear)_"  onclick="this.form.cmd.value='R';this.form.excludeonly.value=true">
   <input type="button" value="_(Corz)_" onclick="corz()">
-  <input type="button" value="_(Find)_" onclick="duplicates()">
+  <input type="button" value="_(Find)_" id="findbtn" onclick="duplicates()">
 <?if ($cfg['place']=='SystemInformation'):?>
   <input type="button" value="_(Done)_" class="lock" onclick="done()">
 <?endif;?>
-<span class="small" style="float:right">_(Include duplicate file hashes in **Find** command)_ &nbsp;<input type='checkbox' name='#more'></span>
+_(Include duplicate file hashes in **Find** command)_ &nbsp;<input type='checkbox' name='#more'>
+</span>
+</p>
 </form>
 
 <table class='tablesorter'>
