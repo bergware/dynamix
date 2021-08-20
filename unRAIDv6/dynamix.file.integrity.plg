@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.06.21">
+<!ENTITY version   "2021.08.20a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0c2a39f5724b3c0529aec14469b1ea8b">
+<!ENTITY MD5       "780f84149c364748f457b61dbdf6df6b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -15,10 +15,13 @@
 <CHANGES>
 ##&name;
 
-###comming soon:
-- added blake3 hash support for 2-6 times more hash rate than blake2 (reduce CPU load up to 4 times at same data rate)
-
 ###&version;
+- Thanks to user Falcosc this plugin has received numerous updates
+- added blake3 hash support for 2-6 times more hash rate than blake2
+- reduced CPU load up to 4 times at same data rate when using blake3
+- other improvements and bug fixes
+
+###2020.08.21
 - fixed regression error
 
 ###2020.06.20
@@ -280,7 +283,7 @@
 </CHANGES>
 
 <!--
-Copyright 2020, Bergware International
+Copyright 2021, Bergware International
 Dynamix File Integrity - Real-time hashing and verification of files. Report on failed file content integrity (aka bit-rot).
 -->
 
@@ -523,7 +526,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2020, Bergware International"
+echo " Copyright 2021, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -538,7 +541,8 @@ echo ""
 
 # Uninstall the packages
 . /etc/unraid-version
-version=${version:0:3}
+version=${version:0:4}
+version=${version/./}
 
 removepkg &name;
 if [[ $version == 6.3 || $version == 6.2 || $version == 6.1 || $version == 6.0 ]]; then
