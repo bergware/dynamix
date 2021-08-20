@@ -2,7 +2,7 @@ Menu="Integrity"
 Title="File Integrity Control"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2021, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -39,15 +39,13 @@ $files = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
 $files = $files ? implode(' , ',$files) : _('None');
 
 $size = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
-$method = $cfg['method']?str_replace(['-b2','-b3','-md5'],[_('BLAKE2'),_('BLAKE3'),_('MD5')],$cfg['method']):_('SHA256');
+$method = $cfg['method'] ? str_replace(['-b2','-b3','-md5'],[_('BLAKE2'),_('BLAKE3'),_('MD5')],$cfg['method']) : _('SHA256');
 $root = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
 $data = array_filter($disks,'data_disks');
 
-$existingDiskTasks=array();
-
-$command="ps -eo comm,args | gawk '$1==\"bunker\" && match($0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash$/,d){print substr($4,2,1) d[1]d[2]}'";
-exec($command, $existingDiskTasks);
-
+$runningTasks=[];
+$command="ps -eo comm,args|gawk '$1==\"bunker\" && match($0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash$/,d){print substr($4,2,1) d[1]d[2]}'";
+exec($command, $runningTasks);
 ?>
 <style>
 input.thin{margin:1px;}
@@ -138,7 +136,7 @@ function corz() {
   });
   openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>','_(Generate Corz Files)_',490,430,false);
 }
-function toogleCommandHelp() {
+function toggleCommandHelp() {
   if (['button', 'input'].indexOf(event.target.localName) == -1) {
     $('.inline_help:last').toggle('slow');
   }
@@ -147,18 +145,18 @@ function showProblems(monitorlog, diskendlog){
   openBox('/plugins/<?=$plugin?>/scripts/showerror&arg1=' + monitorlog + '&arg2=' + diskendlog,'_(Show Problems)_',500,1200,false);
 }
 $(function() {
-  var existingDiskTasks='<?=implode(",", $existingDiskTasks)?>';
-  var disksCookie = $.cookie('disks') != null ? $.cookie('disks') : '';
-  if(existingDiskTasks){
-    disksCookie = existingDiskTasks.split(",").concat(disksCookie.split(','))
-      .filter(d=>!isNaN(d[1])) //remove unexpected ps parings errors
-      .filter((item, pos, self)=>self.findIndex(ele => ele.includes(item[1])) == pos) //remove unexpected duplicates
-      .join(',');
-    $.cookie('disks',disksCookie,{path:'/',expires:3650});
+  var cookies = $.cookie('disks')||'';
+  var runningTasks = '<?=implode(",",array_filter($runningTasks))?>';
+  if (runningTasks) {
+    var table = (runningTasks+','+cookies).split(',');
+    var alive = [];
+    for (var i=0,disk; disk=table[i]; i++) if (disk && !alive.includes(disk)) alive.push(disk);
+    cookies = alive.join(',');
+    $.cookie('disks',cookies,{path:'/',expires:3650});
   }
   updater();
-  if (disksCookie) {
-    var cookies = disksCookie.split(',');
+  if (cookies) {
+    cookies = cookies.split(',');
     for (var i=0,cookie; cookie=cookies[i]; i++) {
       var cmd = cookie.substr(0,1);
       var disk = cookie.substr(1);
@@ -217,7 +215,7 @@ _(Excluded files)_:
 > This is the list of excluded files as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 :end
 
-<table class="share_status fixed" onclick="toogleCommandHelp()" style="margin:20px 0; cursor: help;">
+<table class="share_status fixed" onclick="toggleCommandHelp()" style="margin:20px 0; cursor: help;">
 <?
 $row1 = $row2 = [];
 foreach ($data as $disk) {
@@ -268,7 +266,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody>";
 > Use the **Find** command to search for duplicate file names and file hashes in the exported *hash* files.
 :end
 
-<p onclick="toogleCommandHelp()" style="text-align: right; cursor: help;">
+<p onclick="toggleCommandHelp()" style="text-align: right; cursor: help;">
 <span class="small">
   <input type="submit" value="_(Build)_"  onclick="this.form.cmd.value='a'">
   <input type="submit" value="_(Export)_" onclick="this.form.cmd.value='e'">
