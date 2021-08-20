@@ -19,7 +19,16 @@
 - Thanks to user Falcosc this plugin has received numerous updates
 - added blake3 hash support for 2-6 times more hash rate than blake2
 - reduced CPU load up to 4 times at same data rate when using blake3
-- other improvements and bug fixes
+- improve build, verify and check speed for all hash methods on small files
+- fixed stacking find commands avoiding clean shutdowns while watching control page
+- fixed starting multiple build status checks while watching control page
+- added monitor background verify processes and all manual bunker script executions
+- fixed rare process status detection bug "Operation aborted"
+- fixed file name truncation if key is broken
+- inline help for disk table and commands more accessible
+- fixed multi-language support for buttons
+- added watch error and warning messages of running or finished progress
+- added Disk status icon for running build status check
 
 ###2020.08.21
 - fixed regression error
