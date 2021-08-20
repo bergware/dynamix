@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.08.20d">
+<!ENTITY version   "2021.08.20e">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -552,7 +552,7 @@ echo ""
 
 # Uninstall the packages
 . /etc/unraid-version
-[[ ${version[3]} == . ]] && version=${version:0:3} || version=${version:0:4}
+[[ ${version:3:1} == . ]] && version=${version:0:3} || version=${version:0:4}
 
 removepkg &name;
 if [[ $version == 6.3 || $version == 6.2 || $version == 6.1 || $version == 6.0 ]]; then
