@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.08.20a">
+<!ENTITY version   "2021.08.20b">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "780f84149c364748f457b61dbdf6df6b">
+<!ENTITY MD5       "5e8454a1227237b26672f4c4e95b039c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -29,6 +29,7 @@
 - fixed multi-language support for buttons
 - added watch error and warning messages of running or finished progress
 - added Disk status icon for running build status check
+- fixed regression error (bergware)
 
 ###2020.08.21
 - fixed regression error
