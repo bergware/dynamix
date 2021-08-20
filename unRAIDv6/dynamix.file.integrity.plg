@@ -29,8 +29,8 @@
 - fixed multi-language support for buttons
 - added watch error and warning messages of running or finished progress
 - added Disk status icon for running build status check
-- fixed regression error (bergware)
-- some visual enhancements (bergware)
+- fixed regression error - bergware
+- some visual enhancements - bergware
 
 ###2020.08.21
 - fixed regression error
