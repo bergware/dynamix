@@ -552,7 +552,7 @@ echo ""
 
 # Uninstall the packages
 . /etc/unraid-version
-[[ ${version:3:1} == '.' ]] && version=${version:0:3} || version=${version:0:4}
+[[ ${version:3:1} == . ]] &amp;&amp; version=${version:0:3} || version=${version:0:4}
 
 removepkg &name;
 if [[ $version == 6.3 || $version == 6.2 || $version == 6.1 || $version == 6.0 ]]; then
