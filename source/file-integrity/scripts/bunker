@@ -2,7 +2,7 @@
 
 # bunker (based on bitrot of John Bartlett).
 
-# Copyright 2015-2016, Bergware International.
+# Copyright 2015-2021, Bergware International.
 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2,
@@ -11,11 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
-version=2.5.1
+version=2.5.2
 
 # Display help
 usage() {
-  echo "bunker v$version - Copyright (c) 2015-2016 Bergware International"
+  echo "bunker v$version - Copyright (c) 2015-2021 Bergware International"
   echo
   echo "Usage: bunker -a|A|v|V|u|e|t|i|c|C|r|R [-fdDsSlLnq] [-md5|-b2|-b3] path [!] [mask]"
   echo "  -a          add hash key attribute for files, specified in path and optional mask"
@@ -88,7 +88,7 @@ waitfor() {
       x=$(((x+1)%4))
     fi
     if [[ $mon -ne 0 && $index -eq 0 ]]; then
-      echo -n "0%#<span class='orange-text orange-button'>$task</span> Scanning for files... ${SECONDS}s#" >$monitor
+      echo -n "0%#<span class='orange-text orange-button'>$task <i class='fa fa-refresh fa-spin fa-fw'></i></span> Scanning for files... ${SECONDS}s#" >$monitor
     fi
     sleep .05
   done
@@ -97,7 +97,7 @@ waitfor() {
 # Print result on console
 con() {
   [[ $con -ne 0 ]] && echo -en "${clr}$1${rt}${cln}"
-  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task</span> $1 $errorlink#" >$monitor
+  [[ $mon -ne 0 ]] && echo -n "100%#<span class='green-text green-button'>$task <i class='fa fa-check fa-fw'></i></span> $1 $errorlink#" >$monitor
 }
 
 # Log result to syslog
@@ -130,7 +130,7 @@ progress() {
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$complete'/'$total')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
     [[ $mon -ne 0 && -z $errorlink ]] && ((skip+fail+bad+warning)) > 0 && errorlink="<a onClick='showProblems(\"${tmpfile##*/}.2\",\"${monitor##*/}.end\")'><b class='icon-u-search'></b>Show Problems</a>"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1 $errorlink#$eta" >$monitor
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task <i class='fa fa-refresh fa-spin fa-fw'></i></span> $1 $errorlink#$eta" >$monitor
     past=$2
   fi
   update=0
@@ -147,7 +147,7 @@ progress2() {
     fi
     local percent=$(awk 'BEGIN{printf("%0.1f",100*'$past'/'$files')}')
     [[ $con -ne 0 ]] && echo -e "\r$1. Completed: $percent% ${eta}${rt}"
-    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task</span> $1#$eta" >$monitor
+    [[ $mon -ne 0 ]] && echo -n "$percent%#<span class='orange-text orange-button'>$task <i class='fa fa-refresh fa-spin fa-fw'></i></span> $1#$eta" >$monitor
   fi
   update=0
   timer=$SECONDS
@@ -372,7 +372,7 @@ function ctrl_c() {
 # Cleanup on exit
 function cleanup() {
   [[ -n $ifs ]] && IFS=$ifs
-  [[ -f $tmpfile.2 ]] && cat $tmpfile.2 >> $monitor #temporarly save problems in disk file for ui (will be overwritten by next disk task
+  [[ -f $tmpfile.2 ]] && cat $tmpfile.2 >> $monitor # temporarly save problems in disk file for ui (will be overwritten by next disk task
   [[ -n $tmpfile ]] && rm -f $tmpfile*
   [[ -n $monitor ]] && mv -f $monitor $monitor.end
   exit 0
@@ -407,10 +407,10 @@ log=0
 one=0
 msg=0
 con=1
-mon=1 #allways write progress to file, even if not requested
+mon=1 # always write progress to file, even if not requested
 job=0
 not=0
-large_file_size=100000000 #use size which can not be processed twice in one sec
+large_file_size=100000000 # use size which can not be processed twice in one sec
 
 # Parse user options
 while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xjzE:F:" option; do
@@ -441,9 +441,9 @@ while getopts ":aAvVueicCrRf:d:D:s:S:m:b:lLnq1xjzE:F:" option; do
        2) proc=b2sum; hash=blake2; argv=""; code=128 ;;
       2b) proc=b2sum; hash=blake2; argv="-a blake2b"; code=128 ;;
       2s) proc=b2sum; hash=blake2; argv="-a blake2s"; code=64 ;;
-      #force single threaded to behave same like other methods and to reduce overhead, no-mmap if single threaded
-      #if your CPU does support AVX you may not be able to have enough bandwidth to feed more than 1 core anyway
-      3) proc=b3sum; hash=blake3; argv="--num-threads=1 --no-mmap"; code=64 ;;
+          #force single threaded to behave same like other methods and to reduce overhead, no-mmap if single threaded
+          #if your CPU does support AVX you may not be able to have enough bandwidth to feed more than 1 core anyway
+       3) proc=b3sum; hash=blake3; argv="--num-threads=1 --no-mmap"; code=64 ;;
        *) usage; exit ;;
      esac
       ;;
@@ -524,7 +524,7 @@ if [[ $mon -ne 0 ]]; then
     z=${store##*/}
     monitor=/var/tmp/${z%%.*}.tmp
   fi
-  rm -f $monitor.end #remove old monitor finish file from previous job to make sure that an unclean exit can be detected
+  rm -f $monitor.end # remove old monitor finish file from previous job to make sure that an unclean exit can be detected
   errorlink=""
 fi
 
@@ -598,7 +598,7 @@ v|V|u)
   fi
   prepare 2
   if [[ $files -gt 0 ]]; then
-     [[ $((scandate/86400)) -le $epoch ]] && scan_all=1 # skip getfattr syscalls
+    [[ $((scandate/86400)) -le $epoch ]] && scan_all=1 # skip getfattr syscalls
     [[ $job -ne 0 ]] && record start
     [[ $con -ne 0 ]] && echo -en ${rmam}
     while read -r line; do
@@ -748,7 +748,7 @@ i)
 ;;
 
 c|C)
-  task=Check
+  task='Check Export'
   check_cmd
   [[ $cmd == c ]] && text="" || text=" (updated)"
   sed '/^$/d;/^#/d' "$store" >$tmpfile &

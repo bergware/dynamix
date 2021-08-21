@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2021, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -27,8 +27,8 @@ if ($translations) {
 function status($cmd,$name,$file) {
   global $list;
   if (!$file) return "close blue-text";
-  if ($list && strpos($list[$name],"analyse")!==false) return "refresh grey-text";
-  return ($list && strpos($list[$name],$cmd)!==false) ? "check green-text" : "circle-o orange-text";
+  $status = $list[$name] ?? '';
+  return strpos($status,"analyse")!==false ? "refresh grey-text" : (strpos($status,$cmd)!==false ? "check green-text" : "circle-o orange-text");
 }
 
 if ($_POST['disk']>0) {
@@ -37,13 +37,13 @@ if ($_POST['disk']>0) {
   if (file_exists($tmp)) {
     echo file_get_contents($tmp);
   } else {
-    echo file_exists($end) ? file_get_contents($end) : "100%#<span class='red-text red-button'>"._('Error')."</span>"._('Operation aborted')."#";
+    echo file_exists($end) ? file_get_contents($end) : "100%#<span class='red-text red-button'>"._('Error')." <i class='fa fa-times fa-fw'></i></span>"._('Operation aborted')."#";
     //don't delete end file because there could be a race condition if you submit forms or reload the page for any other reason
   }
 } else {
   $ctrl = "/var/tmp/ctrl.tmp";
   if (!file_exists($ctrl) || (time()-filemtime($ctrl)>=$_POST['time'])) {
-    exec("/etc/cron.daily/exportrotate -q 1>/dev/null 2>&1 &");
+    exec("/etc/cron.daily/exportrotate -q &> /dev/null 2>&1");
     touch($ctrl);
   }
   $path = "/boot/config/plugins/$plugin";

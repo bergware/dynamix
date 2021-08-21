@@ -34,14 +34,12 @@ $cfg = parse_plugin_cfg($plugin);
 $folders = $cfg['exclude'] ? explode(',',$cfg['exclude']) : [];
 if ($cfg['folders']) $folders = array_merge($folders,array_map('trim',explode(',',$cfg['folders'])));
 $folders = $folders ? implode('&nbsp;&nbsp;',$folders) : _('None');
-
-$files = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
-$files = $files ? implode(' , ',$files) : _('None');
-
-$size = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
-$method = $cfg['method'] ? str_replace(['-b2','-b3','-md5'],[_('BLAKE2'),_('BLAKE3'),_('MD5')],$cfg['method']) : _('SHA256');
-$root = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
-$data = array_filter($disks,'data_disks');
+$files   = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
+$files   = $files ? implode(' , ',$files) : _('None');
+$size    = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
+$method  = $cfg['method'] ? str_replace(['-b2','-b3','-md5'],['BLAKE2','BLAKE3','MD5'],$cfg['method']) : 'SHA256';
+$root    = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
+$data    = array_filter($disks,'data_disks');
 
 $runningTasks = [];
 $command = "ps -o args -C bunker|gawk 'match(\$0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash\$/,d){print substr(\$3,2,1) d[1]d[2]}'";
@@ -51,9 +49,9 @@ exec($command, $runningTasks);
 tr[id^=row]{height:44px;line-height:24px}
 input.thin{margin:1px;}
 span.running{background-color:#FF9E9E;}
-span.green-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #6FA239;}
-span.orange-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #FF9900;}
-span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #CC0000;}
+span.green-button{padding:2px 6px;margin-right:6px;border-radius:4px;border:1px solid #6FA239;}
+span.orange-button{padding:2px 6px;margin-right:6px;border-radius:4px;border:1px solid #FF9900;}
+span.red-button{padding:2px 6px;margin-right:6px;border-radius:4px;border:1px solid #CC0000;}
 .blue-text{color:#00529B;}
 .usage-disk{height:auto}
 .usage-disk>span:first-child{height:auto;padding:0}
@@ -95,7 +93,7 @@ function cancelBunker(cmd,disk) {
   $.post('/plugins/<?=$plugin?>/include/BunkerProcess.php',{cmd:cmd,disk:disk,kill:'true'},function(data) {
     updateList(false,'disk'+disk);
     prepareList(cmd);
-    location = location;
+    location.reload();
   });
 }
 function updateList(checked,name) {
@@ -106,7 +104,7 @@ function updateList(checked,name) {
   if (disks.length==0) $.removeCookie('disks',{path:'/'});
 }
 function prepareList(cmd) {
-  var cookies = $.cookie('disks')!=null ? $.cookie('disks').split(',') : [];
+  var cookies = ($.cookie('disks')||'').split(',');
   var list = '';
   for (var i=0,disk; disk=disks[i]; i++) {
     if (list.length) list += ',';
@@ -138,7 +136,7 @@ function corz() {
   openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>','_(Generate Corz Files)_',490,430,false);
 }
 function toggleCommandHelp() {
-  if (['button', 'input'].indexOf(event.target.localName) == -1) {
+  if (['button','input'].indexOf(event.target.localName) == -1) {
     $('.inline_help:last').toggle('slow');
   }
 }
@@ -216,7 +214,7 @@ _(Excluded files)_:
 > This is the list of excluded files as selected on the settings page. Make sure it is correct before you perform any commands on this page.
 :end
 
-<table class="share_status fixed" onclick="toggleCommandHelp()" style="margin:20px 0; cursor: help;">
+<table class="share_status fixed" onclick="toggleCommandHelp()" style="margin:20px 0;cursor:help">
 <?
 $row1 = $row2 = [];
 foreach ($data as $disk) {
@@ -271,7 +269,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody>";
 <span class="small">
   <input type="submit" value="_(Build)_"  onclick="this.form.cmd.value='a'">
   <input type="submit" value="_(Export)_" onclick="this.form.cmd.value='e'">
-  <input type="submit" value="_(Check)_ _(Export)_" onclick="this.form.cmd.value='C'">
+  <input type="submit" value="_(Check Export)_" onclick="this.form.cmd.value='C'">
   <input type="submit" value="_(Import)_" onclick="this.form.cmd.value='i'">
   <input type="submit" value="_(Remove)_" onclick="this.form.cmd.value='R'">
   <input type="submit" value="_(Clear)_"  onclick="this.form.cmd.value='R';this.form.excludeonly.value=true">
