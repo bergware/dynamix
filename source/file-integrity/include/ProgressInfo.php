@@ -43,7 +43,7 @@ if ($_POST['disk']>0) {
 } else {
   $ctrl = "/var/tmp/ctrl.tmp";
   if (!file_exists($ctrl) || (time()-filemtime($ctrl)>=$_POST['time'])) {
-    exec("/etc/cron.daily/exportrotate -q &> /dev/null 2>&1");
+    exec("/etc/cron.daily/exportrotate -q &>/dev/null 2>&1 &");
     touch($ctrl);
   }
   $path = "/boot/config/plugins/$plugin";
