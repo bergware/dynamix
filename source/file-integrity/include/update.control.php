@@ -53,14 +53,12 @@ if ($_POST['#priority']) {
   list($nice,$ionice) = explode(',',$_POST['#priority']);
   $bunker = "nice $nice ionice $ionice $bunker";
 }
-
 switch ($_POST['cmd']) {
 case 'a':
   $key = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
   if ($_POST['#apple']) $key[] = $apple[1];
   $key = $key ? '! "'.implode(',', $key).'"' : '';
   foreach ($disks as $disk) {
-    init($disk,_('Build'));
     exec("$bunker -aqx $m $l $e $f -f $path/$disk.export.hash /mnt/$disk $key &>/dev/null &");
   }
   break;
