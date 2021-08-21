@@ -47,7 +47,7 @@ $n = $_POST['#notify'];
 $e = $_POST['#exclude'] ? "-E \"".regex($_POST['#exclude'])."\"" : "";
 $f = $_POST['#folders'] ? "-F \"".regex($_POST['#folders']).($_POST['#apple'] ? ",{$apple[0]}" : "")."\"" : "";
 $l = strpos($_POST['#log'],'-L')!==false ? "-L" : "";
-$z = $_POST['excludeonly']=="true" ? "-z" : "";
+$z = $_POST['excludeonly']=="true" ? "z" : "";
 
 if ($_POST['#priority']) {
   list($nice,$ionice) = explode(',',$_POST['#priority']);
@@ -59,6 +59,7 @@ case 'a':
   if ($_POST['#apple']) $key[] = $apple[1];
   $key = $key ? '! "'.implode(',', $key).'"' : '';
   foreach ($disks as $disk) {
+    init($disk,_('Build'));
     exec("$bunker -aqx $m $l $e $f -f $path/$disk.export.hash /mnt/$disk $key &>/dev/null &");
   }
   break;
@@ -89,12 +90,18 @@ case 'i':
   }
   break;
 case 'R':
-  $key = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
-  if ($_POST['#apple']) $key[] = $apple[1];
-  $key = $key ? '"'.implode(',', $key).'"' : '';
+  if ($z) {
+    $task = _('Clear');
+    $key = $_POST['#files'] ? array_map('trim', explode(',', $_POST['#files'])) : [];
+    if ($_POST['#apple']) $key[] = $apple[1];
+    $key = $key ? '"'.implode(',', $key).'"' : '';
+  } else {
+    $task = _('Remove');
+    $key = '';
+  }
   foreach ($disks as $disk) {
-    init($disk,$z?_('Clear'):_('Remove'));
-    exec("$bunker -Rqx $z $m $l $e $f /mnt/$disk $key &>/dev/null &");
+    init($disk,$task);
+    exec("$bunker -Rqx$z $m $l $e $f /mnt/$disk $key &>/dev/null &");
   }
   break;
 }

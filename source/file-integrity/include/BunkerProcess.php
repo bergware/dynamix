@@ -18,7 +18,6 @@ if ($_POST['kill']=='true') {
   exec("kill $pid 2>/dev/null");
   foreach ($cpids as $cpid) exec("kill $cpid 2>/dev/null");
   usleep(100000);
-  unlink("/var/tmp/$disk.tmp");
   unlink("/var/tmp/$disk.tmp.end");
 } else {
   echo $pid;
