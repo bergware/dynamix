@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.08.21">
+<!ENTITY version   "2021.08.21a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ab49b11446b8f6f32c9a699cf9b1f222">
+<!ENTITY MD5       "80bbacc124eab5e9e01ffed5b937764c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,11 @@
 ##&name;
 
 ###&version;
+- fixed regression error
+- visual enhancements
+- fixed race-condition when starting operation
+
+###2021.8.20
 - Thanks to user Falcosc this plugin has received numerous updates
 - added blake3 hash support for 2-6 times more hash rate than blake2
 - reduced CPU load up to 4 times at same data rate when using blake3
@@ -29,8 +34,6 @@
 - fixed multi-language support for buttons
 - added watch error and warning messages of running or finished progress
 - added Disk status icon for running build status check
-- fixed regression error - bergware
-- some visual enhancements - bergware
 
 ###2020.08.21
 - fixed regression error
