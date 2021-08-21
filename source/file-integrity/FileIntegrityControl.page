@@ -104,7 +104,7 @@ function updateList(checked,name) {
   if (disks.length==0) $.removeCookie('disks',{path:'/'});
 }
 function prepareList(cmd) {
-  var cookies = ($.cookie('disks')||'').split(',');
+  var cookies = $.cookie('disks')!=null ? $.cookie('disks').split(',') : [];
   var list = '';
   for (var i=0,disk; disk=disks[i]; i++) {
     if (list.length) list += ',';
@@ -144,18 +144,16 @@ function showProblems(monitorlog, diskendlog){
   openBox('/plugins/<?=$plugin?>/scripts/showerror&arg1=' + monitorlog + '&arg2=' + diskendlog,'_(Show Problems)_',500,1200,false);
 }
 $(function() {
-  var cookies = $.cookie('disks')||'';
   var runningTasks = '<?=implode(",",array_filter($runningTasks))?>';
   if (runningTasks) {
-    var table = (runningTasks+','+cookies).split(',');
-    var alive = [];
-    for (var i=0,disk; disk=table[i]; i++) if (disk && !alive.includes(disk)) alive.push(disk);
-    cookies = alive.join(',');
-    $.cookie('disks',cookies,{path:'/',expires:3650});
+    var cookies = $.cookie('disks')!=null ? $.cookie('disks') : '';
+    var run = [], list = (runningTasks+','+cookies).split(',');
+    for (var i=0,disk; disk=list[i]; i++) if (disk && !run.includes(disk)) run.push(disk);
+    if (run.length) $.cookie('disks',run.join(','),{path:'/',expires:3650}); else $.removeCookie('disks',{path:'/'});
   }
   updater();
-  if (cookies) {
-    cookies = cookies.split(',');
+  if ($.cookie('disks') != null) {
+    var cookies = $.cookie('disks').split(',');
     for (var i=0,cookie; cookie=cookies[i]; i++) {
       var cmd = cookie.substr(0,1);
       var disk = cookie.substr(1);
