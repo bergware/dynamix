@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.08.23">
+<!ENTITY version   "2021.08.23a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "125287b91fe3280243e9aa664f8da0bf">
+<!ENTITY MD5       "707e492d35442ec15b04bdc2fb166933">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">

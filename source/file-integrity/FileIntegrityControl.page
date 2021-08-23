@@ -134,7 +134,7 @@ function corz() {
   $('input[class="selection"]').each(function() {
     if ($(this).prop('checked')) args += $(this).attr('name')+',';
   });
-  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>','_(Generate Corz Files)_',490,430,false);
+  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>&arg3=<?=$hashing[$cfg["method"]]?>','_(Generate Corz Files)_',490,430,false);
 }
 function toggleCommandHelp() {
   if (['button','input'].indexOf(event.target.localName) == -1) {
