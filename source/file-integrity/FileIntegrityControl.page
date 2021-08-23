@@ -40,6 +40,7 @@ $size    = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
 $method  = $cfg['method'] ? str_replace(['-b2','-b3','-md5'],['BLAKE2','BLAKE3','MD5'],$cfg['method']) : 'SHA256';
 $root    = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
 $data    = array_filter($disks,'data_disks');
+$hashing = [''=>'sha256', '-md5'=>'md5', '-b2'=>'blake2', '-b3'=>'blake3'];
 
 $runningTasks = [];
 $command = "ps -o args -C bunker|gawk 'match(\$0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash\$/,d){print substr(\$3,2,1) d[1]d[2]}'";
@@ -181,6 +182,7 @@ $(function() {
 <form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.cmd.value)">
 <input type="hidden" name="#file" value="not-used">
 <input type="hidden" name="#method" value="<?=$cfg['method']?>">
+<input type="hidden" name="#hashing" value="<?=$hashing[$cfg['method']]?>">
 <input type="hidden" name="#exclude" value="<?=$cfg['exclude']?>">
 <input type="hidden" name="#folders" value="<?=$cfg['folders']?>">
 <input type="hidden" name="#files" value="<?=$cfg['files']?>">

@@ -32,16 +32,15 @@ function data_disks($disk) {
 function disk($key) {
   return substr($key,0,4)=='disk' ? $key : "";
 }
-$cfg   = parse_plugin_cfg($plugin);
-$sName = "disk-watch";
-$fName = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
+$cfg     = parse_plugin_cfg($plugin);
+$sName   = "disk-watch";
+$fName   = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
 $b2check = "/usr/local/emhttp/plugins/$plugin/scripts/b2sum-check";
 $b3check = "/usr/local/emhttp/plugins/$plugin/scripts/b3sum-check";
-$width = [166,300];
-
-$mode = ['Disabled','Daily','Weekly','Monthly'];
-$days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-$hash = glob("/boot/config/plugins/$plugin/export/disk*.hash");
+$width   = [166,300];
+$mode    = ['Disabled','Daily','Weekly','Monthly'];
+$days    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+$hash    = glob("/boot/config/plugins/$plugin/export/disk*.hash");
 
 extract(parse_ini_file('/etc/unraid-version'));
 $disabled = version_compare($version, '6.1.7', '>=') ? "" : " disabled";
