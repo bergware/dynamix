@@ -8,12 +8,12 @@ method=$2
 [[ -n $3 ]] && exclude="^/mnt/disk[0-9]+/$3" || exclude="''"
 [[ -n $4 ]] && disks=$4 || disks=/mnt/disk[0-9]*
 
-declare -A hash
-hash=sha256
-hash[-md5]=md5
-hash[-b2]=blake2
-hash[-b3]=blake3
-hname=${hash[$method]}
+declare -A hashing
+hashing=sha256
+hashing[-md5]=md5
+hashing[-b2]=blake2
+hashing[-b3]=blake3
+hname=${hashing[$method]}
 
 # calculate levels
 busy=$(($(awk '$3~/md/{++c}END{print c}' /proc/diskstats)*512))
