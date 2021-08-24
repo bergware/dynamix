@@ -43,12 +43,12 @@ foreach ($_POST as $key => $value) {
   }
 }
 $m = $_POST['#method'];
+$h = $_POST['#hashing'];
 $n = $_POST['#notify'];
 $e = $_POST['#exclude'] ? "-E \"".regex($_POST['#exclude'])."\"" : "";
 $f = $_POST['#folders'] ? "-F \"".regex($_POST['#folders']).($_POST['#apple'] ? ",{$apple[0]}" : "")."\"" : "";
 $l = strpos($_POST['#log'],'-L')!==false ? "-L" : "";
 $z = $_POST['excludeonly']=="true" ? "z" : "";
-$hname = $_POST['#hname'];
 
 if ($_POST['#priority']) {
   list($nice,$ionice) = explode(',',$_POST['#priority']);
@@ -61,20 +61,20 @@ case 'a':
   $key = $key ? '! "'.implode(',', $key).'"' : '';
   foreach ($disks as $disk) {
     init($disk,_('Build'));
-    exec("$bunker -aqx $m $l $e $f -f $path/$disk.export.$hname.hash /mnt/$disk $key &>/dev/null &");
+    exec("$bunker -aqx $m $l $e $f -f $path/$disk.export.$h.hash /mnt/$disk $key &>/dev/null &");
   }
   break;
 case 'e':
   foreach ($disks as $disk) {
     init($disk,_('Export'));
-    exec("$bunker -eqx $m $l $e $f -f $path/$disk.export.$hname.hash /mnt/$disk &>/dev/null &");
+    exec("$bunker -eqx $m $l $e $f -f $path/$disk.export.$h.hash /mnt/$disk &>/dev/null &");
   }
   break;
 case 'C':
   foreach ($disks as $disk) {
-    if (file_exists("$path/$disk.export.$hname.hash")) {
+    if (file_exists("$path/$disk.export.$h.hash")) {
       init($disk,_('Check Export'));
-      exec("$bunker -Cqx $m $l $n -f $path/$disk.export.$hname.hash &>/dev/null &");
+      exec("$bunker -Cqx $m $l $n -f $path/$disk.export.$h.hash &>/dev/null &");
     } else {
       file_put_contents("/var/tmp/$disk.tmp.end","100%#<span class='red-text red-button'>"._('Check')." <i class='fa fa-times fa-fw'></span> "._('Aborted - export file not found')."!#");
     }
@@ -82,9 +82,9 @@ case 'C':
   break;
 case 'i':
   foreach ($disks as $disk) {
-    if (file_exists("$path/$disk.export.$hname.hash")) {
+    if (file_exists("$path/$disk.export.$h.hash")) {
       init($disk,_('Import'));
-      exec("$bunker -iqx $m $l -f $path/$disk.export.$hname.hash &>/dev/null &");
+      exec("$bunker -iqx $m $l -f $path/$disk.export.$h.hash &>/dev/null &");
     } else {
       file_put_contents("/var/tmp/$disk.tmp.end","100%#<span class='red-text red-button'>"._('Import')." <i class='fa fa-times fa-fw'></span> "._('Aborted - export file not found')."!#");
     }

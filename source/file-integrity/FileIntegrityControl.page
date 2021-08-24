@@ -37,13 +37,13 @@ $folders = $folders ? implode('&nbsp;&nbsp;',$folders) : _('None');
 $files   = $cfg['files'] ? array_map('trim',explode(',',$cfg['files'])) : [];
 $files   = $files ? implode(' , ',$files) : _('None');
 $size    = $cfg['method']=='-b2' ? 128 : ($cfg['method']=='-md5' ? 32 : 64);
+$method  = $cfg['method'] ? str_replace(['-b2','-b3','-md5'],['BLAKE2','BLAKE3','MD5'],$cfg['method']) : 'SHA256';
 $root    = $cfg['place']=='SystemInformation' ? '/Tools/Integrity' : '/Integrity';
 $data    = array_filter($disks,'data_disks');
-$hash    = [''=>'sha256', '-md5'=>'md5', '-b2'=>'blake2', '-b3'=>'blake3'];
-$method  = $hash[$cfg['method']];
+$hashing = [''=>'sha256', '-md5'=>'md5', '-b2'=>'blake2', '-b3'=>'blake3'];
 
 $runningTasks = [];
-$command = "ps -o args -C bunker|gawk 'match(\$0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.\S+\.hash\$/,d){print substr(\$3,2,1) d[1]d[2]}'";
+$command = "ps -o args -C bunker|gawk 'match(\$0,/\/mnt\/disk([0-9]*)|\/disk([0-9]*)\.export\.hash\$/,d){print substr(\$3,2,1) d[1]d[2]}'";
 exec($command, $runningTasks);
 ?>
 <style>
@@ -65,7 +65,7 @@ var disks = [];
 var bunker = [];
 
 function updater() {
-  $.post('/plugins/<?=$plugin?>/include/ProgressInfo.php',{disk:0,time:180,method:'<?=$method?>'},function(data){
+  $.post('/plugins/<?=$plugin?>/include/ProgressInfo.php',{disk:0,time:180},function(data){
     $('#disk-status').html(data);
     $('#findbtn').prop('disabled',$('#export-status').html().search('green-text')==-1);
     setTimeout(updater,3000);
@@ -134,7 +134,7 @@ function corz() {
   $('input[class="selection"]').each(function() {
     if ($(this).prop('checked')) args += $(this).attr('name')+',';
   });
-  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>','_(Generate Corz Files)_',490,430,false);
+  openBox('/plugins/<?=$plugin?>/scripts/corzation'+args.slice(0,-1)+'&arg2=<?=$method?>&arg3=<?=$hashing[$cfg["method"]]?>','_(Generate Corz Files)_',490,430,false);
 }
 function toggleCommandHelp() {
   if (['button','input'].indexOf(event.target.localName) == -1) {
@@ -182,7 +182,7 @@ $(function() {
 <form markdown="1" name="integrity_control" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareList(this.cmd.value)">
 <input type="hidden" name="#file" value="not-used">
 <input type="hidden" name="#method" value="<?=$cfg['method']?>">
-<input type="hidden" name="#hname" value="<?=$method?>">
+<input type="hidden" name="#hashing" value="<?=$hashing[$cfg['method']]?>">
 <input type="hidden" name="#exclude" value="<?=$cfg['exclude']?>">
 <input type="hidden" name="#folders" value="<?=$cfg['folders']?>">
 <input type="hidden" name="#files" value="<?=$cfg['files']?>">
@@ -194,7 +194,7 @@ $(function() {
 <input type="hidden" name="cmd" value="">
 <input type="hidden" name="excludeonly" value="false">
 _(Hashing method)_:
-: <span style='font-size:12px;margin-right:8px'><?=_(strtoupper($method))?></span>
+: <span style='font-size:12px;margin-right:8px'><?=$method?></span>
 
 :integrity_control_hashing_plug:
 > This is the hash method as selected on the settings page. Make sure it is correct before you perform any commands on this page.
@@ -250,7 +250,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody>";
 > Building can be done in intermediate steps, files which have their extended attributes set, will be skipped when a next build is performed.
 >
 > Use the **Export** command to generate checksum files which can be used for manual checking or restoration.
-> These files are stored on the flash disk under */config/plugins/dynamix.file.integrity/diskXX.export.&lt;hash&gt;.hash*
+> These files are stored on the flash disk under */config/plugins/dynamix.file.integrity/diskXX.export.hash*
 >
 > Use the **Check Export** command to verify files against a previously exported file. This allows for off-line verification in case of a local issue and the extended attributes can't be used.
 >
@@ -260,7 +260,7 @@ echo "</tr></tbody><tbody id='disk-status'></tbody>";
 >
 > Use the **Clear** command to delete the extended attributes from excluded folders and files only.
 >
-> Use the **Corz** command to convert the export files to Corz compatible files. Corz files are created for each folder and stored under name *&lt;disk&gt;.corz&lt;/full-path-name&gt;.&lt;hash&gt;.hash*.
+> Use the **Corz** command to convert the export files to Corz compatible files. Corz files are created for each folder and stored under name *&lt;disk&gt;.corz&lt;/full-path-name&gt;.hash*.
 >
 > Use the **Find** command to search for duplicate file names and file hashes in the exported *hash* files.
 :end

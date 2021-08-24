@@ -11,7 +11,7 @@
 ?>
 <?
 $disk = 'disk'.$_POST['disk'];
-$filter = "bunker -{$_POST['cmd']}.*(\/mnt\/$disk ?|\/$disk\.export\.\S+\.hash$)";
+$filter = "bunker -{$_POST['cmd']}.*(\/mnt\/$disk ?|\/$disk\.export\.hash$)";
 $pid = exec("ps -o pid,args -C bunker|awk '$0~/$filter/{print $1}'");
 if ($_POST['kill']=='true') {
   exec("pgrep -P $pid 2>/dev/null", $cpids);

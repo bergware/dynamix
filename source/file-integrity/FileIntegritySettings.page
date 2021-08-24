@@ -199,7 +199,7 @@ _(Save new hashing results to flash)_:
 
 :integrity_flash_plug:
 > When enabled a daily file on the flash device will be created, holding the checksum results for all newly or modified files of that particular day.
-> The format of this file is the same as the standard export file. The daily file is saved as */config/plugins/dynamix.file.integrity/saved/disks.export.&lt;date&gt;.&lt;hash&gt;.new.hash*
+> The format of this file is the same as the standard export file. The daily file is saved as */config/plugins/dynamix.file.integrity/saved/disks.export.&lt;date&gt;.new.hash*
 :end
 
 _(Excluded folders and files)_:

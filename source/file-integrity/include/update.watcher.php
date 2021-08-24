@@ -26,23 +26,20 @@ function expand_file($text) {
 function regex($text) {
   return strtr($text,['.'=>'\.','['=>'\[',']'=>'\]','('=>'\(',')'=>'\)','{'=>'\{','}'=>'\}','+'=>'\+','-'=>'\-','*'=>'.*','&'=>'\&','?'=>'\?']);
 }
-$local  = "/usr/local/emhttp/plugins";
-$boot   = "/boot/config";
-$path   = "$boot/plugins/$plugin";
-$docker = @parse_ini_file("$boot/docker.cfg");
-$img    = 'DOCKER_IMAGE_FILE';
-$new    = isset($default) ? array_replace_recursive($_POST, $default) : $_POST;
-$bunker = "$local/$plugin/scripts/bunker";
-$conf   = "/etc/inotifywait.conf";
-$cron   = "$path/integrity-check.cron";
-$run    = "$path/integrity-check.sh";
-$tasks  = [];
-$map    = [];
-$cmd    = $new['cmd'];
-$method = $new['method'];
-$hash   = [''=>'sha256', '-md5'=>'md5', '-b2'=>'blake2', '-b3'=>'blake3'];
-$hname  = $hash[$method];
 
+$docker = @parse_ini_file("/boot/config/docker.cfg");
+$img = 'DOCKER_IMAGE_FILE';
+$new = isset($default) ? array_replace_recursive($_POST, $default) : $_POST;
+$bunker = "/usr/local/emhttp/plugins/$plugin/scripts/bunker";
+$path = "/boot/config/plugins/$plugin";
+$conf = "/etc/inotifywait.conf";
+$cron = "$path/integrity-check.cron";
+$run  = "$path/integrity-check.sh";
+$tasks = [];
+$map = [];
+
+$cmd = $new['cmd'];
+$method = $new['method'];
 if (isset($docker[$img]) && strpos(dirname($docker[$img]),'/mnt/disk')!==false) $map[] = expand_file(basename($docker[$img]));
 if ($new['folders']) $map = array_merge($map,array_map('expand_folder',explode(',',$new['folders'])));
 if ($new['files'])   $map = array_merge($map,array_map('expand_file',explode(',',$new['files'])));
@@ -54,7 +51,7 @@ $exclude = $map ? $open.regex(implode('|',$map)).$close : '';
 $disks = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
 
 file_put_contents($conf, "cmd=\"$cmd\"\nmethod=\"$method\"\nexclude=\"$exclude\"\ndisks=\"$disks\"\n");
-exec("$local/$plugin/scripts/rc.watcher ".($new['service'] ? 'restart' : 'stop')." &>/dev/null");
+exec("/usr/local/emhttp/plugins/$plugin/scripts/rc.watcher ".($new['service'] ? 'restart' : 'stop')." &>/dev/null");
 
 foreach ($keys as $key => $value) if ($key[0]!='#' && !array_key_exists($key,$new)) unset($keys[$key]);
 
@@ -97,7 +94,7 @@ if ($new['schedule']>0 && $x>0) {
   foreach ($tasks as $task) {
     if (empty($task)) continue;
     foreach ($task as $disk) {
-      $log = strpos($l, '-f')!==false ? "$l $path/logs/$disk.export.\$(date +%Y%m%d).$hname.bad.log" : $l;
+      $log = strpos($l, '-f')!==false ? "$l $path/logs/$disk.export.\$(date +%Y%m%d).bad.log" : $l;
       $text[] = "[[ $term -eq $i ]] && $bunker -Vqj $m $n $log /mnt/$disk >/dev/null &";
     }
     $i++;

@@ -46,16 +46,15 @@ if ($_POST['disk']>0) {
     exec("/etc/cron.daily/exportrotate -q &>/dev/null 2>&1 &");
     touch($ctrl);
   }
-  $path  = "/boot/config/plugins/$plugin";
-  $list  = @parse_ini_file("$path/disks.ini");
+  $path = "/boot/config/plugins/$plugin";
+  $list = @parse_ini_file("$path/disks.ini");
   $disks = parse_ini_file("state/disks.ini",true);
-  $hname = $_POST['method'];
-  $row1  = $row2 = [];
+  $row1 = $row2 = [];
   foreach ($disks as $disk) {
     if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {
       $name = $disk['name'];
       $row1[] = "<td style='text-align:center'><i class='fa fa-".status('build',$name,true)."'></i></td>";
-      $row2[] = "<td style='text-align:center'><i class='fa fa-".status('export',$name,file_exists("$path/export/$name.export.$hname.hash"))."'></i></td>";
+      $row2[] = "<td style='text-align:center'><i class='fa fa-".status('export',$name,file_exists("$path/export/$name.export.hash"))."'></i></td>";
     }
   }
   $x = 28-count($row1);
