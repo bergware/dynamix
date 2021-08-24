@@ -8,6 +8,13 @@ method=$2
 [[ -n $3 ]] && exclude="^/mnt/disk[0-9]+/$3" || exclude="''"
 [[ -n $4 ]] && disks=$4 || disks=/mnt/disk[0-9]*
 
+declare -A hash
+hash=sha256
+hash[-md5]=md5
+hash[-b2]=blake2
+hash[-b3]=blake3
+hname=${hash[$method]}
+
 # calculate levels
 busy=$(($(awk '$3~/md/{++c}END{print c}' /proc/diskstats)*512))
 jobs=$(($(nproc)*2))
@@ -36,9 +43,9 @@ while read -r file; do
     sleep 0.5
   done
   if [[ -z $(getfattr -n user.$hash --only-values "$file" 2>/dev/null) ]]; then
-    $bunker -${cmd}q1 $method -f "$config/saved/disks.export.$(date +%Y%m%d).new.hash" "$file" >/dev/null &
+    $bunker -${cmd}q1 $method -f "$config/saved/disks.export.$(date +%Y%m%d).$hname.new.hash" "$file" >/dev/null &
   else
-    $bunker -Vq1 $method -f "$config/logs/disks.export.$(date +%Y%m%d).bad.log" "$file" >/dev/null &
+    $bunker -Vq1 $method -f "$config/logs/disks.export.$(date +%Y%m%d).$hname.bad.log" "$file" >/dev/null &
   fi
   ((active++))
 done <$pipe &
