@@ -490,7 +490,7 @@ exit 0
 <FILE Name="/tmp/start_service" Mode="0770">
 <INLINE>
 #!/bin/bash
-/usr/local/emhttp/plugins/&name;/scripts/rc.watcher restart
+/usr/local/emhttp/plugins/&name;/scripts/rc.watcher start
 </INLINE>
 </FILE>
 
