@@ -322,6 +322,9 @@ fi
 
 # Remove exportrotate script
 rm -f /etc/cron.daily/exportrotate
+
+# kill running processes
+pkill bunker
 </INLINE>
 </FILE>
 
