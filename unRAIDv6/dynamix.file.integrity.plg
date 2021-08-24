@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.08.24d">
+<!ENTITY version   "2021.08.24e">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ef3606da3a3b597f7ebedf6be180a1a6">
+<!ENTITY MD5       "b3ff8924d21a25c56d7c7bd74a4d75aa">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -17,6 +17,7 @@
 
 ###&version;
 - fixed all operations with new export file naming
+- fixed regression error in watcher
 
 ###2021.8.23
 - include hashing name in export files (this allows to keep export files for different hashing methods)
