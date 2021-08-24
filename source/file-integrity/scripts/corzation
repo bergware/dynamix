@@ -3,8 +3,7 @@
 path=/boot/config/plugins/dynamix.file.integrity
 list=/tmp/$$_list
 hash=${1//,/ }
-method=$2
-h=$3
+hname=$2
 
 update() {
   time=$SECONDS
@@ -16,14 +15,14 @@ update() {
 }
 function cleanup() {
   rm -f $list.*
-  rm -rf /disk*.export.$h.corz
+  rm -rf /disk*.export.$hname.corz
   exit 0
 }
 
 trap cleanup EXIT
 
 for disk in $hash; do
-  export=$path/export/$disk.export.$h.hash
+  export=$path/export/$disk.export.$hname.hash
   if [[ -f $export ]]; then
     out=1
     echo -ne "<span class='warn'>Process hash file: $(basename $export)\n</span>"
@@ -33,17 +32,17 @@ for disk in $hash; do
     while read -ra line; do
       folder=$(dirname "${line[1]}")
       file=$(basename "${line[1]}")
-      mkdir -p "/$disk.export.$h.corz/$folder"
-      echo -e "#$method#$file#$(stat -c %y "/mnt/$disk/${line[1]}" 2>/dev/null|cut -d. -f1)\n${line[0]}  $file" >>"/$disk.export.$h.corz/$folder/$(basename "$folder").hash"
+      mkdir -p "/$disk.export.$hname.corz/$folder"
+      echo -e "#$hname#$file#$(stat -c %y "/mnt/$disk/${line[1]}" 2>/dev/null|cut -d. -f1)\n${line[0]}  $file" >>"/$disk.export.$hname.corz/$folder/$(basename "$folder").hash"
       ((count++))
       [[ $SECONDS -gt $time ]] && update
     done <$list.0
     IFS=$ifs
-    zip -qmr $path/export/$disk.export.$h.corz.zip /$disk.export.$h.corz
+    zip -qmr $path/export/$disk.export.$hname.corz.zip /$disk.export.$hname.corz
     echo -ne "<span class='system'>Hash export to Corz conversion of $disk completed\n</span>"
   else
     out=0
-    echo -ne "<span class='login'>File $disk.export.$h.hash not found\n</span>"
+    echo -ne "<span class='login'>File $disk.export.$hname.hash not found\n</span>"
   fi
 done
 [[ $out -eq 1 ]] && echo -e "\n<span class='array'>See folder <b>hash files</b> for the generated output</span>"

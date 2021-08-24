@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.08.23a">
+<!ENTITY version   "2021.08.24d">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "707e492d35442ec15b04bdc2fb166933">
+<!ENTITY MD5       "ef3606da3a3b597f7ebedf6be180a1a6">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed all operations with new export file naming
+
+###2021.8.23
 - include hashing name in export files (this allows to keep export files for different hashing methods)
 - Note: users must do a new 'Export' or rename existing files manually
 
@@ -319,9 +322,6 @@ fi
 
 # Remove exportrotate script
 rm -f /etc/cron.daily/exportrotate
-
-# kill running processes
-pkill bunker
 </INLINE>
 </FILE>
 
@@ -437,7 +437,7 @@ for disk in $disks; do
   find $disk -type f -name "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
   # new files in the past 24 hours
   filter 0
-  hashfile=$path/export/$hdd.export.hash
+  hashfile=$path/export/$hdd.export.$hash.hash
   if [[ -s $hashfile ]]; then
     changed=0
     touch -t $(date -d "@$(stat -c %Y $hashfile)" +%Y%m%d%H%M.%S) $tmpfile.1
