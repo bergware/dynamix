@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.08.24a">
+<!ENTITY version   "2021.08.24b">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -325,6 +325,7 @@ rm -f /etc/cron.daily/exportrotate
 
 # kill running processes
 pkill bunker
+exit 0
 </INLINE>
 </FILE>
 
@@ -491,6 +492,7 @@ exit 0
 <INLINE>
 #!/bin/bash
 /usr/local/emhttp/plugins/&name;/scripts/rc.watcher start
+exit 0
 </INLINE>
 </FILE>
 
