@@ -1,0 +1,597 @@
+Title="_(Index of)_ $dir"
+Tag="navicon"
+---
+<?PHP
+/* Copyright 2005-2021, Lime Technology
+ * Copyright 2012-2021, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$dir     = preg_replace('://+:','/',$dir);
+$edit    = $dir[0]=='/' && $dir!='/' && is_dir($dir);
+$subdir  = !in_array($dir,['/','/mnt','/mnt/']);
+$bgcolor = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
+?>
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.ui.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.filetree.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/plugins/dynamix.docker.manager/styles/style-{$display['theme']}.css")?>">
+
+<style>
+.loc{text-align:left!important;padding-left:0!important}
+#title span.left{text-transform:none}
+table.tablesorter.indexer thead th:first-child{width:12px;text-align:left;padding-left:11px}
+table.tablesorter.indexer thead th:nth-child(2){width:4%}
+table.tablesorter.indexer thead th:nth-child(3){width:auto}
+table.tablesorter.indexer thead th:nth-child(7){width:4%}
+i[id^="row_"],i[id^="check_"]{cursor:pointer;font-size:1.8rem;color:gray}
+i.fa-warning,i.fa-refresh{margin-right:8px}
+input#source{border:none}
+input[type=text]{width:400px}
+div.info{position:absolute;bottom:12px;width:95%}
+div.text{margin-left:200px;text-align:left}
+div.template{display:none}
+.fileTree{background:<?=$bgcolor?>;width:400px;max-height:320px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
+</style>
+
+<script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
+<script>
+function addFolderContext(id) {
+  var opts = [];
+<?if ($subdir):?>
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_(Delete Folder)_",id);}});
+  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename Folder)_",id);}});
+<?endif?>
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy Folder)_",id);}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move Folder)_",id);}});
+  context.attach('#'+id, opts);
+}
+function addFileContext(id) {
+  var opts = [];
+<?if ($subdir):?>
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(5,"_(Delete File)_",id);}});
+  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(6,"_(Rename File)_",id);}});
+<?endif?>
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(7,"_(Copy File)_",id);}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",id);}});
+  opts.push({divider:true});
+<?if ($subdir):?>
+//opts.push({text:"_(View)_", icon:"fa-eye", action:function(e){e.preventDefault();doAction(9,"_(View File)_",id);}}); not yet implemented
+  opts.push({text:"_(Download)_", icon:"fa-download", action:function(e){e.preventDefault();doAction(10,"_(Download File)_",id);}});
+<?endif?>
+  context.attach('#'+id, opts);
+}
+function selectAll(select) {
+  if (($('#check_0').hasClass('fa-square-o')||select==1) && select!=0) {
+    $('i[id^="check_"]').removeClass('fa-square-o').addClass('fa-check-square-o');
+    $('input[class="extra"]').prop('disabled',false);
+  } else {
+    $('i[id^="check_"]').removeClass('fa-check-square-o').addClass('fa-square-o');
+    $('input[class="extra"]').prop('disabled',true);
+  }
+}
+function selectOne(id) {
+  if ($('#'+id).hasClass('fa-square-o')) {
+    $('#'+id).removeClass('fa-square-o').addClass('fa-check-square-o');
+  } else {
+    $('#'+id).removeClass('fa-check-square-o').addClass('fa-square-o');
+  }
+  var checked = 0;
+  $('i[id^="check_"]').each(function(){if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) checked++;});
+  $('input[class="extra"]').prop('disabled',checked==0);
+}
+function doAction(action,title,id) {
+  var popup = $("#dialogWindow");
+  var source = $('#'+id).attr('data')<?if (!$subdir):?>+'/'<?endif;?>;
+  var type = $('#'+id).attr('type');
+  var path = source.split('/');
+  var name = path.pop()||patch.pop();
+  if (path[1] != 'mnt') return;
+  var user = /^user0?$/.test(path[2]);
+  var root = '/'+path[1]+(user ? '/'+path[2] : '');
+  var disk = ['disk[0-9]+'];
+<?foreach ($pools as $pool) echo "disk.push(\"$pool\");\n"?>
+  var match = user ? '' : disk.join('|');
+  switch (action) {
+  case 1: // delete folder
+    popup.html($("#templateDeleteFolder").html());
+    popup.find('#source').val(source);
+    var height = 300;
+    break;
+  case 2: // rename folder
+    popup.html($("#templateRenameFolder").html());
+    popup.find('#source').val(name);
+    var height = 300;
+    break;
+  case 3: // copy folder
+    popup.html($("#templateCopyFolder").html());
+    popup.find('#source').val(source);
+    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach();
+    var height = 600;
+    break;
+  case 4: // move folder
+    popup.html($("#templateMoveFolder").html());
+    popup.find('#source').val(source);
+    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach();
+    var height = 600;
+    break;
+  case 5: // delete file
+    popup.html($("#templateDeleteFile").html());
+    popup.find('#source').val(source);
+    var height = 300;
+    break;
+  case 6: // rename file
+    popup.html($("#templateRenameFile").html());
+    popup.find('#source').val(name);
+    var height = 300;
+    break;
+  case 7: // copy file
+    popup.html($("#templateCopyFile").html());
+    popup.find('#source').val(source);
+    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
+    var height = 600;
+    break;
+  case 8: // move file
+    popup.html($("#templateMoveFile").html());
+    popup.find('#source').val(source);
+    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
+    var height = 600;
+    break;
+  case 9: // view file - not yet implemented
+    break;
+  case 10: // download file
+    location.href = source;
+    break;
+  }
+  if (action > 8) return; // no further action for view and download file
+  var changed = false;
+  popup.dialog({
+    title: title,
+    resizable: false,
+    width: 900,
+    height: height,
+    modal: true,
+    show: {effect:'fade', duration: 250},
+    hide: {effect:'fade', duration: 250},
+    buttons: {
+      "_(Proceed)_": function(){
+       var target = popup.find('#target');
+       if (target.length) {
+          target = target.val();
+          var valid = action==2||action==6 ? /^[^\/]*$/ : /^\/mnt\/.+/;
+          if (!target || !valid.test(target)) return;
+        } else target = '';
+        var box =$(this);
+        $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
+        changed = true;
+        var makeAction = function(){
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source),target:encodeURI(target)},function(data){
+            var text = data.status.split(' ');
+            if (text.length==3) text = "_(working)_&nbsp;&nbsp;_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
+            $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text.replace('100%',"_(copy completed)_"));
+            if (data.pid) {
+              timers.makeAction = setTimeout(makeAction,1000);
+              return;
+            } else if (data.status=='done') {
+              setTimeout(refresh,1000);
+              box.dialog('close');
+            }
+          });
+        };
+        makeAction();
+      },
+      "_(Cancel)_": function(){
+        var box = $(this);
+        if (changed) {
+          clearTimeout(timers.makeAction);
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99,source:encodeURI(source)},function(){
+            setTimeout(refresh,1000);
+            box.dialog('close');
+          });
+        } else {
+          box.dialog('close');
+        }
+      }
+    }
+  });
+  $('.ui-dialog .ui-dialog-titlebar').addClass('menu');
+  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%'});
+  $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
+  $('.ui-widget-content').css({'background':'<?=$bgcolor?>'});
+  $('.ui-button-text').css({'padding':'0px 5px'});
+}
+function doActions(action,title) {
+  var popup = $("#dialogWindow");
+  var source = [];
+  var type = [];
+  $('i[id^="check_"]').each(function(){
+    if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
+      source.push($('#'+$(this).prop('id').replace('check','row')).attr('data')<?if(!$subdir):?>+'/'<?endif;?>);
+      type.push($('#'+$(this).prop('id').replace('check','row')).attr('type'));
+    }
+  });
+  var bulk = source.length > 1;
+  var path = source[0].split('/');
+  var name = path.pop()||path.pop();
+  if (path[1] != 'mnt') return;
+  var user = /^user0?$/.test(path[2]);
+  var root = '/'+path[1]+(user ? '/'+path[2] : '');
+  var disk = ['disk[0-9]+'];
+<?foreach ($pools as $pool) echo "disk.push(\"$pool\");\n"?>
+  var match = user ? '' : disk.join('|');
+  switch (action) {
+  case 1: // delete object
+    popup.html($("#templateDeleteObject").html());
+    popup.find('#source').val(bulk ? "_(Objects to delete)_: "+source.length : source[0]);
+    var height = 300;
+    break;
+  case 3: // copy object
+    popup.html($("#templateCopyObject").html());
+    popup.find('#source').val(bulk ? "_(Objects to copy)_: "+source.length : source[0]);
+    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match);
+    if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(); else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
+    var height = 600;
+    break;
+  case 4: // move object
+    popup.html($("#templateMoveObject").html());
+    popup.find('#source').val(bulk ? "_(Objects to move)_: "+source.length : source[0]);
+    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match);
+    if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(); else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
+    var height = 600;
+    break;
+  }
+  if (action > 8) return;
+  var changed = false;
+  popup.dialog({
+    title: title,
+    resizable: false,
+    width: 900,
+    height: height,
+    modal: true,
+    show: {effect:'fade', duration: 250},
+    hide: {effect:'fade', duration: 250},
+    buttons: {
+      "_(Proceed)_": function(){
+        var target = popup.find('#target');
+        if (target.length) {
+          target = target.val();
+          var valid = /^\/mnt\/.+/;
+          if (!target || !valid.test(target)) return;
+        } else target = '';
+        var box =$(this);
+        if (bulk && target.length>0 && target.substr(-1)!='/') target += '/';
+        $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
+        changed = true;
+        var makeAction = function(){
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source.join('\n')),target:encodeURI(target)},function(data){
+            var text = data.status.split(' ');
+            if (text.length==3) text = "_(working)_&nbsp;&nbsp;_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
+            $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text.replace('100%',"_(copy completed)_"));
+            if (data.pid) {
+              timers.makeAction = setTimeout(makeAction,1000);
+              return;
+            } else if (data.status=='done') {
+              setTimeout(refresh,1000);
+              box.dialog('close');
+            }
+        });
+        };
+        makeAction();
+      },
+      "_(Cancel)_": function(){
+        var box = $(this);
+        if (changed) {
+          clearTimeout(timers.makeAction);
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99,source:encodeURI(source.join('\n'))},function(){
+            setTimeout(refresh,1000);
+            box.dialog('close');
+          });
+        } else {
+          box.dialog('close');
+        }
+      }
+    }
+  });
+  $('.ui-dialog .ui-dialog-titlebar').addClass('menu');
+  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%'});
+  $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
+  $('.ui-widget-content').css({'background':'<?=$bgcolor?>'});
+  $('.ui-button-text').css({'padding':'0px 5px'});
+}
+$(function(){
+  timers.browse = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
+  shortcut.add('F2',function(){$.cookie('expert')==null ? $.cookie('expert','expert',{path:'/'}) : $.removeCookie('expert',{path:'/'}); refresh();});
+  $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:"<?=addslashes(urlencode($dir))?>",path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
+    clearTimeout(timers.browse);
+    var table = $('table.indexer');
+    var col = $.cookie('col')||1;
+    var dir = $.cookie('dir')||0;
+    context.init({preventDoubleContext:false,left:true,above:false});
+    table.html(data);
+    table.bind('sortEnd',function(e,t){
+      var sort = e.target.config.sortList.toString().split(',');
+      $.cookie('col',sort[0],{path:'/'});
+      $.cookie('dir',sort[1],{path:'/'});
+    });
+    $('div.spinner.fixed').hide('slow');
+    table.tablesorter({headers:{0:{sorter:false},6:{sorter:false}},sortList:[[col,dir],[1,0]],sortAppend:[[1,0]],textAttribute:'data'});
+  });
+});
+</script>
+<table class="indexer tablesorter shift">
+ <thead><tr><th><?if ($edit):?><i id="check_0" class="fa fa-box fa-fw"></i><?endif;?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead>
+ <tbody><tr><td colspan="7">&nbsp;</td></tr></tbody>
+</table>
+<input type="button" value="_(Done)_" onclick="done('Browse')">
+<input type="button" value="_(Select All)_" onclick="selectAll(1)"<?if (!$edit):?> disabled<?endif;?>>
+<input type="button" value="_(Unselect All)_" onclick="selectAll(0)"<?if (!$edit):?> disabled<?endif;?>>
+<?if($subdir):?>
+<input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
+<?endif;?>
+<input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
+<input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
+
+<div id="dialogWindow" style="display:none"></div>
+
+<div markdown="1" id="templateDeleteFolder" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Folder name)_:
+: <input type="text" id="source" name="source" value="" disabled>
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This deletes the folder and all its content)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateRenameFolder" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Old folder name)_:
+: <input type="text" id="source" name="source" value="" disabled>
+
+&nbsp;
+: _(rename to)_ ...
+
+_(New folder name)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This renames the folder to the new name)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateCopyFolder" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source folder)_:
+: <input type="text" id="source" name="source" disabled>
+
+&nbsp;
+: _(copy to)_ ...
+
+_(Target folder)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies the folder and all its content to another folder)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateMoveFolder" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source folder)_:
+: <input type="text" id="source" name="source" disabled>
+
+&nbsp;
+: _(move to)_ ...
+
+_(Target folder)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves the folder and all its content to another folder)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateDeleteFile" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(File name)_:
+: <input type="text" id="source" name="source" disabled>
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This deletes the selected file)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateRenameFile" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Old file name)_:
+: <input type="text" id="source" name="source" disabled>
+
+&nbsp;
+: _(rename to)_ ...
+
+_(New file name)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This renames the selected file)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateCopyFile" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source file)_:
+: <input type="text" id="source" name="source" disabled>
+
+&nbsp;
+: _(copy to)_ ...
+
+_(Target file)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies the selected file)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateMoveFile" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source file)_:
+: <input type="text" id="source" name="source" disabled>
+
+&nbsp;
+: _(move to)_ ...
+
+_(Target file)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves the selected file)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateDeleteObject" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source)_:
+: <input type="text" id="source" name="source" value="" disabled>
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This deletes all selected sources)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateCopyObject" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source)_:
+: <input type="text" id="source" name="source" disabled>
+
+&nbsp;
+: _(copy to)_ ...
+
+_(Target)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies all the selected sources)_</div></div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateMoveObject" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source)_:
+: <input type="text" id="source" name="source" disabled>
+
+&nbsp;
+: _(move to)_ ...
+
+_(Target)_:
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+
+<div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves all the selected sources)_</div></div>
+</body>
+</html>
+</div>
