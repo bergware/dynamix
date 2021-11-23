@@ -35,7 +35,7 @@ function truepath($file, $root="", $escape=false) {
     if ($bit=='..') array_pop($real); else $real[] = $bit;
   }
   $real = $head.implode('/',$real).$tail;
-  return !$root ? ($escape ? "\"$real\"" : $real) : (substr($real,0,strlen($root))==$root ? ($escape ? "\"$real\"" : $real) : "");
+  return $root ? (substr($real,0,strlen($root))==$root ? ($escape ? "\"$real\"" : $real) : "") : ($escape ? "\"$real\"" : $real);
 }
 
 function quotes($file) {return truepath($file,'/mnt/',true);}
@@ -68,22 +68,22 @@ case 6: // rename file
 case 3:  // copy folder
 case 7:  // copy file
   if ($busy) {
-    $reply['status'] = trim(preg_replace('/\s\s+/',' ',exec("tail -2 $running|grep -Pom1 '^.* \K[0-9]+%.+'"))) ?: 'working';
+    $reply['status'] = preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'working';
   } else {
     touch($running);
-    exec("rsync -ahPIX --info=progress2 ".escape($source)." ".escape($target).">$running 2>/dev/null &");
+    exec("rsync -ahPIX --info=name0,progress2 ".escape($source)." ".escape($target).">$running 2>/dev/null &");
   }
   $reply['pid'] = pgrep('rsync');
   break;
 case 4: // move folder
 case 8: // move file
   if ($busy) {
-    $reply['status'] = $idle ? 'moving' : (trim(preg_replace('/\s\s+/',' ',exec("tail -2 $running|grep -Pom1 '^.* \K[0-9]+%.+'"))) ?: 'working');
+    $reply['status'] = $idle ? 'moving' : (preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'working');
   } else {
     touch($running);
     touch($moving);
     $idle = false;
-    exec("rsync -ahPIX --info=progress2 ".escape($source)." ".escape($target).">$running 2>/dev/null &");
+    exec("rsync -ahPIX --info=name0,progress2 ".escape($source)." ".escape($target).">$running 2>/dev/null &");
   }
   $reply['pid'] = $idle ? pgrep('rm') : pgrep('rsync');
   break;

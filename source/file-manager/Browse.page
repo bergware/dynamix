@@ -172,7 +172,7 @@ function doAction(action,title,id) {
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source),target:encodeURI(target)},function(data){
             var text = data.status.split(' ');
             if (text.length==3) text = "_(working)_&nbsp;&nbsp;_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
-            $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text.replace('100%',"_(copy completed)_"));
+            $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);
             if (data.pid) {
               timers.makeAction = setTimeout(makeAction,1000);
               return;
@@ -271,7 +271,7 @@ function doActions(action,title) {
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source.join('\n')),target:encodeURI(target)},function(data){
             var text = data.status.split(' ');
             if (text.length==3) text = "_(working)_&nbsp;&nbsp;_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
-            $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text.replace('100%',"_(copy completed)_"));
+            $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);
             if (data.pid) {
               timers.makeAction = setTimeout(makeAction,1000);
               return;
