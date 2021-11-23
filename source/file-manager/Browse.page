@@ -17,6 +17,7 @@ Tag="navicon"
 $dir     = preg_replace('://+:','/',$dir);
 $edit    = $dir[0]=='/' && $dir!='/' && is_dir($dir);
 $subdir  = !in_array($dir,['/','/mnt','/mnt/']);
+$isshare = preg_match(':^/mnt/(user0?|disk(s|[0-9]+)|remotes)/?$:',$dir);
 $bgcolor = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.ui.css")?>">
@@ -44,8 +45,8 @@ div.template{display:none}
 <script>
 function addFolderContext(id) {
   var opts = [];
-<?if ($subdir):?>
-  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_(Delete Folder)_",id);}});
+  opts.push({text:"<?=$subdir?_('Delete'):_('Erase')?>", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_('Delete Folder')?>",id);}});
+<?if ($subdir && !$isshare):?>
   opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename Folder)_",id);}});
 <?endif?>
   opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy Folder)_",id);}});
@@ -54,17 +55,13 @@ function addFolderContext(id) {
 }
 function addFileContext(id) {
   var opts = [];
-<?if ($subdir):?>
   opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(5,"_(Delete File)_",id);}});
   opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(6,"_(Rename File)_",id);}});
-<?endif?>
   opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(7,"_(Copy File)_",id);}});
   opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",id);}});
   opts.push({divider:true});
-<?if ($subdir):?>
 //opts.push({text:"_(View)_", icon:"fa-eye", action:function(e){e.preventDefault();doAction(9,"_(View File)_",id);}}); not yet implemented
   opts.push({text:"_(Download)_", icon:"fa-download", action:function(e){e.preventDefault();doAction(10,"_(Download File)_",id);}});
-<?endif?>
   context.attach('#'+id, opts);
 }
 function selectAll(select) {
@@ -88,14 +85,14 @@ function selectOne(id) {
 }
 function doAction(action,title,id) {
   var popup = $("#dialogWindow");
-  var source = $('#'+id).attr('data')<?if (!$subdir):?>+'/'<?endif;?>;
+  var source = $('#'+id).attr('data')<?if (!$subdir){?>+'/'<?}?>;
   var type = $('#'+id).attr('type');
   var path = source.split('/');
   var name = path.pop()||patch.pop();
   if (path[1] != 'mnt') return;
   var user = /^user0?$/.test(path[2]);
   var root = '/'+path[1]+(user ? '/'+path[2] : '');
-  var disk = ['disk[0-9]+'];
+  var disk = ['disk[0-9]+','disks','remotes'];
 <?foreach ($pools as $pool) echo "disk.push(\"$pool\");\n"?>
   var match = user ? '' : disk.join('|');
   switch (action) {
@@ -150,7 +147,7 @@ function doAction(action,title,id) {
     break;
   }
   if (action > 8) return; // no further action for view and download file
-  var changed = false;
+  var proceed = false;
   popup.dialog({
     title: title,
     resizable: false,
@@ -161,15 +158,16 @@ function doAction(action,title,id) {
     hide: {effect:'fade', duration: 250},
     buttons: {
       "_(Proceed)_": function(){
-       var target = popup.find('#target');
-       if (target.length) {
+        if (proceed) return;
+        var target = popup.find('#target');
+        if (target.length) {
           target = target.val();
           var valid = action==2||action==6 ? /^[^\/]*$/ : /^\/mnt\/.+/;
           if (!target || !valid.test(target)) return;
         } else target = '';
         var box =$(this);
         $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
-        changed = true;
+        proceed = true;
         var makeAction = function(){
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source),target:encodeURI(target)},function(data){
             var text = data.status.split(' ');
@@ -188,7 +186,7 @@ function doAction(action,title,id) {
       },
       "_(Cancel)_": function(){
         var box = $(this);
-        if (changed) {
+        if (proceed) {
           clearTimeout(timers.makeAction);
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99,source:encodeURI(source)},function(){
             setTimeout(refresh,1000);
@@ -212,7 +210,7 @@ function doActions(action,title) {
   var type = [];
   $('i[id^="check_"]').each(function(){
     if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
-      source.push($('#'+$(this).prop('id').replace('check','row')).attr('data')<?if(!$subdir):?>+'/'<?endif;?>);
+      source.push($('#'+$(this).prop('id').replace('check','row')).attr('data')<?if(!$subdir){?>+'/'<?}?>);
       type.push($('#'+$(this).prop('id').replace('check','row')).attr('type'));
     }
   });
@@ -247,7 +245,7 @@ function doActions(action,title) {
     break;
   }
   if (action > 8) return;
-  var changed = false;
+  var proceed = false;
   popup.dialog({
     title: title,
     resizable: false,
@@ -258,6 +256,7 @@ function doActions(action,title) {
     hide: {effect:'fade', duration: 250},
     buttons: {
       "_(Proceed)_": function(){
+        if (proceed) return;
         var target = popup.find('#target');
         if (target.length) {
           target = target.val();
@@ -267,7 +266,7 @@ function doActions(action,title) {
         var box =$(this);
         if (bulk && target.length>0 && target.substr(-1)!='/') target += '/';
         $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
-        changed = true;
+        proceed = true;
         var makeAction = function(){
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source.join('\n')),target:encodeURI(target)},function(data){
             var text = data.status.split(' ');
@@ -286,7 +285,7 @@ function doActions(action,title) {
       },
       "_(Cancel)_": function(){
         var box = $(this);
-        if (changed) {
+        if (proceed) {
           clearTimeout(timers.makeAction);
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99,source:encodeURI(source.join('\n'))},function(){
             setTimeout(refresh,1000);
@@ -325,15 +324,13 @@ $(function(){
 });
 </script>
 <table class="indexer tablesorter shift">
- <thead><tr><th><?if ($edit):?><i id="check_0" class="fa fa-box fa-fw"></i><?endif;?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead>
+ <thead><tr><th><?if ($edit){?><i id="check_0" class="fa fa-box fa-fw"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead>
  <tbody><tr><td colspan="7">&nbsp;</td></tr></tbody>
 </table>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
-<input type="button" value="_(Select All)_" onclick="selectAll(1)"<?if (!$edit):?> disabled<?endif;?>>
-<input type="button" value="_(Unselect All)_" onclick="selectAll(0)"<?if (!$edit):?> disabled<?endif;?>>
-<?if($subdir):?>
-<input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
-<?endif;?>
+<input type="button" value="_(Select All)_" onclick="selectAll(1)"<?if (!$edit){?> disabled<?}?>>
+<input type="button" value="_(Unselect All)_" onclick="selectAll(0)"<?if (!$edit){?> disabled<?}?>>
+<input type="button" value="<?=$subdir?_('Delete'):_('Erase')?>" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
 

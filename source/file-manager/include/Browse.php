@@ -43,7 +43,7 @@ extract(parse_plugin_cfg('dynamix',true));
 $disks = parse_ini_file('state/disks.ini',true);
 $dir   = preg_replace('://+:','/',urldecode($_GET['dir']??''));
 $path  = unscript($_GET['path']??'');
-$block = empty($_GET['block']) ? ['/','/mnt','/mnt/user'] : [];
+$block = empty($_GET['block']) ? ['/','/mnt','/mnt/user'] : ['/'];
 $all   = $docroot.preg_replace('/([\'" &()[\]\\\\])/','\\\\$1',$dir).'/*';
 $fmt   = "%F {$display['time']}";
 $dirs  = $files = [];
