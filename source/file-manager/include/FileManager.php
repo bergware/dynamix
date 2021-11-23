@@ -42,12 +42,12 @@ function quotes($file) {return truepath($file,'/mnt/',true);}
 function escape($file) {return is_array($file) ? implode(' ',array_map('quotes',$file)) : quotes($file);}
 
 $reply = [];
-$reply['status'] = 'working';
+$reply['status'] = 'starting';
 switch ($action) {
 case 1: // delete folder
 case 5: // delete file
   if ($busy) {
-    $reply['status'] = 'working';
+    $reply['status'] = 'removing';
   } else {
     touch($running);
     exec("rm -rf ".escape($source)." >/dev/null 2>&1 &");
@@ -57,7 +57,7 @@ case 5: // delete file
 case 2: // rename folder
 case 6: // rename file
   if ($busy) {
-    $reply['status'] = 'working';
+    $reply['status'] = 'renaming';
   } else {
     touch($running);
     $path = dirname($source[0]);
@@ -68,7 +68,7 @@ case 6: // rename file
 case 3:  // copy folder
 case 7:  // copy file
   if ($busy) {
-    $reply['status'] = preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'working';
+    $reply['status'] = preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'copying';
   } else {
     touch($running);
     exec("rsync -ahPIX --info=name0,progress2 ".escape($source)." ".escape($target).">$running 2>/dev/null &");
@@ -78,12 +78,12 @@ case 7:  // copy file
 case 4: // move folder
 case 8: // move file
   if ($busy) {
-    $reply['status'] = $idle ? 'moving' : (preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'working');
+    $reply['status'] = $idle ? 'moving' : (preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'moving');
   } else {
     touch($running);
     touch($moving);
     $idle = false;
-    exec("rsync -ahPIX --info=name0,progress2 ".escape($source)." ".escape($target).">$running 2>/dev/null &");
+    exec("rsync -ahPIX --info=name0,progress2 --remove-source-files ".escape($source)." ".escape($target).">$running 2>/dev/null &");
   }
   $reply['pid'] = $idle ? pgrep('rm') : pgrep('rsync');
   break;
