@@ -71,7 +71,7 @@ case 7:  // copy file
     $reply['status'] = preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'copying';
   } else {
     touch($running);
-    exec("rsync -ahPIX --info=name0,progress2 ".escape($source)." ".escape($target).">$running 2>/dev/null &");
+    exec("rsync -ahPIX --info=name0,progress2 ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
   }
   $reply['pid'] = pgrep('rsync');
   break;
@@ -83,7 +83,7 @@ case 8: // move file
     touch($running);
     touch($moving);
     $idle = false;
-    exec("rsync -ahPIX --info=name0,progress2 --remove-source-files ".escape($source)." ".escape($target).">$running 2>/dev/null &");
+    exec("rsync -ahPIX --info=name0,progress2 --remove-source-files ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
   }
   $reply['pid'] = $idle ? pgrep('rm') : pgrep('rsync');
   break;
