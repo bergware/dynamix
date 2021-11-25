@@ -25,16 +25,16 @@ function parent_link() {
   return in_array(dirname($dir),$block)||$dir==dirname($dir) ? "" : "<a href=\"/$path?dir=".htmlspecialchars(urlencode_path(dirname($dir)))."\">Parent Directory</a>";
 }
 function my_devs(&$devs) {
-  global $disks;
+  global $disks,$fix;
   $text = []; $i = 0;
   foreach ($devs as $dev) {
-    switch ($disks[$dev]['luksState']) {
+    if ($fix!='---') switch ($disks[$dev]['luksState']) {
       case 0: $text[$i] = "<a class='info' onclick='return false'><i class='lock fa fa-fw fa-unlock-alt grey-text'></i><span>"._('Not encrypted')."</span></a>"; break;
       case 1: $text[$i] = "<a class='info' onclick='return false'><i class='lock fa fa-fw fa-unlock-alt green-text'></i><span>"._('Encrypted and unlocked')."</span></a>"; break;
       case 2: $text[$i] = "<a class='info' onclick='return false'><i class='lock fa fa-fw fa-lock red-text'></i><span>"._('Locked: missing encryption key')."</span></a>"; break;
       case 3: $text[$i] = "<a class='info' onclick='return false'><i class='lock fa fa-fw fa-lock red-text'></i><span>"._('Locked: wrong encryption key')."</span></a>"; break;
      default: $text[$i] = "<a class='info' onclick='return false'><i class='lock fa fa-fw fa-lock red-text'></i><span>"._('Locked: unknown error')."</span></a>"; break;
-    }
+    } else    $text[$i] = "<a class='info' onclick='return false'><i class='lock fa fa-fw fa-hdd-o grey-text'></i></a>";
     $text[$i++] .= '&nbsp;'.compress($dev,8,0);
   }
   return implode(', ',$text);
@@ -50,7 +50,7 @@ $dirs  = $files = [];
 $total = $i = 0; $n = 1;
 $edit  = $dir[0]=='/' && $dir!='/' && is_dir($dir);
 [$root,$main,$rest] = my_explode('/',substr($dir,1),3);
-$fix   = $root=='mnt' ? ($main ?: '---') : _('flash');
+$fix   = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
 
 echo "<thead><tr><th>".($edit?"<i id='check_0' class='fa fa-fw fa-square-o' onclick='selectAll()'></i>":"")."</th><th>"._('Type')."</th><th class='sorter-text'>"._('Name')."</th><th>"._('Size')."</th><th>"._('Last Modified')."</th><th style='width:200px'>"._('Location')."</th><th>"._('Action')."</th></tr></thead>";
 if (!$dir||!is_dir($dir)||$dir[0]!='/') {
