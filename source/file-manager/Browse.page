@@ -14,11 +14,24 @@ Tag="navicon"
  */
 ?>
 <?
-$dir     = preg_replace('://+:','/',$dir);
-$edit    = $dir[0]=='/' && $dir!='/' && is_dir($dir);
-$subdir  = !in_array($dir,['/','/mnt','/mnt/']);
-$isshare = preg_match(':^/mnt/(user0?|disk(s|[0-9]+)|remotes)/?$:',$dir);
-$bgcolor = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
+function cap($dir,$p) {
+  return mb_substr($dir,$p,1)=='/' ? '/' : '';
+}
+function truepath($dir) {
+  $dir  = preg_replace(['://+:',':\\+:'],'/',$dir);
+  $bits = array_filter(explode('/',$dir),'strlen');
+  $path = [];
+  foreach ($bits as $bit) {
+    if ($bit=='.') continue;
+    if ($bit=='..') array_pop($path); else $path[] = $bit;
+  }
+  return cap($dir,0).implode('/',$path).cap($dir,-1);
+}
+$dir     = truepath($dir);
+$edit    = mb_substr($dir,0,1)=='/' && $dir!='/' && is_dir($dir);
+[$root,$main,$rest] = my_explode('/',mb_substr($dir,1),3);
+$isshare = $root=='mnt' && (!$main || !$rest);
+$bgcolor = in_array($theme,['white','azure']) ? '#f2f2f2' : '#1c1c1c';
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.ui.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.filetree.css")?>">
@@ -45,12 +58,12 @@ div.template{display:none}
 <script>
 function addFolderContext(id) {
   var opts = [];
-  opts.push({text:"<?=$subdir?_('Delete'):_('Erase')?>", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_('Delete Folder')?>",id);}});
-<?if ($subdir && !$isshare):?>
+  opts.push({text:"<?=$isshare?_('Erase'):_('Delete')?>", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=$isshare?_('Erase Share'):_('Delete Folder')?>",id);}});
+<?if (!$isshare):?>
   opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename Folder)_",id);}});
 <?endif?>
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy Folder)_",id);}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move Folder)_",id);}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=$isshare?_('Copy Share'):_('Copy Folder')?>",id);}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=$isshare?_('Move Share'):_('Move Folder')?>",id);}});
   context.attach('#'+id, opts);
 }
 function addFileContext(id) {
@@ -85,7 +98,7 @@ function selectOne(id) {
 }
 function doAction(action,title,id) {
   var popup = $("#dialogWindow");
-  var source = $('#'+id).attr('data')<?if (!$subdir){?>+'/'<?}?>;
+  var source = $('#'+id).attr('data')<?if (!$main){?>+'/'<?}?>;
   var type = $('#'+id).attr('type');
   var path = source.split('/');
   var name = path.pop()||path.pop();
@@ -212,7 +225,7 @@ function doActions(action,title) {
   var type = [];
   $('i[id^="check_"]').each(function(){
     if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
-      source.push($('#'+$(this).prop('id').replace('check','row')).attr('data')<?if(!$subdir){?>+'/'<?}?>);
+      source.push($('#'+$(this).prop('id').replace('check','row')).attr('data')<?if(!$main){?>+'/'<?}?>);
       type.push($('#'+$(this).prop('id').replace('check','row')).attr('type'));
     }
   });
@@ -334,7 +347,7 @@ $(function(){
 <input type="button" value="_(Done)_" onclick="done('Browse')">
 <input type="button" value="_(Select All)_" onclick="selectAll(1)"<?if (!$edit){?> disabled<?}?>>
 <input type="button" value="_(Unselect All)_" onclick="selectAll(0)"<?if (!$edit){?> disabled<?}?>>
-<input type="button" value="<?=$subdir?_('Delete'):_('Erase')?>" class="extra" onclick="doActions(1,this.value)" disabled>
+<input type="button" value="<?=$isshare?_('Erase'):_('Delete')?>" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
 

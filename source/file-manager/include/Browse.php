@@ -54,6 +54,7 @@ $total = $i = 0; $n = 1;
 $edit  = is_slash($dir,0) && $dir!='/' && is_dir($dir);
 [$root,$main,$rest] = my_explode('/',mb_substr($dir,1),3);
 $fix   = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
+$isshare = $root=='mnt' && (!$main || !$rest);
 
 echo "<thead><tr><th>".($edit?"<i id='check_0' class='fa fa-fw fa-square-o' onclick='selectAll()'></i>":"")."</th><th>"._('Type')."</th><th class='sorter-text'>"._('Name')."</th><th>"._('Size')."</th><th>"._('Last Modified')."</th><th style='width:200px'>"._('Location')."</th><th>"._('Action')."</th></tr></thead>";
 if (!$dir||!is_dir($dir)||!is_slash($dir,0)) {
@@ -84,7 +85,7 @@ foreach ($dirs as $row) {
   echo "<td>".($edit?"<i id='check_$n' class='fa fa-fw fa-square-o' onclick='selectOne(this.id)'></i>":"")."</td>";
   echo "<td data=''><div class='icon-dir'></div></td>";
   echo "<td><a href=\"/$path?dir=".htmlspecialchars(urlencode_path(unslash($dir)."/$name"))."\">".htmlspecialchars($name)."</a></td>";
-  echo "<td data='0'>&lt;"._('FOLDER')."&gt;</td>";
+  echo "<td data='0'>&lt;".($isshare?_('SHARE'):_('FOLDER'))."&gt;</td>";
   echo "<td data='$time'>".my_time($time,$fmt)."</td>";
   echo "<td class='loc'>".my_devs($devs)."</td>";
   echo "<td>".($edit?"<i id='row_$n' data=\"".unslash($dir)."/$name\" type='d' class='fa fa-plus-square-o' onclick='addFolderContext(this.id)'>...</i>":"")."</td>";

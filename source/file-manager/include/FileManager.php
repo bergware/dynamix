@@ -27,23 +27,20 @@ function pgrep($proc) {
   global $arg1;
   return exec("pgrep -a $proc|awk '/$arg1/{print \$1;exit}'");
 }
-function truepath($file, $root='', $escape=false) {
+function truepath($file, $root=[], $escape=false) {
   $file = preg_replace(['://+:',':\\+:'],'/',$file);
-  $head = cap($file,0);
-  $tail = cap($file,-1);
   $bits = array_filter(explode('/',$file),'strlen');
-  $real = [];
+  $path = [];
   foreach ($bits as $bit) {
     if ($bit=='.') continue;
-    if ($bit=='..') array_pop($real); else $real[] = $bit;
+    if ($bit=='..') array_pop($path); else $path[] = $bit;
   }
-  $test = $real[0];
-  $real = $head.implode('/',$real).$tail;
-  $root = array_filter(explode('|',$root));
-  return count($root) && !in_array($test,$root) ? "" : ($escape ? "\"$real\"" : $real);
+  $test = $path[0];
+  $path = cap($file,0).implode('/',$path).cap($file,-1);
+  return count($root) && !in_array($test,$root) ? "" : ($escape ? "\"$path\"" : $path);
 }
 
-function quotes($file) {return truepath($file,'mnt|boot',true);}
+function quotes($file) {return truepath($file,['mnt','boot'],true);}
 function escape($file) {return is_array($file) ? implode(' ',array_map('quotes',$file)) : quotes($file);}
 
 $reply = [];
