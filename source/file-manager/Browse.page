@@ -28,7 +28,7 @@ function truepath($dir) {
   return cap($dir,0).implode('/',$path).cap($dir,-1);
 }
 $dir     = truepath($dir);
-$edit    = mb_substr($dir,0,1)=='/' && $dir!='/' && is_dir($dir);
+$edit    = cap($dir,0) && $dir!='/' && is_dir($dir);
 [$root,$main,$rest] = my_explode('/',mb_substr($dir,1),3);
 $isshare = $root=='mnt' && (!$main || !$rest);
 $bgcolor = in_array($theme,['white','azure']) ? '#f2f2f2' : '#1c1c1c';
