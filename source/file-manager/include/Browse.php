@@ -17,12 +17,15 @@ $_SERVER['REQUEST_URI'] = '';
 require_once "$docroot/webGui/include/Translations.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
+function is_slash($dir,$p) {
+  return mb_substr($dir,$p,1)=='/';
+}
 function unslash($dir) {
-  return $dir[-1]!='/' ? $dir : substr($dir,0,-1);
+  return is_slash($dir,-1) ? mb_substr($dir,0,mb_strlen($dir)-1) : $dir;
 }
 function parent_link() {
   global $dir,$path,$block;
-  return in_array(dirname($dir),$block)||$dir==dirname($dir) ? "" : "<a href=\"/$path?dir=".htmlspecialchars(urlencode_path(dirname($dir)))."\">Parent Directory</a>";
+  return in_array(dirname($dir),$block)||dirname($dir)==$dir ? "" : "<a href=\"/$path?dir=".htmlspecialchars(urlencode_path(dirname($dir)))."\">Parent Directory</a>";
 }
 function my_devs(&$devs) {
   global $disks,$fix;
@@ -48,12 +51,12 @@ $all   = $docroot.preg_replace('/([\'" &()[\]\\\\])/','\\\\$1',$dir).'/*';
 $fmt   = "%F {$display['time']}";
 $dirs  = $files = [];
 $total = $i = 0; $n = 1;
-$edit  = $dir[0]=='/' && $dir!='/' && is_dir($dir);
-[$root,$main,$rest] = my_explode('/',substr($dir,1),3);
+$edit  = is_slash($dir,0) && $dir!='/' && is_dir($dir);
+[$root,$main,$rest] = my_explode('/',mb_substr($dir,1),3);
 $fix   = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
 
 echo "<thead><tr><th>".($edit?"<i id='check_0' class='fa fa-fw fa-square-o' onclick='selectAll()'></i>":"")."</th><th>"._('Type')."</th><th class='sorter-text'>"._('Name')."</th><th>"._('Size')."</th><th>"._('Last Modified')."</th><th style='width:200px'>"._('Location')."</th><th>"._('Action')."</th></tr></thead>";
-if (!$dir||!is_dir($dir)||$dir[0]!='/') {
+if (!$dir||!is_dir($dir)||!is_slash($dir,0)) {
   echo "<tbody><tr><td></td><td></td><td colspan='5'>"._('Invalid path')."</td></tr></tbody>";
   exit;
 }

@@ -88,13 +88,12 @@ function doAction(action,title,id) {
   var source = $('#'+id).attr('data')<?if (!$subdir){?>+'/'<?}?>;
   var type = $('#'+id).attr('type');
   var path = source.split('/');
-  var name = path.pop()||patch.pop();
-  if (path[1] != 'mnt') return;
+  var name = path.pop()||path.pop();
+  var access = ['mnt','boot'];
+  if (!access.includes(path[1])) return;
   var user = /^user0?$/.test(path[2]);
   var root = '/'+path[1]+(user ? '/'+path[2] : '');
-  var disk = ['disk[0-9]+','disks','remotes'];
-<?foreach ($pools as $pool) echo "disk.push(\"$pool\");\n"?>
-  var match = user ? '' : disk.join('|');
+  var match = user ? '' : '^(?!.*user0?).*$';
   switch (action) {
   case 1: // delete folder
     popup.html($("#templateDeleteFolder").html());
@@ -109,13 +108,13 @@ function doAction(action,title,id) {
   case 3: // copy folder
     popup.html($("#templateCopyFolder").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach();
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach();
     var height = 600;
     break;
   case 4: // move folder
     popup.html($("#templateMoveFolder").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach();
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach();
     var height = 600;
     break;
   case 5: // delete file
@@ -131,13 +130,13 @@ function doAction(action,title,id) {
   case 7: // copy file
     popup.html($("#templateCopyFile").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
     var height = 600;
     break;
   case 8: // move file
     popup.html($("#templateMoveFile").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
     var height = 600;
     break;
   case 9: // view file - not yet implemented
@@ -162,8 +161,11 @@ function doAction(action,title,id) {
         var target = popup.find('#target');
         if (target.length) {
           target = target.val();
-          var valid = action==2||action==6 ? /^[^\/]*$/ : /^\/mnt\/.+/;
-          if (!target || !valid.test(target)) return;
+          var valid = action==2||action==6 ? /^[^\/]*$/ : (user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/);
+          if (!target || !valid.test(target)) {
+            swal({title:"_(Invalid target)_",text:"_(Enter a matching target)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
+            return;
+          }
         } else target = '';
         var box =$(this);
         $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
@@ -217,12 +219,11 @@ function doActions(action,title) {
   var bulk = source.length > 1;
   var path = source[0].split('/');
   var name = path.pop()||path.pop();
-  if (path[1] != 'mnt') return;
+  var access = ['mnt','boot'];
+  if (!access.includes(path[1])) return;
   var user = /^user0?$/.test(path[2]);
   var root = '/'+path[1]+(user ? '/'+path[2] : '');
-  var disk = ['disk[0-9]+'];
-<?foreach ($pools as $pool) echo "disk.push(\"$pool\");\n"?>
-  var match = user ? '' : disk.join('|');
+  var match = user ? '' : '^(?!.*user0?).*$';
   switch (action) {
   case 1: // delete object
     popup.html($("#templateDeleteObject").html());
@@ -232,14 +233,14 @@ function doActions(action,title) {
   case 3: // copy object
     popup.html($("#templateCopyObject").html());
     popup.find('#source').val(bulk ? "_(Objects to copy)_: "+source.length : source[0]);
-    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match);
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(); else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
     var height = 600;
     break;
   case 4: // move object
     popup.html($("#templateMoveObject").html());
     popup.find('#source').val(bulk ? "_(Objects to move)_: "+source.length : source[0]);
-    popup.find('#target').attr('data-pickroot',root).attr('data-pickmatch',match);
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(); else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+name).change();});
     var height = 600;
     break;
@@ -260,8 +261,11 @@ function doActions(action,title) {
         var target = popup.find('#target');
         if (target.length) {
           target = target.val();
-          var valid = /^\/mnt\/.+/;
-          if (!target || !valid.test(target)) return;
+          var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/;
+          if (!target || !valid.test(target)) {
+            swal({title:"_(Invalid target)_",text:"_(Enter a matching target)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
+            return;
+          }
         } else target = '';
         var box =$(this);
         if (bulk && target.length>0 && target.substr(-1)!='/') target += '/';
@@ -309,7 +313,7 @@ $(function(){
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:"<?=addslashes(urlencode($dir))?>",path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
     clearTimeout(timers.browse);
     var table = $('table.indexer');
-    var col = $.cookie('col')||1;
+    var col = $.cookie('col')||2;
     var dir = $.cookie('dir')||0;
     context.init({preventDoubleContext:false,left:true,above:false});
     table.html(data);
@@ -319,7 +323,7 @@ $(function(){
       $.cookie('dir',sort[1],{path:'/'});
     });
     $('div.spinner.fixed').hide('slow');
-    table.tablesorter({headers:{0:{sorter:false},6:{sorter:false}},sortList:[[col,dir],[1,0]],sortAppend:[[1,0]],textAttribute:'data'});
+    table.tablesorter({headers:{0:{sorter:false},6:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
   });
 });
 </script>
@@ -398,7 +402,7 @@ _(Source folder)_:
 : _(copy to)_ ...
 
 _(Target folder)_:
-: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies the folder and all its content to another folder)_</div></div>
 </body>
@@ -423,7 +427,7 @@ _(Source folder)_:
 : _(move to)_ ...
 
 _(Target folder)_:
-: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves the folder and all its content to another folder)_</div></div>
 </body>
@@ -492,7 +496,7 @@ _(Source file)_:
 : _(copy to)_ ...
 
 _(Target file)_:
-: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies the selected file)_</div></div>
 </body>
@@ -517,7 +521,7 @@ _(Source file)_:
 : _(move to)_ ...
 
 _(Target file)_:
-: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves the selected file)_</div></div>
 </body>
@@ -561,7 +565,7 @@ _(Source)_:
 : _(copy to)_ ...
 
 _(Target)_:
-: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies all the selected sources)_</div></div>
 </body>
@@ -586,7 +590,7 @@ _(Source)_:
 : _(move to)_ ...
 
 _(Target)_:
-: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-pickfolders="true">
+: <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves all the selected sources)_</div></div>
 </body>

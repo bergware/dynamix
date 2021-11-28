@@ -20,25 +20,30 @@ $moving  = '/tmp/file.manager.moving';
 $busy    = file_exists($running);
 $idle    = !file_exists($moving);
 
+function cap($file,$p) {
+  return mb_substr($file,$p,1)=='/' ? '/' : '';
+}
 function pgrep($proc) {
   global $arg1;
   return exec("pgrep -a $proc|awk '/$arg1/{print \$1;exit}'");
 }
-function truepath($file, $root="", $escape=false) {
+function truepath($file, $root='', $escape=false) {
   $file = preg_replace(['://+:',':\\+:'],'/',$file);
-  $head = $file[0]=='/' ? '/' : '';
-  $tail = $file[-1]=='/' ? '/' : '';
+  $head = cap($file,0);
+  $tail = cap($file,-1);
   $bits = array_filter(explode('/',$file),'strlen');
   $real = [];
   foreach ($bits as $bit) {
     if ($bit=='.') continue;
     if ($bit=='..') array_pop($real); else $real[] = $bit;
   }
+  $test = $real[0];
   $real = $head.implode('/',$real).$tail;
-  return $root ? (substr($real,0,strlen($root))==$root ? ($escape ? "\"$real\"" : $real) : "") : ($escape ? "\"$real\"" : $real);
+  $root = array_filter(explode('|',$root));
+  return count($root) && !in_array($test,$root) ? "" : ($escape ? "\"$real\"" : $real);
 }
 
-function quotes($file) {return truepath($file,'/mnt/',true);}
+function quotes($file) {return truepath($file,'mnt|boot',true);}
 function escape($file) {return is_array($file) ? implode(' ',array_map('quotes',$file)) : quotes($file);}
 
 $reply = [];
