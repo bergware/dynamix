@@ -96,7 +96,10 @@ function selectOne(id) {
   $('i[id^="check_"]').each(function(){if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) checked++;});
   $('input[class="extra"]').prop('disabled',checked==0);
 }
-function errorMsg() {
+function errorSource() {
+  swal({title:"_(Invalid source)_",text:"_(Not allowed to mix disk and user shares)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
+}
+function errorTarget() {
   swal({title:"_(Invalid target)_",text:"_(Enter a valid target)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
 }
 function doAction(action,title,id) {
@@ -104,13 +107,13 @@ function doAction(action,title,id) {
   var source = $('#'+id).attr('data')<?if (!$main){?>+'/'<?}?>;
   var type   = $('#'+id).attr('type');
   var path   = source.substr(1).split('/');
-  var name   = path.pop()||path.pop();
   var access = ['mnt','boot']; // source must be these folders
   if (!access.includes(path[0])) return;
   var user   = /^user0?$/.test(path[1]);
   var root   = '/'+path[0]+(user ? '/'+path[1] : '');
   var share  = user||!path[2] ? '' : path[2]+'/';
   var match  = user ? '' : '^(?!.*user0?).*$';
+  var name   = path.pop()||path.pop();
   switch (action) {
   case 1: // delete folder
     popup.html($("#templateDeleteFolder").html());
@@ -147,13 +150,13 @@ function doAction(action,title,id) {
   case 7: // copy file
     popup.html($("#templateCopyFile").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
     var height = 600;
     break;
   case 8: // move file
     popup.html($("#templateMoveFile").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
     var height = 600;
     break;
   case 9: // view file - not yet implemented
@@ -187,12 +190,11 @@ function doAction(action,title,id) {
             var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // prevent mixing of disk shares and user shares
             break;
           }
-          if (!target || !valid.test(target)) {errorMsg(); return;}
+          if (!target || !valid.test(target)) {errorTarget(); return;}
         } else target = '';
         var box =$(this);
         $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
         proceed = true;
-        //return;
         var makeAction = function(){
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source),target:encodeURI(target)},function(data){
             var text = data.status.split(' ');
@@ -241,13 +243,13 @@ function doActions(action,title) {
   });
   var bulk   = source.length > 1;
   var path   = source[0].substr(1).split('/');
-  var name   = path.pop()||path.pop();
   var access = ['mnt','boot'];
   if (!access.includes(path[0])) return;
   var user   = /^user0?$/.test(path[1]);
   var root   = '/'+path[0]+(user ? '/'+path[1] : '');
   var share  = user||!path[2] ? '' : path[2]+'/';
   var match  = user ? '' : '^(?!.*user0?).*$';
+  var name   = path.pop()||path.pop();
   switch (action) {
   case 1: // delete object
     popup.html($("#templateDeleteObject").html());
@@ -259,7 +261,7 @@ function doActions(action,title) {
     popup.find('#source').val(bulk ? "_(Objects to copy)_: "+source.length : source[0]);
     popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
-    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
+    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
     var height = 600;
     break;
   case 4: // move object
@@ -267,7 +269,7 @@ function doActions(action,title) {
     popup.find('#source').val(bulk ? "_(Objects to move)_: "+source.length : source[0]);
     popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
-    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
+    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
     var height = 600;
     break;
   }
@@ -284,17 +286,24 @@ function doActions(action,title) {
     buttons: {
       "_(Proceed)_": function(){
         if (proceed) return;
+        if (bulk) {
+          var u = false, d = false;
+          for (var i=0,s; s=source[i]; i++) {
+            var p = s.substr(1).split('/');
+            if (/^user0?$/.test(p[1])) u = true; else d = true;
+          }
+          if (u && d) {errorSource(); return;}
+        }
         var target = popup.find('#target');
         if (target.length) {
           target = target.val();
           var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // prevent mixing of disk shares and user shares
-          if (!target || !valid.test(target)) {errorMsg(); return;}
+          if (!target || !valid.test(target)) {errorTarget(); return;}
         } else target = '';
         var box =$(this);
         if (bulk && target.length>0 && target.substr(-1)!='/') target += '/';
         $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
         proceed = true;
-        //return;
         var makeAction = function(){
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source.join('\n')),target:encodeURI(target)},function(data){
             var text = data.status.split(' ');
