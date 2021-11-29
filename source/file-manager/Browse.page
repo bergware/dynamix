@@ -58,12 +58,12 @@ div.template{display:none}
 <script>
 function addFolderContext(id) {
   var opts = [];
-  opts.push({text:"<?=$isshare?_('Erase'):_('Delete')?>", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=$isshare?_('Erase Share'):_('Delete Folder')?>",id);}});
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_('Delete Folder')?>",id);}});
 <?if (!$isshare):?>
   opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename Folder)_",id);}});
 <?endif?>
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=$isshare?_('Copy Share'):_('Copy Folder')?>",id);}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=$isshare?_('Move Share'):_('Move Folder')?>",id);}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy Folder)_",id);}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move Folder)_",id);}});
   context.attach('#'+id, opts);
 }
 function addFileContext(id) {
@@ -347,7 +347,7 @@ $(function(){
 <input type="button" value="_(Done)_" onclick="done('Browse')">
 <input type="button" value="_(Select All)_" onclick="selectAll(1)"<?if (!$edit){?> disabled<?}?>>
 <input type="button" value="_(Unselect All)_" onclick="selectAll(0)"<?if (!$edit){?> disabled<?}?>>
-<input type="button" value="<?=$isshare?_('Erase'):_('Delete')?>" class="extra" onclick="doActions(1,this.value)" disabled>
+<input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
 
