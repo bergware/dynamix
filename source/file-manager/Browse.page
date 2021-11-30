@@ -177,7 +177,7 @@ function doAction(action,title,id) {
     hide: {effect:'fade', duration: 250},
     buttons: {
       "_(Proceed)_": function(){
-        if (proceed) return;
+        if (proceed) return; // already running
         var target = popup.find('#target');
         if (target.length) {
           target = target.val();
@@ -187,7 +187,7 @@ function doAction(action,title,id) {
             var valid = /^[^\/]*$/; // no slashes allowed
             break;
           default:
-            var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // prevent mixing of disk shares and user shares
+            var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // disallow mixing of disk and user shares
             break;
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
@@ -285,19 +285,19 @@ function doActions(action,title) {
     hide: {effect:'fade', duration: 250},
     buttons: {
       "_(Proceed)_": function(){
-        if (proceed) return;
+        if (proceed) return; // already running
         if (bulk) {
           var u = false, d = false;
           for (var i=0,s; s=source[i]; i++) {
             var p = s.substr(1).split('/');
             if (/^user0?$/.test(p[1])) u = true; else d = true;
           }
-          if (u && d) {errorSource(); return;}
+          if (u && d) {errorSource(); return;} // disallow mixing of disk and user shares
         }
         var target = popup.find('#target');
         if (target.length) {
           target = target.val();
-          var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // prevent mixing of disk shares and user shares
+          var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // disallow mixing of disk and user shares
           if (!target || !valid.test(target)) {errorTarget(); return;}
         } else target = '';
         var box =$(this);
