@@ -389,7 +389,7 @@ $(function(){
     $('div.spinner.fixed').hide('slow');
     table.tablesorter({headers:{0:{sorter:false},6:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
   });
-  $('span.left').append("<span class='right'><input type='checkbox' class='expert'></span>");
+  $('span.left').append('<span class="right"><input type="checkbox" class="expert"></span>');
   $('.expert').switchButton({labels_placement:"left", on_label:"_(Advanced Mode)_", off_label:"_(Basic Mode)_", checked:$.cookie('expert')!=null});
   $('.expert').change(function(){expert();});
   shortcut.add('F2',function(){expert();});
