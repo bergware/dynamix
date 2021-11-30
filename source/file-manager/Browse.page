@@ -104,7 +104,7 @@ function errorTarget() {
 }
 function doAction(action,title,id) {
   var popup  = $("#dialogWindow");
-  var source = $('#'+id).attr('data')<?if (!$main){?>+'/'<?}?>;
+  var source = $('#'+id).attr('data')<?if ($isshare){?>+'/'<?}?>;
   var type   = $('#'+id).attr('type');
   var path   = source.substr(1).split('/');
   var access = ['mnt','boot']; // source must be these folders
@@ -237,7 +237,7 @@ function doActions(action,title) {
   var type = [];
   $('i[id^="check_"]').each(function(){
     if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
-      source.push($('#'+$(this).prop('id').replace('check','row')).attr('data')<?if(!$main){?>+'/'<?}?>);
+      source.push($('#'+$(this).prop('id').replace('check','row')).attr('data')<?if($isshare){?>+'/'<?}?>);
       type.push($('#'+$(this).prop('id').replace('check','row')).attr('type'));
     }
   });
