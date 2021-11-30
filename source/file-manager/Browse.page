@@ -111,7 +111,7 @@ function doAction(action,title,id) {
   if (!access.includes(path[0])) return;
   var user   = /^user0?$/.test(path[1]);
   var root   = '/'+path[0]+(user ? '/'+path[1] : '');
-  var share  = user||!path[2] ? '' : path[2]+'/';
+  var share  = user||!path[3] ? '' : path[2]+'/';
   var match  = user ? '' : '^(?!.*user0?).*$';
   var name   = path.pop()||path.pop();
   switch (action) {
@@ -247,9 +247,17 @@ function doActions(action,title) {
   if (!access.includes(path[0])) return;
   var user   = /^user0?$/.test(path[1]);
   var root   = '/'+path[0]+(user ? '/'+path[1] : '');
-  var share  = user||!path[2] ? '' : path[2]+'/';
+  var share  = user||!path[3] ? '' : path[2]+'/';
   var match  = user ? '' : '^(?!.*user0?).*$';
   var name   = path.pop()||path.pop();
+  if (bulk) {
+    var u = false, d = false;
+    for (var i=0,s; s=source[i]; i++) {
+      var p = s.substr(1).split('/');
+      if (/^user0?$/.test(p[1])) u = true; else d = true;
+    }
+    if (u && d) {errorSource(); return;} // disallow mixing of disk and user shares
+  }
   switch (action) {
   case 1: // delete object
     popup.html($("#templateDeleteObject").html());
@@ -286,14 +294,6 @@ function doActions(action,title) {
     buttons: {
       "_(Proceed)_": function(){
         if (proceed) return; // already running
-        if (bulk) {
-          var u = false, d = false;
-          for (var i=0,s; s=source[i]; i++) {
-            var p = s.substr(1).split('/');
-            if (/^user0?$/.test(p[1])) u = true; else d = true;
-          }
-          if (u && d) {errorSource(); return;} // disallow mixing of disk and user shares
-        }
         var target = popup.find('#target');
         if (target.length) {
           target = target.val();
