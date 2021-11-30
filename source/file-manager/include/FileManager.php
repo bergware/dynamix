@@ -14,8 +14,8 @@
 $action  = $_POST['action'];
 $source  = explode("\n",urldecode($_POST['source']));
 $target  = urldecode($_POST['target']);
-$H       = empty($_POST['hardlink']) ? '' : 'H';
-$protect = empty($_POST['protect']) ? '' : '--ignore-existing';
+$H       = empty($_POST['hdlink']) ? '' : 'H';
+$protect = empty($_POST['protect']) ? '--ignore-existing' : '';
 $arg1    = preg_replace('/(["\'&()[\]\/])/','\\\\$1',$source[0]);
 $running = '/tmp/file.manager.running';
 $moving  = '/tmp/file.manager.moving';
@@ -88,7 +88,7 @@ case 8: // move file
     $idle = false;
     exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 --remove-source-files ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
   }
-  $reply['pid'] = $idle ? pgrep('rm') : pgrep('rsync');
+  $reply['pid'] = $idle ? pgrep('find') : pgrep('rsync');
   break;
 case 99: // kill background processes
   foreach (['mv','rsync'] as $proc) exec("pkill -x $proc");
@@ -101,7 +101,7 @@ if (empty($reply['pid'])) {
     $reply['status'] = 'done';
   } else {
     unlink($moving);
-    exec("rm -rf ".escape($source)." >/dev/null 2>&1 &");
+    exec("find ".escape($source)." -type d -empty -delete >/dev/null 2>&1 &");
     $reply['pid'] = 1;
   }
 }
