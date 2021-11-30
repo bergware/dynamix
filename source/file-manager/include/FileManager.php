@@ -14,6 +14,8 @@
 $action  = $_POST['action'];
 $source  = explode("\n",urldecode($_POST['source']));
 $target  = urldecode($_POST['target']);
+$H       = empty($_POST['hardlink']) ? '' : 'H';
+$protect = empty($_POST['protect']) ? '' : '--ignore-existing';
 $arg1    = preg_replace('/(["\'&()[\]\/])/','\\\\$1',$source[0]);
 $running = '/tmp/file.manager.running';
 $moving  = '/tmp/file.manager.moving';
@@ -43,7 +45,6 @@ function truepath($file, $root=[], $escape=false) {
 function quotes($file) {return truepath($file,['mnt','boot'],true);}
 function escape($file) {return is_array($file) ? implode(' ',array_map('quotes',$file)) : quotes($file);}
 
-$reply = [];
 $reply['status'] = 'starting';
 switch ($action) {
 case 1: // delete folder
@@ -73,7 +74,7 @@ case 7:  // copy file
     $reply['status'] = preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'copying';
   } else {
     touch($running);
-    exec("rsync -ahPIX --info=name0,progress2 ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
+    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
   }
   $reply['pid'] = pgrep('rsync');
   break;
@@ -85,7 +86,7 @@ case 8: // move file
     touch($running);
     touch($moving);
     $idle = false;
-    exec("rsync -ahPIX --info=name0,progress2 --remove-source-files ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
+    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 --remove-source-files ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
   }
   $reply['pid'] = $idle ? pgrep('rm') : pgrep('rsync');
   break;

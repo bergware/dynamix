@@ -150,13 +150,13 @@ function doAction(action,title,id) {
   case 7: // copy file
     popup.html($("#templateCopyFile").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
     var height = 600;
     break;
   case 8: // move file
     popup.html($("#templateMoveFile").html());
     popup.find('#source').val(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
+    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
     var height = 600;
     break;
   case 9: // view file - not yet implemented
@@ -196,7 +196,7 @@ function doAction(action,title,id) {
         $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
         proceed = true;
         var makeAction = function(){
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source),target:encodeURI(target)},function(data){
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source),target:encodeURI(target),hardlinks:"<?=$var['fuse_directio']==1?'1':''?>",protect:popup.find('#protect').val()},function(data){
             var text = data.status.split(' ');
             if (text.length==3) text = "_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
             $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);
@@ -269,7 +269,7 @@ function doActions(action,title) {
     popup.find('#source').val(bulk ? "_(Objects to copy)_: "+source.length : source[0]);
     popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
-    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
+    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
     var height = 600;
     break;
   case 4: // move object
@@ -277,7 +277,7 @@ function doActions(action,title) {
     popup.find('#source').val(bulk ? "_(Objects to move)_: "+source.length : source[0]);
     popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
-    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share+name).change();});
+    else popup.find('#target').fileTreeAttach(null,null,function(path){popup.find('#target').val(path+share).change();});
     var height = 600;
     break;
   }
@@ -305,7 +305,7 @@ function doActions(action,title) {
         $('div.text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
         proceed = true;
         var makeAction = function(){
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source.join('\n')),target:encodeURI(target)},function(data){
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURI(source.join('\n')),target:encodeURI(target),hardlinks:"<?=$var['fuse_directio']==1?'1':''?>",protect:popup.find('#protect').val()},function(data){
             var text = data.status.split(' ');
             if (text.length==3) text = "_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
             $('div.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);
@@ -437,6 +437,12 @@ _(Source folder)_:
 _(Target folder)_:
 : <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
 
+&nbsp;
+: &nbsp;
+
+_(Do not overwrite existing files)_ <input type="checkbox" id="protect" value="" onchange="this.value=this.checked?'1':''">
+: &nbsp;
+
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies the folder and all its content to another folder)_</div></div>
 </body>
 </html>
@@ -461,6 +467,12 @@ _(Source folder)_:
 
 _(Target folder)_:
 : <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
+
+&nbsp;
+: &nbsp;
+
+_(Do not overwrite existing files)_ <input type="checkbox" id="protect" value="" onchange="this.value=this.checked?'1':''">
+: &nbsp;
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves the folder and all its content to another folder)_</div></div>
 </body>
@@ -531,6 +543,12 @@ _(Source file)_:
 _(Target file)_:
 : <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
+&nbsp;
+: &nbsp;
+
+_(Do not overwrite existing file)_ <input type="checkbox" id="protect" value="" onchange="this.value=this.checked?'1':''">
+: &nbsp;
+
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies the selected file)_</div></div>
 </body>
 </html>
@@ -555,6 +573,12 @@ _(Source file)_:
 
 _(Target file)_:
 : <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
+
+&nbsp;
+: &nbsp;
+
+_(Do not overwrite existing file)_ <input type="checkbox" id="protect" value="" onchange="this.value=this.checked?'1':''">
+: &nbsp;
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves the selected file)_</div></div>
 </body>
@@ -600,6 +624,12 @@ _(Source)_:
 _(Target)_:
 : <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
+&nbsp;
+: &nbsp;
+
+_(Do not overwrite existing files)_ <input type="checkbox" id="protect" value="" onchange="this.value=this.checked?'1':''">
+: &nbsp;
+
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This copies all the selected sources)_</div></div>
 </body>
 </html>
@@ -624,6 +654,12 @@ _(Source)_:
 
 _(Target)_:
 : <input type="text" id="target" name="target" autocomplete="off" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
+
+&nbsp;
+: &nbsp;
+
+_(Do not overwrite existing files)_ <input type="checkbox" id="protect" value="" onchange="this.value=this.checked?'1':''">
+: &nbsp;
 
 <div class="info"><div class="text"><i class="fa fa-warning"></i>_(This moves all the selected sources)_</div></div>
 </body>
