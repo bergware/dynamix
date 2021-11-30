@@ -35,6 +35,7 @@ $bgcolor = in_array($theme,['white','azure']) ? '#f2f2f2' : '#1c1c1c';
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.ui.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.filetree.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.switchbutton.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/plugins/dynamix.docker.manager/styles/style-{$display['theme']}.css")?>">
 
 <style>
@@ -54,7 +55,8 @@ div.template{display:none}
 .fileTree{background:<?=$bgcolor?>;width:400px;max-height:320px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
 </style>
 
-<script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
+<script src="<?autov("/webGui/javascript/jquery.filetree.js")?>"></script>
+<script src="<?autov("/webGui/javascript/jquery.switchbutton.js")?>"></script>
 <script>
 function addFolderContext(id) {
   var opts = [];
@@ -366,9 +368,12 @@ function doActions(action,title) {
   $('.ui-widget-content').css({'background':'<?=$bgcolor?>'});
   $('.ui-button-text').css({'padding':'0px 5px'});
 }
+function expert() {
+  $.cookie('expert')==null ? $.cookie('expert','expert',{path:'/'}) : $.removeCookie('expert',{path:'/'});
+  refresh();
+}
 $(function(){
   timers.browse = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
-  shortcut.add('F2',function(){$.cookie('expert')==null ? $.cookie('expert','expert',{path:'/'}) : $.removeCookie('expert',{path:'/'}); refresh();});
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:"<?=addslashes(urlencode($dir))?>",path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
     clearTimeout(timers.browse);
     var table = $('table.indexer');
@@ -384,6 +389,10 @@ $(function(){
     $('div.spinner.fixed').hide('slow');
     table.tablesorter({headers:{0:{sorter:false},6:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
   });
+  $('span.left').append("<span class='right'><input type='checkbox' class='expert'></span>");
+  $('.expert').switchButton({labels_placement:"left", on_label:"_(Advanced Mode)_", off_label:"_(Basic Mode)_", checked:$.cookie('expert')!=null});
+  $('.expert').change(function(){expert();});
+  shortcut.add('F2',function(){expert();});
 });
 </script>
 <table class="indexer tablesorter shift">
