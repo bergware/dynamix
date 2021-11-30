@@ -85,7 +85,7 @@ foreach ($dirs as $row) {
   echo "<td>".($edit?"<i id='check_$n' class='fa fa-fw fa-square-o' onclick='selectOne(this.id)'></i>":"")."</td>";
   echo "<td data=''><div class='icon-dir'></div></td>";
   echo "<td><a href=\"/$path?dir=".htmlspecialchars(urlencode_path(unslash($dir)."/$name"))."\">".htmlspecialchars($name)."</a></td>";
-  echo "<td data='0'>&lt;".($isshare?_('SHARE'):_('FOLDER'))."&gt;</td>";
+  echo "<td data='0'>&lt;".($fix=='---'&&$dir!='/'?_('DEVICE'):($isshare?_('SHARE'):_('FOLDER')))."&gt;</td>";
   echo "<td data='$time'>".my_time($time,$fmt)."</td>";
   echo "<td class='loc'>".my_devs($devs)."</td>";
   echo "<td>".($edit?"<i id='row_$n' data=\"".unslash($dir)."/$name\" type='d' class='fa fa-plus-square-o' onclick='addFolderContext(this.id)'>...</i>":"")."</td>";
