@@ -12,8 +12,8 @@
 ?>
 <?
 $action  = $_POST['action'];
-$source  = explode("\n",urldecode($_POST['source']));
-$target  = urldecode($_POST['target']);
+$source  = explode("\n",htmlspecialchars_decode(rawurldecode($_POST['source']),ENT_QUOTES));
+$target  = rawurldecode($_POST['target']);
 $H       = empty($_POST['hdlink']) ? '' : 'H';
 $protect = empty($_POST['protect']) ? '--ignore-existing' : '';
 $arg1    = preg_replace('/(["\'&()[\]\/])/','\\\\$1',$source[0]);
@@ -29,31 +29,40 @@ function pgrep($proc) {
   global $arg1;
   return exec("pgrep -a $proc|awk '/$arg1/{print \$1;exit}'");
 }
-function truepath($file, $root=[], $escape=false) {
-  $file = preg_replace(['://+:',':\\+:'],'/',$file);
-  $bits = array_filter(explode('/',$file),'strlen');
+function truepath($file, $root=[]) {
+  $file = preg_replace('://+:','/',$file);
+  $bits = array_filter(explode('/',$file),'mb_strlen');
   $path = [];
   foreach ($bits as $bit) {
     if ($bit=='.') continue;
     if ($bit=='..') array_pop($path); else $path[] = $bit;
   }
   $test = $path[0];
-  $path = cap($file,0).implode('/',$path).cap($file,-1);
-  return count($root) && !in_array($test,$root) ? "" : ($escape ? "\"$path\"" : $path);
+  $path = cap($file,0).implode('/',$path).(mb_strlen($file)>1?cap($file,-1):'');
+  return count($root) && !in_array($test,$root) ? "" : escapeshellarg($path);
 }
 
-function quotes($file) {return truepath($file,['mnt','boot'],true);}
-function escape($file) {return is_array($file) ? implode(' ',array_map('quotes',$file)) : quotes($file);}
+function escape($file) {return truepath($file,['mnt','boot']);}
+function quoted($file) {return is_array($file) ? implode(' ',array_map('escape',$file)) : escape($file);}
 
 $reply['status'] = 'starting';
 switch ($action) {
+case 0: // create folder
+  if ($busy) {
+    $reply['status'] = 'creating';
+  } else {
+    touch($running);
+    exec("mkdir -p ".quoted($source[0].'/'.$target)." >/dev/null 2>&1 &");
+  }
+  $reply['pid'] = pgrep('mkdir');
+  break;
 case 1: // delete folder
 case 5: // delete file
   if ($busy) {
     $reply['status'] = 'removing';
   } else {
     touch($running);
-    exec("rm -rf ".escape($source)." >/dev/null 2>&1 &");
+    exec("rm -Rf ".quoted($source)." >/dev/null 2>&1 &");
   }
   $reply['pid'] = pgrep('rm');
   break;
@@ -64,7 +73,7 @@ case 6: // rename file
   } else {
     touch($running);
     $path = dirname($source[0]);
-    exec("mv -f ".escape($source)." ".escape("$path/$target")." >/dev/null 2>&1 &");
+    exec("mv -f ".quoted($source)." ".quoted("$path/$target")." >/dev/null 2>&1 &");
   }
   $reply['pid'] = pgrep('mv');
   break;
@@ -74,7 +83,7 @@ case 7:  // copy file
     $reply['status'] = preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'copying';
   } else {
     touch($running);
-    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
+    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 ".quoted($source)." ".quoted($target)." >$running 2>/dev/null &");
   }
   $reply['pid'] = pgrep('rsync');
   break;
@@ -86,12 +95,30 @@ case 8: // move file
     touch($running);
     touch($moving);
     $idle = false;
-    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 --remove-source-files ".escape($source)." ".escape($target)." >$running 2>/dev/null &");
+    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 --remove-source-files ".quoted($source)." ".quoted($target)." >$running 2>/dev/null &");
   }
   $reply['pid'] = $idle ? pgrep('find') : pgrep('rsync');
   break;
+case 9: // change owner
+  if ($busy) {
+    $reply['status'] = 'updating';
+  } else {
+    touch($running);
+    exec("chown -Rf $target ".quoted($source)." >/dev/null 2>&1 &");
+  }
+  $reply['pid'] = pgrep('chown');
+  break;
+case 10: // change permission
+  if ($busy) {
+    $reply['status'] = 'updating';
+  } else {
+    touch($running);
+    exec("chmod -Rf $target ".quoted($source)." >/dev/null 2>&1 &");
+  }
+  $reply['pid'] = pgrep('chmod');
+  break;
 case 99: // kill background processes
-  foreach (['mv','rsync'] as $proc) exec("pkill -x $proc");
+  foreach (['rm','mv','rsync','chmod','chown'] as $proc) exec("pkill -x $proc");
   $reply['pid'] = '';
   break;
 }
@@ -101,7 +128,7 @@ if (empty($reply['pid'])) {
     $reply['status'] = 'done';
   } else {
     unlink($moving);
-    exec("find ".escape($source)." -type d -empty -delete >/dev/null 2>&1 &");
+    exec("find ".quoted($source)." -type d -empty -delete >/dev/null 2>&1 &");
     $reply['pid'] = 1;
   }
 }

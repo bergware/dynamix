@@ -1,0 +1,10 @@
+Menu="Buttons:3a"
+Title="File Manager"
+Icon="icon-u-duplicate"
+Code="e963"
+---
+<script>
+function BrowseButton() {
+  location.replace('/<?=$task?>/Browse?dir=/mnt');
+}
+</script>
