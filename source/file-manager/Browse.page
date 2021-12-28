@@ -590,7 +590,7 @@ $(function(){
  <tbody><tr><td colspan="9">&nbsp;</td></tr></tbody>
 </table>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
-<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$valid){?> disabled<?}?>>
+<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$valid||$isshare){?> disabled<?}?>>
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
