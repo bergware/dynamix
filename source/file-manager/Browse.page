@@ -136,7 +136,7 @@ function errorTarget() {
   swal({title:"_(Invalid target)_",text:"_(Enter a valid target)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
 }
 function level(id) {
-  var data = id.attr('data');
+  var data = id.attr('data').replace(/&#34;/g,'"');
 <?if ($isshare):?>
   return id.attr('type')=='d' ? data+'/' : data;
 <?else:?>
