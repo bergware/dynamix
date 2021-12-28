@@ -26,24 +26,13 @@ function pgrep($proc) {
   global $arg1;
   return exec("pgrep -a $proc|awk '/$arg1/{print \$1;exit}'");
 }
-function cap($file,$p) {
-  return mb_substr($file,$p,1)=='/' ? '/' : '';
+function validname($name) {
+  $path = realpath(dirname($name));
+  $root = explode('/',$path)[1];
+  return in_array($root,['mnt','boot']) ? $path.'/'.basename($name).(mb_substr($name,-1)=='/'?'/':'') : '';
 }
-function truepath($file, $root=[]) {
-  $file = preg_replace('://+:','/',$file);
-  $bits = array_filter(explode('/',$file),'mb_strlen');
-  $path = [];
-  foreach ($bits as $bit) {
-    if ($bit=='.') continue;
-    if ($bit=='..') array_pop($path); else $path[] = $bit;
-  }
-  $test = $path[0];
-  $path = cap($file,0).implode('/',$path).cap($file,-1);
-  return count($root) && !in_array($test,$root) ? "" : escapeshellarg($path);
-}
-
-function escape($file) {return truepath($file,['mnt','boot']);}
-function quoted($file) {return is_array($file) ? implode(' ',array_map('escape',$file)) : escape($file);}
+function escape($name) {return escapeshellarg(validname($name));}
+function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}
 
 $reply['status'] = 'starting';
 switch ($action) {

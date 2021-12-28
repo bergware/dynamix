@@ -21,31 +21,48 @@ if (isset($_POST['mode'])) {
   switch ($_POST['mode']) {
   case 'upload':
     $size = 'stop';
-    $file = htmlspecialchars_decode(rawurldecode($_POST['file']));
-    if (preg_match('@^/mnt/(.+)?/.+|^/boot/?@',$file)) {
+    $file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])));
+    if ($file) {
       if (($_POST['start']==0 || $_POST['cancel']==1) && file_exists($file)) unlink($file);
       if ($_POST['cancel']==0) $size = file_put_contents($file,base64_decode(explode(';base64,',$_POST['data'])[1]),FILE_APPEND);
     }
     die($size);
   case 'calc':
     extract(parse_plugin_cfg('dynamix',true));
-    $source = htmlspecialchars_decode(rawurldecode($_POST['source']));
-    [$root,$main,$rest] = my_explode('/',mb_substr($source,1),3);
-    $lock = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
-    $user = $root=='mnt' && in_array($main,['user','user0']);
-    $loc = $user ? exec("getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg($source)." 2>/dev/null") : $lock;
+    $source = explode("\n",htmlspecialchars_decode(rawurldecode($_POST['source'])));
+    [$null,$root,$main,$rest] = my_explode('/',$source[0],4);
+    if ($root=='mnt' && in_array($main,['user','user0'])) {
+      $disks = (array)parse_ini_file('state/disks.ini',true);
+      $tag = implode('|',array_merge(['disk'],pools_filter($disks)));
+      $loc = array_filter(explode(',',preg_replace("/($tag)/",',$1',exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".quoted($source)."/* 2>/dev/null"))));
+      natcasesort($loc);
+      $loc = implode(', ',array_unique($loc));
+    } else $loc = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
     $awk = "awk 'BEGIN{ORS=\" \"}/Number of files|Total file size/{if(\$5==\"(reg:\")print \$4,\$8;if(\$5==\"(dir:\")print \$4,\$6;if(\$3==\"size:\")print \$4}'"; 
-    [$files,$dirs,$size] = explode(' ',str_replace([',',')'],'',exec("rsync --stats -naI ".escapeshellarg($source)." /var/tmp 2>/dev/null|$awk")));
+    [$files,$dirs,$size] = explode(' ',str_replace([',',')'],'',exec("rsync --stats -naI ".quoted($source)." /var/tmp 2>/dev/null|$awk")));
     $files -= $dirs;
     $text   = [];
-    $text[] = _('Name').": ".basename($source);
-    $text[] = _('Location').": ".str_replace(',',', ',$loc);
-    $text[] = _('Last modified').': '.my_age(filemtime($source));
+    $text[] = _('Name').": ".implode(', ',array_map('basename',$source));
+    $text[] = _('Location').": ".$loc;
+    $text[] = _('Last modified').': '.my_age(max(array_map('filemtime',$source)));
     $text[] = _('Total occupied space').": ".my_scale($size,$unit)." $unit";
     $text[] = sprintf(_("in %s folder".($dirs==1?'':'s')." and %s file".($files==1?'':'s')),my_number($dirs),my_number($files));
-    die('<div style="text-align:left;margin-left:60px">'.implode('<br>',$text).'</div>');
+    die('<div style="text-align:left;margin-left:56px">'.implode('<br>',$text).'</div>');
   }
 }
+function validdir($dir) {
+  $path = realpath($dir);
+  $root = explode('/',$path)[1];
+  return in_array($root,['mnt','boot']) ? $path : '';
+}
+function validname($name) {
+  $path = realpath(dirname($name));
+  $root = explode('/',$path)[1] ?? '';
+  return in_array($root,['mnt','boot']) ? $path.'/'.basename($name) : '';
+}
+function escape($name) {return escapeshellarg(validname($name));}
+function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}
+
 function escapeQuote($data) {
   return str_replace('"','&#34;',$data);
 }
@@ -81,27 +98,26 @@ function my_devs(&$devs) {
   }
   return implode(', ',$text);
 }
+$dir = validdir(htmlspecialchars_decode(rawurldecode($_GET['dir'])));
+echo "<thead><tr><th>".($dir?"<i id='check_0' class='fa fa-fw fa-square-o' onclick='selectAll()'></i>":"")."</th><th>"._('Type')."</th><th class='sorter-text'>"._('Name')."</th><th>"._('Owner')."</th><th>"._('Permission')."</th><th>"._('Size')."</th><th>"._('Last Modified')."</th><th style='width:200px'>"._('Location')."</th><th>"._('Action')."</th></tr></thead>";
+if (!$dir) {
+  echo "<tbody><tr><td></td><td></td><td colspan='7'>"._('Invalid path')."</td></tr></tbody>";
+  exit;
+}
+
 extract(parse_plugin_cfg('dynamix',true));
 $disks = parse_ini_file('state/disks.ini',true);
-$dir   = realpath(htmlspecialchars_decode(rawurldecode($_GET['dir'])));
 $path  = unscript($_GET['path']);
 $block = empty($_GET['block']) ? ['/','/mnt','/mnt/user'] : ['/'];
 $fmt   = "%F {$display['time']}";
 $dirs  = $files = [];
 $total = $n = 0;
-[$root,$main,$rest] = my_explode('/',mb_substr($dir,1),3);
-$valid = in_array($root,['boot','mnt']);
+[$null,$root,$main,$rest] = my_explode('/',$dir,4);
 $lock  = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
 $user  = $root=='mnt' && in_array($main,['user','user0']);
 $isshare = $root=='mnt' && (!$main || !$rest);
 
-echo "<thead><tr><th>".($valid?"<i id='check_0' class='fa fa-fw fa-square-o' onclick='selectAll()'></i>":"")."</th><th>"._('Type')."</th><th class='sorter-text'>"._('Name')."</th><th>"._('Owner')."</th><th>"._('Permission')."</th><th>"._('Size')."</th><th>"._('Last Modified')."</th><th style='width:200px'>"._('Location')."</th><th>"._('Action')."</th></tr></thead>";
-if (!$valid) {
-  echo "<tbody><tr><td></td><td></td><td colspan='7'>"._('Invalid path')."</td></tr></tbody>";
-  exit;
-}
 if ($link = parent_link()) echo "<tbody class='tablesorter-infoOnly'><tr><td></td><td><div><img src='/webGui/icons/folderup.png'></div></td><td>$link</td><td colspan='6'></td></tr></tbody>";
-
 if ($user) {
   $tag = implode('|',array_merge(['disk'],pools_filter($disks)));
   $set = explode(';',str_replace(',;',',',preg_replace("/($tag)/",';$1',exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg($dir)."/* 2>/dev/null"))));

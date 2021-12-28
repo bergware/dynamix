@@ -14,23 +14,15 @@ Tag="navicon"
  */
 ?>
 <?
-function cap($dir,$p) {
-  return mb_substr($dir,$p,1)=='/' ? '/' : '';
+function validdir($dir) {
+  $path = realpath($dir);
+  $root = explode('/',$path)[1] ?? '';
+  return in_array($root,['mnt','boot']) ? $path : '';
 }
-function truepath($dir) {
-  $dir  = preg_replace('://+:','/',htmlspecialchars_decode($dir));
-  $bits = array_filter(explode('/',$dir),'mb_strlen');
-  $path = [];
-  foreach ($bits as $bit) {
-    if ($bit=='.') continue;
-    if ($bit=='..') array_pop($path); else $path[] = $bit;
-  }
-  return cap($dir,0).implode('/',$path);
-}
-$dir = truepath($dir);
-[$root,$main,$rest] = my_explode('/',mb_substr($dir,1),3);
+
+$dir = validdir(htmlspecialchars_decode($dir));
+[$null,$root,$main,$rest] = my_explode('/',$dir,4);
 $dir = htmlspecialchars(str_replace('\\','\\\\',$dir));
-$valid   = in_array($root,['boot','mnt']);
 $isshare = $root=='mnt' && (!$main || !$rest);
 $bgcolor = in_array($theme,['white','azure']) ? '#f2f2f2' : '#1c1c1c';
 $fgcolor = in_array($theme,['white','azure']) ? '#1c1c1c' : '#f2f2f2';
@@ -71,6 +63,7 @@ String.prototype.patch = function(){return this.replace('rw','x+rw').replace('r-
 String.prototype.proxy = function(){return this.replace('name','row');}
 String.prototype.fetch = function(tag){return this.replace('check',tag);}
 String.prototype.bring = function(tag){return this.replace('row',tag);}
+String.prototype.strip = function(){return this.replace(/\/$/,'');}
 
 function folderContextMenu(id,button) {
   var opts = [];
@@ -80,11 +73,11 @@ function folderContextMenu(id,button) {
   opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
 <?endif?>
   opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_(Delete Folder)_",id.proxy());}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy Folder)_",id.proxy());}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move Folder)_",id.proxy());}});
 <?if (!$isshare):?>
   opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename Folder)_",id.proxy());}});
 <?endif?>
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy Folder)_",id.proxy());}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move Folder)_",id.proxy());}});
   opts.push({divider:true});
   opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(9,"_(Change Owner)_",id.proxy());}});
   opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
@@ -100,9 +93,9 @@ function fileContextMenu(id,button) {
   opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
 <?endif?>
   opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(5,"_(Delete File)_",id.proxy());}});
-  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(6,"_(Rename File)_",id.proxy());}});
   opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(7,"_(Copy File)_",id.proxy());}});
   opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",id.proxy());}});
+  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(6,"_(Rename File)_",id.proxy());}});
   opts.push({divider:true});
   opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(9,"_(Change Owner)_",id.proxy());}});
   opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
@@ -392,7 +385,7 @@ function doActions(action,title) {
     break;
   case 1: // delete object
     popup.html($("#templateDeleteObject").html());
-    popup.find('#source').html(bulk ? "_(Objects to delete)_: "+source.length : source[0]);
+    popup.find('#source').html(bulk ? "_(Objects to delete)_: "+source.length : source[0].strip());
     var height = 300;
     break;
   case 2: // rename object
@@ -416,7 +409,7 @@ function doActions(action,title) {
     break;
   case 3: // copy object
     popup.html($("#templateCopyObject").html());
-    popup.find('#source').html(bulk ? "_(Objects to copy)_: "+source.length : source[0]);
+    popup.find('#source').html(bulk ? "_(Objects to copy)_: "+source.length : source[0].strip());
     popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
     popup.find('#target').fileTreeAttach(null,null,function(path){
@@ -428,7 +421,7 @@ function doActions(action,title) {
     break;
   case 4: // move object
     popup.html($("#templateMoveObject").html());
-    popup.find('#source').html(bulk ? "_(Objects to move)_: "+source.length : source[0]);
+    popup.find('#source').html(bulk ? "_(Objects to move)_: "+source.length : source[0].strip());
     popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
     if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
     popup.find('#target').fileTreeAttach(null,null,function(path){
@@ -440,19 +433,27 @@ function doActions(action,title) {
     break;
   case 9: // change owner
     popup.html($("#templateChangeOwner").html());
-    popup.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0]);
+    popup.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
     if (!bulk) popup.find('#target').val(owner[0]);
     var height = 300;
     break;
   case 10: // change permission
     popup.html($("#templateChangePermission").html());
-    popup.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0]);
+    popup.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
     if (!bulk) {
       popup.find('#owner').val('u-'+perm[0].substr(1,2).patch());
       popup.find('#group').val('g-'+perm[0].substr(4,2).patch());
       popup.find('#other').val('o-'+perm[0].substr(7,2).patch());
     }
     var height = 300;
+    break;
+  case 12: // calculate occupied space
+    timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
+    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(source.join('\n'))},function(text){
+      clearTimeout(timers.calc);
+      $('div.spinner.fixed').hide('slow');
+      swal({title:"_(Calculate Occupied Space)_",text:text,html:true,confirmButtonText:"_(Ok)_"});
+    });
     break;
   }
   if (action > 10) return;
@@ -616,18 +617,19 @@ $(function(){
 });
 </script>
 <table class="indexer tablesorter shift">
- <thead><tr><th><?if($valid){?><i id="check_0" class="fa fa-box fa-fw"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead>
+ <thead><tr><th><?if($dir){?><i id="check_0" class="fa fa-box fa-fw"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead>
  <tbody><tr><td colspan="9">&nbsp;</td></tr></tbody>
 </table>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
-<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$valid||$isshare){?> disabled<?}?>>
+<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$dir||$isshare){?> disabled<?}?>>
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
-<input type="button" value="_(Rename)_" class="rename" onclick="doActions(2,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
+<input type="button" value="_(Rename)_" class="rename" onclick="doActions(2,this.value)" disabled>
 <input type="button" value="_(Owner)_" class="extra" onclick="doActions(9,this.value)" disabled>
 <input type="button" value="_(Permission)_" class="extra" onclick="doActions(10,this.value)" disabled>
-<input type="button" value="_(Upload)_" id="uploadButton" onclick="$('#upload').click()"<?if (!$valid||$isshare){?> disabled<?}?>><span id="uploadStatus"></span>
+<input type="button" value="_(Calculate)_" class="extra" onclick="doActions(12,this.value)" disabled>
+<input type="button" value="_(Upload)_" id="uploadButton" onclick="$('#upload').click()"<?if (!$dir||$isshare){?> disabled<?}?>><span id="uploadStatus"></span>
 
 <input type="file" id="upload" value="" onchange="startUpload(this.files)" multiple>
 <div id="dialogWindow"></div>
