@@ -67,6 +67,11 @@ select.narrow{margin:0 40px 0 10px}
 <script src="<?autov("/webGui/javascript/jquery.filetree.js")?>"></script>
 <script src="<?autov("/webGui/javascript/jquery.switchbutton.js")?>"></script>
 <script>
+
+$(function(){
+  caPluginUpdateCheck("dynamix.file.manager.plg",{name:"Dynamix File Manager"});
+});
+
 String.prototype.patch = function(){return this.replace('rw','x+rw').replace('r-','wx+r').replace('--','rwx');}
 String.prototype.proxy = function(){return this.replace('name','row');}
 String.prototype.fetch = function(tag){return this.replace('check',tag);}
