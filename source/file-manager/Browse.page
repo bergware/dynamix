@@ -14,25 +14,23 @@ Tag="navicon"
  */
 ?>
 <?
-function htmlsafe($dir) {
-  return htmlspecialchars(str_replace('\\','\\\\',$dir),ENT_COMPAT);
-}
 function cap($dir,$p) {
   return mb_substr($dir,$p,1)=='/' ? '/' : '';
 }
 function truepath($dir) {
-  $dir  = preg_replace('://+:','/',htmlspecialchars_decode($dir,ENT_QUOTES));
+  $dir  = preg_replace('://+:','/',htmlspecialchars_decode($dir));
   $bits = array_filter(explode('/',$dir),'mb_strlen');
   $path = [];
   foreach ($bits as $bit) {
     if ($bit=='.') continue;
     if ($bit=='..') array_pop($path); else $path[] = $bit;
   }
-  return cap($dir,0).implode('/',$path).(mb_strlen($dir)>1?cap($dir,-1):'');
+  return cap($dir,0).implode('/',$path);
 }
 $dir = truepath($dir);
-$edit = cap($dir,0) && $dir!='/' && is_dir($dir);
 [$root,$main,$rest] = my_explode('/',mb_substr($dir,1),3);
+$dir = htmlspecialchars(str_replace('\\','\\\\',$dir));
+$valid   = in_array($root,['boot','mnt']);
 $isshare = $root=='mnt' && (!$main || !$rest);
 $bgcolor = in_array($theme,['white','azure']) ? '#f2f2f2' : '#1c1c1c';
 $fgcolor = in_array($theme,['white','azure']) ? '#1c1c1c' : '#f2f2f2';
@@ -54,8 +52,7 @@ table.tablesorter.indexer thead th:nth-child(9){width:3%}
 i[id^="row_"],i[id^="check_"]{cursor:pointer;font-size:1.8rem;color:gray}
 td[id^="name_"]{cursor:pointer}
 i.fa-warning,i.fa-refresh{margin-right:8px}
-input#target{color:<?=$fgcolor?>}
-input[type=text]{width:500px}
+input#target{color:<?=$fgcolor?>;width:500px}
 div.info{position:absolute;bottom:4px;width:74%;margin-left:23%}
 div.template,div#dialogWindow,input#upload{display:none}
 span.filter{position:relative;margin-left:<?=$themes1?'12':'0'?>px;top:-<?=$themes1?'2':'8'?>px}
@@ -162,7 +159,7 @@ function doAction(action,title,id) {
   switch (action) {
   case 0: // create folder
     popup.html($("#templateCreateFolder").html());
-    source = "<?=htmlsafe($dir)?>";
+    source = "<?=$dir?>";
     var height = 300;
     break;
   case 1: // delete folder
@@ -381,7 +378,7 @@ function doActions(action,title) {
   switch (action) {
   case 0: // create folder
     popup.html($("#templateCreateFolder").html());
-    source[0] = "<?=htmlsafe($dir)?>";
+    source[0] = "<?=$dir?>";
     var height = 300;
     break;
   case 1: // delete object
@@ -526,7 +523,7 @@ function uploadFile(files,index,start) {
   var blob = file.slice(start, next);
   reader.onloadend = function(e){
     if (e.target.readyState !== FileReader.DONE) return;
-    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'upload', file:encodeURIComponent("<?=htmlsafe($dir)?>/"+file.name), start:start, data:e.target.result, cancel:cancel},function(reply){
+    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'upload', file:encodeURIComponent("<?=$dir?>/"+file.name), start:start, data:e.target.result, cancel:cancel},function(reply){
       if (reply=='stop') stop();
       if (next < file.size) {
         var total = 0;
@@ -569,7 +566,7 @@ $(function(){
   $('.expert').change(function(){expert();});
   shortcut.add('F2',function(){expert();});
   timers.browse = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
-  $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=htmlsafe($dir)?>"),path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
+  $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
     clearTimeout(timers.browse);
     var table = $('table.indexer');
     var col = $.cookie('col')||2;
@@ -589,17 +586,17 @@ $(function(){
 });
 </script>
 <table class="indexer tablesorter shift">
- <thead><tr><th><?if ($edit){?><i id="check_0" class="fa fa-box fa-fw"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead>
+ <thead><tr><th><?if($valid){?><i id="check_0" class="fa fa-box fa-fw"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead>
  <tbody><tr><td colspan="9">&nbsp;</td></tr></tbody>
 </table>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
-<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if (!$edit||$isshare){?> disabled<?}?>>
+<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$valid){?> disabled<?}?>>
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
 <input type="button" value="_(Owner)_" class="extra" onclick="doActions(9,this.value)" disabled>
 <input type="button" value="_(Permission)_" class="extra" onclick="doActions(10,this.value)" disabled>
-<input type="button" value="_(Upload)_" id="uploadButton" onclick="$('#upload').click()"<?if (!$edit||$isshare){?> disabled<?}?>><span id="uploadStatus"></span>
+<input type="button" value="_(Upload)_" id="uploadButton" onclick="$('#upload').click()"<?if (!$valid||$isshare){?> disabled<?}?>><span id="uploadStatus"></span>
 
 <input type="file" id="upload" value="" onchange="startUpload(this.files)" multiple>
 <div id="dialogWindow"></div>

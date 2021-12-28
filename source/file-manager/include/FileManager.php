@@ -12,7 +12,7 @@
 ?>
 <?
 $action  = $_POST['action'];
-$source  = explode("\n",htmlspecialchars_decode(rawurldecode($_POST['source']),ENT_QUOTES));
+$source  = explode("\n",htmlspecialchars_decode(rawurldecode($_POST['source'])));
 $target  = rawurldecode($_POST['target']);
 $H       = empty($_POST['hdlink']) ? '' : 'H';
 $protect = empty($_POST['protect']) ? '--ignore-existing' : '';
@@ -22,12 +22,12 @@ $moving  = '/tmp/file.manager.moving';
 $busy    = file_exists($running);
 $idle    = !file_exists($moving);
 
-function cap($file,$p) {
-  return mb_substr($file,$p,1)=='/' ? '/' : '';
-}
 function pgrep($proc) {
   global $arg1;
   return exec("pgrep -a $proc|awk '/$arg1/{print \$1;exit}'");
+}
+function cap($file,$p) {
+  return mb_substr($file,$p,1)=='/' ? '/' : '';
 }
 function truepath($file, $root=[]) {
   $file = preg_replace('://+:','/',$file);
@@ -38,7 +38,7 @@ function truepath($file, $root=[]) {
     if ($bit=='..') array_pop($path); else $path[] = $bit;
   }
   $test = $path[0];
-  $path = cap($file,0).implode('/',$path).(mb_strlen($file)>1?cap($file,-1):'');
+  $path = cap($file,0).implode('/',$path).cap($file,-1);
   return count($root) && !in_array($test,$root) ? "" : escapeshellarg($path);
 }
 
