@@ -114,9 +114,15 @@ function selectAll(select) {
   if (($('#check_0').hasClass('fa-square-o')||select==1) && select!=0) {
     $('i[id^="check_"]').removeClass('fa-square-o').addClass('fa-check-square-o');
     $('input[class="extra"]').prop('disabled',false);
+<?if (!$isshare):?>
+    $('input[class="rename"]').prop('disabled',false);
+<?endif;?>
   } else {
     $('i[id^="check_"]').removeClass('fa-check-square-o').addClass('fa-square-o');
     $('input[class="extra"]').prop('disabled',true);
+<?if (!$isshare):?>
+    $('input[class="rename"]').prop('disabled',true);
+<?endif;?>
   }
 }
 function selectOne(id) {
@@ -128,6 +134,9 @@ function selectOne(id) {
   var checked = 0;
   $('i[id^="check_"]').each(function(){if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) checked++;});
   $('input[class="extra"]').prop('disabled',checked==0);
+<?if (!$isshare):?>
+  $('input[class="rename"]').prop('disabled',checked==0);
+<?endif;?>
 }
 function errorSource() {
   swal({title:"_(Invalid source)_",text:"_(Not allowed to mix disk and user shares)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
@@ -135,7 +144,7 @@ function errorSource() {
 function errorTarget() {
   swal({title:"_(Invalid target)_",text:"_(Enter a valid target)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
 }
-function level(id) {
+function data(id) {
   var data = id.attr('data').replace(/&#34;/g,'"');
 <?if ($isshare):?>
   return id.attr('type')=='d' ? data+'/' : data;
@@ -350,7 +359,7 @@ function doActions(action,title) {
     $('i[id^="check_"]').each(function(){
       if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
         var id = $(this).prop('id');
-        source.push(level($('#'+id.fetch('row'))));
+        source.push(data($('#'+id.fetch('row'))));
         type.push($('#'+id.fetch('row')).attr('type'));
         owner.push($('#'+id.fetch('owner')).text());
         perm.push($('#'+id.fetch('perm')).text());
@@ -385,6 +394,25 @@ function doActions(action,title) {
     popup.html($("#templateDeleteObject").html());
     popup.find('#source').html(bulk ? "_(Objects to delete)_: "+source.length : source[0]);
     var height = 300;
+    break;
+  case 2: // rename object
+    if (!bulk) {
+      popup.html($("#templateRenameObject").html());
+      popup.find('#source').html(name);
+      popup.find('#target').val(name);
+      var height = 300;
+    } else {
+      popup.html($("#templateMoveObject").html());
+      popup.find('#source').html("_(Objects to move)_: "+source.length);
+      popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).attr('data-pickfilter','HIDE_FILES_FILTER');
+      popup.find('#target').fileTreeAttach(null,null,function(path){
+        var bits = path.substr(1).split('/');
+        var auto = bits.length>3 ? '' : share;
+        popup.find('#target').val(path+auto).change();
+      });
+      action = 4; // change to move operation
+      var height = 600;
+    }
     break;
   case 3: // copy object
     popup.html($("#templateCopyObject").html());
@@ -444,9 +472,10 @@ function doActions(action,title) {
         if (target.length) {
           target = target.val();
           switch (action) {
-          case 0:
-            var valid = /^[^\/]*$/; // no slashes allowed
+          case 0: // create folder
             bulk = false;
+          case 2: // rename object
+            var valid = /^[^\/]*$/; // no slashes allowed
             break;
           case 9: // change owner
             target += (target=='root' ? ':root' : ':users');
@@ -561,6 +590,7 @@ function toggleTime(init) {
   $.cookie('my_time')==null ? $.cookie('my_time','age',{path:'/'}) : $.removeCookie('my_time',{path:'/'});
 }
 $(function(){
+  caPluginUpdateCheck("dynamix.file.manager.plg",{name:"Dynamix File Manager"});
   $('span.left').append('<span class="right"><span class="filter"><input type="text" class="filter" oninput="filter(this.value)" autocomplete="off" spellcheck="false" placeholder="_(file type)_"><i class="fa fa-filter"></i></span><i class="fa fa-toggle-off" onclick="toggleTime()" style="cursor:pointer;margin-left:20px" title="_(Toggle Time/Age display)_"></i><input type="checkbox" class="expert"></span>');
   $('.expert').switchButton({labels_placement:"left", on_label:"_(Advanced Mode)_", off_label:"_(Basic Mode)_", checked:$.cookie('expert')!=null});
   $('.expert').change(function(){expert();});
@@ -592,6 +622,7 @@ $(function(){
 <input type="button" value="_(Done)_" onclick="done('Browse')">
 <input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$valid||$isshare){?> disabled<?}?>>
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
+<input type="button" value="_(Rename)_" class="rename" onclick="doActions(2,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
 <input type="button" value="_(Owner)_" class="extra" onclick="doActions(9,this.value)" disabled>
@@ -868,6 +899,31 @@ _(Source)_:
 : <span class="text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This deletes all selected sources)_</div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateRenameObject" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+</head>
+<body>
+_(Source)_:
+: <span id="source"></span>
+
+&nbsp;
+: _(rename to)_ ...
+
+_(Target)_:
+: <input type="text" id="target" autocomplete="off" spellcheck="false" value="">
+
+<div class="info"><i class="fa fa-warning"></i>_(This renames the selected source)_</div>
 </body>
 </html>
 </div>
