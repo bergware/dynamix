@@ -311,6 +311,10 @@ function doAction(action,title,id) {
         proceed = true;
         var makeAction = function(){
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,protect:popup.find('#protect').val()},function(data){
+            if (data.error) {
+              $('span.text').html("<span class='orange-text'><i class='fa fa-warning'></i> "+data.error+"</span>");
+              return;
+            }
             var text = data.status.split(' ');
             if (text.length==3) text = "_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
             $('span.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);

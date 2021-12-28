@@ -26,9 +26,18 @@ function pgrep($proc) {
   global $arg1;
   return exec("pgrep -a $proc|awk '/$arg1/{print \$1;exit}'");
 }
-function validname($name) {
-  $path = realpath(dirname($name));
-  $root = explode('/',$path)[1];
+function truepath($name) {
+  $bits = array_filter(explode('/',$name), 'mb_strlen');
+  $path = [];
+  foreach ($bits as $bit) {
+    if ($bit == '.') continue;
+    if ($bit == '..') array_pop($path); else $path[] = $bit;
+  }
+  return '/'.implode('/',$path);
+}
+function validname($name, $real=true) {
+  $path = $real ? realpath(dirname($name)) : truepath(dirname($name));
+  $root = explode('/',$path)[1] ?? '';
   return in_array($root,['mnt','boot']) ? $path.'/'.basename($name).(mb_substr($name,-1)=='/'?'/':'') : '';
 }
 function escape($name) {return escapeshellarg(validname($name));}
@@ -71,8 +80,13 @@ case 7:  // copy file
   if ($busy) {
     $reply['status'] = preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'copying';
   } else {
-    touch($running);
-    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 ".quoted($source)." ".quoted($target)." >$running 2>/dev/null &");
+    $target = validname($target,false);
+    if ($target) {
+      touch($running);
+      exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 ".quoted($source)." ".escapeshellarg($target)." >$running 2>/dev/null &");
+    } else {
+      $reply['error'] = 'Invalid target';
+    }
   }
   $reply['pid'] = pgrep('rsync');
   break;
@@ -81,10 +95,15 @@ case 8: // move file
   if ($busy) {
     $reply['status'] = $idle ? 'moving' : (preg_replace('/\s\s+/',' ',rtrim(exec("tail -1 $running|grep -Pom1 '^.+ \K[0-9]+%[^(]+'"))) ?: 'moving');
   } else {
-    touch($running);
-    touch($moving);
-    $idle = false;
-    exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 --remove-source-files ".quoted($source)." ".quoted($target)." >$running 2>/dev/null &");
+    $target = validname($target,false);
+    if ($target) {
+      touch($running);
+      touch($moving);
+      $idle = false;
+      exec("rsync -ahPIX$H $protect --mkpath --info=name0,progress2 --remove-source-files ".quoted($source)." ".escapeshellarg($target)." >$running 2>/dev/null &");
+    } else {
+      $reply['error'] = 'Invalid target';
+    }
   }
   $reply['pid'] = $idle ? pgrep('find') : pgrep('rsync');
   break;
