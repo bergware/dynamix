@@ -84,6 +84,9 @@ function folderContextMenu(id,button) {
   opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
   opts.push({divider:true});
   opts.push({text:"_(Calculate)_", icon:"fa-calculator", action:function(e){e.preventDefault();doAction(12,"_(Calculate Occupied Space)_",id.proxy());}});
+<?if ($dir && !$isshare):?>
+  opts.push({text:"_(Upload)_", icon:"fa-upload", action:function(e){e.preventDefault();$('#upload').click();}});
+<?endif?>
   context.attach('#'+id, opts);
 }
 function fileContextMenu(id,button) {
@@ -102,6 +105,9 @@ function fileContextMenu(id,button) {
   opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
   opts.push({divider:true});
   opts.push({text:"_(Download)_", icon:"fa-download", action:function(e){e.preventDefault();doAction(11,"_(Download File)_",id.proxy());}});
+<?if ($dir && !$isshare):?>
+  opts.push({text:"_(Upload)_", icon:"fa-upload", action:function(e){e.preventDefault();$('#upload').click();}});
+<?endif?>
   context.attach('#'+id, opts);
 }
 function selectAll(select) {
