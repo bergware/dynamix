@@ -12,13 +12,13 @@
 ?>
 <?
 $action  = $_POST['action'];
-$source  = explode("\n",htmlspecialchars_decode(rawurldecode($_POST['source'])));
-$target  = rawurldecode($_POST['target']);
+$source  = explode("\n",htmlspecialchars_decode(rawurldecode($_POST['source']??'')));
+$target  = rawurldecode($_POST['target']??'');
 $H       = empty($_POST['hdlink']) ? '' : 'H';
 $protect = empty($_POST['protect']) ? '--ignore-existing' : '';
 $status  = '/var/tmp/file.manager.status';
 $moving  = '/var/tmp/file.manager.moving';
-$procid  = '/var/tmp/file.manager.pid';
+$procid  = '/var/run/file.manager.pid';
 $idle    = !file_exists($moving);
 
 function pgrep($pid) {
@@ -46,7 +46,7 @@ function escape($name) {return escapeshellarg(validname($name));}
 function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}
 
 $reply['status'] = 'starting';
-$reply['pid'] = file_exists($procid) ? file_get_contents($procid) : null;
+$reply['pid'] = @file_get_contents($procid);
 switch ($action) {
 case 0: // create folder
   if ($reply['pid']) {
@@ -114,14 +114,16 @@ case 10: // change permission
     exec("chmod -Rf $target ".quoted($source)." >/dev/null 2>&1 & echo $!",$reply['pid']);
   }
   break;
-case 99: // kill background processes
-  exec("kill -9 ".$reply['pid']);
+case 99: // kill running background process
+  if ($reply['pid']) exec("kill -9 ".$reply['pid']);
+  @unlink($moving);
+  $idle = true;
   break;
 }
 $reply['pid'] = pgrep($reply['pid']);
 if (empty($reply['pid'])) {
   if ($idle) {
-    if (file_exists($status)) unlink($status);
+    @unlink($status);
     $reply['status'] = 'done';
   } else {
     unlink($moving);

@@ -52,7 +52,7 @@ if (isset($_POST['mode'])) {
 }
 function validdir($dir) {
   $path = realpath($dir);
-  $root = explode('/',$path)[1];
+  $root = explode('/',$path)[1] ?? '';
   return in_array($root,['mnt','boot']) ? $path : '';
 }
 function validname($name) {

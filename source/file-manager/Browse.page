@@ -64,6 +64,7 @@ String.prototype.proxy = function(){return this.replace('name','row');}
 String.prototype.fetch = function(tag){return this.replace('check',tag);}
 String.prototype.bring = function(tag){return this.replace('row',tag);}
 String.prototype.strip = function(){return this.replace(/\/$/,'');}
+String.prototype.quote = function(){return this.replace(/&#34;/g,'"');}
 
 function folderContextMenu(id,button) {
   var opts = [];
@@ -138,7 +139,7 @@ function errorTarget() {
   swal({title:"_(Invalid target)_",text:"_(Enter a valid target)_",html:true,type:'error',confirmButtonText:"_(Ok)_"});
 }
 function data(id) {
-  var data = id.attr('data').replace(/&#34;/g,'"');
+  var data = id.attr('data').quote();
 <?if ($isshare):?>
   return id.attr('type')=='d' ? data+'/' : data;
 <?else:?>
@@ -147,8 +148,7 @@ function data(id) {
 }
 function doAction(action,title,id) {
   var popup  = $("#dialogWindow");
-  var type   = $('#'+id).attr('type');
-  var source = $('#'+id).attr('data').replace(/&#34;/g,'"');
+  var source = data($('#'+id));
   var path   = source.substr(1).split('/');
   var access = ['mnt','boot'];
   if (!access.includes(path[0])) return;
@@ -183,9 +183,6 @@ function doAction(action,title,id) {
       var auto = bits.length>3 ? '' : share;
       popup.find('#target').val(path+auto).change();
     });
-<?if ($isshare):?>
-    source += '/'; // do not copy share name
-<?endif;?>
     var height = 600;
     break;
   case 4: // move folder
@@ -196,9 +193,6 @@ function doAction(action,title,id) {
       var auto = bits.length>3 ? '' : share;
       popup.find('#target').val(path+auto).change();
     });
-<?if ($isshare):?>
-    source += '/'; // do not move share name
-<?endif;?>
     var height = 600;
     break;
   case 5: // delete file
@@ -333,7 +327,7 @@ function doAction(action,title,id) {
         var box = $(this);
         if (proceed) {
           clearTimeout(timers.makeAction);
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99,source:encodeURIComponent(source)},function(){
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){
             setTimeout(refresh,1250);
             box.dialog('close');
           });
@@ -508,6 +502,10 @@ function doActions(action,title) {
         proceed = true;
         var makeAction = function(){
           $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURIComponent(source.join('\n')),target:encodeURIComponent(target),hdlink:hdlink,protect:popup.find('#protect').val()},function(data){
+            if (data.error) {
+              $('span.text').html("<span class='orange-text'><i class='fa fa-warning'></i> "+data.error+"</span>");
+              return;
+            }
             var text = data.status.split(' ');
             if (text.length==3) text = "_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
             $('span.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);
@@ -526,7 +524,7 @@ function doActions(action,title) {
         var box = $(this);
         if (proceed) {
           clearTimeout(timers.makeAction);
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99,source:encodeURIComponent(source.join('\n'))},function(){
+          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){
             setTimeout(refresh,1250);
             box.dialog('close');
           });
