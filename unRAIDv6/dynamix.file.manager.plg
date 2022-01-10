@@ -9,7 +9,7 @@
 <!ENTITY MD5       "e2d356943971393fa24b870bec55f815">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3a" max="6.10.0-rc3c">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3a" max="6.10.0-rc3">
 
 <CHANGES>
 ##&name;
