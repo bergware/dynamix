@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.02.19c">
+<!ENTITY version   "2022.02.20">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a73a53df0924c870391d4872d70202d0">
+<!ENTITY MD5       "80617e7cb21d9dfb2684a60403b71b76">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3c" max="6.10.0-rc4">
@@ -19,7 +19,7 @@
 </CHANGES>
 
 <!--
-Copyright 2021, Bergware International
+Copyright 2022, Bergware International
 Dynamix File Manager - File management features added to the GUI Browser function
 -->
 
@@ -47,7 +47,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2021, Bergware International"
+echo " Copyright 2022, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
