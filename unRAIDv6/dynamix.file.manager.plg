@@ -59,6 +59,10 @@ echo ""
 <!-- REMOVE SCRIPT -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
+# stop and remove Nchan script
+pkill file_manager
+sed -ri '/file_manager$/d' /var/run/nchan.pid
+
 # Uninstall the 'source' package
 removepkg &name;
 </INLINE>
