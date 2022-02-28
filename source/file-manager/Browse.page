@@ -1,9 +1,10 @@
 Title="_(Index of)_ $dir"
 Tag="navicon"
+Nchan="file_manager"
 ---
 <?PHP
-/* Copyright 2005-2021, Lime Technology
- * Copyright 2012-2021, Bergware International.
+/* Copyright 2005-2022, Lime Technology
+ * Copyright 2012-2022, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,6 +21,8 @@ function validdir($dir) {
   return in_array($root,['mnt','boot']) ? $path : '';
 }
 
+$active  = '/var/tmp/file.manager.active';
+$running = file_exists($active);
 $dir     = validdir(htmlspecialchars_decode($dir));
 [$null,$root,$main,$rest] = my_explode('/',$dir,4);
 $dir     = htmlspecialchars(str_replace('\\','\\\\',$dir));
@@ -39,15 +42,18 @@ $folder  = strtolower($Folder);
 <style>
 .loc{text-align:left!important;padding-left:0!important}
 #title span.left{text-transform:none}
+table.tablesorter.indexer{margin-top:0}
 table.tablesorter.indexer thead th:nth-child(1){width:12px;text-align:left;padding-left:11px}
-table.tablesorter.indexer thead th:nth-child(2){width:3%}
-table.tablesorter.indexer thead th:nth-child(3){width:auto}
-table.tablesorter.indexer thead th:nth-child(n+4){width:10%}
-table.tablesorter.indexer thead th:nth-child(9){width:3%}
+table.tablesorter.indexer thead th:nth-child(2){width:3%!important}
+table.tablesorter.indexer thead th:nth-child(3){width:auto!important}
+table.tablesorter.indexer thead th:nth-child(n+4){width:10%!important}
+table.tablesorter.indexer thead th:nth-child(8){width:12%!important}
+table.tablesorter.indexer thead th:nth-child(9){width:3%!important}
 i[id^="row_"],i[id^="check_"]{cursor:pointer;font-size:1.8rem;color:gray}
 td[id^="name_"]{cursor:pointer}
 i.fa-warning,i.fa-refresh{margin-right:8px}
 input#target{color:<?=$fgcolor?>;width:500px}
+div.autoheight{width:100%;overflow-y:auto;margin-top:<?=$themes1?'-30px':'0'?>}
 div.info{position:absolute;bottom:4px;width:74%;margin-left:23%}
 div.template,div#dialogWindow,input#upload{display:none}
 span.filter{position:relative;margin-left:<?=$themes1?'12':'0'?>px;top:-<?=$themes1?'2':'8'?>px}
@@ -69,6 +75,12 @@ String.prototype.fetch = function(tag){return this.replace('check',tag);}
 String.prototype.bring = function(tag){return this.replace('row',tag);}
 String.prototype.strip = function(){return this.replace(/\/$/,'');}
 String.prototype.quote = function(){return this.replace(/&#34;/g,'"');}
+String.prototype.press = function(len){len=len||80;return this.length<=len ? this : this.slice(0,Math.round(len/2)-2)+'...'+this.slice(-1-Math.round(len/2));}
+
+// General variables
+var box = null;
+var running = false;
+var previous = '';
 
 function folderContextMenu(id,button) {
   var opts = [];
@@ -77,9 +89,9 @@ function folderContextMenu(id,button) {
 <?if (!$isshare):?>
   opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
 <?endif?>
-  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_(Delete <?=$Folder?>)_",id.proxy());}});
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy <?=$Folder?>)_",id.proxy());}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move <?=$Folder?>)_",id.proxy());}});
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_("Delete $Folder")?>",id.proxy());}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=_("Copy $Folder")?>",id.proxy());}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=_("Move $Folder")?>",id.proxy());}});
 <?if (!$isshare):?>
   opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename Folder)_",id.proxy());}});
 <?endif?>
@@ -118,9 +130,9 @@ function deviceFolderContextMenu(dev,id) {
   var opts = [];
   context.init({button:'both'});
   opts.push({header:"_(Action)_"});
-  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_(Delete <?=$Folder?>)_",dev);}});
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy <?=$Folder?>)_",dev);}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move <?=$Folder?>)_",dev);}});
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_("Delete $Folder")?>",dev);}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=_("Copy $Folder")?>",dev);}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=_("Move $Folder")?>",dev);}});
   opts.push({divider:true});
   opts.push({text:"_(Calculate)_", icon:"fa-calculator", action:function(e){e.preventDefault();doAction(12,"_(Calculate Occupied Space)_",dev);}});
   context.attach('#device_'+id, opts);
@@ -134,8 +146,11 @@ function deviceFileContextMenu(dev,id) {
   opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",dev);}});
   context.attach('#device_'+id, opts);
 }
-function selectAll(select) {
-  if (($('#check_0').hasClass('fa-square-o')||select==1) && select!=0) {
+function resize() {
+  $('div.autoheight').height(Math.max(window.innerHeight-320,330));
+}
+function selectAll() {
+  if ($('#check_0').hasClass('fa-square-o')) {
     $('i[id^="check_"]').removeClass('fa-square-o').addClass('fa-check-square-o');
     $('input[class="extra"]').prop('disabled',false);
 <?if (!$isshare):?>
@@ -176,8 +191,203 @@ function data(id) {
   return data;
 <?endif;?>
 }
+function escapeHTML(name) {
+  const data = document.createElement('div');
+  const text = document.createTextNode(name);
+  data.appendChild(text);
+  return data.innerHTML;
+}
+function progress(data) {
+  var file = null;
+  var text = data.split('\n');
+  var strict = /^mnt|^boot/;
+  if (text.length==1) {
+    text = text[0].press();
+  } else {
+    if (strict.test(text[1])) {
+      file = text[1].press();
+      text = previous;
+    } else {
+      file = text[0].press();
+      text = text[1].split(/\s+/);
+      text = "_(Completed)_: "+text[1]+",&nbsp;&nbsp;_(Speed)_: "+text[2]+",&nbsp;&nbsp;_(ETA)_: "+text[3];
+      previous = text;
+    }
+  }
+  if (file==null || strict.test(file)) $('span.text').html((file?'/'+escapeHTML(file)+'<br>':'')+text);
+}
+function fileManager(action) {
+  switch (action) {
+  case 'start':
+    if (!running) {
+<?if (!$running):?>
+      clearTimeout(timers.filemonitor);
+      filemonitor.stop();
+<?endif;?>
+      filemanager.start();
+    }
+    running = true;
+    break;
+  case 'stop':
+    if (running) {
+      filemanager.stop();
+<?if (!$running):?>
+      setTimeout(function(){filemonitor.start();},5000);
+<?endif;?>
+    }
+    running = false;
+    break;
+  }
+}
+function dialogStyle() {
+  $('.ui-dialog .ui-dialog-titlebar').addClass('menu');
+  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%'});
+  $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
+  $('.ui-button-text').css({'padding':'0px 5px'});
+}
+
+var filemanager = new NchanSubscriber('/sub/filemanager',{subscriber:'websocket'});
+filemanager.on('message', function(msg) {
+  var data = $.parseJSON(msg);
+  if (data.error) {
+    fileManager('stop');
+    $('span.text').addClass('orange-text').html(data.error);
+    box.find('#target').prop('disabled',false);
+    box.find('#exist').prop('disabled',false);
+    box.find('#owner').prop('disabled',false);
+    box.find('#group').prop('disabled',false);
+    box.find('#other').prop('disabled',false);
+  } else {
+    progress(data.status);
+    if (data.done && !timers.filemanager) {
+      timers.filemanager = setTimeout(refresh,1250);
+      fileManager('stop');
+      box.dialog('close');
+    }
+  }
+});
+
+<?if ($running):
+extract(parse_ini_file($active));
+$bulk = count(explode("\r",$source));?>
+function showDialog() {
+  box = $("#dialogWindow");
+  switch (<?=$action?>) {
+<?if ($bulk==1):?>
+  case 1: // delete folder
+    box.html($("#templateDeleteFolder").html());
+    box.find('#source').html("<?=$source?>");
+    var height = 330;
+    break;
+  case 3: // copy folder
+    box.html($("#templateCopyFolder").html());
+    box.find('#source').html("<?=$source?>");
+    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    var height = 600;
+    break;
+  case 4: // move folder
+    box.html($("#templateMoveFolder").html());
+    box.find('#source').html("<?=$source?>");
+    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    var height = 600;
+    break;
+  case 5: // delete file
+    box.html($("#templateDeleteFile").html());
+    box.find('#source').html("<?=$source?>");
+    var height = 330;
+    break;
+  case 7: // copy file
+    box.html($("#templateCopyFile").html());
+    box.find('#source').html("<?=$source?>");
+    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    var height = 600;
+    break;
+  case 8: // move file
+    box.html($("#templateMoveFile").html());
+    box.find('#source').html("<?=$source?>");
+    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    var height = 600;
+    break;
+  case 9: // change owner
+    box.html($("#templateChangeOwner").html());
+    box.find('#source').html("<?=$source?>");
+    box.find('#target').prop('disabled',true);
+    var height = 330;
+    break;
+  case 10: // change permission
+    box.html($("#templateChangePermission").html());
+    box.find('#source').html("<?=$source?>");
+    box.find('#owner').prop('disabled',true);
+    box.find('#group').prop('disabled',true);
+    box.find('#other').prop('disabled',true);
+    var height = 330;
+    break;
+<?else:?>
+  case 1: // delete object
+    box.html($("#templateDeleteObject").html());
+    box.find('#source').html("_(Objects to delete)_: <?=$bulk?>");
+    var height = 330;
+    break;
+  case 3: // copy object
+    box.html($("#templateCopyObject").html());
+    box.find('#source').html("_(Objects to copy)_: <?=$bulk?>");
+    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    var height = 600;
+    break;
+  case 4: // move object
+    box.html($("#templateCopyObject").html());
+    box.find('#source').html("_(Objects to move)_: <?=$bulk?>");
+    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    var height = 600;
+    break;
+  case 9: // change owner
+    box.html($("#templateChangeOwner").html());
+    box.find('#source').html("_(Objects to change)_: <?=$bulk?>");
+    box.find('#target').prop('disabled',true);
+    var height = 330;
+    break;
+  case 10: // change permission
+    box.html($("#templateChangePermission").html());
+    box.find('#source').html("_(Objects to change)_: <?=$bulk?>");
+    box.find('#owner').prop('disabled',true);
+    box.find('#group').prop('disabled',true);
+    box.find('#other').prop('disabled',true);
+    var height = 330;
+    break;
+<?endif;?>
+  }
+  box.find('#exist').prop('disabled',true);
+  fileManager('start');
+  box.dialog({
+    title: "<?=$title?>",
+    resizable: false,
+    width: 900,
+    height: height,
+    modal: true,
+    show: {effect:'fade', duration:250},
+    hide: {effect:'fade', duration:250},
+    buttons: {
+      "_(Proceed)_": function(){
+        return;
+      },
+      "_(Cancel)_": function(){
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(refresh,1250);});
+        fileManager('stop');
+        box.dialog('close');
+      }
+    }
+  });
+  dialogStyle();
+}
+<?else:?>
+var filemonitor = new NchanSubscriber('/sub/filemonitor',{subscriber:'websocket'});
+filemonitor.on('message', function(state) {
+  if (state==1 && !timers.filemonitor) timers.filemonitor = setTimeout(refresh,1250);
+});
+setTimeout(function(){filemonitor.start();},5000);
+<?endif;?>
+
 function doAction(action,title,id) {
-  var popup  = $("#dialogWindow");
   var link   = id.substr(0,1)=='/';
   var source =  link ? id : data($('#'+id));
   var path   = source.substr(1).split('/');
@@ -189,89 +399,90 @@ function doAction(action,title,id) {
   var match  = user ? '' : '^(?!.*user0?).*$';
   var name   = path.pop()||path.pop();
   var hdlink = "<?=$var['fuse_directio']==1?'1':''?>";
+  box = $("#dialogWindow");
   switch (action) {
   case 0: // create folder
-    popup.html($("#templateCreateFolder").html());
+    box.html($("#templateCreateFolder").html());
     source = "<?=$dir?>";
-    var height = 300;
+    var height = 330;
     break;
   case 1: // delete folder
-    popup.html($("#templateDeleteFolder").html());
-    popup.find('#source').html(source.strip());
-    var height = 300;
+    box.html($("#templateDeleteFolder").html());
+    box.find('#source').html(source.strip());
+    var height = 330;
     break;
   case 2: // rename folder
-    popup.html($("#templateRenameFolder").html());
-    popup.find('#source').html(name);
-    popup.find('#target').val(name);
-    var height = 300;
+    box.html($("#templateRenameFolder").html());
+    box.find('#source').html(name);
+    box.find('#target').val(name);
+    var height = 330;
     break;
   case 3: // copy folder
-    popup.html($("#templateCopyFolder").html());
-    popup.find('#source').html(source.strip());
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+    box.html($("#templateCopyFolder").html());
+    box.find('#source').html(source.strip());
+    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      popup.find('#target').val(path+auto).change();
+      box.find('#target').val(path+auto).change();
     });
     var height = 600;
     break;
   case 4: // move folder
-    popup.html($("#templateMoveFolder").html());
-    popup.find('#source').html(source.strip());
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+    box.html($("#templateMoveFolder").html());
+    box.find('#source').html(source.strip());
+    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      popup.find('#target').val(path+auto).change();
+      box.find('#target').val(path+auto).change();
     });
     var height = 600;
     break;
   case 5: // delete file
-    popup.html($("#templateDeleteFile").html());
-    popup.find('#source').html(source);
-    var height = 300;
+    box.html($("#templateDeleteFile").html());
+    box.find('#source').html(source);
+    var height = 330;
     break;
   case 6: // rename file
-    popup.html($("#templateRenameFile").html());
-    popup.find('#source').html(name);
-    popup.find('#target').val(name);
-    var height = 300;
+    box.html($("#templateRenameFile").html());
+    box.find('#source').html(name);
+    box.find('#target').val(name);
+    var height = 330;
     break;
   case 7: // copy file
-    popup.html($("#templateCopyFile").html());
-    popup.find('#source').html(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+    box.html($("#templateCopyFile").html());
+    box.find('#source').html(source);
+    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      popup.find('#target').val(path+auto).change();
+      box.find('#target').val(path+auto).change();
     });
     var height = 600;
     break;
   case 8: // move file
-    popup.html($("#templateMoveFile").html());
-    popup.find('#source').html(source);
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+    box.html($("#templateMoveFile").html());
+    box.find('#source').html(source);
+    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      popup.find('#target').val(path+auto).change();
+      box.find('#target').val(path+auto).change();
     });
     var height = 600;
     break;
   case 9: // change owner
-    popup.html($("#templateChangeOwner").html());
+    box.html($("#templateChangeOwner").html());
     var owner = $('#'+id.bring('owner')).text();
-    popup.find('#source').html(source.strip());
-    popup.find('#target').val(owner);
-    var height = 300;
+    box.find('#source').html(source.strip());
+    box.find('#target').val(owner);
+    var height = 330;
     break;
   case 10: // change permission
-    popup.html($("#templateChangePermission").html());
+    box.html($("#templateChangePermission").html());
     var perm = $('#'+id.bring('perm')).text();
-    popup.find('#source').html(source.strip());
-    popup.find('#owner').val('u-'+perm.substr(1,2).patch());
-    popup.find('#group').val('g-'+perm.substr(4,2).patch());
-    popup.find('#other').val('o-'+perm.substr(7,2).patch());
-    var height = 300;
+    box.find('#source').html(source.strip());
+    box.find('#owner').val('u-'+perm.substr(1,2).patch());
+    box.find('#group').val('g-'+perm.substr(4,2).patch());
+    box.find('#other').val('o-'+perm.substr(7,2).patch());
+    var height = 330;
     break;
   case 11: // download file
     var a = document.createElement('a');
@@ -292,8 +503,7 @@ function doAction(action,title,id) {
     break;
   }
   if (action > 10) return;
-  var proceed = false;
-  popup.dialog({
+  box.dialog({
     title: title,
     resizable: false,
     width: 900,
@@ -303,8 +513,8 @@ function doAction(action,title,id) {
     hide: {effect:'fade', duration:250},
     buttons: {
       "_(Proceed)_": function(){
-        if (proceed) return; // already running
-        var target = popup.find('#target');
+        if (running) return;
+        var target = box.find('#target');
         if (target.length) {
           target = target.val();
           switch (action) {
@@ -319,9 +529,9 @@ function doAction(action,title,id) {
             break;
           case 10: // change permission
             target = [];
-            target.push(popup.find('#owner').val());
-            target.push(popup.find('#group').val());
-            target.push(popup.find('#other').val());
+            target.push(box.find('#owner').val());
+            target.push(box.find('#group').val());
+            target.push(box.find('#other').val());
             target = target.join(',')+',ugo+X';
             var valid = /.+/;
             break;
@@ -331,52 +541,27 @@ function doAction(action,title,id) {
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
         } else target = '';
-        var box =$(this);
-        $('span.text').removeClass('orange-text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
-        proceed = true;
-        var makeAction = function(){
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,exist:popup.find('#exist').val()},function(data){
-            if (data.error) {
-              $('span.text').addClass('orange-text').html(data.error);
-              proceed = false;
-              return;
-            }
-            var text = data.status.split(' ');
-            if (text.length==3) text = "_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
-            $('span.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);
-            if (data.pid) {
-              timers.makeAction = setTimeout(makeAction,1000);
-              return;
-            } else if (data.status=='done') {
-              setTimeout(refresh,1250);
-              box.dialog('close');
-            }
-          });
-        };
-        makeAction();
+        $('span.text').removeClass('orange-text').html("_(Running)_...");
+        box.find('#target').prop('disabled',true);
+        box.find('#exist').prop('disabled',true);
+        if (action==10) {
+          box.find('#owner').prop('disabled',true);
+          box.find('#group').prop('disabled',true);
+          box.find('#other').prop('disabled',true);
+        }
+        fileManager('start');
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        var box = $(this);
-        if (proceed) {
-          clearTimeout(timers.makeAction);
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){
-            setTimeout(refresh,1250);
-            box.dialog('close');
-          });
-        } else {
-          box.dialog('close');
-        }
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(refresh,1250);});
+        fileManager('stop');
+        box.dialog('close');
       }
     }
   });
-  $('.ui-dialog .ui-dialog-titlebar').addClass('menu');
-  $('.ui-dialog .ui-dialog-titlebar-close').css({'display':'none'});
-  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%'});
-  $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
-  $('.ui-button-text').css({'padding':'0px 5px'});
+  dialogStyle();
 }
 function doActions(action,title) {
-  var popup = $("#dialogWindow");
   var source = [], type = [], owner = [], perm = [];
   if (action > 0) {
     $('i[id^="check_"]').each(function(){
@@ -407,75 +592,76 @@ function doActions(action,title) {
       if (u && d) {errorSource(); return;} // disallow mixing of disk and user shares
     }
   }
+  box = $("#dialogWindow");
   switch (action) {
   case 0: // create folder
-    popup.html($("#templateCreateFolder").html());
+    box.html($("#templateCreateFolder").html());
     source[0] = "<?=$dir?>";
-    var height = 300;
+    var height = 330;
     break;
   case 1: // delete object
-    popup.html($("#templateDeleteObject").html());
-    popup.find('#source').html(bulk ? "_(Objects to delete)_: "+source.length : source[0].strip());
-    var height = 300;
+    box.html($("#templateDeleteObject").html());
+    box.find('#source').html(bulk ? "_(Objects to delete)_: "+source.length : source[0].strip());
+    var height = 330;
     break;
   case 2: // rename object
     if (!bulk) {
-      popup.html($("#templateRenameObject").html());
-      popup.find('#source').html(name);
-      popup.find('#target').val(name);
-      var height = 300;
+      box.html($("#templateRenameObject").html());
+      box.find('#source').html(name);
+      box.find('#target').val(name);
+      var height = 330;
     } else {
-      popup.html($("#templateMoveObject").html());
-      popup.find('#source').html("_(Objects to move)_: "+source.length);
-      popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).attr('data-pickfilter','HIDE_FILES_FILTER');
-      popup.find('#target').fileTreeAttach(null,null,function(path){
+      box.html($("#templateMoveObject").html());
+      box.find('#source').html("_(Objects to move)_: "+source.length);
+      box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).attr('data-pickfilter','HIDE_FILES_FILTER');
+      box.find('#target').fileTreeAttach(null,null,function(path){
         var bits = path.substr(1).split('/');
         var auto = bits.length>3 ? '' : share;
-        popup.find('#target').val(path+auto).change();
+        box.find('#target').val(path+auto).change();
       });
       action = 4; // change to move operation
       var height = 600;
     }
     break;
   case 3: // copy object
-    popup.html($("#templateCopyObject").html());
-    popup.find('#source').html(bulk ? "_(Objects to copy)_: "+source.length : source[0].strip());
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
-    if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
-    popup.find('#target').fileTreeAttach(null,null,function(path){
+    box.html($("#templateCopyObject").html());
+    box.find('#source').html(bulk ? "_(Objects to copy)_: "+source.length : source[0].strip());
+    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
+    if (bulk || type[0]=='d') box.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
+    box.find('#target').fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      popup.find('#target').val(path+auto).change();
+      box.find('#target').val(path+auto).change();
     });
     var height = 600;
     break;
   case 4: // move object
-    popup.html($("#templateMoveObject").html());
-    popup.find('#source').html(bulk ? "_(Objects to move)_: "+source.length : source[0].strip());
-    popup.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
-    if (bulk || type[0]=='d') popup.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
-    popup.find('#target').fileTreeAttach(null,null,function(path){
+    box.html($("#templateMoveObject").html());
+    box.find('#source').html(bulk ? "_(Objects to move)_: "+source.length : source[0].strip());
+    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
+    if (bulk || type[0]=='d') box.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
+    box.find('#target').fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      popup.find('#target').val(path+auto).change();
+      box.find('#target').val(path+auto).change();
     });
     var height = 600;
     break;
   case 9: // change owner
-    popup.html($("#templateChangeOwner").html());
-    popup.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
-    if (!bulk) popup.find('#target').val(owner[0]);
-    var height = 300;
+    box.html($("#templateChangeOwner").html());
+    box.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
+    if (!bulk) box.find('#target').val(owner[0]);
+    var height = 330;
     break;
   case 10: // change permission
-    popup.html($("#templateChangePermission").html());
-    popup.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
+    box.html($("#templateChangePermission").html());
+    box.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
     if (!bulk) {
-      popup.find('#owner').val('u-'+perm[0].substr(1,2).patch());
-      popup.find('#group').val('g-'+perm[0].substr(4,2).patch());
-      popup.find('#other').val('o-'+perm[0].substr(7,2).patch());
+      box.find('#owner').val('u-'+perm[0].substr(1,2).patch());
+      box.find('#group').val('g-'+perm[0].substr(4,2).patch());
+      box.find('#other').val('o-'+perm[0].substr(7,2).patch());
     }
-    var height = 300;
+    var height = 330;
     break;
   case 12: // calculate occupied space
     timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
@@ -487,8 +673,7 @@ function doActions(action,title) {
     break;
   }
   if (action > 10) return;
-  var proceed = false;
-  popup.dialog({
+  box.dialog({
     title: title,
     resizable: false,
     width: 900,
@@ -498,8 +683,8 @@ function doActions(action,title) {
     hide: {effect:'fade', duration:250},
     buttons: {
       "_(Proceed)_": function(){
-        if (proceed) return; // already running
-        var target = popup.find('#target');
+        if (running) return;
+        var target = box.find('#target');
         if (target.length) {
           target = target.val();
           switch (action) {
@@ -515,9 +700,9 @@ function doActions(action,title) {
             break;
           case 10: // change permission
             target = [];
-            target.push(popup.find('#owner').val());
-            target.push(popup.find('#group').val());
-            target.push(popup.find('#other').val());
+            target.push(box.find('#owner').val());
+            target.push(box.find('#group').val());
+            target.push(box.find('#other').val());
             target = target.join(',')+',ugo+X';
             var valid = /.+/;
             bulk = false;
@@ -528,50 +713,26 @@ function doActions(action,title) {
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
         } else target = '';
-        var box =$(this);
         if (bulk && target.length>0 && target.substr(-1)!='/') target += '/';
-        $('span.text').removeClass('orange-text').html("<i class='fa fa-refresh fa-spin'></i>_(Running)_ ...");
-        proceed = true;
-        var makeAction = function(){
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,source:encodeURIComponent(source.join('\n')),target:encodeURIComponent(target),hdlink:hdlink,exist:popup.find('#exist').val()},function(data){
-            if (data.error) {
-              $('span.text').addClass('orange-text').html(data.error);
-              proceed = false;
-              return;
-            }
-            var text = data.status.split(' ');
-            if (text.length==3) text = "_(completed)_: "+text[0]+",&nbsp;&nbsp;_(Speed)_: "+text[1]+",&nbsp;&nbsp;_(ETA)_: "+text[2]; else text = _(text[0]);
-            $('span.text').html("<i class='fa fa-refresh fa-spin'></i> _(Status)_: "+text);
-            if (data.pid) {
-              timers.makeAction = setTimeout(makeAction,1000);
-              return;
-            } else if (data.status=='done') {
-              setTimeout(refresh,1250);
-              box.dialog('close');
-            }
-        });
-        };
-        makeAction();
+        box.find('#target').prop('disabled',true);
+        box.find('#exist').prop('disabled',true);
+        if (action==10) {
+          box.find('#owner').prop('disabled',true);
+          box.find('#group').prop('disabled',true);
+          box.find('#other').prop('disabled',true);
+        }
+        $('span.text').removeClass('orange-text').html("_(Running)_...");
+        fileManager('start');
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        var box = $(this);
-        if (proceed) {
-          clearTimeout(timers.makeAction);
-          $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){
-            setTimeout(refresh,1250);
-            box.dialog('close');
-          });
-        } else {
-          box.dialog('close');
-        }
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(refresh,1250);});
+        fileManager('stop');
+        box.dialog('close');
       }
     }
   });
-  $('.ui-dialog .ui-dialog-titlebar').addClass('menu');
-  $('.ui-dialog .ui-dialog-titlebar-close').css({'display':'none'});
-  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%'});
-  $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
-  $('.ui-button-text').css({'padding':'0px 5px'});
+  dialogStyle();
 }
 function expert() {
   $.cookie('expert')==null ? $.cookie('expert','expert',{path:'/'}) : $.removeCookie('expert',{path:'/'});
@@ -648,10 +809,19 @@ $(function(){
     thead.after(data);
     table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
     if ($.cookie('my_time')!=null) toggleTime(true);
+<?if ($display['resize']):?>
+    resize();
+    $(window).bind('resize',function(){resize();});
+<?endif;?>
   });
+<?if ($running):?>
+  showDialog();
+<?endif;?>
 });
 </script>
-<table class="indexer tablesorter shift"><thead><tr><th><?if($dir){?><i id="check_0" class="fa fa-fw fa-square-o" onclick="selectAll(this.id)"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead></table>
+<div class="autoheight">
+<table class="indexer tablesorter shift"><thead><tr><th><?if($dir){?><i id="check_0" class="fa fa-fw fa-square-o" onclick="selectAll()"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead></table>
+</div>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
 <input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$dir||$isshare){?> disabled<?}?>>
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
@@ -702,13 +872,13 @@ _(New folder name)_:
 <meta name="referrer" content="same-origin">
 </head>
 <body>
-_(<?=$Folder?> name)_:
+<?=_("$Folder name")?>:
 : <span id="source"></span>
 
 &nbsp;
 : <span class="text"></span>
 
-<div class="info"><i class="fa fa-warning"></i>_(This deletes the <?=$folder?> and all its content)_</div>
+<div class="info"><i class="fa fa-warning"></i><?=_("This deletes the $folder and all its content")?></div>
 </body>
 </html>
 </div>
@@ -752,13 +922,13 @@ _(New folder name)_:
 <meta name="referrer" content="same-origin">
 </head>
 <body>
-_(Source <?=$folder?>)_:
+<?=_("Source $folder")?>:
 : <span id="source"></span>
 
 &nbsp;
 : _(copy to)_ ...
 
-_(Target <?=$folder?>)_:
+<?=_("Target $folder")?>:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
 
 &nbsp;
@@ -767,7 +937,7 @@ _(Target <?=$folder?>)_:
 _(Overwrite existing files)_ <input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''">
 : <span class="text"></span>
 
-<div class="info"><i class="fa fa-warning"></i>_(This copies the <?=$folder?> and all its content to another <?=$folder?>)_</div>
+<div class="info"><i class="fa fa-warning"></i><?=_("This copies the $folder and all its content to another $folder")?></div>
 </body>
 </html>
 </div>
@@ -783,13 +953,13 @@ _(Overwrite existing files)_ <input type="checkbox" id="exist" value="" onchange
 <meta name="referrer" content="same-origin">
 </head>
 <body>
-_(Source <?=$folder?>)_:
+<?=_("Source $folder")?>:
 : <span id="source"></span>
 
 &nbsp;
 : _(move to)_ ...
 
-_(Target <?=$folder?>)_:
+<?=_("Target $folder")?>:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
 
 &nbsp;
@@ -798,7 +968,7 @@ _(Target <?=$folder?>)_:
 _(Overwrite existing files)_ <input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''">
 : <span class="text"></span>
 
-<div class="info"><i class="fa fa-warning"></i>_(This moves the <?=$folder?> and all its content to another <?=$folder?>)_</div>
+<div class="info"><i class="fa fa-warning"></i><?=_("This moves the $folder and all its content to another $folder")?></div>
 </body>
 </html>
 </div>
@@ -1070,7 +1240,7 @@ _(Source)_:
 : <span id="source"></span>
 
 &nbsp;
-: _(change permision)_ ...
+: _(change permission)_ ...
 
 _(New permission)_:
 : <input type="hidden" id="target" value="">

@@ -1,0 +1,186 @@
+#!/usr/bin/php -q
+<?PHP
+/* Copyright 2005-2022, Lime Technology
+ * Copyright 2012-2022, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+session_start();
+$docroot = '/usr/local/emhttp';
+$active  = '/var/tmp/file.manager.active';
+$status  = '/var/tmp/file.manager.status';
+$error   = '/var/tmp/file.manager.error';
+$null    = '/dev/null';
+$timer   = time();
+
+require_once "$docroot/webGui/include/Wrappers.php";
+require_once "$docroot/webGui/include/publish.php";
+extract(parse_plugin_cfg('dynamix',true));
+
+// add translations
+$_SERVER['REQUEST_URI'] = '';
+$_SESSION['locale'] = $display['locale'];
+require_once "$docroot/webGui/include/Translations.php";
+// remember current language
+$locale_init = $locale;
+
+// close session, it is not needed anymore
+session_unset();
+session_destroy();
+
+function delete_file(...$file) {
+  array_map('unlink',array_filter($file,'file_exists'));
+}
+function pgrep($pid) {
+  $pid = is_array($pid) ? $pid[0] : $pid;
+  return $pid && file_exists("/proc/$pid") ? $pid : false;
+}
+function isdir($name) {
+  return mb_substr($name,-1)=='/';
+}
+function truepath($name) {
+  $bits = array_filter(explode('/',$name),'mb_strlen');
+  $path = [];
+  foreach ($bits as $bit) {
+    if ($bit == '.') continue;
+    if ($bit == '..') array_pop($path); else $path[] = $bit;
+  }
+  return '/'.implode('/',$path);
+}
+function validname($name, $real=true) {
+  $path = $real ? realpath(dirname($name)) : truepath(dirname($name));
+  $root = explode('/',$path)[1] ?? '';
+  return in_array($root,['mnt','boot']) ? $path.'/'.basename($name).(mb_substr($name,-1)=='/'?'/':'') : '';
+}
+function update_translation($locale) {
+  global $docroot,$language;
+  $language = [];
+  if ($locale) {
+    $text = "$docroot/languages/$locale/translations.txt";
+    if (file_exists($text)) {
+      $store = "$docroot/languages/$locale/translations.dot";
+      if (!file_exists($store)) file_put_contents($store,serialize(parse_lang_file($text)));
+      $language = unserialize(file_get_contents($store));
+    }
+  }
+}
+function escape($name) {return escapeshellarg(validname($name));}
+function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}
+
+while (true) {
+  unset($action,$source,$target,$H,$exist);
+  if (file_exists($active)) extract(parse_ini_file($active));
+  $reply = [];
+  if (isset($action)) {
+    // check for language changes
+    extract(parse_plugin_cfg('dynamix',true));
+    if ($display['locale'] != $locale_init) {
+      $locale_init = $display['locale'];
+      update_translation($locale_init);
+    }
+    $source = explode("\r",$source);
+    switch ($action) {
+    case 0: // create folder
+      if ($pid) {
+        $reply['status'] = _('Creating').'...';
+      } else {
+        exec("mkdir -p ".quoted($source[0].'/'.$target)." 1>$null 2>$error & echo $!",$pid);
+      }
+      break;
+    case 1: // delete folder
+    case 5: // delete file
+      if ($pid) {
+        $reply['status'] = _('Removing').'... '.exec("tail -1 $status");
+      } else {
+        exec("find ".quoted($source)." -name \"*\" -print -delete 1>$status 2>$null & echo \$!",$pid);
+      }
+      break;
+    case 2: // rename folder
+    case 6: // rename file
+      if ($pid) {
+        $reply['status'] = _('Renaming').'...';
+      } else {
+        $path = dirname($source[0]);
+        exec("mv -f ".quoted($source)." ".quoted("$path/$target")." 1>$null 2>$error & echo \$!",$pid);
+      }
+      break;
+    case 3:  // copy folder
+    case 7:  // copy file
+      if ($pid) {
+        $reply['status'] = shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'") ?: _('Copying').'...';
+      } else {
+        $target = validname($target,false);
+        if ($target) {
+          $mkpath = isdir($target) ? '--mkpath' : '';
+          exec("rsync -ahPIX$H $exist $mkpath --out-format=%f --info=flist0,misc0,stats0,name1,progress2 ".quoted($source)." ".escapeshellarg($target)." 1>$status 2>$error & echo \$!",$pid);
+        } else {
+          $reply['error'] = 'Invalid target name';
+        }
+      }
+      break;
+    case 4: // move folder
+    case 8: // move file
+      if ($pid) {
+        $reply['status'] = isset($step2) ? _('Moving').'... '.exec("tail -1 $status") : (shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'") ?: _('Moving').'...');
+      } else {
+        $target = validname($target,false);
+        if ($target) {
+          $step2 = true;
+          $mkpath = isdir($target) ? '--mkpath' : '';
+          exec("rsync -ahPIX$H $exist $mkpath --out-format=%f --info=flist0,misc0,stats0,name1,progress2 --remove-source-files ".quoted($source)." ".escapeshellarg($target)." 1>$status 2>$error & echo \$!",$pid);
+        } else {
+          $reply['error'] = 'Invalid target name';
+        }
+      }
+      break;
+    case 9: // change owner
+      if ($pid) {
+        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\K[^']+\"");
+      } else {
+        exec("chown -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
+      }
+      break;
+    case 10: // change permission
+      if ($pid) {
+        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\K[^']+\"");
+      } else {
+        exec("chmod -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
+      }
+      break;
+    case 99: // kill running background process
+      if ($pid) exec("kill $pid");
+      delete_file($active,$status,$error);
+      unset($pid,$step2);
+      break;
+    }
+    $pid = pgrep($pid);
+    if ($pid===false) {
+      if ($step2) {
+        exec("find ".quoted($source)." -type d -empty -print -delete 1>$status 2>$null & echo \$!",$pid);
+        $step2 = false;
+        $pid = pgrep($pid);
+      } else {
+        if (file_exists($error)) $reply['error'] = str_replace("\n","<br>",trim(file_get_contents($error)));
+        delete_file($active,$status,$error);
+        unset($pid,$step2);
+        $reply['status'] = _('Done');
+        $reply['done'] = 1;
+      }
+    }
+  }
+  if (time()-$timer) {
+    // update every second
+    publish('filemonitor',file_exists($active) ? 1 : 0);
+    $timer = time();
+  }
+  publish('filemanager',json_encode($reply));
+  usleep(250000);
+}
+?>
