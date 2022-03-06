@@ -128,11 +128,11 @@ while (true) {
     case 4: // move folder
     case 8: // move file
       if ($pid) {
-        $reply['status'] = isset($step2) ? _('Moving').'... '.exec("tail -1 $status") : (shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'") ?: _('Moving').'...');
+        $reply['status'] = isset($move) ? _('Moving').'... '.exec("tail -1 $status") : (shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'") ?: _('Moving').'...');
       } else {
         $target = validname($target,false);
         if ($target) {
-          $step2 = true;
+          $move = true;
           $mkpath = isdir($target) ? '--mkpath' : '';
           exec("rsync -ahPIX$H $exist $mkpath --out-format=%f --info=flist0,misc0,stats0,name1,progress2 --remove-source-files ".quoted($source)." ".escapeshellarg($target)." 1>$status 2>$error & echo \$!",$pid);
         } else {
@@ -142,14 +142,14 @@ while (true) {
       break;
     case 9: // change owner
       if ($pid) {
-        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\K[^']+\"");
+        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
       } else {
         exec("chown -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
       }
       break;
     case 10: // change permission
       if ($pid) {
-        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\K[^']+\"");
+        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
       } else {
         exec("chmod -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
       }
@@ -157,19 +157,19 @@ while (true) {
     case 99: // kill running background process
       if ($pid) exec("kill $pid");
       delete_file($active,$status,$error);
-      unset($pid,$step2);
+      unset($pid,$move);
       break;
     }
     $pid = pgrep($pid);
     if ($pid===false) {
-      if ($step2) {
+      if ($move) {
         exec("find ".quoted($source)." -type d -empty -print -delete 1>$status 2>$null & echo \$!",$pid);
-        $step2 = false;
+        $move = false;
         $pid = pgrep($pid);
       } else {
         if (file_exists($error)) $reply['error'] = str_replace("\n","<br>",trim(file_get_contents($error)));
         delete_file($active,$status,$error);
-        unset($pid,$step2);
+        unset($pid,$move);
         $reply['status'] = _('Done');
         $reply['done'] = 1;
       }

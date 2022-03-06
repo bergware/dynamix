@@ -240,7 +240,7 @@ function fileManager(action) {
   }
 }
 function dialogStyle() {
-  $('.ui-dialog .ui-dialog-titlebar').addClass('menu');
+  $('.ui-dialog .ui-dialog-titlebar-close').text('X').prop("title","_(Close)_");
   $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%'});
   $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
   $('.ui-button-text').css({'padding':'0px 5px'});
@@ -389,7 +389,7 @@ setTimeout(function(){filemonitor.start();},5000);
 
 function doAction(action,title,id) {
   var link   = id.substr(0,1)=='/';
-  var source =  link ? id : data($('#'+id));
+  var source = link ? id : data($('#'+id));
   var path   = source.substr(1).split('/');
   var access = ['mnt','boot'];
   if (!access.includes(path[0])) return;
