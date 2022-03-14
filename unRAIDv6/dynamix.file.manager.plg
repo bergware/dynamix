@@ -15,7 +15,7 @@
 ##&name;
 
 ###&version;
-- Allow Unassigned Device to access both disk shares and user shares
+- Allow Unassigned Devices to access both disk shares and user shares
 
 ### 2022.03.11
 - Adjusted min/max Unraid version for the launch of this plugin
