@@ -396,7 +396,8 @@ function doAction(action,title,id) {
   var user   = /^user0?$/.test(path[1]);
   var root   = '/'+path[0]+(user ? '/'+path[1] : '');
   var share  = user||!path[2]||(link&&path.length==3) ? '' : path[2]+'/';
-  var match  = user ? '' : '^(?!.*user0?).*$';
+  var ud     = ['disks','remotes','rootshare'].includes(path[1]); // unassigned devices
+  var match  = ud||user ? '' : '^(?!.*user0?).*$';
   var name   = path.pop()||path.pop();
   var hdlink = "<?=$var['fuse_directio']==1?'1':''?>";
   box = $("#dialogWindow");
@@ -536,7 +537,7 @@ function doAction(action,title,id) {
             var valid = /.+/;
             break;
           default:
-            var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // disallow mixing of disk and user shares
+            var valid = ud ? /.+/ : (user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
             break;
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
@@ -580,7 +581,8 @@ function doActions(action,title) {
     var user   = /^user0?$/.test(path[1]);
     var root   = '/'+path[0]+(user ? '/'+path[1] : '');
     var share  = user||!path[2] ? '' : path[2]+'/';
-    var match  = user ? '' : '^(?!.*user0?).*$';
+    var ud     = ['disks','remotes','rootshare'].includes(path[1]); // unassigned devices
+    var match  = ud||user ? '' : '^(?!.*user0?).*$';
     var name   = path.pop()||path.pop();
     var hdlink = "<?=$var['fuse_directio']==1?'1':''?>";
     if (bulk) {
@@ -708,7 +710,7 @@ function doActions(action,title) {
             bulk = false;
             break;
           default:
-            var valid = user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/; // disallow mixing of disk and user shares
+            var valid = ud ? /.+/ : (user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
             break;
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
