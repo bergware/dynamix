@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.16">
+<!ENTITY version   "2022.03.18">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "4e7f4c4f980d0ee3527b1ea791a186d2">
+<!ENTITY MD5       "aea2e86370c3255f26047f374f2078ab">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -14,17 +14,21 @@
 <CHANGES>
 ##&name;
 
-### &version;
+###&version;
+- Added Text File Editor (ace.js)
+- Minor visual enhancements
+
+###2022.03.16
 - Added support for Unassigned Devices (UD) 'rootshare'
 - Rearranged context menu to separate common actions
 
-### 2022.03.14
+###2022.03.14
 - Allow Unassigned Devices to access both disk shares and user shares
 
-### 2022.03.11
+###2022.03.11
 - Adjusted min/max Unraid version for the launch of this plugin
 
-### 2022.03.03
+###2022.03.03
 - Initial release
 </CHANGES>
 
