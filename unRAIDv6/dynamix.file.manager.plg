@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.19a">
+<!ENTITY version   "2022.03.19b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ef2655bf489e3024c01fb8e5556615a6">
+<!ENTITY MD5       "88b505212ae5a4a9a4873e17f32ee724">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -16,6 +16,7 @@
 
 ###&version;
 - More refinements for the text file editor
+- Fixed editing of files containing single quotes
 
 ###2022.03.18
 - Added Text File Editor (ace.js)
