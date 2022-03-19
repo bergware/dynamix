@@ -20,19 +20,24 @@ function validdir($dir) {
   $root = explode('/',$path)[1] ?? '';
   return in_array($root,['mnt','boot']) ? $path : '';
 }
-
+function quote($text) {
+  return "'$text'";
+}
 $active  = '/var/tmp/file.manager.active';
 $running = file_exists($active);
 $dir     = validdir(htmlspecialchars_decode($dir));
-[$null,$root,$main,$rest] = my_explode('/',$dir,4);
+[$null,$root,$main,$next,$rest] = my_explode('/',$dir,5);
 $dir     = htmlspecialchars(str_replace('\\','\\\\',$dir));
 $lock    = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
-$isshare = $root=='mnt' && (!$main || !$rest);
+$isshare = $root=='mnt' && (!$main || !$next || ($main=='rootshare' && !$rest));
 $bgcolor = in_array($theme,['white','azure']) ? '#f2f2f2' : '#1c1c1c';
 $fgcolor = in_array($theme,['white','azure']) ? '#1c1c1c' : '#f2f2f2';
 $incolor = $theme!='gray' ? $bgcolor : '#121510';
 $Folder  = $lock=='---' ? 'Device' : ($isshare ? 'Share' : 'Folder');
 $folder  = strtolower($Folder);
+$editor  = '/boot/config/editor.cfg';
+
+if (!file_exists($editor)) file_put_contents($editor,implode("\n",['','txt','js','php','page','plg','xml','old','bak','log','css']));
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.ui.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.filetree.css")?>">
@@ -76,6 +81,7 @@ String.prototype.bring = function(tag){return this.replace('row',tag);}
 String.prototype.strip = function(){return this.replace(/\/$/,'');}
 String.prototype.quote = function(){return this.replace(/&#34;/g,'"');}
 String.prototype.press = function(len){len=len||80;return this.length<=len ? this : this.slice(0,Math.round(len/2)-2)+'...'+this.slice(-1-Math.round(len/2));}
+String.prototype.build = function(){return this.replace(/\n<!--!\n|\n!-->\n/,'');}
 
 // General variables
 var box = null;
@@ -86,9 +92,6 @@ function folderContextMenu(id,button) {
   var opts = [];
   context.init({button:button});
   opts.push({header:"_(Action)_"});
-<?if (!$isshare):?>
-  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
-<?endif?>
   opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_("Delete $Folder")?>",id.proxy());}});
   opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=_("Copy $Folder")?>",id.proxy());}});
   opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=_("Move $Folder")?>",id.proxy());}});
@@ -98,10 +101,13 @@ function folderContextMenu(id,button) {
   opts.push({divider:true});
   opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(9,"_(Change Owner)_",id.proxy());}});
   opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
-  opts.push({divider:true});
   opts.push({text:"_(Calculate)_", icon:"fa-calculator", action:function(e){e.preventDefault();doAction(12,"_(Calculate Occupied Space)_",id.proxy());}});
-<?if ($dir && !$isshare):?>
+<?if (!$isshare):?>
+  opts.push({header:"_(Common)_"});
+  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
+<?if ($dir):?>
   opts.push({text:"_(Upload)_", icon:"fa-upload", action:function(e){e.preventDefault();$('#upload').click();}});
+<?endif?>
 <?endif?>
   context.attach('#'+id, opts);
 }
@@ -109,9 +115,6 @@ function fileContextMenu(id,button) {
   var opts = [];
   context.init({button:button});
   opts.push({header:"_(Action)_"});
-<?if (!$isshare):?>
-  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
-<?endif?>
   opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(5,"_(Delete File)_",id.proxy());}});
   opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(7,"_(Copy File)_",id.proxy());}});
   opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",id.proxy());}});
@@ -119,10 +122,13 @@ function fileContextMenu(id,button) {
   opts.push({divider:true});
   opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(9,"_(Change Owner)_",id.proxy());}});
   opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
-  opts.push({divider:true});
   opts.push({text:"_(Download)_", icon:"fa-download", action:function(e){e.preventDefault();doAction(11,"_(Download File)_",id.proxy());}});
-<?if ($dir && !$isshare):?>
+<?if (!$isshare):?>
+  opts.push({header:"_(Common)_"});
+  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
+<?if ($dir):?>
   opts.push({text:"_(Upload)_", icon:"fa-upload", action:function(e){e.preventDefault();$('#upload').click();}});
+<?endif?>
 <?endif?>
   context.attach('#'+id, opts);
 }
@@ -240,10 +246,66 @@ function fileManager(action) {
   }
 }
 function dialogStyle() {
-  $('.ui-dialog .ui-dialog-titlebar-close').text('X').prop("title","_(Close)_");
-  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%'});
+  $('.ui-dialog .ui-dialog-titlebar-close').css({'background':'transparent','border':'none','font-size':'1.8rem','margin-top':'-14px','margin-right':'-18px'}).html('<i class="fa fa-times"></i>').prop('title',"_(Close)_").prop('onclick',null).off('click').click(function(){box.dialog('close');});
+  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%','font-size':'1.8rem'});
   $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
   $('.ui-button-text').css({'padding':'0px 5px'});
+}
+function fileName(file) {
+  return file.indexOf('/')>=0 ? file.split('/').pop() : file;
+}
+function fileExtension(file) {
+  file = fileName(file);
+  return file.indexOf('.')>=0 ? file.split('.').pop() : '';
+}
+function fileEdit(id) {
+  const valid = ['','cfg','conf',<?=implode(',',array_map('quote',file($editor,FILE_IGNORE_NEW_LINES)))?>];
+  var source = $('#'+id.proxy()).attr('data').quote();
+  if (!valid.includes(fileExtension(source))) return;
+  box = $("#dialogWindow");
+  $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'edit', file:encodeURIComponent(source)},function(data){
+    var content = data.split('\0');
+    // Prepare the file content for editing:
+    // 1. Replace HTML special characters &xxx; by @xxx; so these are not translated by the browser
+    // 2. Replace literal '<' signs by its &lt; representation so the browser won't execute them
+    // 3. Load the prepared content {$0} in a <div> block which is later copied to the editor
+    // 4. Indicate whether the file {$1} has linux or windows line endings (files are saved with their original line endings)
+    // 5. Prepare the syntax coding {$2} for the opened file
+    // 6. Build the dialog window in which the editor resides
+    box.html($("#templateEditFile").html().replace('{$0}',content[0].replace(/&([#0-9a-zA-Z]+?);/g,'@$1;').replace(/</g,'&lt;')).replace('{$1}',content[1]||'auto').replace('{$2}',source).build());
+    box.dialog({
+      title: fileName(source),
+      height: Math.min(screen.height*2/3,$(window).height()-80),
+      width: Math.min(screen.width*2/3,$(window).width()-10),
+      resizable: false,
+      modal: true,
+      show: {effect:'fade', duration:250},
+      hide: {effect:'fade', duration:250},
+      buttons: {
+        "_(Save)_": function(){
+          $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'save', file:encodeURIComponent(source), data:encodeURIComponent(editor.session.getValue())});
+          box.dialog('close');
+        },
+        "_(Cancel)_": function(){
+          box.dialog('close');
+        }
+      }
+    });
+    dialogStyle();
+    $('.ui-dialog .ui-dialog-titlebar-close').html('<i class="fa fa-expand"></i>').prop('title',"_(Expand)_").prop('onclick',null).off('click').click(function(){fullWindow();});
+  });
+}
+function fullWindow() {
+  if (box.dialog('option','height')==Math.min(screen.height*2/3,$(window).height()-80)) {
+    box.dialog('option','height',$(window).height()-80);
+    box.dialog('option','width',$(window).width()-10);
+    $('.ui-dialog .ui-dialog-titlebar-close').html("<i class='fa fa-compress'></i>").prop("title","_(Compress)_");
+  } else {
+    box.dialog('option','height',Math.min(screen.height*2/3,$(window).height()-80));
+    box.dialog('option','width',Math.min(screen.width*2/3,$(window).width()-10));
+    $('.ui-dialog .ui-dialog-titlebar-close').html("<i class='fa fa-expand'></i>").prop("title","_(Expand)_");
+  }
+  editor.resize();
 }
 
 var filemanager = new NchanSubscriber('/sub/filemanager',{subscriber:'websocket'});
@@ -266,7 +328,6 @@ filemanager.on('message', function(msg) {
     }
   }
 });
-
 <?if ($running):
 extract(parse_ini_file($active));
 $bulk = count(explode("\r",$source));?>
@@ -283,13 +344,13 @@ function showDialog() {
     box.html($("#templateCopyFolder").html());
     box.find('#source').html("<?=$source?>");
     box.find('#target').val("<?=$target?>").prop('disabled',true);
-    var height = 600;
+    var height = 630;
     break;
   case 4: // move folder
     box.html($("#templateMoveFolder").html());
     box.find('#source').html("<?=$source?>");
     box.find('#target').val("<?=$target?>").prop('disabled',true);
-    var height = 600;
+    var height = 630;
     break;
   case 5: // delete file
     box.html($("#templateDeleteFile").html());
@@ -300,13 +361,13 @@ function showDialog() {
     box.html($("#templateCopyFile").html());
     box.find('#source').html("<?=$source?>");
     box.find('#target').val("<?=$target?>").prop('disabled',true);
-    var height = 600;
+    var height = 630;
     break;
   case 8: // move file
     box.html($("#templateMoveFile").html());
     box.find('#source').html("<?=$source?>");
     box.find('#target').val("<?=$target?>").prop('disabled',true);
-    var height = 600;
+    var height = 630;
     break;
   case 9: // change owner
     box.html($("#templateChangeOwner").html());
@@ -332,13 +393,13 @@ function showDialog() {
     box.html($("#templateCopyObject").html());
     box.find('#source').html("_(Objects to copy)_: <?=$bulk?>");
     box.find('#target').val("<?=$target?>").prop('disabled',true);
-    var height = 600;
+    var height = 630;
     break;
   case 4: // move object
     box.html($("#templateCopyObject").html());
     box.find('#source').html("_(Objects to move)_: <?=$bulk?>");
     box.find('#target').val("<?=$target?>").prop('disabled',true);
-    var height = 600;
+    var height = 630;
     break;
   case 9: // change owner
     box.html($("#templateChangeOwner").html());
@@ -393,11 +454,11 @@ function doAction(action,title,id) {
   var path   = source.substr(1).split('/');
   var access = ['mnt','boot'];
   if (!access.includes(path[0])) return;
-  var user   = /^user0?$/.test(path[1]);
+  var user   = /^(user0?|rootshare)$/.test(path[1]);
   var root   = '/'+path[0]+(user ? '/'+path[1] : '');
   var share  = user||!path[2]||(link&&path.length==3) ? '' : path[2]+'/';
-  var ud     = ['disks','remotes','rootshare'].includes(path[1]); // unassigned devices
-  var match  = ud||user ? '' : '^(?!.*user0?).*$';
+  var ud     = ['disks','remotes'].includes(path[1]); // unassigned devices
+  var match  = ud||user ? '' : '^(?!.*(user0?|rootshare)).*$';
   var name   = path.pop()||path.pop();
   var hdlink = "<?=$var['fuse_directio']==1?'1':''?>";
   box = $("#dialogWindow");
@@ -426,7 +487,7 @@ function doAction(action,title,id) {
       var auto = bits.length>3 ? '' : share;
       box.find('#target').val(path+auto).change();
     });
-    var height = 600;
+    var height = 630;
     break;
   case 4: // move folder
     box.html($("#templateMoveFolder").html());
@@ -436,7 +497,7 @@ function doAction(action,title,id) {
       var auto = bits.length>3 ? '' : share;
       box.find('#target').val(path+auto).change();
     });
-    var height = 600;
+    var height = 630;
     break;
   case 5: // delete file
     box.html($("#templateDeleteFile").html());
@@ -457,7 +518,7 @@ function doAction(action,title,id) {
       var auto = bits.length>3 ? '' : share;
       box.find('#target').val(path+auto).change();
     });
-    var height = 600;
+    var height = 630;
     break;
   case 8: // move file
     box.html($("#templateMoveFile").html());
@@ -467,7 +528,7 @@ function doAction(action,title,id) {
       var auto = bits.length>3 ? '' : share;
       box.find('#target').val(path+auto).change();
     });
-    var height = 600;
+    var height = 630;
     break;
   case 9: // change owner
     box.html($("#templateChangeOwner").html());
@@ -537,7 +598,7 @@ function doAction(action,title,id) {
             var valid = /.+/;
             break;
           default:
-            var valid = ud ? /.+/ : (user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
+            var valid = ud ? /^\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
             break;
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
@@ -578,11 +639,11 @@ function doActions(action,title) {
     var path   = source[0].substr(1).split('/');
     var access = ['mnt','boot'];
     if (!access.includes(path[0])) return;
-    var user   = /^user0?$/.test(path[1]);
+    var user   = /^(user0?|rootshare)$/.test(path[1]);
     var root   = '/'+path[0]+(user ? '/'+path[1] : '');
     var share  = user||!path[2] ? '' : path[2]+'/';
-    var ud     = ['disks','remotes','rootshare'].includes(path[1]); // unassigned devices
-    var match  = ud||user ? '' : '^(?!.*user0?).*$';
+    var ud     = ['disks','remotes'].includes(path[1]); // unassigned devices
+    var match  = ud||user ? '' : '^(?!.*(user0?|rootshare)).*$';
     var name   = path.pop()||path.pop();
     var hdlink = "<?=$var['fuse_directio']==1?'1':''?>";
     if (bulk) {
@@ -622,7 +683,7 @@ function doActions(action,title) {
         box.find('#target').val(path+auto).change();
       });
       action = 4; // change to move operation
-      var height = 600;
+      var height = 630;
     }
     break;
   case 3: // copy object
@@ -635,7 +696,7 @@ function doActions(action,title) {
       var auto = bits.length>3 ? '' : share;
       box.find('#target').val(path+auto).change();
     });
-    var height = 600;
+    var height = 630;
     break;
   case 4: // move object
     box.html($("#templateMoveObject").html());
@@ -647,7 +708,7 @@ function doActions(action,title) {
       var auto = bits.length>3 ? '' : share;
       box.find('#target').val(path+auto).change();
     });
-    var height = 600;
+    var height = 630;
     break;
   case 9: // change owner
     box.html($("#templateChangeOwner").html());
@@ -710,7 +771,7 @@ function doActions(action,title) {
             bulk = false;
             break;
           default:
-            var valid = ud ? /.+/ : (user ? /^\/mnt\/user0?\/.+/ : /^\/mnt\/(?!.*user0?).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
+            var valid = ud ? /\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
             break;
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
@@ -825,7 +886,6 @@ $(function(){
 <table class="indexer tablesorter shift"><thead><tr><th><?if($dir){?><i id="check_0" class="fa fa-fw fa-square-o" onclick="selectAll()"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead></table>
 </div>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
-<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$dir||$isshare){?> disabled<?}?>>
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
@@ -833,6 +893,7 @@ $(function(){
 <input type="button" value="_(Owner)_" class="extra" onclick="doActions(9,this.value)" disabled>
 <input type="button" value="_(Permission)_" class="extra" onclick="doActions(10,this.value)" disabled>
 <input type="button" value="_(Calculate)_" class="extra" onclick="doActions(12,this.value)" disabled>
+<input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$dir||$isshare){?> disabled<?}?>>
 <input type="button" value="_(Upload)_" id="uploadButton" onclick="$('#upload').click()"<?if (!$dir||$isshare){?> disabled<?}?>><span id="uploadStatus"></span>
 
 <input type="file" id="upload" value="" onchange="startUpload(this.files)" multiple>
@@ -847,6 +908,7 @@ $(function(){
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 &nbsp;
@@ -872,6 +934,7 @@ _(New folder name)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 <?=_("$Folder name")?>:
@@ -894,6 +957,7 @@ _(New folder name)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Current folder name)_:
@@ -922,6 +986,7 @@ _(New folder name)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 <?=_("Source $folder")?>:
@@ -953,6 +1018,7 @@ _(Overwrite existing files)_ <input type="checkbox" id="exist" value="" onchange
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 <?=_("Source $folder")?>:
@@ -984,6 +1050,7 @@ _(Overwrite existing files)_ <input type="checkbox" id="exist" value="" onchange
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(File name)_:
@@ -1006,6 +1073,7 @@ _(File name)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Current file name)_:
@@ -1034,6 +1102,7 @@ _(New file name)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source file)_:
@@ -1065,6 +1134,7 @@ _(Overwrite existing file)_ <input type="checkbox" id="exist" value="" onchange=
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source file)_:
@@ -1096,6 +1166,7 @@ _(Overwrite existing file)_ <input type="checkbox" id="exist" value="" onchange=
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source)_:
@@ -1118,6 +1189,7 @@ _(Source)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source)_:
@@ -1143,6 +1215,7 @@ _(Target)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source)_:
@@ -1174,6 +1247,7 @@ _(Overwrite existing files)_ <input type="checkbox" id="exist" value="" onchange
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source)_:
@@ -1205,6 +1279,7 @@ _(Overwrite existing files)_ <input type="checkbox" id="exist" value="" onchange
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source)_:
@@ -1236,6 +1311,7 @@ _(New owner)_:
 <meta name="viewport" content="width=1600">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 </head>
 <body>
 _(Source)_:
@@ -1268,4 +1344,42 @@ _(New permission)_:
 <div class="info"><i class="fa fa-warning"></i>_(This changes the permission of the source recursively)_</div>
 </body>
 </html>
+</div>
+
+<div markdown="1" id="templateEditFile" class="template">
+<!--!
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
+<style>div#editor{position:absolute;top:0;bottom:0;left:0;right:0;font-size:1.4rem;font-family:bitstream;line-height:1.6}</style>
+</head>
+<body>
+<div id="file" style="display:none">{$0}</div><div id="editor"></div>
+<script src="<?autov('/plugins/dynamix.file.manager/javascript/ace/ace.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.file.manager/javascript/ace/ext-modelist.js')?>"></script>
+<script>
+function getMode(file){
+  var modelist = require('ace/ext/modelist');
+  return modelist.getModeForPath(file).mode;
+}
+var editor = ace.edit('editor');
+<?if (in_array($theme,['black','gray'])):?>
+editor.setTheme('ace/theme/tomorrow_night');
+<?else:?>
+editor.setTheme('ace/theme/tomorrow');
+<?endif;?>
+editor.setOption('newLineMode',"{$1}");
+editor.session.setMode(getMode("{$2}"));
+editor.session.setValue($('#file').text());
+$('#file').text('');
+</script>
+</body>
+</html>
+!-->
 </div>

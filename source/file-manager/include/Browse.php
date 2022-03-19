@@ -48,6 +48,16 @@ if (isset($_POST['mode'])) {
     $text[] = _('Total occupied space').": ".my_scale($size,$unit)." $unit";
     $text[] = sprintf(_("in %s folder".($dirs==1?'':'s')." and %s file".($files==1?'':'s')),my_number($dirs),my_number($files));
     die('<div style="text-align:left;margin-left:56px">'.implode('<br>',$text).'</div>');
+  case 'edit':
+    $data = '';
+    if ($file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])))) {
+      $data = file_get_contents($file);
+      $data .= "\0".(strpos($data,"\r\n")===false ? 'linux' : 'windows');
+    }
+    die($data);
+  case 'save':
+    if ($file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])))) file_put_contents($file,preg_replace('/@([#0-9a-zA-Z]+?);/','&${1};',rawurldecode($_POST['data'])));
+    die();
   }
 }
 function write(&$rows) {
@@ -118,10 +128,10 @@ $block = empty($_GET['block']) ? ['/','/mnt','/mnt/user'] : ['/'];
 $fmt   = "%F {$display['time']}";
 $dirs  = $files = [];
 $total = $objs = 0;
-[$null,$root,$main,$rest] = my_explode('/',$dir,4);
+[$null,$root,$main,$next,$rest] = my_explode('/',$dir,5);
 $user  = $root=='mnt' && in_array($main,['user','user0']);
 $lock  = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
-$isshare = $root=='mnt' && (!$main || !$rest);
+$isshare = $root=='mnt' && (!$main || !$next || ($main=='rootshare' && !$rest));
 $folder = $lock=='---' ? _('DEVICE') : ($isshare ? _('SHARE') : _('FOLDER'));
 
 if ($user) {
@@ -151,7 +161,7 @@ while (($row = fgets($stat))!==false) {
   } else {
     $text[] = '<tr><td><i id="check_'.$objs.'" class="fa fa-fw fa-square-o" onclick="selectOne(this.id)"></i></td>';
     $text[] = '<td class="ext" data="'.$ext.'"><div class="icon-file icon-'.$ext.'"></div></td>';
-    $text[] = '<td id="name_'.$objs.'" class="'.$tag.'" oncontextmenu="fileContextMenu(this.id,\'right\');return false">'.htmlspecialchars(basename($name)).'</td>';
+    $text[] = '<td id="name_'.$objs.'" class="'.$tag.'" onclick="fileEdit(this.id)" oncontextmenu="fileContextMenu(this.id,\'right\');return false">'.htmlspecialchars(basename($name)).'</td>';
     $text[] = '<td id="owner_'.$objs.'" class="'.$tag.'">'.$owner.'</td>';
     $text[] = '<td id="perm_'.$objs.'" class="'.$tag.'">'.$perm.'</td>';
     $text[] = '<td data="'.$size.'" class="'.$tag.'">'.my_scale($size,$unit).' '.$unit.'</td>';
