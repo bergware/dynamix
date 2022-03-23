@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.21a">
+<!ENTITY version   "2022.03.23">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "bbcf1222ab06acfa6267fee31de28703">
+<!ENTITY MD5       "dd9a59a8917744f7563e89275b0b4788">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Added file viewer for files with extension: .pdf, .jpg, png, .jpeg, .gif
+
+###2022.03.21
 - Fixed progress indicator for Move and Copy operations
 
 ###2022.03.19
