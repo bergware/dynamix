@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.23a">
+<!ENTITY version   "2022.03.24">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "4e8d897efe98e7c3c44107abadf560ac">
+<!ENTITY MD5       "cdbed2b076dcf38c60d72c90fb7a5c4c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Show Unraid wave when loading of files takes longer
+
+###2022.03.23
 - Added file viewer for files with extension: .pdf, .jpg, png, .jpeg, .gif
 - Minor visual enhancements
 
