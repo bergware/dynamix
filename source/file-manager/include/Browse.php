@@ -52,11 +52,11 @@ if (isset($_POST['mode'])) {
     $data = '';
     if ($file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])))) {
       $data = file_get_contents($file);
-      $data .= "\0".(strpos($data,"\r\n")===false ? 'linux' : 'windows');
+      $data .= "\0".(strpos($data,"\r\n")===false ? 'unix' : 'windows');
     }
     die($data);
   case 'save':
-    if ($file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])))) file_put_contents($file,preg_replace('/@([#0-9a-zA-Z]+?);/','&${1};',rawurldecode($_POST['data'])));
+    if ($file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])))) file_put_contents($file,rawurldecode($_POST['data']));
     die();
   }
 }
@@ -105,18 +105,18 @@ function my_devs(&$devs,$name,$menu) {
       $text[$i] = '<a class="info" onclick="return false"><i class="lock fa fa-fw fa-hdd-o grey-text"></i></a>&nbsp;---';
     } else {
       switch ($disks[$dev]['luksState']) {
-        case 0: $text[$i] = '<a class="info" onclick="return false"><i class="lock fa fa-fw fa-unlock-alt grey-text"></i><span>'._('Not encrypted').'</span></a>'; break;
-        case 1: $text[$i] = '<a class="info" onclick="return false"><i class="lock fa fa-fw fa-unlock-alt green-text"></i><span>'._('Encrypted and unlocked').'</span></a>'; break;
-        case 2: $text[$i] = '<a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: missing encryption key').'</span></a>'; break;
-        case 3: $text[$i] = '<a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: wrong encryption key').'</span></a>'; break;
-       default: $text[$i] = '<a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: unknown error').'</span></a>'; break;
+        case 0: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-unlock-alt grey-text"></i><span>'._('Not encrypted').'</span></a>'; break;
+        case 1: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-unlock-alt green-text"></i><span>'._('Encrypted and unlocked').'</span></a>'; break;
+        case 2: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: missing encryption key').'</span></a>'; break;
+        case 3: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: wrong encryption key').'</span></a>'; break;
+       default: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: unknown error').'</span></a>'; break;
       }
       $root = $dev=='flash' ? "/boot/$name" : "/mnt/$dev/$name";
-      $text[$i] .= '&nbsp;<span id="device_'.$i.'" class="hand" onclick="'.$menu.'(\''.$root.'\','.$i.')" oncontextmenu="'.$menu.'(\''.$root.'\','.$i.');return false">'.compress($dev,8,0).'</span>';
+      $text[$i] .= '<span id="device_'.$i.'" class="hand" onclick="'.$menu.'(\''.$root.'\','.$i.')" oncontextmenu="'.$menu.'(\''.$root.'\','.$i.');return false">'.compress($dev,8,0).'</span></span>';
     }
     $i++;
   }
-  return implode(', ',$text);
+  return implode($text);
 }
 $dir = validdir(htmlspecialchars_decode(rawurldecode($_GET['dir'])));
 if (!$dir) {echo '<tbody><tr><td></td><td></td><td colspan="7">',_('Invalid path'),'</td></tr></tbody>'; exit;}

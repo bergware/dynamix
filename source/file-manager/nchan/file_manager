@@ -114,7 +114,7 @@ while (true) {
     case 3:  // copy folder
     case 7:  // copy file
       if ($pid) {
-        $reply['status'] = shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'") ?: _('Copying').'...';
+        $reply['status'] = _('Copying').'... '.shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'");
       } else {
         $target = validname($target,false);
         if ($target) {
@@ -128,7 +128,7 @@ while (true) {
     case 4: // move folder
     case 8: // move file
       if ($pid) {
-        $reply['status'] = isset($move) ? _('Moving').'... '.exec("tail -1 $status") : (shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'") ?: _('Moving').'...');
+        $reply['status'] = _('Moving').'... '.($move===false ? exec("tail -1 $status") : shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'"));
       } else {
         $target = validname($target,false);
         if ($target) {
