@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.24a">
+<!ENTITY version   "2022.03.25">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "2a33af325d0457b2b2a44d7639c85e5a">
+<!ENTITY MD5       "9926009fac1e379dbdf1cfd244b5691a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Improved Window expand/compress when editing files
+
+###2022.03.24
 - Show Unraid wave when loading of files takes longer
 - Added device name in header of contextmenu for devices
 - Minor optimizations
