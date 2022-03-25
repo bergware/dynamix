@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.25">
+<!ENTITY version   "2022.03.25a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9926009fac1e379dbdf1cfd244b5691a">
+<!ENTITY MD5       "e4ffa212ee49818b4bfb1e2fa31f04f4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -16,6 +16,7 @@
 
 ###&version;
 - Improved Window expand/compress when editing files
+- Show PROCEED button as disabled when operation is in progress
 
 ###2022.03.24
 - Show Unraid wave when loading of files takes longer
