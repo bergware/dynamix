@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.26a">
+<!ENTITY version   "2022.03.26b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6487091ef523a27240d0f93d443bcc6c">
+<!ENTITY MD5       "b7daea09e5ca549cdb4ee16901381a91">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -15,7 +15,7 @@
 ##&name;
 
 ###&version;
-- Adjusted file editor loading to prevent unnecessary conversions
+- Improved editor file loading
 
 ###2022.03.25
 - Improved Window expand/compress when editing files
