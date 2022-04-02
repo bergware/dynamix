@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.03.26c">
+<!ENTITY version   "2022.04.02">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1bdef71b391fd5418755cc10a33df052">
+<!ENTITY MD5       "b54ed778630e24c06f397e09a6f34242">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Added zip files are downloaded by clicking on their name
+
+###2022.03.26
 - Improved editor file loading
 
 ###2022.03.25
