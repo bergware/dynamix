@@ -339,7 +339,7 @@ filemanager.on('message', function(msg) {
   } else {
     showProgress(data.status);
     if (data.done && !timers.filemanager) {
-      timers.filemanager = setTimeout(loadList,500);
+      timers.filemanager = setTimeout(loadList,1000);
       fileManager('stop');
       box.dialog('close');
     }
@@ -448,7 +448,7 @@ function showDialog() {
         return;
       },
       "_(Cancel)_": function(){
-        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1000);});
         fileManager('stop');
         box.dialog('close');
       }
@@ -626,7 +626,7 @@ function doAction(action,title,id) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1000);});
         fileManager('stop');
         box.dialog('close');
       }
@@ -800,7 +800,7 @@ function doActions(action,title) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1000);});
         fileManager('stop');
         box.dialog('close');
       }
