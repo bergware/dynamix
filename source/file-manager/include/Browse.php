@@ -49,14 +49,10 @@ if (isset($_POST['mode'])) {
     $text[] = sprintf(_("in %s folder".($dirs==1?'':'s')." and %s file".($files==1?'':'s')),my_number($dirs),my_number($files));
     die('<div style="text-align:left;margin-left:56px">'.implode('<br>',$text).'</div>');
   case 'edit':
-    $data = '';
-    if ($file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])))) {
-      $data = file_get_contents($file);
-      $data .= "\0".(strpos($data,"\r\n")===false ? 'unix' : 'windows');
-    }
-    die($data);
+    $file = validname(rawurldecode($_POST['file']));
+    die($file ? file_get_contents($file) : '');
   case 'save':
-    if ($file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])))) file_put_contents($file,rawurldecode($_POST['data']));
+    if ($file = validname(rawurldecode($_POST['file']))) file_put_contents($file,rawurldecode($_POST['data']));
     die();
   }
 }

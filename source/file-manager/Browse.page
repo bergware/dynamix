@@ -76,6 +76,7 @@ input.filter:focus{background-color:<?=$incolor?>}
 dt{width:23%}
 select.narrow{margin:0 40px 0 10px}
 .fileTree{background:<?=$bgcolor?>;width:500px;max-height:320px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset button[disabled]{cursor:default;color:#808080;background:-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 0 no-repeat,-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#404040),to(#404040)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#808080),to(#808080)) 100% 100% no-repeat;background:linear-gradient(90deg,#404040 0,#808080) 0 0 no-repeat,linear-gradient(90deg,#404040 0,#808080) 0 100% no-repeat,linear-gradient(0deg,#404040 0,#404040) 0 100% no-repeat,linear-gradient(0deg,#808080 0,#808080) 100% 100% no-repeat;background-size:100% 2px,100% 2px,2px 100%,2px 100%}
 </style>
 
 <script src="<?autov("/webGui/javascript/jquery.filetree.js")?>"></script>
@@ -89,12 +90,14 @@ String.prototype.strip = function(){return this.replace(/\/$/,'');}
 String.prototype.quote = function(){return this.replace(/&#34;/g,'"');}
 String.prototype.crush = function(len){len=len||70;return this.length<=len ? this : this.slice(0,Math.round(len/2)-2)+'...'+this.slice(-1-Math.round(len/2));}
 String.prototype.alter = function(...a){var t=this;for(var i=0;i<a.length;i+=2){t=t.replace(a[i],a[i+1]);} return t;}
-String.prototype.build = function(){return this.replace(/\n<!--!\n|\n!-->\n/g,'');}
+String.prototype.build = function(){return this.replace(/\n(<!--!|!-->)\n/g,'');}
 
 // General variables
 var box = null;
 var running = false;
 var previous = '';
+var table = null;
+var thead = null;
 
 function folderContextMenu(id,button) {
   var opts = [];
@@ -143,7 +146,7 @@ function fileContextMenu(id,button) {
 function deviceFolderContextMenu(dev,id) {
   var opts = [];
   context.init({button:'both'});
-  opts.push({header:"_(Action)_"});
+  opts.push({header:dev.split('/')[2]});
   opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_("Delete $Folder")?>",dev);}});
   opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=_("Copy $Folder")?>",dev);}});
   opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=_("Move $Folder")?>",dev);}});
@@ -154,7 +157,7 @@ function deviceFolderContextMenu(dev,id) {
 function deviceFileContextMenu(dev,id) {
   var opts = [];
   context.init({button:'both'});
-  opts.push({header:"_(Action)_"});
+  opts.push({header:dev.split('/')[2]});
   opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(5,"_(Delete File)_",dev);}});
   opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(7,"_(Copy File)_",dev);}});
   opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",dev);}});
@@ -211,7 +214,7 @@ function escapeHTML(name) {
   data.appendChild(text);
   return data.innerHTML;
 }
-function progress(data) {
+function showProgress(data) {
   if (!data) return;
   var file = null;
   var text = data.split('\n');
@@ -240,6 +243,7 @@ function fileManager(action) {
       clearTimeout(timers.filemonitor);
       filemonitor.stop();
 <?endif;?>
+      $('.ui-dialog button:contains("_(Proceed)_")').prop('disabled',true);
       filemanager.start();
     }
     running = true;
@@ -256,9 +260,9 @@ function fileManager(action) {
   }
 }
 function dialogStyle() {
-  $('.ui-dialog .ui-dialog-titlebar-close').css({'background':'transparent','border':'none','font-size':'1.8rem','margin-top':'-14px','margin-right':'-18px'}).html('<i class="fa fa-times"></i>').prop('title',"_(Close)_").prop('onclick',null).off('click').click(function(){box.dialog('close');});
-  $('.ui-dialog .ui-dialog-title').css({'text-align':'center','width':'100%','font-size':'1.8rem'});
-  $('.ui-dialog .ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
+  $('.ui-dialog-titlebar-close').css({'background':'transparent','border':'none','font-size':'1.8rem','margin-top':'-14px','margin-right':'-18px'}).html('<i class="fa fa-times"></i>').prop('title',"_(Close)_").prop('onclick',null).off('click').click(function(){box.dialog('close');});
+  $('.ui-dialog-title').css({'text-align':'center','width':'100%','font-size':'1.8rem'});
+  $('.ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
   $('.ui-button-text').css({'padding':'0px 5px'});
 }
 function fileName(file) {
@@ -269,59 +273,54 @@ function fileExtension(file) {
   return file.indexOf('.')>=0 ? file.split('.').pop() : '';
 }
 function fileEdit(id) {
-  const valid = ['','cfg','conf',<?=implode(',',array_map('quote',file($editor,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)))?>];
+  const known = ['','cfg','conf',<?=implode(',',array_map('quote',file($editor,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)))?>];
   var source = $('#'+id.proxy()).attr('data').quote();
+  var ext = fileExtension(source);
+  if (ext == 'zip') {
+    // download zip files
+    downloadFile(source);
+    return;
+  }
   box = $("#dialogWindow");
-  if (!valid.includes(fileExtension(source))) {
+  if (!known.includes(ext)) {
     // file viewer - supported file extensions: .pdf, .jpg, png, .jpeg, .gif
     box.html($("#templateViewFile").html().replace('{$0}',source).build());
     return;
   }
-  timers.editor = setTimeout(function(){$('div.spinner.fixed').show();},500);
-  $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'edit', file:encodeURIComponent(source)},function(data){
-    var content = data.split('\0');
-    // Prepare the file content for editing:
-    // 1. Replace HTML special characters &xxx; by @xxx; so these are not parsed by the browser
-    // 2. Replace literal '<' sign by its &lt; representation so the browser won't execute them
-    // 3. Escape single quotes before content parsing, and restore them afterwards
-    // 4. Load the prepared content {$0} in a <div> block which is later copied to the editor
-    // 5. Indicate whether the file {$1} has linux or windows line endings (files are saved with their original line endings)
-    // 6. Prepare the syntax coding {$2} for the opened file
-    // 7. Build the dialog window in which the editor resides
-    box.html($("#templateEditFile").html().alter('{$0}',content[0].alter(/&([#0-9a-zA-Z]+?);/g,'@$1;',/</g,'&lt;',/'/g,'!#39!'),'{$1}',content[1]||'auto','{$2}',source).build());
-    clearTimeout(timers.editor);
-    $('div.spinner.fixed').hide();
-    box.dialog({
-      title: fileName(source),
-      height: Math.min(screen.height*2/3,$(window).height()-80),
-      width: Math.min(screen.width*2/3,$(window).width()-10),
-      resizable: false,
-      modal: true,
-      show: {effect:'fade', duration:250},
-      hide: {effect:'fade', duration:250},
-      buttons: {
-        "_(Save)_": function(){
-          $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'save', file:encodeURIComponent(source), data:encodeURIComponent(editor.session.getValue())});
-          box.dialog('close');
-        },
-        "_(Cancel)_": function(){
-          box.dialog('close');
-        }
+  // file editor dialog
+  box.html($("#templateEditFile").html().replace('{$0}',source).build());
+  box.dialog({
+    title: fileName(source),
+    height: Math.min(screen.height*2/3,window.innerHeight-40),
+    width: Math.min(screen.width*2/3,window.innerWidth),
+    resizable: false,
+    modal: true,
+    show: {effect:'fade', duration:250},
+    hide: {effect:'fade', duration:250},
+    buttons: {
+      "_(Save)_": function(){
+        $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'save', file:encodeURIComponent(source), data:encodeURIComponent(editor.session.getValue())});
+        box.dialog('close');
+      },
+      "_(Cancel)_": function(){
+        box.dialog('close');
       }
-    });
-    dialogStyle();
-    $('.ui-dialog .ui-dialog-titlebar-close').html('<i class="fa fa-expand"></i>').prop('title',"_(Expand)_").prop('onclick',null).off('click').click(function(){fullWindow();});
+    }
   });
+  dialogStyle();
+  $('.ui-dialog-titlebar-close').html('<i class="fa fa-expand"></i>').prop('title',"_(Expand)_").prop('onclick',null).off('click').click(function(){fullWindow();});
 }
 function fullWindow() {
-  if (box.dialog('option','height')==Math.min(screen.height*2/3,$(window).height()-80)) {
-    box.dialog('option','height',$(window).height()-80);
-    box.dialog('option','width',$(window).width()-10);
-    $('.ui-dialog .ui-dialog-titlebar-close').html("<i class='fa fa-compress'></i>").prop("title","_(Compress)_");
+  if ($('.ui-dialog-titlebar-close').html().indexOf('expand')>=0) {
+    box.dialog('option','height',window.innerHeight-40);
+    box.dialog('option','width',window.innerWidth);
+    box.dialog('option','position',{my:'top',at:'top',of:window});
+    $('.ui-dialog-titlebar-close').html("<i class='fa fa-compress'></i>").prop("title","_(Compress)_");
   } else {
-    box.dialog('option','height',Math.min(screen.height*2/3,$(window).height()-80));
-    box.dialog('option','width',Math.min(screen.width*2/3,$(window).width()-10));
-    $('.ui-dialog .ui-dialog-titlebar-close').html("<i class='fa fa-expand'></i>").prop("title","_(Expand)_");
+    box.dialog('option','height',Math.min(screen.height*2/3,window.innerHeight-40));
+    box.dialog('option','width',Math.min(screen.width*2/3,window.innerWidth));
+    box.dialog('option','position',{my:'center',at:'center',of:window});
+    $('.ui-dialog-titlebar-close').html("<i class='fa fa-expand'></i>").prop("title","_(Expand)_");
   }
   editor.resize();
 }
@@ -338,9 +337,9 @@ filemanager.on('message', function(msg) {
     box.find('#group').prop('disabled',false);
     box.find('#other').prop('disabled',false);
   } else {
-    progress(data.status);
+    showProgress(data.status);
     if (data.done && !timers.filemanager) {
-      timers.filemanager = setTimeout(refresh,1250);
+      timers.filemanager = setTimeout(loadList,500);
       fileManager('stop');
       box.dialog('close');
     }
@@ -436,7 +435,6 @@ function showDialog() {
 <?endif;?>
   }
   box.find('#exist').prop('disabled',true);
-  fileManager('start');
   box.dialog({
     title: "<?=$title?>",
     resizable: false,
@@ -450,18 +448,19 @@ function showDialog() {
         return;
       },
       "_(Cancel)_": function(){
-        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(refresh,1250);});
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
         fileManager('stop');
         box.dialog('close');
       }
     }
   });
+  fileManager('start');
   dialogStyle();
 }
 <?else:?>
 var filemonitor = new NchanSubscriber('/sub/filemonitor',{subscriber:'websocket'});
 filemonitor.on('message', function(state) {
-  if (state==1 && !timers.filemonitor) timers.filemonitor = setTimeout(refresh,1250);
+  if (state==1 && !timers.filemonitor) timers.filemonitor = setTimeout(refresh,1000);
 });
 setTimeout(function(){filemonitor.start();},3000);
 <?endif;?>
@@ -565,13 +564,7 @@ function doAction(action,title,id) {
     var height = 330;
     break;
   case 11: // download file
-    var a = document.createElement('a');
-    a.setAttribute('href',source);
-    a.setAttribute('download',name);
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    downloadFile(source,name);
     break;
   case 12: // calculate occupied space
     timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
@@ -633,7 +626,7 @@ function doAction(action,title,id) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(refresh,1250);});
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
         fileManager('stop');
         box.dialog('close');
       }
@@ -807,7 +800,7 @@ function doActions(action,title) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(refresh,1250);});
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
         fileManager('stop');
         box.dialog('close');
       }
@@ -817,11 +810,20 @@ function doActions(action,title) {
 }
 function expert() {
   $.cookie('expert')==null ? $.cookie('expert','expert',{path:'/'}) : $.removeCookie('expert',{path:'/'});
-  refresh();
+  loadList();
 }
 function stop() {
   window.onbeforeunload = null;
-  refresh();
+  loadList();
+}
+function downloadFile(source) {
+  var a = document.createElement('a');
+  a.setAttribute('href',source);
+  a.setAttribute('download',source.split('/').pop());
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 function uploadFile(files,index,start) {
   var file = files[index];
@@ -867,26 +869,15 @@ function toggleTime(init) {
   if (init) return;
   $.cookie('my_time')==null ? $.cookie('my_time','age',{path:'/'}) : $.removeCookie('my_time',{path:'/'});
 }
-$(function(){
-  caPluginUpdateCheck('dynamix.file.manager.plg',{name:'Dynamix File Manager'});
-  $('span.left').append('<span class="right"><span class="filter"><input type="text" class="filter" oninput="filter(this.value)" autocomplete="off" spellcheck="false" placeholder="_(file type)_"><i class="fa fa-filter"></i></span><i class="fa fa-toggle-off" onclick="toggleTime()" style="cursor:pointer;margin-left:20px" title="_(Toggle Time/Age display)_"></i><a href="#" class="none" title=""><input type="checkbox" class="expert"></a></span>');
-  $('.expert').switchButton({labels_placement:"left", on_label:"_(Advanced Mode)_", off_label:"_(Basic Mode)_", checked:$.cookie('expert')!=null});
-  $('.expert').change(function(){expert();});
-  shortcut.add('F2',function(){expert();});
-  if ($.cookie('expert')==null) $('a.none').attr("title","_(Restricted access)_"); else $('a.none').attr("title","_(Unrestricted access)_");
-  timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},500);
+function loadList() {
+  timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},1000);
   var col = $.cookie('col')||2;
   var dir = $.cookie('dir')||0;
-  var table = $('table.indexer');
-  var thead = table.find('thead');
-  table.bind('sortEnd',function(e,t){
-    var sort = e.target.config.sortList.toString().split(',');
-    $.cookie('col',sort[0],{path:'/'});
-    $.cookie('dir',sort[1],{path:'/'});
-  });
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
     clearTimeout(timers.browse);
     $('div.spinner.fixed').hide();
+    table.find('tbody').empty();
+    table.find('tfoot').empty();
     thead.after(data);
     table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
     if ($.cookie('my_time')!=null) toggleTime(true);
@@ -895,6 +886,22 @@ $(function(){
     $(window).bind('resize',function(){resize();});
 <?endif;?>
   });
+}
+$(function(){
+  caPluginUpdateCheck('dynamix.file.manager.plg',{name:'Dynamix File Manager'});
+  $('span.left').append('<span class="right"><span class="filter"><input type="text" class="filter" oninput="filter(this.value)" autocomplete="off" spellcheck="false" placeholder="_(file type)_"><i class="fa fa-filter"></i></span><i class="fa fa-toggle-off" onclick="toggleTime()" style="cursor:pointer;margin-left:20px" title="_(Toggle Time/Age display)_"></i><a href="#" class="none" title=""><input type="checkbox" class="expert"></a></span>');
+  $('.expert').switchButton({labels_placement:"left", on_label:"_(Advanced Mode)_", off_label:"_(Basic Mode)_", checked:$.cookie('expert')!=null});
+  $('.expert').change(function(){expert();});
+  shortcut.add('F2',function(){expert();});
+  if ($.cookie('expert')==null) $('a.none').attr("title","_(Restricted access)_"); else $('a.none').attr("title","_(Unrestricted access)_");
+  table = $('table.indexer');
+  thead = table.find('thead');
+  table.bind('sortEnd',function(e,t){
+    var sort = e.target.config.sortList.toString().split(',');
+    $.cookie('col',sort[0],{path:'/'});
+    $.cookie('dir',sort[1],{path:'/'});
+  });
+  loadList();
 <?if ($running):?>
   showDialog();
 <?endif;?>
@@ -1378,7 +1385,7 @@ _(New permission)_:
 <style>div#editor{position:absolute;top:0;bottom:0;left:0;right:0;font-size:1.4rem;font-family:bitstream;line-height:1.6}</style>
 </head>
 <body>
-<div id="file" style="display:none">{$0}</div><div id="editor"></div>
+<div id="editor"></div>
 <script src="<?autov('/plugins/dynamix.file.manager/javascript/ace/ace.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.file.manager/javascript/ace/ext-modelist.js')?>"></script>
 <script>
@@ -1392,10 +1399,14 @@ editor.setTheme('ace/theme/tomorrow_night');
 <?else:?>
 editor.setTheme('ace/theme/tomorrow');
 <?endif;?>
-editor.setOption('newLineMode',"{$1}");
-editor.session.setMode(getMode("{$2}"));
-editor.session.setValue($('#file').text().alter(/@([#0-9a-zA-Z]+?);/g,'&$1;',/!#39!/g,"'"));
-$('#file').text('');
+var source = "{$0}";
+editor.session.setMode(getMode(source));
+timers.editor = setTimeout(function(){$('div.spinner.fixed').show();},1000);
+$.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'edit', file:encodeURIComponent(source)},function(data){
+  clearTimeout(timers.editor);
+  $('div.spinner.fixed').hide();
+  editor.session.setValue(data);
+});
 </script>
 </body>
 </html>
