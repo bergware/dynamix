@@ -876,8 +876,7 @@ function loadList() {
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
     clearTimeout(timers.browse);
     $('div.spinner.fixed').hide();
-    table.find('tbody').empty();
-    table.find('tfoot').empty();
+    table.find('tbody,tfoot').remove();
     thead.after(data);
     table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
     if ($.cookie('my_time')!=null) toggleTime(true);
