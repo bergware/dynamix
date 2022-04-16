@@ -807,6 +807,7 @@ function expert() {
 }
 function stop() {
   window.onbeforeunload = null;
+  running = false;
   loadList();
 }
 function downloadFile(source) {
@@ -849,6 +850,7 @@ function startUpload(files) {
   reader = new FileReader();
   window.onbeforeunload = function(e){return '';};
   $('#uploadButton').val("_(Cancel)_").prop('onclick',null).off('click').click(function(){cancel=1;});
+  running = true;
   uploadFile(files,0,0);
 }
 function filter(ext) {
