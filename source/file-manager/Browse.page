@@ -339,7 +339,7 @@ filemanager.on('message', function(msg) {
   } else {
     showProgress(data.status);
     if (data.done && !timers.filemanager) {
-      timers.filemanager = setTimeout(loadList,1000);
+      timers.filemanager = setTimeout(loadList,1100);
       fileManager('stop');
       box.dialog('close');
     }
@@ -448,7 +448,7 @@ function showDialog() {
         return;
       },
       "_(Cancel)_": function(){
-        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1000);});
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1100);});
         fileManager('stop');
         box.dialog('close');
       }
@@ -460,7 +460,7 @@ function showDialog() {
 <?else:?>
 var filemonitor = new NchanSubscriber('/sub/filemonitor',{subscriber:'websocket'});
 filemonitor.on('message', function(state) {
-  if (state==1 && !timers.filemonitor) timers.filemonitor = setTimeout(refresh,1000);
+  if (state==1 && !timers.filemonitor) timers.filemonitor = setTimeout(refresh,1100);
 });
 setTimeout(function(){filemonitor.start();},3000);
 <?endif;?>
@@ -626,7 +626,7 @@ function doAction(action,title,id) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1000);});
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1100);});
         fileManager('stop');
         box.dialog('close');
       }
@@ -800,7 +800,7 @@ function doActions(action,title) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1000);});
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1100);});
         fileManager('stop');
         box.dialog('close');
       }
@@ -870,7 +870,7 @@ function toggleTime(init) {
   $.cookie('my_time')==null ? $.cookie('my_time','age',{path:'/'}) : $.removeCookie('my_time',{path:'/'});
 }
 function loadList() {
-  timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},1000);
+  timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},1100);
   var col = $.cookie('col')||2;
   var dir = $.cookie('dir')||0;
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
@@ -1400,7 +1400,7 @@ editor.setTheme('ace/theme/tomorrow');
 <?endif;?>
 var source = "{$0}";
 editor.session.setMode(getMode(source));
-timers.editor = setTimeout(function(){$('div.spinner.fixed').show();},1000);
+timers.editor = setTimeout(function(){$('div.spinner.fixed').show();},1100);
 $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'edit', file:encodeURIComponent(source)},function(data){
   clearTimeout(timers.editor);
   $('div.spinner.fixed').hide();
