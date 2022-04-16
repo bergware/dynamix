@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.04.16b">
+<!ENTITY version   "2022.04.16c">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b4581a5455eb42ada0f573f68419f2e2">
+<!ENTITY MD5       "7bc2aabb9fc0242b9131459054270b9b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
@@ -15,7 +15,7 @@
 ##&name;
 
 ###&version;
-- Code optimization
+- Code optimization and fixes
 
 ###2022.04.15
 - Smart display updates for improved user experience

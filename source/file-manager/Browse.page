@@ -239,10 +239,6 @@ function fileManager(action) {
   switch (action) {
   case 'start':
     if (!running) {
-<?if (!$running):?>
-      clearTimeout(timers.filemonitor);
-      filemonitor.stop();
-<?endif;?>
       $('.ui-dialog button:contains("_(Proceed)_")').prop('disabled',true);
       filemanager.start();
     }
@@ -251,9 +247,7 @@ function fileManager(action) {
   case 'stop':
     if (running) {
       filemanager.stop();
-<?if (!$running):?>
-      setTimeout(function(){filemonitor.start();},3000);
-<?endif;?>
+      $('span.text').html('');
     }
     running = false;
     break;
@@ -338,10 +332,10 @@ filemanager.on('message', function(msg) {
     box.find('#other').prop('disabled',false);
   } else {
     showProgress(data.status);
-    if (data.done && !timers.filemanager) {
-      timers.filemanager = setTimeout(loadList,1100);
-      fileManager('stop');
+    if (data.done) {
       box.dialog('close');
+      fileManager('stop');
+      setTimeout(loadList,500);
     }
   }
 });
@@ -448,22 +442,21 @@ function showDialog() {
         return;
       },
       "_(Cancel)_": function(){
-        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1100);});
-        fileManager('stop');
         box.dialog('close');
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        fileManager('stop');
       }
     }
   });
   fileManager('start');
   dialogStyle();
 }
-<?else:?>
+<?endif;?>
 var filemonitor = new NchanSubscriber('/sub/filemonitor',{subscriber:'websocket'});
 filemonitor.on('message', function(state) {
-  if (state==1 && !timers.filemonitor) timers.filemonitor = setTimeout(refresh,1100);
+  if (state==1 && !running) setTimeout(function(){if (!running) refresh();},1500);
 });
 setTimeout(function(){filemonitor.start();},3000);
-<?endif;?>
 
 function doAction(action,title,id) {
   var link   = id.substr(0,1)=='/';
@@ -567,7 +560,7 @@ function doAction(action,title,id) {
     downloadFile(source,name);
     break;
   case 12: // calculate occupied space
-    timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
+    timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},500);
     $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(source)},function(text){
       clearTimeout(timers.calc);
       $('div.spinner.fixed').hide('slow');
@@ -626,9 +619,9 @@ function doAction(action,title,id) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1100);});
-        fileManager('stop');
         box.dialog('close');
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        fileManager('stop');
       }
     }
   });
@@ -738,7 +731,7 @@ function doActions(action,title) {
     var height = 330;
     break;
   case 12: // calculate occupied space
-    timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},100);
+    timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},500);
     $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(source.join('\n'))},function(text){
       clearTimeout(timers.calc);
       $('div.spinner.fixed').hide('slow');
@@ -800,9 +793,9 @@ function doActions(action,title) {
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
       },
       "_(Cancel)_": function(){
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,1100);});
-        fileManager('stop');
         box.dialog('close');
+        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        fileManager('stop');
       }
     }
   });
@@ -870,9 +863,9 @@ function toggleTime(init) {
   $.cookie('my_time')==null ? $.cookie('my_time','age',{path:'/'}) : $.removeCookie('my_time',{path:'/'});
 }
 function loadList() {
-  timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},1100);
   var col = $.cookie('col')||2;
   var dir = $.cookie('dir')||0;
+  timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},500);
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
     clearTimeout(timers.browse);
     $('div.spinner.fixed').hide();
@@ -1400,7 +1393,7 @@ editor.setTheme('ace/theme/tomorrow');
 <?endif;?>
 var source = "{$0}";
 editor.session.setMode(getMode(source));
-timers.editor = setTimeout(function(){$('div.spinner.fixed').show();},1100);
+timers.editor = setTimeout(function(){$('div.spinner.fixed').show();},500);
 $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'edit', file:encodeURIComponent(source)},function(data){
   clearTimeout(timers.editor);
   $('div.spinner.fixed').hide();
