@@ -454,9 +454,9 @@ function showDialog() {
 <?endif;?>
 var filemonitor = new NchanSubscriber('/sub/filemonitor',{subscriber:'websocket'});
 filemonitor.on('message', function(state) {
-  if (state==1 && !running) setTimeout(function(){if (!running) refresh();},1500);
+  if (state==1 && !running && !timers.filemonitor) timers.filemonitor = setTimeout(function(){if (running) clearTimeout(timers.filemonitor); else refresh();},1500);
 });
-setTimeout(function(){filemonitor.start();},3000);
+setTimeout(function(){filemonitor.start();},5000);
 
 function doAction(action,title,id) {
   var link   = id.substr(0,1)=='/';
