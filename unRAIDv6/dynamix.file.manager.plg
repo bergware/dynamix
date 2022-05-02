@@ -3,18 +3,24 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.04.23">
+<!ENTITY version   "2022.05.02">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "370ed0f9664207d9afac89bc59de3186">
+<!ENTITY MD5       "855c5df9599cfbea5d2dc7298f17afbe">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc3" max="6.10.9">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc5" max="6.10.9">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- Fixed: select all ignores filtered files
+- Changed: highlighting of selected rows
+- Changed: use latest $.cookies assignments
+- Changed: minimum Unraid version 6.10.0-rc5
+
+###2022.04.23
 - Fixed regression error
 
 ###2022.04.17
