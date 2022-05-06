@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.05.06">
+<!ENTITY version   "2022.05.06a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "88fe3d252cba4cecfdc5f6b97b7eaab5">
+<!ENTITY MD5       "acbb07772251609c0994b26f5ff50fd8">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc5" max="6.10.9">
@@ -17,6 +17,7 @@
 ###&version;
 - Added selectable browse header
 - Removed Basic/Advanced view
+- Fixed alignmnt of invalid folder
 
 ###2022.05.02
 - Fixed: select all ignores filtered files
