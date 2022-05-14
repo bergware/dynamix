@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.05.13">
+<!ENTITY version   "2022.05.14">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3ff7a063893a6d91ac1559457e44a9f3">
+<!ENTITY MD5       "8218578e3156e487d8d54d9c68003357">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc5" max="6.10.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Added Search function
+
+###2022.05.13
 - Fixed file attributes not updated after editing
 
 ###2022.05.11
