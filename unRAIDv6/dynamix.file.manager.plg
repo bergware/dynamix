@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.05.14b">
+<!ENTITY version   "2022.05.15">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "012b8b6064d024e47d3194d90ed7b138">
+<!ENTITY MD5       "896a07003b77a19a9068ab29dbca48a3">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc5" max="6.10.9">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- Added disk location in search results
+- Updated browse function, attempt to fix uncaught error
+
+##2022.05.14
 - Added Search function
 
 ###2022.05.13
