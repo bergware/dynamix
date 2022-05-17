@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.ssd.trim">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2020.06.21">
+<!ENTITY version   "2022.05.17">
 <!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "fa2b24f814c15db984a65072246f6b82">
+<!ENTITY MD5       "64de0ff820f7515f013548f5e1b49250">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- Added "Trim Now" button
+
+###2020.06.21
 - fiexed regression error
 
 ###2020.06.20
@@ -49,7 +52,7 @@
 </CHANGES>
 
 <!--
-Copyright 2020, Bergware International
+Copyright 2022, Bergware International
 Dynamix SSD trim - create a cronjob to do regular SSD TRIM operations
 -->
 
@@ -83,7 +86,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2020, Bergware International"
+echo " Copyright 2022, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
