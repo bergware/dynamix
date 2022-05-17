@@ -1,0 +1,45 @@
+#!/usr/bin/php -q
+<?PHP
+/* Copyright 2012-2022, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$echo = !empty($argv[1]);
+$min = 500000000; // 500 MB
+$pow = ['B','KB','MB','GB','TB','PB','EB','ZB','YB'];
+
+function scale($value, &$unit) {
+  global $pow;
+  $base = $value ? floor(log($value,1000)) : 0;
+  $unit = $pow[$base];
+  return number_format($value/pow(1000,$base),1);
+}
+foreach (glob('/mnt/user/*',GLOB_NOSORT|GLOB_ONLYDIR) as $dir) {
+  unset($max);
+  $name = basename($dir);
+  if ($echo) echo "Scanning $name ... ";
+  exec("find ".escapeshellarg($dir)." -type 'f' -size +{$min}c -printf '%s\n'",$max);
+  rsort($max,SORT_NUMERIC);
+  $new = scale($max[0] ? pow(2,round(log($max[0])/log(2)))*1.2 : $min,$unit);
+  $val = $new*pow(1000,array_search($unit,$pow)-1);
+  $cfg = (array)@parse_ini_file("boot/config/shares/$name.cfg");
+  if ($cfg['shareFloor'] != $val) {
+    $cfg['shareNameOrig'] = $name;
+    $cfg['shareName'] = $name;
+    $cfg['shareFloor'] = $val;
+    $cfg['csrf_token'] = parse_ini_file('state/var.ini')['csrf_token'];
+    $cfg['cmdEditShare'] = 'Apply';
+    $options = ['http' => ['header' => "Content-type: application/x-www-form-urlencoded\r\n",'method' => 'POST','content' => http_build_query($cfg)]];
+    file_get_contents('http://localhost/update.htm',false,stream_context_create($options));
+    if ($echo) echo "updated - new floor setting: $new $unit";
+  }
+  if ($echo) echo "\n";
+}
+?>

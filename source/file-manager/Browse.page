@@ -1,5 +1,5 @@
-Title="_(Index of)_ $dir"
-Tag="navicon"
+Title=""
+Tag="home"
 Nchan="file_manager"
 ---
 <?PHP
@@ -30,6 +30,7 @@ $dir     = validdir(htmlspecialchars_decode($dir));
 $dir     = htmlspecialchars(str_replace('\\','\\\\',$dir));
 $lock    = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
 $isshare = $root=='mnt' && (!$main || !$next || ($main=='rootshare' && !$rest));
+$hover   = in_array($theme,['white','azure']) ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
 $bgcolor = in_array($theme,['white','azure']) ? '#f2f2f2' : '#1c1c1c';
 $fgcolor = in_array($theme,['white','azure']) ? '#1c1c1c' : '#f2f2f2';
 $incolor = $theme!='gray' ? $bgcolor : '#121510';
@@ -53,9 +54,7 @@ table.tablesorter.indexer thead th:nth-child(2){width:3%!important}
 table.tablesorter.indexer thead th:nth-child(3){width:auto!important}
 table.tablesorter.indexer thead th:nth-child(n+4){width:10%!important}
 table.tablesorter.indexer thead th:nth-child(9){width:3%!important}
-table.tablesorter.indexer tbody tr:hover td{color:#e68a00}
-table.tablesorter.indexer tbody tr:hover a{color:#e68a00}
-table.tablesorter.indexer tbody tr:hover .fa{color:#e68a00}
+table.tablesorter.indexer tbody tr:hover td{background-color:<?=$hover?>}
 table.tablesorter.indexer thead th{text-align:left}
 table.tablesorter.indexer tbody td{text-align:left}
 table.tablesorter.indexer thead th:last-child{text-align:right}
@@ -63,12 +62,16 @@ table.tablesorter.indexer tbody td:last-child{text-align:right}
 i[id^="row_"],i[id^="check_"]{cursor:pointer;font-size:1.8rem;color:gray}
 td[id^="name_"]{cursor:pointer}
 i.fa-warning,i.fa-refresh{margin-right:8px}
+i.fa-home{font-size:2rem}
+i.fa-chevron-right{font-size:1.2rem;margin:0 8px}
+#title{letter-spacing:1px}
 input#target{color:<?=$fgcolor?>;width:500px}
 div.autoheight{width:100%;overflow-y:auto;margin-top:<?=$themes1?'-30px':'0'?>}
 div.info{position:absolute;bottom:4px;width:74%;margin-left:23%}
 div.template,div#dialogWindow,input#upload{display:none}
 span.filter{position:relative;margin-left:<?=$themes1?'12':'0'?>px;top:-<?=$themes1?'2':'8'?>px}
 span.filter i{position:absolute;left:10px;top:<?=$themes1?'4':'8'?>px;font-size:1.4rem}
+span.loc{display:inline-block}
 span.text{display:inline-block;width:75%;white-space:normal}
 span.device{display:inline-block;float:left}
 input.filter{border:none;width:100px;background-color:<?=$incolor?>;margin:-8px 0 0 0;padding-left:30px}
@@ -77,6 +80,7 @@ dt{width:23%}
 select.narrow{margin:0 40px 0 10px}
 .fileTree{background:<?=$bgcolor?>;width:500px;max-height:320px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset button[disabled]{cursor:default;color:#808080;background:-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 0 no-repeat,-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#404040),to(#404040)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#808080),to(#808080)) 100% 100% no-repeat;background:linear-gradient(90deg,#404040 0,#808080) 0 0 no-repeat,linear-gradient(90deg,#404040 0,#808080) 0 100% no-repeat,linear-gradient(0deg,#404040 0,#404040) 0 100% no-repeat,linear-gradient(0deg,#808080 0,#808080) 100% 100% no-repeat;background-size:100% 2px,100% 2px,2px 100%,2px 100%}
+.dropdown-menu{z-index:10001;
 </style>
 
 <script src="<?autov("/webGui/javascript/jquery.filetree.js")?>"></script>
@@ -168,13 +172,13 @@ function resize() {
 }
 function selectAll() {
   if ($('#check_0').hasClass('fa-square-o')) {
-    $('i[id^="check_"]').removeClass('fa-square-o').addClass('fa-check-square-o');
+    $('i[id^="check_"]:visible').removeClass('fa-square-o').addClass('fa-check-square-o');
     $('input[class="extra"]').prop('disabled',false);
 <?if (!$isshare):?>
     $('input[class="rename"]').prop('disabled',false);
 <?endif;?>
   } else {
-    $('i[id^="check_"]').removeClass('fa-check-square-o').addClass('fa-square-o');
+    $('i[id^="check_"]:visible').removeClass('fa-check-square-o').addClass('fa-square-o');
     $('input[class="extra"]').prop('disabled',true);
 <?if (!$isshare):?>
     $('input[class="rename"]').prop('disabled',true);
@@ -215,12 +219,25 @@ function escapeHTML(name) {
   return data.innerHTML;
 }
 function showProgress(data) {
-  if (!data) return;
+  if (!data) return 0;
   var file = null;
   var text = data.split('\n');
   var line = text[0].split('... ');
   var strict = /^mnt|^boot/;
-  if (text.length==1) {
+  if (text[0]=='#cat#') {
+    var loc = [], cat = [];
+    for (var i=1,row; row=text[i]; i++) {
+      if (!row) continue;
+      row = row.split('\0');
+      loc.push(row[0]);
+      cat.push(row[1].crush(80));
+    }
+    if (loc.length > 0) {
+      $('span.loc').html(loc.join('<br>'));
+      $('span.text').html(cat.join('<br>'));
+    }
+    return cat.length;
+  } else if (text.length==1) {
     text = text[0].crush(80);
   } else {
     if (strict.test(text[1])) {
@@ -234,6 +251,7 @@ function showProgress(data) {
     }
   }
   if (file==null || strict.test(file)) $('span.text').html((file?line[0]+'... /'+escapeHTML(file.crush())+'<br>':'')+text);
+  return 0;
 }
 function fileManager(action) {
   switch (action) {
@@ -295,6 +313,7 @@ function fileEdit(id) {
       "_(Save)_": function(){
         $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'save', file:encodeURIComponent(source), data:encodeURIComponent(editor.session.getValue())});
         box.dialog('close');
+        setTimeout(loadList,100);
       },
       "_(Cancel)_": function(){
         box.dialog('close');
@@ -331,11 +350,17 @@ filemanager.on('message', function(msg) {
     box.find('#group').prop('disabled',false);
     box.find('#other').prop('disabled',false);
   } else {
-    showProgress(data.status);
-    if (data.done) {
+    var cat = showProgress(data.status);
+    if (data.done==1) {
       box.dialog('close');
       fileManager('stop');
       setTimeout(loadList,500);
+    } else if (data.done==2) {
+      box.find('#target').prop('disabled',false);
+      $('.ui-dialog button:contains("_(Proceed)_")').prop('disabled',false);
+      filemanager.stop();
+      running = false;
+      if (cat==0) $('span.text').html("_(No results found)_");
     }
   }
 });
@@ -558,7 +583,7 @@ function doAction(action,title,id) {
     break;
   case 11: // download file
     downloadFile(source,name);
-    break;
+    return;
   case 12: // calculate occupied space
     timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},500);
     $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(source)},function(text){
@@ -566,9 +591,8 @@ function doAction(action,title,id) {
       $('div.spinner.fixed').hide('slow');
       swal({title:"_(Calculate Occupied Space)_",text:text,html:true,confirmButtonText:"_(Ok)_"});
     });
-    break;
+    return;
   }
-  if (action > 10) return;
   box.dialog({
     title: title,
     resizable: false,
@@ -629,7 +653,7 @@ function doAction(action,title,id) {
 }
 function doActions(action,title) {
   var source = [], type = [], owner = [], perm = [];
-  if (action > 0) {
+  if (action > 0 && action < 11) {
     $('i[id^="check_"]').each(function(){
       if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
         var id = $(this).prop('id');
@@ -730,6 +754,13 @@ function doActions(action,title) {
     }
     var height = 330;
     break;
+  case 11: // search
+    source[0] = "<?=$dir?>";
+    box.html($("#templateSearch").html());
+    box.find('span.loc').html('&nbsp;').css({'line-height':'normal'});
+    box.find('span.text').html('').css({'line-height':'normal'});
+    var height = 630;
+    break;
   case 12: // calculate occupied space
     timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},500);
     $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(source.join('\n'))},function(text){
@@ -737,9 +768,8 @@ function doActions(action,title) {
       $('div.spinner.fixed').hide('slow');
       swal({title:"_(Calculate Occupied Space)_",text:text,html:true,confirmButtonText:"_(Ok)_"});
     });
-    break;
+    return;
   }
-  if (action > 10) return;
   box.dialog({
     title: title,
     resizable: false,
@@ -774,6 +804,10 @@ function doActions(action,title) {
             var valid = /.+/;
             bulk = false;
             break;
+          case 11: // search
+            var valid = /.+/;
+            bulk = false;
+            break;
           default:
             var valid = ud ? /\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
             break;
@@ -788,6 +822,7 @@ function doActions(action,title) {
           box.find('#group').prop('disabled',true);
           box.find('#other').prop('disabled',true);
         }
+        if (action==11) $('span.loc').html('&nbsp;');
         $('span.text').removeClass('orange-text').html("_(Running)_...");
         fileManager('start');
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,exist:box.find('#exist').val()});
@@ -800,10 +835,6 @@ function doActions(action,title) {
     }
   });
   dialogStyle();
-}
-function expert() {
-  $.cookie('expert')==null ? $.cookie('expert','expert',{path:'/'}) : $.removeCookie('expert',{path:'/'});
-  loadList();
 }
 function stop() {
   window.onbeforeunload = null;
@@ -852,6 +883,7 @@ function startUpload(files) {
   $('#uploadButton').val("_(Cancel)_").prop('onclick',null).off('click').click(function(){cancel=1;});
   running = true;
   uploadFile(files,0,0);
+  $('#uploadButton').val("_(Upload)_").prop('onclick',null).off('click').click(function(){$('#upload').click();});
 }
 function filter(ext) {
   $('td.ext').each(function(){
@@ -862,18 +894,19 @@ function toggleTime(init) {
   $('.my_time').toggle();
   $('.my_age').toggle();
   if (init) return;
-  $.cookie('my_time')==null ? $.cookie('my_time','age',{path:'/'}) : $.removeCookie('my_time',{path:'/'});
+  $.cookie('my_time')==null ? $.cookie('my_time','age') : $.removeCookie('my_time');
 }
 function loadList() {
   var col = $.cookie('col')||2;
   var dir = $.cookie('dir')||0;
   timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},500);
-  $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>",block:$.cookie('expert')||''},function(data){
+  $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>"},function(data){
     clearTimeout(timers.browse);
     $('div.spinner.fixed').hide();
     table.find('tbody,tfoot').remove();
     thead.after(data);
     table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
+    table.trigger('update',[true]);
     if ($.cookie('my_time')!=null) toggleTime(true);
 <?if ($display['resize']):?>
     resize();
@@ -883,17 +916,19 @@ function loadList() {
 }
 $(function(){
   caPluginUpdateCheck('dynamix.file.manager.plg',{name:'Dynamix File Manager'});
-  $('span.left').append('<span class="right"><span class="filter"><input type="text" class="filter" oninput="filter(this.value)" autocomplete="off" spellcheck="false" placeholder="_(file type)_"><i class="fa fa-filter"></i></span><i class="fa fa-toggle-off" onclick="toggleTime()" style="cursor:pointer;margin-left:20px" title="_(Toggle Time/Age display)_"></i><a href="#" class="none" title=""><input type="checkbox" class="expert"></a></span>');
-  $('.expert').switchButton({labels_placement:"left", on_label:"_(Advanced Mode)_", off_label:"_(Basic Mode)_", checked:$.cookie('expert')!=null});
-  $('.expert').change(function(){expert();});
-  shortcut.add('F2',function(){expert();});
-  if ($.cookie('expert')==null) $('a.none').attr("title","_(Restricted access)_"); else $('a.none').attr("title","_(Unrestricted access)_");
+  var dirs = "<?=$dir?>".split('/');
+  var url = [];
+  for (var n=1; n < dirs.length; n++) {
+    var dir = dirs.slice(1,n+1);
+    url.push('<a class="none" href="/<?=$path?>?dir=/'+encodeURIComponent(dir.join('/'))+'">'+(n==1 ? '<i class="fa fa-home"></i>' : dirs[n])+'</a>');
+  }
+  $('span.left').html(url.join('<i class="fa fa-chevron-right"></i>')).append('<span class="right"><span class="filter"><input type="text" class="filter" oninput="filter(this.value)" autocomplete="off" spellcheck="false" placeholder="_(file type)_"><i class="fa fa-filter"></i></span><i class="fa fa-toggle-off" onclick="toggleTime()" style="cursor:pointer;margin-left:20px" title="_(Toggle Time/Age display)_"></i></span>');
   table = $('table.indexer');
   thead = table.find('thead');
   table.bind('sortEnd',function(e,t){
     var sort = e.target.config.sortList.toString().split(',');
-    $.cookie('col',sort[0],{path:'/'});
-    $.cookie('dir',sort[1],{path:'/'});
+    $.cookie('col',sort[0]);
+    $.cookie('dir',sort[1]);
   });
   loadList();
 <?if ($running):?>
@@ -905,6 +940,7 @@ $(function(){
 <table class="indexer tablesorter shift"><thead><tr><th><?if($dir){?><i id="check_0" class="fa fa-fw fa-square-o" onclick="selectAll()"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead></table>
 </div>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
+<input type="button" value="_(Search)_" onclick="doActions(11,this.value)">
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
@@ -1361,6 +1397,28 @@ _(New permission)_:
 : <span class="text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This changes the permission of the source recursively)_</div>
+</body>
+</html>
+</div>
+
+<div markdown="1" id="templateSearch" class="template">
+<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1600">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
+</head>
+<body>
+_(Search string)_:
+: <input type="text" id="target" autocomplete="off" spellcheck="false" value="">
+
+<span class="loc">&nbsp;</span>
+: <span class="text"></span>
+
 </body>
 </html>
 </div>

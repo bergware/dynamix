@@ -1,0 +1,135 @@
+Menu="Scheduler"
+Title="Share Floor Settings"
+---
+<?PHP
+/* Copyright 2012-2022, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$plugin = 'dynamix.share.floor';
+$translations = file_exists("$docroot/webGui/include/Translations.php");
+require_once "$docroot/plugins/$plugin/include/Legacy.php";
+?>
+<?if (!$translations):?>
+<?eval('?>'.parse_file("$docroot/plugins/$plugin/ShareFloorSettings.page"))?>
+<?else:?>
+<?
+$cron = parse_plugin_cfg($plugin);
+$mode = ['Disabled','Hourly','Daily','Weekly','Monthly'];
+$days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+?>
+<script>
+function updateNow() {
+  openBox("/plugins/dynamix.share.floor/scripts/share_floor&arg1=1","_(Update Share Floor)_",600,600);
+}
+function presetFloor(form) {
+  var mode = form.mode.value;
+  form.min.disabled = mode==0;
+  form.day.disabled = mode==0 || mode!=3;
+  form.dotm.disabled = mode==0 || mode!=4;
+  form.hour1.disabled = mode==0;
+  form.hour2.disabled = mode==0;
+  form.day.value = form.day.disabled ? '*' : (form.day.value=='*' ? 0 : form.day.value);
+  form.dotm.value = form.dotm.disabled ? '*' : (form.dotm.value=='*' ? 1 : form.dotm.value);
+  if (mode==1) {$('#hour1').hide(); $('#hour2').show();} else {$('#hour2').hide(); $('#hour1').show();}
+}
+function prepareFloor(form) {
+  var include = '';
+  var mode = form.mode.value;
+  form.hour.value = mode!=1 ? form.hour1.value : form.hour2.value;
+  form.min.value = mode!=1 ? form.min.value : 0;
+  form.hour1.disabled = true;
+  form.hour2.disabled = true;
+  for (var i=0,item; item=form.disk.options[i]; i++) {
+    if (item.selected) {
+      if (include.length) include += ',';
+      include += item.value;
+      item.selected = false;
+    }
+  }
+  item = form.disk.options[0];
+  item.value = include;
+  item.selected = true;
+}
+$(function() {
+  presetFloor(document.floor_schedule);
+});
+</script>
+<form markdown="1" name="floor_schedule" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareFloor(this)">
+<input type="hidden" name="#file" value="<?=$plugin.'/'.$plugin?>.cfg">
+<input type="hidden" name="#include" value="/plugins/<?=$plugin?>/include/update.sharefloor.php">
+<input type="hidden" name="hour" value="">
+_(Share Floor schedule)_:
+: <select name="mode" onchange="presetFloor(this.form)">
+  <?for ($m=0; $m<count($mode); $m++):?>
+  <?=mk_option($cron['mode'], strval($m), _($mode[$m]))?>
+  <?endfor;?>
+  </select>
+
+:floor_schedule_plug:
+> Choose a share floor schedule ranging from hourly, daily, weekly and monthly.
+>
+> The interval determines how often share floor will run, it runs in the background.
+:end
+
+_(Day of the week)_:
+: <select name="day">
+  <?for ($d=0; $d<count($days); $d++):?>
+  <?=mk_option($cron['day'], strval($d), _($days[$d]),0)?>
+  <?endfor;?>
+  <?=mk_option($cron['day'], "*", "--------", _("disabled"))?>
+  </select>
+
+:floor_day_of_the_week_plug:
+> Choose a day when the weekly schedule is selected. Otherwise disabled.
+:end
+
+_(Day of the month)_:
+: <select name="dotm">
+  <?for ($d=1; $d<=31; $d++):?>
+  <?=mk_option($cron['dotm'], strval($d), sprintf("%02d", $d))?>
+  <?endfor;?>
+  <?=mk_option($cron['dotm'], "*", "--------", _("disabled"))?>
+  </select>
+
+:floor_day_of_the_month_plug:
+> Choose a date when the monthly schedule is selected. Otherwise disabled.
+:end
+
+_(Time of the day)_:
+: <span id="hour1" style="display:none"><select name="hour1" class="narrow">
+  <?for ($d=0; $d<=23; $d++):?>
+  <?=mk_option($cron['hour'], strval($d), sprintf("%02d", $d))?>
+  <?endfor;?>
+  </select>
+  <select name="min" class="narrow">
+  <?for ($d=0; $d<=55; $d+=5):?>
+  <?=mk_option($cron['min'], strval($d), sprintf("%02d", $d))?>
+  <?endfor;?>
+  </select>&nbsp;&nbsp;_(HH:MM)_</span>
+: <span id="hour2" style="display:none"><select name="hour2">
+  <?=mk_option($cron['hour'], "*/1", _("Every hour"))?>
+  <?=mk_option($cron['hour'], "*/2", _("Every 2 hours"))?>
+  <?=mk_option($cron['hour'], "*/3", _("Every 3 hours"))?>
+  <?=mk_option($cron['hour'], "*/4", _("Every 4 hours"))?>
+  <?=mk_option($cron['hour'], "*/6", _("Every 6 hours"))?>
+  <?=mk_option($cron['hour'], "*/8", _("Every 8 hours"))?>
+  </select></span>
+
+:floor_time_of_the_day_plug:
+> When an hourly schedule is selected this will set the interval in hours. An interval always starts on the whole hour (minute 0).
+>
+> For the other schedules choose here the time of the day share floor should start.
+:end
+
+&nbsp;
+: <input type="submit" name="#apply" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()"><input type="button" value="_(Update Now)_" onclick="updateNow()">
+</form>
+<?endif;?>

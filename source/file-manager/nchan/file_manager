@@ -35,6 +35,18 @@ $locale_init = $locale;
 session_unset();
 session_destroy();
 
+function prefix($key) {
+  return preg_replace('/\d+$/','',$key);
+}
+function cache_only($disk) {
+  return $disk['type']=='Cache';
+}
+function cache_filter($disks) {
+  return array_filter($disks,'cache_only');
+}
+function pools_filter($disks) {
+  return array_unique(array_map('prefix',array_keys(cache_filter($disks))));
+}
 function delete_file(...$file) {
   array_map('unlink',array_filter($file,'file_exists'));
 }
@@ -70,6 +82,33 @@ function update_translation($locale) {
       $language = unserialize(file_get_contents($store));
     }
   }
+}
+function cat($file) {
+  global $null;
+  $cat = $set = [];
+  $rows = file($file,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
+  if (count($rows)>0) {
+    $user = array_filter($rows,function($path){return preg_match('/^\/mnt\/user0?\//',$path);});
+    if (count($user)>0) {
+      for ($n=0; $n < count($user); $n+=100) {
+        $name = array_slice($user,$n,100);
+        $set[] = exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".quoted($name)." 2>$null");
+      }
+      $disks = (array)parse_ini_file('state/disks.ini',true);
+      $tag = implode('|',array_merge(['disk'],pools_filter($disks)));
+      $set = explode(';',str_replace(',;',',',preg_replace("/($tag)/",';$1',implode($set))));
+    }
+    foreach ($rows as $row) {
+      if (($index = array_search($row,$user))===false) {
+        [$none,$root,$main] = explode('/',$row,4);
+        $loc = $root=='mnt' ? $main : ($root=='boot' ? 'flash' : '---');
+      } else {
+        $loc = $set[$index+1];
+      }
+      $cat[] = $loc."\0".$row;
+    }
+  }
+  return "#cat#\n".implode("\n",$cat)."\n";
 }
 function escape($name) {return escapeshellarg(validname($name));}
 function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}
@@ -154,6 +193,13 @@ while (true) {
         exec("chmod -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
       }
       break;
+    case 11: // search
+      if ($pid) {
+        $reply['status'] = _('Searching').'... '.exec("wc -l $status|grep -Pom1 '^[0-9]+'");
+      } else {
+        exec("find ".escapeshellarg($source[0])." -iname ".escapeshellarg($target)." 1>$status 2>$null & echo \$!",$pid);
+      }
+      break;
     case 99: // kill running background process
       if ($pid) exec("kill $pid");
       delete_file($active,$status,$error);
@@ -167,11 +213,16 @@ while (true) {
         $move = false;
         $pid = pgrep($pid);
       } else {
+        if ($action != 11) {
+          $reply['status'] = _('Done');
+          $reply['done'] = 1;
+        } else {
+          $reply['status'] = cat($status);
+          $reply['done'] = 2;
+        }
         if (file_exists($error)) $reply['error'] = str_replace("\n","<br>",trim(file_get_contents($error)));
         delete_file($active,$status,$error);
         unset($pid,$move);
-        $reply['status'] = _('Done');
-        $reply['done'] = 1;
       }
     }
   }

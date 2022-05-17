@@ -90,8 +90,9 @@ function my_age($time) {
   return age($age->s,'second');
 }
 function parent_link() {
-  global $dir,$path,$block;
-  return in_array(dirname($dir),$block)||dirname($dir)==$dir ? '' : '<a href="/'.$path.'?dir='.rawurlencode(htmlspecialchars(dirname($dir))).'">'._('Parent Directory').'</a>';
+  global $dir,$path;
+  $parent = dirname($dir);
+  return $parent=='/' ? false : '<a href="/'.$path.'?dir='.rawurlencode(htmlspecialchars($parent)).'">'._('Parent Directory').'</a>';
 }
 function my_devs(&$devs,$name,$menu) {
   global $disks,$lock;
@@ -108,19 +109,18 @@ function my_devs(&$devs,$name,$menu) {
        default: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: unknown error').'</span></a>'; break;
       }
       $root = $dev=='flash' ? "/boot/$name" : "/mnt/$dev/$name";
-      $text[$i] .= '<span id="device_'.$i.'" class="hand" onclick="'.$menu.'(\''.$root.'\','.$i.')" oncontextmenu="'.$menu.'(\''.$root.'\','.$i.');return false">'.compress($dev,8,0).'</span></span>';
+      $text[$i] .= '<span id="device_'.$i.'" class="hand" onclick="'.$menu.'(\''.$root.'\','.$i.')" oncontextmenu="'.$menu.'(\''.$root.'\','.$i.');return false">'.compress($dev,10,0).'</span></span>';
     }
     $i++;
   }
   return implode($text);
 }
 $dir = validdir(htmlspecialchars_decode(rawurldecode($_GET['dir'])));
-if (!$dir) {echo '<tbody><tr><td></td><td></td><td colspan="7">',_('Invalid path'),'</td></tr></tbody>'; exit;}
+if (!$dir) {echo '<tbody><tr><td></td><td></td><td colspan="6">',_('Invalid path'),'</td><td></td></tr></tbody>'; exit;}
 
 extract(parse_plugin_cfg('dynamix',true));
 $disks = parse_ini_file('state/disks.ini',true);
 $path  = unscript($_GET['path']);
-$block = empty($_GET['block']) ? ['/','/mnt','/mnt/user'] : ['/'];
 $fmt   = "%F {$display['time']}";
 $dirs  = $files = [];
 $total = $objs = 0;
@@ -134,16 +134,15 @@ if ($user) {
   $tag = implode('|',array_merge(['disk'],pools_filter($disks)));
   $set = explode(';',str_replace(',;',',',preg_replace("/($tag)/",';$1',exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg($dir)."/* 2>/dev/null"))));
 }
-$stat = popen("shopt -s dotglob; stat -L -c'%F|%n|%U|%A|%s|%Y' ".escapeshellarg($dir)."/* 2>/dev/null",'r');
+$stat = popen("shopt -s dotglob;stat -L -c'%F|%U|%A|%s|%Y|%n' ".escapeshellarg($dir)."/* 2>/dev/null",'r');
 while (($row = fgets($stat))!==false) {
-  [$type,$name,$owner,$perm,$size,$time] = my_explode('|',$row,6);
+  [$type,$owner,$perm,$size,$time,$name] = explode('|',$row,6);
   $objs++; $loc = $user ? $set[$objs] : $lock;
-  $ext  = strtolower(pathinfo($name,PATHINFO_EXTENSION));
+  $name = rtrim($name,"\n");
   $devs = explode(',',$loc);
   $dev  = explode('/',$name,4);
-  $tag  = count($devs)>1 ? 'warning' : '';
   $text = [];
-  if ($row[0]=='d') {
+  if ($type[0]=='d') {
     $text[] = '<tr><td><i id="check_'.$objs.'" class="fa fa-fw fa-square-o" onclick="selectOne(this.id)"></i></td>';
     $text[] = '<td data=""><div class="icon-dir"></div></td>';
     $text[] = '<td><a id="name_'.$objs.'" oncontextmenu="folderContextMenu(this.id,\'right\');return false" href="/'.$path.'?dir='.rawurlencode(htmlspecialchars($name)).'">'.htmlspecialchars(basename($name)).'</a></td>';
@@ -155,6 +154,8 @@ while (($row = fgets($stat))!==false) {
     $text[] = '<td><i id="row_'.$objs.'" data="'.escapeQuote($name).'" type="d" class="fa fa-plus-square-o" onclick="folderContextMenu(this.id,\'both\')" oncontextmenu="folderContextMenu(this.id,\'both\');return false">...</i></td></tr>';
     $dirs[] = gzdeflate(implode($text));
   } else {
+    $ext = strtolower(pathinfo($name,PATHINFO_EXTENSION));
+    $tag = count($devs)>1 ? 'warning' : '';
     $text[] = '<tr><td><i id="check_'.$objs.'" class="fa fa-fw fa-square-o" onclick="selectOne(this.id)"></i></td>';
     $text[] = '<td class="ext" data="'.$ext.'"><div class="icon-file icon-'.$ext.'"></div></td>';
     $text[] = '<td id="name_'.$objs.'" class="'.$tag.'" onclick="fileEdit(this.id)" oncontextmenu="fileContextMenu(this.id,\'right\');return false">'.htmlspecialchars(basename($name)).'</td>';
