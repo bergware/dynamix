@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.05.17a">
+<!ENTITY version   "2022.05.17b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "5be5f4f8b9ebec39a1da7f49f1f79196">
+<!ENTITY MD5       "b53351c7abf1224ca8772fe6e835bb27">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0-rc5" max="6.10.9">
@@ -16,6 +16,7 @@
 
 ###&version;
 - Fixed potential file timestamp misreading
+- Fixed regression error in calculation function
 
 ###2022.05.16
 - Improved search function - faster results
