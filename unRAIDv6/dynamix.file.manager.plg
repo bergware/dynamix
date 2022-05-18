@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.05.18">
+<!ENTITY version   "2022.05.18a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b53351c7abf1224ca8772fe6e835bb27">
+<!ENTITY MD5       "c5fc75b55c15e54625ebaceeddf194ab">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.9">
@@ -16,6 +16,7 @@
 
 ###&version;
 - Change minimum Unraid version to 6.10.0 (stable release)
+- Fixed bug in calculation function when only files are selected
 
 ###2022.05.17
 - Fixed potential file timestamp misreading
