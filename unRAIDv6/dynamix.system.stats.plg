@@ -2,11 +2,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.system.stats">
 <!ENTITY author "Bergware">
-<!ENTITY version "2022.05.20">
+<!ENTITY version "2022.05.20a">
 <!ENTITY launch "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5 "1bd3a411f9fae9c3f7fea86667501a73">
+<!ENTITY MD5 "9c9daaedf26f3fcefa9fff3860410e08">
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0" icon="area-chart" support="http://lime-technology.com/forum/index.php?topic=36543.0">
   <CHANGES>
@@ -15,6 +15,7 @@
 ###&version;
 - Added missing .png file
 - Removed legacy code
+- Make font size in rem units
 - Minimum Unraid version set to 6.9.0
 
 ###2020.06.21
