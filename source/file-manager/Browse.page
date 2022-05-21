@@ -838,6 +838,8 @@ function doActions(action,title) {
 }
 function stop() {
   window.onbeforeunload = null;
+  $('#uploadButton').val("_(Upload)_").prop('onclick',null).off('click').click(function(){$('#upload').click();});
+  $('#uploadStatus').html('');
   running = false;
   loadList();
 }
@@ -883,7 +885,6 @@ function startUpload(files) {
   $('#uploadButton').val("_(Cancel)_").prop('onclick',null).off('click').click(function(){cancel=1;});
   running = true;
   uploadFile(files,0,0);
-  $('#uploadButton').val("_(Upload)_").prop('onclick',null).off('click').click(function(){$('#upload').click();});
 }
 function filter(ext) {
   $('td.ext').each(function(){
