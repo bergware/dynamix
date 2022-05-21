@@ -3,7 +3,7 @@ Title="Disk Stats"
 Tag="bar-chart"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2022, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -229,7 +229,7 @@ function systemStats() {
   }
 }
 function diskStats() {
-  setTimeout('sys(0)',0);
+  setTimeout(function(){sys(0);},0);
   if (graph>0) {
 <?if (strpos($show,'cpu')!==false):?>
     clearTimeout(cputime);
@@ -249,9 +249,7 @@ function sys(delay) {
   var series = [], i = 0;
   if (delay!=0) delay = 1200;
   $.post('<?=$stats?>',{cmd:'sys',startMode:'<?=$var["startMode"]?>',pools:'<?=implode(",",$pools)?>'},function(string) {
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    if ($('#tab1').is(':checked')) systime = setTimeout('sys(0)',<?=max(30000,abs($display['refresh']))?>);
-<?endif;?>
+    if ($('#tab1').is(':checked')) systime = setTimeout(function(){sys(0);},<?=max(30000,abs($display['refresh']))?>);
     if (!syschart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; syschart.addSeries(series, false);});
     } else {
@@ -276,9 +274,7 @@ function sys(delay) {
 function cpu() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'cpu',graph:graph},function(string) {
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     if (graph>0 && $('#tab2').is(':checked')) cputime = setTimeout(cpu,interval[graph]*1000);
-<?endif;?>
     if (!cpuchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; cpuchart.addSeries(series, false);});
     } else {
@@ -292,9 +288,7 @@ function cpu() {
 function ram() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'ram',graph:graph},function(string) {
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     if (graph>0 && $('#tab2').is(':checked')) ramtime = setTimeout(ram,interval[graph]*1000);
-<?endif;?>
     if (!ramchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; ramchart.addSeries(series, false);});
     } else {
@@ -308,9 +302,7 @@ function ram() {
 function com() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'com',port:'<?=$port?>',graph:graph},function(string) {
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     if (graph>0 && $('#tab2').is(':checked')) comtime = setTimeout(com,interval[graph]*1000);
-<?endif;?>
     if (!comchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; comchart.addSeries(series, false);});
     } else {
@@ -324,9 +316,7 @@ function com() {
 function hdd() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'hdd',graph:graph},function(string) {
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     if (graph>0 && $('#tab2').is(':checked')) hddtime = setTimeout(hdd,interval[graph]*1000);
-<?endif;?>
     if (!hddchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; hddchart.addSeries(series, false);});
     } else {
@@ -361,7 +351,7 @@ $(function() {
   Highcharts.setOptions({
     global:{useUTC:false},
     chart:{
-      style:{fontFamily:'clear-sans',fontSize:'1rem'},
+      style:{fontFamily:'clear-sans',fontSize:'1.1rem'},
       backgroundColor:{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'rgb(96,96,96)'],[1,'rgb(16,16,16)']]},
       borderWidth:0,
       borderRadius:8,
@@ -379,8 +369,8 @@ $(function() {
       animation:false,
       zoomType:'x'
     },
-    title:{style:{color:'#fff',fontSize:'18px'},y:10},
-    subtitle:{style:{color:'#aaa',fontSize:'13px'},y:28},
+    title:{style:{color:'#fff',fontSize:'1.8rem'},y:10},
+    subtitle:{style:{color:'#aaa',fontSize:'1.4rem'},y:30},
     plotOptions:{
       area:{marker:{enabled:false},lineWidth:1,states:{hover:{lineWidth:1}},shadow:false,turboThreshold:1},
       bar:{borderWidth:0,borderRadius:2,states:{hover:{enabled:false}},shadow:false,turboThreshold:1},
@@ -392,21 +382,21 @@ $(function() {
       gridLineWidth:0,
       lineColor:'#999',
       tickColor:'#999',
-      labels:{style:{color:'#999',fontSize:'10px'},y:20}
+      labels:{style:{color:'#999',fontSize:'1rem'},y:20}
     },
     yAxis:{
       title:{text:null},
       gridLineColor:'rgba(255,255,255,.1)',
       lineWidth:0,
       tickWidth:0,
-      labels:{style:{color:'#999',fontSize:'11px'},y:2},
+      labels:{style:{color:'#999',fontSize:'1rem'},y:2},
       min:0
     },
     tooltip:{
       backgroundColor:{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'rgba(96,96,96,.8)'],[1,'rgba(16,16,16,.8)']]},
       borderWidth:0,
       shared:true,
-      style:{color:'#fff',fontSize:'10px'},
+      style:{color:'#fff',fontSize:'1rem'},
       positioner:function() {return {x:70,y:5};}
     },
     legend:{
@@ -433,17 +423,17 @@ $(function() {
     title:{text:_('Disk Usage')},
     subtitle:{text:_('utilization in percentage')},
 <?if ($cfg['size']):?>
-    xAxis:[{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'12px'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
-    {opposite:true,linkedTo:0,type:'linear',labels:{style:{fontSize:'12px'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$sizes)?>]}],
+    xAxis:[{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'1.2rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
+    {opposite:true,linkedTo:0,type:'linear',labels:{style:{fontSize:'1.2rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$sizes)?>]}],
 <?else:?>
-    xAxis:{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'12px'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
+    xAxis:{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'1.2rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
 <?endif;?>
     yAxis:{gridLineDashStyle:'dash',labels:{y:15},max:100,plotLines:[
 <?if ($warning):?>
-      {label:{text:'<?=$display['warning']?>',style:{color:'#ff6600',fontSize:'9px'},verticalAlign:'top',textAlign:'right',y:-4,x:-4},dashStyle:'dash',color:'#ff6600',width:0.8,value:<?=$display['warning']?>,zIndex:5},
+      {label:{text:'<?=$display['warning']?>',style:{color:'#ff6600',fontSize:'1rem'},verticalAlign:'top',textAlign:'right',y:-4,x:-4},dashStyle:'dash',color:'#ff6600',width:0.8,value:<?=$display['warning']?>,zIndex:5},
 <?endif;?>
 <?if ($critical):?>
-      {label:{text:'<?=$display['critical']?>',style:{color:'#ff6600',fontSize:'9px'},verticalAlign:'top',textAlign:'right',y:-4,x:-4},dashStyle:'dash',color:'#ff6600',width:0.8,value:<?=$display['critical']?>,zIndex:5}
+      {label:{text:'<?=$display['critical']?>',style:{color:'#ff6600',fontSize:'1rem'},verticalAlign:'top',textAlign:'right',y:-4,x:-4},dashStyle:'dash',color:'#ff6600',width:0.8,value:<?=$display['critical']?>,zIndex:5}
 <?endif;?>
     ]},
     legend:{enabled:false},
