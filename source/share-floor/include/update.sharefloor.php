@@ -18,7 +18,7 @@ if ($_POST['mode']>0) {
   $min  = isset($_POST['min'])  ? $_POST['min']  : '*';
   $dotm = isset($_POST['dotm']) ? $_POST['dotm'] : '*';
   $day  = isset($_POST['day'])  ? $_POST['day']  : '*';
-  $cron = "# Generated share floor schedule:\n$min $hour $dotm * $day $docroot/plugins/dynamix.share.floor/scripts/share-floor &> /dev/null\n\n";
+  $cron = "# Generated share floor schedule:\n$min $hour $dotm * $day $docroot/plugins/dynamix.share.floor/scripts/share_floor &> /dev/null\n\n";
 } else {
   $cron = "";
 }
