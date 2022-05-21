@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.05.21b">
+<!ENTITY version   "2022.05.21c">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0cac6843f921702b940c09b0c627ef15">
+<!ENTITY MD5       "77678f307544ad6cfcc77c7a2ef6b4a4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.9">
@@ -16,6 +16,7 @@
 
 ###&version;
 - Fixed screen not updated after Upload function finished
+- Fixed long list may crash
 
 ###2022.05.19
 - Make rows all same height in folder listing

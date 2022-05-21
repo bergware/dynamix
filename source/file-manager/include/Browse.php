@@ -58,7 +58,7 @@ if (isset($_POST['mode'])) {
   }
 }
 function write(&$rows) {
-  if ($score = count($rows)) echo '<tbody>',array_map(function($row){echo gzinflate($row);},$rows),'</tbody>';
+  if ($score = count($rows)) echo '<tbody class="list">',array_map(function($row){echo gzinflate($row);},$rows),'</tbody>';
   $rows = $score;
 }
 function validdir($dir) {

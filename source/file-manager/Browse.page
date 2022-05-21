@@ -910,9 +910,8 @@ function loadList() {
     table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
     table.trigger('update',[true]);
     if ($.cookie('my_time')!=null) toggleTime(true);
-    $('tbody tr').each(function(){y.push($(this).height());});
-    y = Math.max(...y);
-    $('tbody tr').each(function(){$(this).height(y);});
+    $('tbody.list tr').each(function(){if (!y.includes($(this).height())) y.push($(this).height());});
+    if (y.length > 2) {y = Math.max(...y); $('tbody tr').each(function(){$(this).height(y);});}
 <?if ($display['resize']):?>
     resize();
     $(window).bind('resize',function(){resize();});
