@@ -653,7 +653,7 @@ function doAction(action,title,id) {
 }
 function doActions(action,title) {
   var source = [], type = [], owner = [], perm = [];
-  if (action > 0 && action < 11) {
+  if (action > 0 && action != 11) {
     $('i[id^="check_"]').each(function(){
       if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
         var id = $(this).prop('id');
@@ -899,6 +899,7 @@ function toggleTime(init) {
 function loadList() {
   var col = $.cookie('col')||2;
   var dir = $.cookie('dir')||0;
+  var y = [];
   timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},500);
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>"},function(data){
     clearTimeout(timers.browse);
@@ -908,6 +909,9 @@ function loadList() {
     table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
     table.trigger('update',[true]);
     if ($.cookie('my_time')!=null) toggleTime(true);
+    $('tbody tr').each(function(){y.push($(this).height());});
+    y = Math.max(...y);
+    $('tbody tr').each(function(){$(this).height(y);});
 <?if ($display['resize']):?>
     resize();
     $(window).bind('resize',function(){resize();});

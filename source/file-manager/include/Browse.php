@@ -40,6 +40,7 @@ if (isset($_POST['mode'])) {
     } else $loc = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
     $awk = "awk 'BEGIN{ORS=\" \"}/Number of files|Total file size/{if(\$5==\"(reg:\")print \$4,\$8;if(\$5==\"(dir:\")print \$4,\$6;if(\$3==\"size:\")print \$4}'";
     [$files,$dirs,$size] = explode(' ',str_replace([',',')'],'',exec("rsync --stats -naI ".quoted($source)." /var/tmp 2>/dev/null|$awk")));
+    $dirs = $dirs ?: 0;
     $files -= $dirs;
     $text   = [];
     $text[] = _('Name').": ".implode(', ',array_map('basename',$source));
@@ -80,6 +81,7 @@ function age($number,$time) {
   return sprintf(_('%s '.($number==1 ? $time : $time.'s').' ago'),$number);
 }
 function my_age($time) {
+  if (!is_numeric($time)) $time = time();
   $age = new DateTime('@'.$time);
   $age = date_create('now')->diff($age);
   if ($age->y > 0) return age($age->y,'year');
