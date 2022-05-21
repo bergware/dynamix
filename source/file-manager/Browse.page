@@ -854,7 +854,7 @@ function downloadFile(source) {
 }
 function uploadFile(files,index,start) {
   var file = files[index];
-  var slice = 4000 * 1024;
+  var slice = 4000 * 1000;
   var next = start + slice + 1;
   var blob = file.slice(start, next);
   reader.onloadend = function(e){
