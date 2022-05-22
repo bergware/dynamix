@@ -838,6 +838,7 @@ function doActions(action,title) {
 }
 function stop() {
   window.onbeforeunload = null;
+  $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'stop'});
   $('#uploadButton').val("_(Upload)_").prop('onclick',null).off('click').click(function(){$('#upload').click();});
   $('#uploadStatus').html('');
   $('#upload').val('');

@@ -18,9 +18,9 @@ require_once "$docroot/webGui/include/Translations.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
 if (isset($_POST['mode'])) {
+  $local = '/var/tmp/local.tmp';
   switch ($_POST['mode']) {
   case 'upload':
-    $local = '/var/tmp/local.tmp';
     $file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])));
     if (!$file) die('stop');
     if ($_POST['start']==0) {
@@ -62,6 +62,9 @@ if (isset($_POST['mode'])) {
     die($file ? file_get_contents($file) : '');
   case 'save':
     if ($file = validname(rawurldecode($_POST['file']))) file_put_contents($file,rawurldecode($_POST['data']));
+    die();
+  case 'stop':
+    delete_file($local);
     die();
   }
 }
