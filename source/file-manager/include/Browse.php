@@ -20,13 +20,21 @@ require_once "$docroot/webGui/include/Helpers.php";
 if (isset($_POST['mode'])) {
   switch ($_POST['mode']) {
   case 'upload':
-    $size = 'stop';
+    $local = '/var/tmp/local.tmp';
     $file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])));
-    if ($file) {
-      if (($_POST['start']==0 || $_POST['cancel']==1) && file_exists($file)) unlink($file);
-      if ($_POST['cancel']==0) $size = file_put_contents($file,base64_decode(explode(';base64,',$_POST['data'])[1]),FILE_APPEND);
+    if (!$file) die('stop');
+    if ($_POST['start']==0) {
+      $my = pathinfo($file); $n = 0;
+      while (file_exists($file)) $file = $my['dirname'].'/'.preg_replace('/ \(\d+\)$/','',$my['filename']).' ('.++$n.')'.($my['extension'] ? '.'.$my['extension'] : '');
+      file_put_contents($local,$file);
     }
-    die($size);
+    $file = file_get_contents($local);
+    if ($_POST['cancel']==1) {
+      delete_file($file,$local);
+      die('stop');
+    }
+    file_put_contents($file,base64_decode(explode(';base64,',$_POST['data'])[1]),FILE_APPEND);
+    die();
   case 'calc':
     extract(parse_plugin_cfg('dynamix',true));
     $source = explode("\n",htmlspecialchars_decode(rawurldecode($_POST['source'])));

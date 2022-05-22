@@ -840,6 +840,7 @@ function stop() {
   window.onbeforeunload = null;
   $('#uploadButton').val("_(Upload)_").prop('onclick',null).off('click').click(function(){$('#upload').click();});
   $('#uploadStatus').html('');
+  $('#upload').val('');
   running = false;
   loadList();
 }
@@ -860,7 +861,7 @@ function uploadFile(files,index,start) {
   reader.onloadend = function(e){
     if (e.target.readyState !== FileReader.DONE) return;
     $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'upload', file:encodeURIComponent("<?=$dir?>/"+file.name), start:start, data:e.target.result, cancel:cancel},function(reply){
-      if (reply=='stop') stop();
+      if (reply=='stop') {stop(); return;}
       if (next < file.size) {
         var total = 0;
         for (var i=0,f; f=files[i]; i++) {
@@ -872,7 +873,7 @@ function uploadFile(files,index,start) {
         uploadFile(files,index,next);
       } else if (index < files.length-1) {
         uploadFile(files,index+1,0);
-      } else stop();
+      } else {stop(); return;}
     });
   };
   reader.readAsDataURL(blob);
