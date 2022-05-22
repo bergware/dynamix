@@ -71,13 +71,11 @@ function write(&$rows) {
 }
 function validdir($dir) {
   $path = realpath($dir);
-  $root = explode('/',$path)[1] ?? '';
-  return in_array($root,['mnt','boot']) ? $path : '';
+  return in_array(explode('/',$path)[1]??'',['mnt','boot']) ? $path : '';
 }
 function validname($name) {
   $path = realpath(dirname($name));
-  $root = explode('/',$path)[1] ?? '';
-  return in_array($root,['mnt','boot']) ? $path.'/'.basename($name) : '';
+  return in_array(explode('/',$path)[1]??'',['mnt','boot']) ? $path.'/'.basename($name) : '';
 }
 function escape($name) {return escapeshellarg(validname($name));}
 function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}

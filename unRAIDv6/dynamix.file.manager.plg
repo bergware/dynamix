@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.05.22b">
+<!ENTITY version   "2022.05.22c">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b20090354e0f99ff33537c953f1ff3e4">
+<!ENTITY MD5       "4328330d8757aff5e6aad35d35988d33">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.9">
@@ -17,6 +17,7 @@
 ###&version;
 - Fixed - do not overwrite existing file while uploading, create a new file instead
 - Minor code optimizations
+- Minor bug fixes
 
 ###2022.05.21
 - Fixed screen not updated after Upload function finished

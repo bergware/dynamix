@@ -903,6 +903,7 @@ function loadList() {
   var col = $.cookie('col')||2;
   var ord = $.cookie('dir')||0;
   var y = [];
+  $('#check_0').removeClass('fa-check-square-o').addClass('fa-square-o');
   timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},500);
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent(dir),path:"<?=$path?>"},function(data){
     clearTimeout(timers.browse);
@@ -923,9 +924,13 @@ function loadList() {
 $(function(){
   caPluginUpdateCheck('dynamix.file.manager.plg',{name:'Dynamix File Manager'});
   var dirs = dir.split('/'), url = [];
-  for (var n=1; n < dirs.length; n++) {
-    var subdir = dirs.slice(1,n+1);
-    url.push('<a class="none" href="/<?=$path?>?dir=/'+encodeURIComponent(subdir.join('/'))+'">'+(n==1 ? '<i class="fa fa-home"></i>' : dirs[n])+'</a>');
+  if (dirs.length > 1) {
+    for (var n=1; n < dirs.length; n++) {
+      var subdir = dirs.slice(1,n+1);
+      url.push('<a class="none" href="/<?=$path?>?dir=/'+encodeURIComponent(subdir.join('/'))+'">'+(n==1 ? '<i class="fa fa-home"></i>' : dirs[n])+'</a>');
+    }
+  } else {
+    url.push('<i class="fa fa-home red-text"></i>');
   }
   $('span.left').html(url.join('<i class="fa fa-chevron-right"></i>')).append('<span class="right"><span class="filter"><input type="text" class="filter" oninput="filter(this.value)" autocomplete="off" spellcheck="false" placeholder="_(file type)_"><i class="fa fa-filter"></i></span><i class="fa fa-toggle-off" onclick="toggleTime()" style="cursor:pointer;margin-left:20px" title="_(Toggle Time/Age display)_"></i></span>');
   table = $('table.indexer');
