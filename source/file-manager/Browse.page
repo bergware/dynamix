@@ -17,8 +17,7 @@ Nchan="file_manager"
 <?
 function validdir($dir) {
   $path = realpath($dir);
-  $root = explode('/',$path)[1] ?? '';
-  return in_array($root,['mnt','boot']) ? $path : '';
+  return in_array(explode('/',$path)[1]??'',['mnt','boot']) ? $path : '';
 }
 function quote($text) {
   return "'$text'";
@@ -26,7 +25,7 @@ function quote($text) {
 $active  = '/var/tmp/file.manager.active';
 $running = file_exists($active);
 $dir     = validdir(htmlspecialchars_decode($dir));
-[$null,$root,$main,$next,$rest] = my_explode('/',$dir,5);
+[$none,$root,$main,$next,$rest] = my_explode('/',$dir,5);
 $dir     = htmlspecialchars(str_replace('\\','\\\\',$dir));
 $lock    = $root=='mnt' ? ($main ?: '---') : ($root=='boot' ? _('flash') : '---');
 $isshare = $root=='mnt' && (!$main || !$next || ($main=='rootshare' && !$rest));
@@ -97,6 +96,7 @@ String.prototype.alter = function(...a){var t=this;for(var i=0;i<a.length;i+=2){
 String.prototype.build = function(){return this.replace(/\n(<!--!|!-->)\n/g,'');}
 
 // General variables
+var dir = "<?=$dir?>";
 var box = null;
 var running = false;
 var previous = '';
@@ -500,7 +500,7 @@ function doAction(action,title,id) {
   switch (action) {
   case 0: // create folder
     box.html($("#templateCreateFolder").html());
-    source = "<?=$dir?>";
+    source = dir;
     var height = 330;
     break;
   case 1: // delete folder
@@ -677,8 +677,8 @@ function doActions(action,title) {
     if (bulk) {
       var u = false, d = false;
       for (var i=0,s; s=source[i]; i++) {
-        var p = s.substr(1).split('/');
-        if (/^user0?$/.test(p[1])) u = true; else d = true;
+        var p = s.split('/');
+        if (/^user0?$/.test(p[2])) u = true; else d = true;
       }
       if (u && d) {errorSource(); return;} // disallow mixing of disk and user shares
     }
@@ -687,7 +687,7 @@ function doActions(action,title) {
   switch (action) {
   case 0: // create folder
     box.html($("#templateCreateFolder").html());
-    source[0] = "<?=$dir?>";
+    source[0] = dir;
     var height = 330;
     break;
   case 1: // delete object
@@ -755,7 +755,7 @@ function doActions(action,title) {
     var height = 330;
     break;
   case 11: // search
-    source[0] = "<?=$dir?>";
+    source[0] = dir;
     box.html($("#templateSearch").html());
     box.find('span.loc').html('&nbsp;').css({'line-height':'normal'});
     box.find('span.text').html('').css({'line-height':'normal'});
@@ -860,7 +860,7 @@ function uploadFile(files,index,start) {
   var blob = file.slice(start, next);
   reader.onloadend = function(e){
     if (e.target.readyState !== FileReader.DONE) return;
-    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'upload', file:encodeURIComponent("<?=$dir?>/"+file.name), start:start, data:e.target.result, cancel:cancel},function(reply){
+    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'upload', file:encodeURIComponent(dir+'/'+file.name), start:start, data:e.target.result, cancel:cancel},function(reply){
       if (reply=='stop') {stop(); return;}
       if (next < file.size) {
         var total = 0;
@@ -901,15 +901,15 @@ function toggleTime(init) {
 }
 function loadList() {
   var col = $.cookie('col')||2;
-  var dir = $.cookie('dir')||0;
+  var ord = $.cookie('dir')||0;
   var y = [];
   timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},500);
-  $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent("<?=$dir?>"),path:"<?=$path?>"},function(data){
+  $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent(dir),path:"<?=$path?>"},function(data){
     clearTimeout(timers.browse);
     $('div.spinner.fixed').hide();
     table.find('tbody,tfoot').remove();
     thead.after(data);
-    table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,dir],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
+    table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,ord],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
     table.trigger('update',[true]);
     if ($.cookie('my_time')!=null) toggleTime(true);
     $('tbody.list tr').each(function(){if (!y.includes($(this).height())) y.push($(this).height());});
@@ -922,11 +922,10 @@ function loadList() {
 }
 $(function(){
   caPluginUpdateCheck('dynamix.file.manager.plg',{name:'Dynamix File Manager'});
-  var dirs = "<?=$dir?>".split('/');
-  var url = [];
+  var dirs = dir.split('/'), url = [];
   for (var n=1; n < dirs.length; n++) {
-    var dir = dirs.slice(1,n+1);
-    url.push('<a class="none" href="/<?=$path?>?dir=/'+encodeURIComponent(dir.join('/'))+'">'+(n==1 ? '<i class="fa fa-home"></i>' : dirs[n])+'</a>');
+    var subdir = dirs.slice(1,n+1);
+    url.push('<a class="none" href="/<?=$path?>?dir=/'+encodeURIComponent(subdir.join('/'))+'">'+(n==1 ? '<i class="fa fa-home"></i>' : dirs[n])+'</a>');
   }
   $('span.left').html(url.join('<i class="fa fa-chevron-right"></i>')).append('<span class="right"><span class="filter"><input type="text" class="filter" oninput="filter(this.value)" autocomplete="off" spellcheck="false" placeholder="_(file type)_"><i class="fa fa-filter"></i></span><i class="fa fa-toggle-off" onclick="toggleTime()" style="cursor:pointer;margin-left:20px" title="_(Toggle Time/Age display)_"></i></span>');
   table = $('table.indexer');
