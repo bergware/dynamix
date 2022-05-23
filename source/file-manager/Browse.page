@@ -903,7 +903,7 @@ function toggleTime(init) {
 function loadList() {
   var col = $.cookie('col')||2;
   var ord = $.cookie('dir')||0;
-  var y = [];
+  var h = [];
   $('#check_0').removeClass('fa-check-square-o').addClass('fa-square-o');
   timers.browse = setTimeout(function(){$('div.spinner.fixed').show();},500);
   $.get('/plugins/dynamix.file.manager/include/Browse.php',{dir:encodeURIComponent(dir),path:"<?=$path?>"},function(data){
@@ -914,12 +914,8 @@ function loadList() {
     table.tablesorter({headers:{0:{sorter:false},8:{sorter:false}},sortList:[[col,ord],[2,0]],sortAppend:[[2,0]],textAttribute:'data'});
     table.trigger('update',[true]);
     if ($.cookie('my_time')!=null) toggleTime(true);
-    $('tbody.list tr').each(function(){if (!y.includes($(this).height())) y.push($(this).height());});
-    if (y.length > 2) {y = Math.max(...y); $('tbody tr').each(function(){$(this).height(y);});}
-<?if ($display['resize']):?>
-    resize();
-    $(window).bind('resize',function(){resize();});
-<?endif;?>
+    $('tbody.list tr').each(function(){if (!h.includes($(this).height())) h.push($(this).height());});
+    if (h.length > 2) {h = Math.max(...h); $('tbody tr').each(function(){$(this).height(h);});}
   });
 }
 $(function(){
@@ -942,6 +938,10 @@ $(function(){
     $.cookie('dir',sort[1]);
   });
   loadList();
+<?if ($display['resize']):?>
+  resize();
+  $(window).bind('resize',function(){resize();});
+<?endif;?>
 <?if ($running):?>
   showDialog();
 <?endif;?>
@@ -1445,7 +1445,7 @@ _(Search string)_:
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
-<style>div#editor{position:absolute;top:0;bottom:0;left:0;right:0;font-size:1.4rem;font-family:bitstream;line-height:1.6}</style>
+<style>div#editor{position:absolute;top:0;bottom:0;left:0;right:0;font-size:1.3rem;font-family:bitstream;line-height:1.5}</style>
 </head>
 <body>
 <div id="editor"></div>
