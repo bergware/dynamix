@@ -6,7 +6,7 @@
 <!ENTITY version   "2022.05.23a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6cfe79e9005c1018e2e34eb86c23369c">
+<!ENTITY MD5       "120e44b5949cfdca4405b4799e321201">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.9">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Updated ACE editor to version 1.5.3
+
+###2002.05.23
 - Minor code optimizations
 - Adjusted font size of editor
 
