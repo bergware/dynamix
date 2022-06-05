@@ -30,7 +30,7 @@ if (isset($_POST['mode'])) {
     }
     $file = file_get_contents($local);
     if ($_POST['cancel']==1) {
-      delete_file($file,$local);
+      delete_file($file);
       die('stop');
     }
     file_put_contents($file,base64_decode(explode(';base64,',$_POST['data'])[1]),FILE_APPEND);
