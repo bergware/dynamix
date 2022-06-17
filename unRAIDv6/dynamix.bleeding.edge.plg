@@ -3,18 +3,32 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.16">
+<!ENTITY version   "2022.06.17">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "7a791e96b8bf8208cc345a98c71bfa0a">
+<!ENTITY MD5       "b5447f4dd05bcc217ed066a7044c164b">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.3">
+
+<ALERT>
+**WARNING - THIS IS PREPRODUCTION STUFF**
+
+###There maybe bugs, use at your own risk.
+</ALERT>
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- Many improvements and corrections in several files
+- Added security for StartCommand
+- Added language plugins as well
+- Added new script 'multiplugin' which installs multiple plugins at once
+- Added ALERT message for testing purposes
+- Updates done for Apps.page (CA) - available as a separate file, this makes CA work with the new system
+
+###2022.06.16
 - Test release
 </CHANGES>
 
