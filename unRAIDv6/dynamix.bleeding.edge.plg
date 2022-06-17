@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.17">
+<!ENTITY version   "2022.06.18">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b5447f4dd05bcc217ed066a7044c164b">
+<!ENTITY MD5       "502c8d143edbfba23a6fef65ea1634bb">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.3">
@@ -21,6 +21,9 @@
 ##&name;
 
 ###&version;
+- Added automatic "nchan" appending, no more need to do this in the calling functions (GUI uses nchan by default)
+
+###2022.06.17
 - Many improvements and corrections in several files
 - Added security for StartCommand
 - Added language plugins as well
