@@ -26,6 +26,7 @@
 #                                       - added fan spin up/down offset 
 # Version 1.7   Modified by doron       - Prevent spinning up SAS drives, use sdspin
 #                                       - Use "-n standby" flag in smartctl calls, extra safety
+#                                       - Obtain HD temp data from SAS drives
 #=======================================================================================
 # Dependencies: grep,awk,smartctl,hdparm
 #=======================================================================================
@@ -195,7 +196,7 @@ function_get_highest_hd_temp() {
       if [[ $DISK == /dev/nvme[0-9] ]]; then
         CURRENT_TEMP=$(smartctl -n standby -A $DISK | awk '$1=="Temperature:" {print $2;exit}')
       else
-        CURRENT_TEMP=$(smartctl -n standby -A $DISK | awk '$1==190||$1==194 {print $10;exit}')
+        CURRENT_TEMP=$(smartctl -n standby -A $DISK | awk '$1==190||$1==194 {print $10;exit} $1=="Current"&&$3=="Temperature:" {print $4;exit}')
       fi
       if [[ $HIGHEST_TEMP -le $CURRENT_TEMP ]]; then
         HIGHEST_TEMP=$CURRENT_TEMP
