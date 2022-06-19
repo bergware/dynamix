@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.18c">
+<!ENTITY version   "2022.06.19">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "147f6ea4ac883e09d72f1d813effa8a9">
+<!ENTITY MD5       "37f288c7d8da3605a7d98878353511a6">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.3">
@@ -21,6 +21,11 @@
 ##&name;
 
 ###&version;
+- Added pre hooks feature (post hooks was added earlier)
+- Added pre hook script to validate updates first
+- Renamed post hook script
+
+###2022.06.18
 - Added automatic "nchan" appending, no more need to do this in the calling functions (GUI uses nchan by default)
 - Added hook script feature, script(s) are executed after a successful completion of the given method (install, update, check, remove)
 - Added "check_support_link" script to update incorrect or missing support links
