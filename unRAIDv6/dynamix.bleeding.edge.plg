@@ -3,13 +3,13 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.19b">
+<!ENTITY version   "2022.06.21">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "bbec14f57dec52b0ccfea33eaea4a3cf">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.3">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
 
 <ALERT>
 **WARNING - THIS IS PREPRODUCTION STUFF**
@@ -21,6 +21,10 @@
 ##&name;
 
 ###&version;
+- Latest update
+- Removed max unraid version limitation
+
+###2022.06.19
 - Added pre hooks feature (post hooks was added earlier)
 - Added pre hook script to validate updates first
 - Renamed post hook script
