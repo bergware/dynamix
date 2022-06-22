@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.21a">
+<!ENTITY version   "2022.06.22">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ebb82de85fad67d9cf60491827d9827b">
+<!ENTITY MD5       "db4378d1d64372885310032ba0a61e39">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -21,6 +21,12 @@
 ##&name;
 
 ###&version;
+- Fixed SWAL windows may show with wrong size
+- Removed animation in SWAL popup for openPlugin, openChanges and openAlert
+- Removed top icon in openPlugin
+- Added function "footerAlert(msg,[timer]) to show an alert message in the footer when openPlugin is closed
+
+###2022.06.21
 - Latest update
 - Removed max unraid version limitation
 
