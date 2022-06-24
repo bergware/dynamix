@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.24">
+<!ENTITY version   "2022.06.24a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "bbb64d6529cd699fd3d8b2e556fa6cd6">
+<!ENTITY MD5       "61dab39fe85501dc9eeb64f877a77f60">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -23,6 +23,7 @@
 ###&version;
 - smarter plugin validation
 - minor updates
+- other updates
 
 ###2022.06.22
 - Fixed SWAL windows may show with wrong size
