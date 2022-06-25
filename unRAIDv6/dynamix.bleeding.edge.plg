@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.24c">
+<!ENTITY version   "2022.06.25">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a60193f82c071ef92d92097a48d22cbd">
+<!ENTITY MD5       "5f97ccbcd54efb92ddac8b36e7de45dc">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -21,6 +21,9 @@
 ##&name;
 
 ###&version;
+- more improvements
+
+###2022.06.24
 - smarter plugin validation
 - minor updates
 - other updates
