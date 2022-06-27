@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.26c">
+<!ENTITY version   "2022.06.27">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "e19fee1a2718352fff7f1f3d1e4f6f3e">
+<!ENTITY MD5       "eeb6c340af771159bcf633d84f74c931">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -21,6 +21,9 @@
 ##&name;
 
 ###&version;
+- changed banner
+
+###2022.06.26
 - Added process running check in footerAlert, afterwards message is cleared and designated script is run
 
 ###2022.06.25
