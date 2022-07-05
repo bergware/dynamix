@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.07.03">
+<!ENTITY version   "2022.07.05">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ba0aad7991a6d9917e590c25defffe7a">
+<!ENTITY MD5       "266bc74a08db4df940090f2b77c6b2b4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -21,6 +21,9 @@
 ##&name;
 
 ###&version;
+- System update: replace all openBox calls
+
+###2022.07.03
 - Added openChanges for System Information
 - Added openChanges for Feedback form
 - Updated diagnostics
