@@ -3,18 +3,22 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.06.28a">
+<!ENTITY version   "2022.07.07">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "859fb732de7d5b8e3170607ef5f46057">
+<!ENTITY MD5       "cc1cfd61097d5bb711b5fc75a159e36a">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0" max="6.10.9">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- Updated ACE editor to version 1.7.1
+- Removed 6.10 max Unraid version
+
+###2022.06.28
 - Fixed corrupted upload of binary files
 
 ###2022.06.11
