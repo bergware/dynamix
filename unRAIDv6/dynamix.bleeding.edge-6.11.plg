@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "dynamix.bleeding.edge">
+<!ENTITY name      "dynamix.bleeding.edge-6.11">
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2022.07.11">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
@@ -9,7 +9,7 @@
 <!ENTITY MD5       "910d94463f088ede57d67506bf4c2f75">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.11.0-beta5">
 
 <ALERT>
 **WARNING - THIS IS PREPRODUCTION STUFF**
