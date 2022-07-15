@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.07.08">
+<!ENTITY version   "2022.07.15">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b4a1eb0991eb3a7677c64b3dfa43ab7f">
+<!ENTITY MD5       "23af982077c24ad5b18c11713b21999d">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -21,6 +21,14 @@
 ##&name;
 
 ###&version;
+- Added "start" parameter to openPlugin (start = 1 --> forced start of background process)
+- Updated plugins page to show pending status and hide remove button
+- Updated hook scripts
+- Added hook possbility to language script (similar to plugin)
+- Hook scripts uses additional parameter: type
+- Other updates
+
+###2022.07.08
 - Added openDocker
 
 ###2022.07.08
