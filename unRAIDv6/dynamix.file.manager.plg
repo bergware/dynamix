@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.07.09b">
+<!ENTITY version   "2022.07.17">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "3a94a2f67343370ecbf36bed37b89003">
+<!ENTITY MD5       "4d95a5ff866a6e8d9969ec29fbb91dd7">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Added right-click menu to browse header which displays full path
+
+###2022.07.09
 - Changed size of editor window to 800x1200 or 600x900
 
 ###2022.07.07
