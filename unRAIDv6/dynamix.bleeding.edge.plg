@@ -3,13 +3,13 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.07.16a">
+<!ENTITY version   "2022.07.27">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "399bc7699e5e7eff1d3f9d3672791e50">
+<!ENTITY MD5       "6cef5c33a6b023ae151ff3b1c9112b6a">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.11.0-rc1">
 
 <ALERT>
 **WARNING - THIS IS PREPRODUCTION STUFF**
@@ -21,6 +21,10 @@
 ##&name;
 
 ###&version;
+- Add openDocker
+- Fix regression error in OS update selection
+
+###2022.07.16
 - Added "start" parameter to openPlugin (start = 1 --> forced start of background process)
 - Updated plugins page to show pending status and hide remove button
 - Updated hook scripts
