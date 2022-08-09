@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.08.09a">
+<!ENTITY version   "2022.08.09b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c3b27dfe60b5c933861d0968ae5018a9">
+<!ENTITY MD5       "4449e6d60c5aef306be60339c27bf4e5">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.11.0-rc3">
@@ -22,6 +22,7 @@
 
 ###&version;
 - Use nchan buffering between sender and receiver
+- Start command delayed
 
 ###2022.07.27
 - Add openDocker
