@@ -43,10 +43,11 @@ function get_autofan() {
   return is_executable($script) ? array_map('load',explode(' ',exec("$script speed"))) : [];
 }
 $set = [];
-$sensors = explode(' ',exec("sensors -A|awk 'BEGIN{cpu=\"\";mb=\"\";fan=\"\"}{if (/^CPU Temp/) cpu=$3*1; if (/^MB Temp/) mb=$3*1; if (/^Array Fan/) fan=fan\" \"$3*1} END{print cpu,mb fan}'"));
+$sensors = explode(' ',exec("sensors -A|awk 'BEGIN{cpu0=\"\";cpu1=\"\";mb=\"\";fan=\"\"}{if (/^CPU0 Temp/) cpu0=$3*1; if (/^CPU1 Temp/) cpu1=$3*1; if (/^MB Temp/) mb=$3*1; if (/^Array Fan/) fan=fan\" \"$3*1} END{print cpu0,cpu1,mb fan}'"));
 $fans = get_autofan();
-$set[] = "<span title='"._('Procesor')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[0], $_POST['unit'], $_POST['dot'])."</span>";
-$set[] = "<span title='"._('Mainboard')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[1], $_POST['unit'], $_POST['dot'])."</span>";
-for ($i=2; $i<count($sensors); $i++) $set[] = "<span title='"._('Array fan')."'><i class='fa fa-flag-o' style='margin:0 6px 0 24px'></i>".my_rpm($sensors[$i]).($fans[$i-2]??'')."</span>";
+$set[] = "<span title='"._('Processor 0')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[0], $_POST['unit'], $_POST['dot'])."</span>";
+$set[] = "<span title='"._('Processor 1')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[1], $_POST['unit'], $_POST['dot'])."</span>";
+$set[] = "<span title='"._('Mainboard')."'><i class='fa fa-thermometer-0' style='margin:0 6px 0 24px'></i>".my_temp($sensors[2], $_POST['unit'], $_POST['dot'])."</span>";
+for ($i=3; $i<count($sensors); $i++) $set[] = "<span title='"._('Array fan')."'><i class='fa fa-flag-o' style='margin:0 6px 0 24px'></i>".my_rpm($sensors[$i]).($fans[$i-3]??'')."</span>";
 echo "<span id='temp' style='margin-right:24px'>".implode($set)."</span>";
 ?>

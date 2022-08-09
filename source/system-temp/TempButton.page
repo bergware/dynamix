@@ -30,8 +30,8 @@ function systemTemp() {
       var temp = $('span#temp').text();
       var unit = temp.indexOf('C')>0 ? 'C' : 'F';
       temp = temp.split(unit);
-      if (temp[0]) $('#cpu-temp').html('_(Temperature)_: '+temp[0]+unit);
-      if (temp[1]) $('#mb-temp').html('_(Temperature)_: '+temp[1]+unit);
+      if (temp[0] || temp[1]) $('#cpu-temp').html('_(Temperature)_: '+temp[0]+unit+' | '+temp[1]+unit);
+      if (temp[2]) $('#mb-temp').html('_(Temperature)_: '+temp[2]+unit);
     }
     timers.systemTemp = setTimeout(systemTemp,10000);
   });
