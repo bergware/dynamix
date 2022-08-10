@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.08.09g">
+<!ENTITY version   "2022.08.10">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "ede17d7cff16f72d7ce8ec8d0650e956">
+<!ENTITY MD5       "52c13109dc69b2d212064978364bec55">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.11.0-rc3">
@@ -21,6 +21,9 @@
 ##&name;
 
 ###&version;
+- Fixed javascript typo, causing Add Container not to work
+
+###2022.08.09
 - Use nchan buffering between sender and receiver
 - Start command delayed
 
