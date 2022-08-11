@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.08.11f">
+<!ENTITY version   "2022.08.11h">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "d7eecbca6a517eac6c5da91c44eab02f">
+<!ENTITY MD5       "b1d5ca498abb32134e6ed14e2d98ec36">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.11.0-rc3">
@@ -24,6 +24,7 @@
 - Fixed javascript typo, causing Add Container not to work
 - Added new parameter 'button' to openPlugin and openDocker which allows to show or hide the CLOSE button (defaults to show)
 - Added new parameter 'button' to openChanges which allows to show or hide the CLOSE button (defaults to hide)
+- Fixed regression errors
 
 ###2022.08.09
 - Use nchan buffering between sender and receiver
