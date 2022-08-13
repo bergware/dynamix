@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.08.13">
+<!ENTITY version   "2022.08.13a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "366151dc33ad0a8418187e7d40266d35">
+<!ENTITY MD5       "9c38fbad8629c02f8ecc3e462348f397">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.11.0-rc3">
@@ -23,6 +23,7 @@
 ###&version;
 - Simplified command start
 - Added progress feedback to diagnostics
+- Docker changed default CLOSE button to hide
 
 ###2022.08.12
 - Empty nchan buffer after error message
