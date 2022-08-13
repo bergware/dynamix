@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.08.12a">
+<!ENTITY version   "2022.08.13">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f5c94b7b4fd681d4f194e8f927c75226">
+<!ENTITY MD5       "366151dc33ad0a8418187e7d40266d35">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.11.0-rc3">
@@ -21,6 +21,10 @@
 ##&name;
 
 ###&version;
+- Simplified command start
+- Added progress feedback to diagnostics
+
+###2022.08.12
 - Empty nchan buffer after error message
 - Removed delay dependency for server side
 
