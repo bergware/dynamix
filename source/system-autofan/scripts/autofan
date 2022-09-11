@@ -24,10 +24,13 @@
 #                                       - added exclude disks from temperature reading (contributed by andreiio)
 # Version 1.6   Modified by InfinityMod - added mulifan support
 #                                       - added fan spin up/down offset 
+# Version 1.7   Modified by doron       - Prevent spinning up SAS drives, use sdspin
+#                                       - Use "-n standby" flag in smartctl calls, extra safety
+#                                       - Obtain HD temp data from SAS drives
 #=======================================================================================
 # Dependencies: grep,awk,smartctl,hdparm
 #=======================================================================================
-version=1.6
+version=1.7
 program_name="autofan"
 usage() {
  echo "Usage: $program_name [-t min_temp] [-T max_temp] [-m loop in minutes] [-c controller] [-f fan] [-l low]"
@@ -188,12 +191,12 @@ done
 function_get_highest_hd_temp() {
   HIGHEST_TEMP=0
   for DISK in "${HD[@]}"; do
-    SLEEPING=`hdparm -C ${DISK} | grep -c standby`
+    SLEEPING=`sdspin ${DISK} ; echo $?`
     if [[ $SLEEPING -eq 0 ]]; then
       if [[ $DISK == /dev/nvme[0-9] ]]; then
-        CURRENT_TEMP=$(smartctl -A $DISK | awk '$1=="Temperature:" {print $2;exit}')
+        CURRENT_TEMP=$(smartctl -n standby -A $DISK | awk '$1=="Temperature:" {print $2;exit}')
       else
-        CURRENT_TEMP=$(smartctl -A $DISK | awk '$1==190||$1==194 {print $10;exit}')
+        CURRENT_TEMP=$(smartctl -n standby -A $DISK | awk '$1==190||$1==194 {print $10;exit} $1=="Current"&&$3=="Temperature:" {print $4;exit}')
       fi
       if [[ $HIGHEST_TEMP -le $CURRENT_TEMP ]]; then
         HIGHEST_TEMP=$CURRENT_TEMP
