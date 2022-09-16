@@ -1,8 +1,9 @@
 Menu="Buttons:1"
 Link="nav-user"
+Nchan="system_temp"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2022, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,12 +18,27 @@ Link="nav-user"
 <?
 $plugin = 'dynamix.system.temp';
 $translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/TempButton.page"))?>
-<?else:?>
+if (!$translations):
+  require_once "$docroot/plugins/$plugin/include/Legacy.php";
+  eval('?>'.parse_file("$docroot/plugins/$plugin/TempButton.page"));
+else:?>
 <script>
+<?if (exec("pgrep system_temp")):?>
+// nchan updates
+var temperature = new NchanSubscriber('/sub/temperature');
+temperature.on('message', function(data) {
+  showFooter(data,'temp');
+  if ($('#mb-temp').length) {
+    var temp = $('span#temp').text();
+    var unit = temp.indexOf('C')>0 ? 'C' : 'F';
+    temp = temp.split(unit);
+    if (temp[0] && $('#cpu-temp').length>0) $('#cpu-temp').html("<i class='ups fa fa-thermometer'></i>_(Temperature)_: "+temp[0]+unit);
+    if (temp[1] && $('#mb-temp').length>0) $('#mb-temp').html("<i class='ups fa fa-thermometer'></i>_(Temperature)_: "+temp[1]+unit);
+  }
+});
+temperature.start();
+<?else:?>
+// legacy updates
 function systemTemp() {
   $.post('/plugins/<?=$plugin?>/include/SystemTemp.php',{unit:'<?=$display['unit']?>',dot:'<?=$display['number'][0]?>'},function(data) {
     showFooter(data,'temp');
@@ -30,12 +46,13 @@ function systemTemp() {
       var temp = $('span#temp').text();
       var unit = temp.indexOf('C')>0 ? 'C' : 'F';
       temp = temp.split(unit);
-      if (temp[0]) $('#cpu-temp').html('_(Temperature)_: '+temp[0]+unit);
-      if (temp[1]) $('#mb-temp').html('_(Temperature)_: '+temp[1]+unit);
+      if (temp[0] && $('#cpu-temp').length>0) $('#cpu-temp').html("<i class='ups fa fa-thermometer'></i>_(Temperature)_: "+temp[0]+unit);
+      if (temp[1] && $('#mb-temp').length>0) $('#mb-temp').html("<i class='ups fa fa-thermometer'></i>_(Temperature)_: "+temp[1]+unit);
     }
-    timers.systemTemp = setTimeout(systemTemp,10000);
+    timers.systemTemp = setTimeout(systemTemp,5000);
   });
 }
 setTimeout(systemTemp,100);
+<?endif;?>
 </script>
 <?endif;?>

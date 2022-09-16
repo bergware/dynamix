@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.09.16">
+<!ENTITY version   "2022.09.16a">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
@@ -16,8 +16,8 @@
 ##&name;
 
 ###&version;
-- Fixed typos
-- Added icons
+- fixed typos
+- added icons
 
 ###2021.06.25
 - added Nchan operation (Unraid 6.10)
@@ -148,6 +148,10 @@ version=${version:2:2}
 if [[ $((${version/./}*1)) -lt 8 ]]; then
   rm -f /usr/sbin/sensors-detect
 fi
+
+# stop nchan script
+pkill system_temp
+sed -ri '/system_temp$/d' /var/run/nchan.pid
 </INLINE>
 </FILE>
 

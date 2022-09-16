@@ -4,7 +4,7 @@ Icon="thermometer"
 Tag="thermometer"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2022, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -42,14 +42,7 @@ function get_sensors() {
   preg_match_all("/(.*?)\nAdapter:.*?\n(.*?)(?:[\n]{2,})/smi", shell_exec("sensors -u -c $tmp"), $controllers);
   foreach ($controllers[1] as $key => $controller) {
     preg_match_all("/(.*):\n\s+([^:]*): (.*)/", $controllers[2][$key], $matches);
-    for ($i=0; $i<count($matches[1]); $i++) {
-      $out[] = array(
-        'ctrl' => $controller,
-        'name' => $matches[1][$i],
-        'attr' => $matches[2][$i],
-        'val'  => $matches[3][$i]
-      );
-    }
+    for ($i=0; $i<count($matches[1]); $i++) $out[] = ['ctrl' => $controller, 'name' => $matches[1][$i], 'attr' => $matches[2][$i], 'val'  => $matches[3][$i]];
   }
   unlink($tmp);
   return $out;
@@ -73,9 +66,11 @@ function unload_module($module) {
 }
 switch ($_POST['tag']) {
 case 'sensors':
-  file_put_contents('/tmp/post',print_r($_POST,true));
   if ($_POST['rescan']) break;
   $content = "# sensors\n";
+  $buslist = $retval = null;
+  exec("sensors --bus-list", $buslist, $retval);
+  if ($retval===0) $content .= implode("\n",$buslist)."\n";
   $probes = "";
   foreach ($_POST as $key => $value) {
     switch ($key) {

@@ -136,7 +136,6 @@ if [[ -f $lockfile ]]; then
   # to see if it is still running
   lock_pid=`head -n 1 "${lockfile}"`
   pid_running=`ps -p "${lock_pid}" | grep ${lock_pid}`
-
   if [[ -z $pid_running ]]; then
     if [[ $quit_flag == no ]]; then
       # The process is not running
@@ -188,10 +187,20 @@ for d in $DRIVES; do
   COUNT=$[$COUNT+1]
 done
 
+# get current Unraid version
+source /etc/unraid-version
+
+function version() {
+  # normalize version string for comparison
+  echo $1|awk -F. '{printf("%d%03d%03d%03d\n",$1,$2,$3,$4);}'
+}
+
 function_get_highest_hd_temp() {
   HIGHEST_TEMP=0
+  [[ $(version $version) -ge $(version "6.8.9") ]] && HDD=1 || HDD=
   for DISK in "${HD[@]}"; do
-    SLEEPING=`sdspin ${DISK} ; echo $?`
+    # Get disk state using sdspin (new) or hdparm (legacy)
+    [[ -n $HDD ]] && SLEEPING=`sdspin ${DISK}; echo $?` || SLEEPING=`hdparm -C ${DISK}|grep -c standby`
     if [[ $SLEEPING -eq 0 ]]; then
       if [[ $DISK == /dev/nvme[0-9] ]]; then
         CURRENT_TEMP=$(smartctl -n standby -A $DISK | awk '$1=="Temperature:" {print $2;exit}')
