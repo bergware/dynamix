@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.autofan">
 <!ENTITY author    "Bergware/gfjardim">
-<!ENTITY version   "2020.06.21">
+<!ENTITY version   "2022.09.16">
 <!ENTITY launch    "Settings/FanSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "0122ea8ba1111ce163ec8311b9a58274">
+<!ENTITY MD5       "54445e13d59a769116db5518f571a4b7">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.1.9">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- added SAS disks support (courtesy of user Doron)
+- minor updates
+
+###2020.06.21
 - fixed regression error
 
 ###2020.06.20
