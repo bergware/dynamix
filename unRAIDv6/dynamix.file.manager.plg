@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.09.07">
+<!ENTITY version   "2022.11.10">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "f93757a46d3294f90e2f05a587351ce7">
+<!ENTITY MD5       "1df30fec98ae165e913feea6c2ad89e2">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- Updated ACE editor to version 1.12.5
+- Replace external base64 function with internal btoa function
+
+###2022.09.07
 - Updated ACE editor to version 1.10.1
 
 ###2022.08.26
