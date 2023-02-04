@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.04a">
+<!ENTITY version   "2023.02.04b">
 <!ENTITY launch    "Tools/SystemProfiler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "13436c88365ec6222f1527f644c5a8ec">
+<!ENTITY MD5       "761759aa77a7c0cda53e17e5bcbec2df">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -18,8 +18,9 @@
 ###&version;
 - set minimum Unraid version to 6.9 (supports multi-language)
 - added support for upcoming Unraid version 6.12 
+- several fixes in overview information
 
-###3030.06.21
+###2020.06.21
 - fixed regression error
 
 ###2020.06.20
