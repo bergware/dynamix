@@ -9,7 +9,8 @@
 <!ENTITY MD5 "6cb4183b0b527169224b98c865f2ee7f">
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0" support="http://lime-technology.com/forum/index.php?topic=36543.0">
-  <CHANGES>
+
+<CHANGES>
 ##&name;
 
 ###&version;
