@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.buttons">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.04">
+<!ENTITY version   "2023.02.11">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "80069f39e4a2a70835fa8d532ec67e68">
+<!ENTITY MD5       "97bfce635ad36c5746c1b70f31adc4d8">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.9.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- minor fix in distribution package
+
+###2023.02.04
 - set minimum Unraid version to 6.9 (supports multi-language)
 - added support for upcoming Unraid version 6.12 
 
