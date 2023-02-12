@@ -2,7 +2,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.system.stats">
 <!ENTITY author "Bergware">
-<!ENTITY version "2023.02.05a">
+<!ENTITY version "2023.02.12">
 <!ENTITY launch "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
@@ -18,6 +18,9 @@
 ##&name;
 
 ###&version;
+- restored sysstat package for Unraid versions older than 6.11
+
+###2023.02.05
 - added support for upcoming Unraid version 6.12
 - removed sa package from plugin, and use sa package included in Unraid
 - **NOTE: A SYSTEM REBOOT IS REQUIRED AFTER THIS UPDATE**
@@ -179,7 +182,7 @@
 - initial release for unRAID v6
 </CHANGES>
   <!--
-Copyright 2020, Bergware International
+Copyright 2023, Bergware International
 Dynamix System Stats - disk and system usage graphs
 -->
   <!-- PRE-INSTALL SCRIPT -->
@@ -201,6 +204,11 @@ fi
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
+</FILE>
+
+<!-- SYSSTAT PACKAGE (prepared by Bergware) -->
+<FILE Name="/boot/config/plugins/&name;/sysstat-12.0.2.txz" Run="upgradepkg --install-new" Max="6.10.9">
+<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sysstat-12.0.2.txz</URL>
 </FILE>
 
 <!-- POST-INSTALL SCRIPT -->
@@ -240,7 +248,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2020, Bergware International"
+echo " Copyright 2023, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
