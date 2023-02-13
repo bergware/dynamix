@@ -2,11 +2,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.system.stats">
 <!ENTITY author "Bergware">
-<!ENTITY version "2023.02.13">
+<!ENTITY version "2023.02.13a">
 <!ENTITY launch "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5 "9e5f2628b13b2cf51d8279b0c05b5abc">
+<!ENTITY MD5 "abec3a491027e41d0ad18ef551a01be8">
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0" icon="area-chart" support="http://lime-technology.com/forum/index.php?topic=36543.0">
 
@@ -16,6 +16,7 @@
 ###&version;
 - restored sysstat package for Unraid versions older than 6.11
 - replaced deprecated function in HardwareStats.php
+- PHP8 support
 
 ###2023.02.05
 - added support for upcoming Unraid version 6.12
