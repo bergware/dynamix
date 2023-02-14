@@ -2,7 +2,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.system.stats">
 <!ENTITY author "Bergware">
-<!ENTITY version "2023.02.13a">
+<!ENTITY version "2023.02.14">
 <!ENTITY launch "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- restored sysstat package for Unraid versions older than 6.12
+
+###2023.02.13
 - restored sysstat package for Unraid versions older than 6.11
 - replaced deprecated function in HardwareStats.php
 - PHP8 support
@@ -205,7 +208,7 @@ fi
 </FILE>
 
 <!-- SYSSTAT PACKAGE (prepared by Bergware) -->
-<FILE Name="/boot/config/plugins/&name;/sysstat-12.0.2.txz" Run="upgradepkg --install-new" Max="6.10.9">
+<FILE Name="/boot/config/plugins/&name;/sysstat-12.0.2.txz" Run="upgradepkg --install-new" Max="6.11.9">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sysstat-12.0.2.txz</URL>
 </FILE>
 
