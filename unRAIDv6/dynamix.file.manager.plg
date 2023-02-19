@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.05">
+<!ENTITY version   "2023.02.19">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "e0dc5ff143c3003cd5c9b697002b7c91">
+<!ENTITY MD5       "683751b506de45cc5dcca9061919c1d7">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- PHP 8.2 corrections
+
+###2023.02.05
 - Updated ACE editor to version 1.14.0
 - Support for upcoming Unraid version 6.12
 
