@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.19">
+<!ENTITY version   "2023.02.19a">
 <!ENTITY launch    "Settings/SMB">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "df7297c9de7f49189a9b5c267a04764f">
+<!ENTITY MD5       "873a5651fa15b02e73abecef213af726">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -18,6 +18,7 @@
 ###&version;
 - added link to SMB settings
 - updated help text
+- check on NetBIOS and WSD
 
 ###2023.02.05
 - set minimum Unraid version to 6.9 (supports multi-language)
