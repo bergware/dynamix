@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.local.master">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.19a">
+<!ENTITY version   "2023.02.20">
 <!ENTITY launch    "Settings/SMB">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "873a5651fa15b02e73abecef213af726">
+<!ENTITY MD5       "218f850147030e45471bdedab78e9e13">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- disable local master browser when WSD is used
+
+###2023.02.19
 - added link to SMB settings
 - updated help text
 - check on NetBIOS and WSD
