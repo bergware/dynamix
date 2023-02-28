@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.28a">
+<!ENTITY version   "2023.02.28b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "a02be0f36e09551e2fa6a7eecac34f30">
+<!ENTITY MD5       "cd39d845d6298253ad375c6a2ad5f71a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -18,6 +18,7 @@
 - Updated ACE editor to version 1.15.2
 - Added "Use sparse option" for copy and move operations
 - Fixed context menu indicator position in Unraid 6.12
+- Added preset file name on download in file preview
 
 ###2023.02.19
 - PHP 8.2 corrections
