@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.19">
+<!ENTITY version   "2023.02.28">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "683751b506de45cc5dcca9061919c1d7">
+<!ENTITY MD5       "b9f47a747efa506a87a60c388926c0cb">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- Updated ACE editor to version 1.15.2
+- Added "Use sparse option" for copy and move operations
+
+###2023.02.19
 - PHP 8.2 corrections
 
 ###2023.02.05
