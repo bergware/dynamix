@@ -5,4 +5,3 @@ define("ace/mode/plain_text",["require","exports","module","ace/lib/oop","ace/mo
                         }
                     });
                 })();
-            

@@ -5,4 +5,3 @@ define("ace/mode/xquery/jsoniq_lexer",["require","exports","module"],function(e,
                         }
                     });
                 })();
-            

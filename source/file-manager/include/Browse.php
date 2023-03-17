@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2022, Lime Technology
- * Copyright 2012-2022, Bergware International.
+/* Copyright 2005-2023, Lime Technology
+ * Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -33,7 +33,7 @@ if (isset($_POST['mode'])) {
       delete_file($file);
       die('stop');
     }
-    file_put_contents($file,base64_decode(explode(';base64,',$_POST['data'])[1]),FILE_APPEND);
+    file_put_contents($file,base64_decode($_POST['data']),FILE_APPEND);
     die();
   case 'calc':
     extract(parse_plugin_cfg('dynamix',true));
@@ -69,8 +69,8 @@ if (isset($_POST['mode'])) {
   }
 }
 function write(&$rows) {
-  if ($score = count($rows)) echo '<tbody class="list">',array_map(function($row){echo gzinflate($row);},$rows),'</tbody>';
-  $rows = $score;
+  if ($size = count($rows)) echo '<tbody>',implode(array_map(function($row){echo gzinflate($row);},$rows)),'</tbody>';
+  $rows = $size;
 }
 function validdir($dir) {
   $path = realpath($dir);
@@ -88,6 +88,9 @@ function escapeQuote($data) {
 }
 function age($number,$time) {
   return sprintf(_('%s '.($number==1 ? $time : $time.'s').' ago'),$number);
+}
+function add($number, $name, $single='', $plural='s') {
+  return $number.' '._($name.($number==1 ? $single : $plural));
 }
 function my_age($time) {
   if (!is_numeric($time)) $time = time();
@@ -112,7 +115,7 @@ function my_devs(&$devs,$name,$menu) {
     if ($lock=='---') {
       $text[$i] = '<a class="info" onclick="return false"><i class="lock fa fa-fw fa-hdd-o grey-text"></i></a>&nbsp;---';
     } else {
-      switch ($disks[$dev]['luksState']) {
+      switch ($disks[$dev]['luksState']??0) {
         case 0: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-unlock-alt grey-text"></i><span>'._('Not encrypted').'</span></a>'; break;
         case 1: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-unlock-alt green-text"></i><span>'._('Encrypted and unlocked').'</span></a>'; break;
         case 2: $text[$i] = '<span class="device"><a class="info" onclick="return false"><i class="lock fa fa-fw fa-lock red-text"></i><span>'._('Locked: missing encryption key').'</span></a>'; break;
@@ -182,5 +185,5 @@ while (($row = fgets($stat))!==false) {
 }
 pclose($stat);
 if ($link = parent_link()) echo '<tbody class="tablesorter-infoOnly"><tr><td></td><td><div><img src="/webGui/icons/folderup.png"></div></td><td>',$link,'</td><td colspan="6"></td></tr></tbody>';
-echo write($dirs),write($files),'<tfoot><tr><td></td><td></td><td colspan="7">',$objs,' ',_('object'.($objs==1?'':'s')),': ',$dirs,' ',_('director'.($dirs==1?'y':'ies')),', ',$files,' ',_('file'.($files==1?'':'s')),' (',my_scale($total,$unit),' ',$unit,' ',_('total'),')</td></tr></tfoot>';
+echo write($dirs),write($files),'<tfoot><tr><td></td><td></td><td colspan="7">',add($objs,'object'),': ',add($dirs,'director','y','ies'),', ',add($files,'file'),' (',my_scale($total,$unit),' ',$unit,' ',_('total'),')</td></tr></tfoot>';
 ?>

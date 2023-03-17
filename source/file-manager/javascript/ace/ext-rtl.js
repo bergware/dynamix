@@ -5,4 +5,3 @@ define("ace/ext/rtl",["require","exports","module","ace/editor","ace/config"],fu
                         }
                     });
                 })();
-            

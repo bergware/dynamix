@@ -5,4 +5,3 @@ define("ace/ext/elastic_tabstops_lite",["require","exports","module","ace/editor
                         }
                     });
                 })();
-            

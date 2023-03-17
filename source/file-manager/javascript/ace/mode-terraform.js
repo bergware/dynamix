@@ -5,4 +5,3 @@ define("ace/mode/terraform_highlight_rules",["require","exports","module","ace/l
                         }
                     });
                 })();
-            

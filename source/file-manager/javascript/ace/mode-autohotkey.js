@@ -5,4 +5,3 @@ define("ace/mode/autohotkey_highlight_rules",["require","exports","module","ace/
                         }
                     });
                 })();
-            

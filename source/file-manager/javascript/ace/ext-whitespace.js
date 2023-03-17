@@ -5,4 +5,3 @@ define("ace/ext/whitespace",["require","exports","module","ace/lib/lang"],functi
                         }
                     });
                 })();
-            

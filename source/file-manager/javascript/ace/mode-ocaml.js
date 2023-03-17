@@ -5,4 +5,3 @@ define("ace/mode/ocaml_highlight_rules",["require","exports","module","ace/lib/o
                         }
                     });
                 })();
-            

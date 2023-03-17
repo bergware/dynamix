@@ -5,4 +5,3 @@ define("ace/mode/applescript_highlight_rules",["require","exports","module","ace
                         }
                     });
                 })();
-            

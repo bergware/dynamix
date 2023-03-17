@@ -5,4 +5,3 @@ define("ace/mode/xquery/xquery_lexer",["require","exports","module"],function(e,
                         }
                     });
                 })();
-            

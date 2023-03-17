@@ -5,4 +5,3 @@ define("ace/mode/assembly_x86_highlight_rules",["require","exports","module","ac
                         }
                     });
                 })();
-            

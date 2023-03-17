@@ -5,4 +5,3 @@ define("ace/mode/mel_highlight_rules",["require","exports","module","ace/lib/oop
                         }
                     });
                 })();
-            

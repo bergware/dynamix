@@ -5,4 +5,3 @@ define("ace/mode/powershell_highlight_rules",["require","exports","module","ace/
                         }
                     });
                 })();
-            

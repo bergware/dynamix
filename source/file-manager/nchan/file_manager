@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?PHP
-/* Copyright 2005-2022, Lime Technology
- * Copyright 2012-2022, Bergware International.
+/* Copyright 2005-2023, Lime Technology
+ * Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -114,7 +114,7 @@ function escape($name) {return escapeshellarg(validname($name));}
 function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}
 
 while (true) {
-  unset($action,$source,$target,$H,$exist);
+  unset($action,$source,$target,$H,$sparse,$exist);
   if (file_exists($active)) extract(parse_ini_file($active));
   $reply = [];
   if (isset($action)) {
@@ -127,7 +127,7 @@ while (true) {
     $source = explode("\r",$source);
     switch ($action) {
     case 0: // create folder
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Creating').'...';
       } else {
         exec("mkdir -p ".quoted($source[0].'/'.$target)." 1>$null 2>$error & echo $!",$pid);
@@ -135,7 +135,7 @@ while (true) {
       break;
     case 1: // delete folder
     case 5: // delete file
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Removing').'... '.exec("tail -1 $status");
       } else {
         exec("find ".quoted($source)." -name \"*\" -print -delete 1>$status 2>$null & echo \$!",$pid);
@@ -143,7 +143,7 @@ while (true) {
       break;
     case 2: // rename folder
     case 6: // rename file
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Renaming').'...';
       } else {
         $path = dirname($source[0]);
@@ -152,13 +152,13 @@ while (true) {
       break;
     case 3:  // copy folder
     case 7:  // copy file
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Copying').'... '.shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'");
       } else {
         $target = validname($target,false);
         if ($target) {
           $mkpath = isdir($target) ? '--mkpath' : '';
-          exec("rsync -ahPIX$H $exist $mkpath --out-format=%f --info=flist0,misc0,stats0,name1,progress2 ".quoted($source)." ".escapeshellarg($target)." 1>$status 2>$error & echo \$!",$pid);
+          exec("rsync -ahPIX$H $sparse $exist $mkpath --out-format=%f --info=flist0,misc0,stats0,name1,progress2 ".quoted($source)." ".escapeshellarg($target)." 1>$status 2>$error & echo \$!",$pid);
         } else {
           $reply['error'] = 'Invalid target name';
         }
@@ -166,49 +166,49 @@ while (true) {
       break;
     case 4: // move folder
     case 8: // move file
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Moving').'... '.($move===false ? exec("tail -1 $status") : shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'"));
       } else {
         $target = validname($target,false);
         if ($target) {
           $move = true;
           $mkpath = isdir($target) ? '--mkpath' : '';
-          exec("rsync -ahPIX$H $exist $mkpath --out-format=%f --info=flist0,misc0,stats0,name1,progress2 --remove-source-files ".quoted($source)." ".escapeshellarg($target)." 1>$status 2>$error & echo \$!",$pid);
+          exec("rsync -ahPIX$H $sparse $exist $mkpath --out-format=%f --info=flist0,misc0,stats0,name1,progress2 --remove-source-files ".quoted($source)." ".escapeshellarg($target)." 1>$status 2>$error & echo \$!",$pid);
         } else {
           $reply['error'] = 'Invalid target name';
         }
       }
       break;
     case 9: // change owner
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
       } else {
         exec("chown -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
       }
       break;
     case 10: // change permission
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
       } else {
         exec("chmod -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
       }
       break;
     case 11: // search
-      if ($pid) {
+      if (!empty($pid)) {
         $reply['status'] = _('Searching').'... '.exec("wc -l $status|grep -Pom1 '^[0-9]+'");
       } else {
         exec("find ".escapeshellarg($source[0])." -iname ".escapeshellarg($target)." 1>$status 2>$null & echo \$!",$pid);
       }
       break;
     case 99: // kill running background process
-      if ($pid) exec("kill $pid");
+      if (!empty($pid)) exec("kill $pid");
       delete_file($active,$status,$error);
       unset($pid,$move);
       break;
     }
-    $pid = pgrep($pid);
+    $pid = pgrep($pid??0);
     if ($pid===false) {
-      if ($move) {
+      if (!empty($move)) {
         exec("find ".quoted($source)." -type d -empty -print -delete 1>$status 2>$null & echo \$!",$pid);
         $move = false;
         $pid = pgrep($pid);

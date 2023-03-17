@@ -5,4 +5,3 @@ define("ace/mode/matlab_highlight_rules",["require","exports","module","ace/lib/
                         }
                     });
                 })();
-            

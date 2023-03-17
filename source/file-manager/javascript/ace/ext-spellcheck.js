@@ -5,4 +5,3 @@ define("ace/ext/spellcheck",["require","exports","module","ace/lib/event","ace/e
                         }
                     });
                 })();
-            

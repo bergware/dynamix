@@ -5,4 +5,3 @@ define("ace/mode/vbscript_highlight_rules",["require","exports","module","ace/li
                         }
                     });
                 })();
-            

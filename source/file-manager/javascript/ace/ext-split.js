@@ -5,4 +5,3 @@ define("ace/split",["require","exports","module","ace/lib/oop","ace/lib/lang","a
                         }
                     });
                 })();
-            
