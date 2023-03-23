@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.03.23f">
+<!ENTITY version   "2023.03.23g">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "77e5d82e7d0b093189ad9f221db648fb">
+<!ENTITY MD5       "c6d7d34ebbf4ad9b6f3032d0f4f81a5c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -22,6 +22,7 @@
 - Fixed simultaneous uploads from different sessions
 - Added error message when file upload fails
 - Fixed permissions and owner of created folders
+- Improved single file/folder logic
 
 ###2023.03.22
 - Fixed bulk operations for folders
