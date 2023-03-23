@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.s3.sleep">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.19">
+<!ENTITY version   "2023.03.23">
 <!ENTITY launch    "Settings/SleepSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "915bae0c4fdba36ebaa08a0e4c8e482d">
+<!ENTITY MD5       "adcde452695aeba4fb205688b5ce7b40">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -16,6 +16,10 @@
 ##&name;
 
 ###&version;
+- use sdspin to monitor disk activity
+- updated s3_sleep script to 3.0.11
+
+###2023.02.19
 - updated s3_sleep script to 3.0.10
 - fix list of devices outside array
 - add custom ports for telnet and ssh
