@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.03.24">
+<!ENTITY version   "2023.03.24a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "4bd91c4dda77f882460461db5e544de3">
+<!ENTITY MD5       "a813edac9c39f42a5c983484ee3cca28">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -16,6 +16,8 @@
 
 ###&version;
 - Fixed regression error in permissions and owner operations
+- Fixed regression error in search function
+- Added list multiple sources when more than one object is selected
 
 ###2023.03.23
 - Added "smart" move: use 'mv' when source and target are in the same location (not used for shares)
