@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.03.23g">
+<!ENTITY version   "2023.03.24">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "c6d7d34ebbf4ad9b6f3032d0f4f81a5c">
+<!ENTITY MD5       "4bd91c4dda77f882460461db5e544de3">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Fixed regression error in permissions and owner operations
+
+###2023.03.23
 - Added "smart" move: use 'mv' when source and target are in the same location (not used for shares)
 - Changed dialog 'close' to 'minimize'
 - Added progress indicator in the footer
