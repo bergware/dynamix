@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.03.24b">
+<!ENTITY version   "2023.03.25">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "44d0a2c0de82e713331d03389bbfa6fd">
+<!ENTITY MD5       "b5d2e088b1467b402277d3e1835738d3">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,10 @@
 ##&name;
 
 ###&version;
+- Minor visual enhancements
+- Fixed possible installation error
+
+###2023.03.24
 - Fixed regression error in permissions and owner operations
 - Fixed regression error in search function
 - Added list multiple sources when more than one object is selected
@@ -192,7 +196,7 @@
 </CHANGES>
 
 <!--
-Copyright 2022, Bergware International
+Copyright 2023, Bergware International
 Dynamix File Manager - File management features added to the GUI Browser function
 -->
 
@@ -204,7 +208,7 @@ MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f &source;*.txz
   pkill file_manager
-  sed -ri '/file_manager$/d' /var/run/nchan.pid
+  [[ -e /var/run/nchan.pid ]] && sed -ri '/file_manager$/d' /var/run/nchan.pid
 fi
 </INLINE>
 </FILE>
@@ -222,7 +226,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2022, Bergware International"
+echo " Copyright 2023, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
