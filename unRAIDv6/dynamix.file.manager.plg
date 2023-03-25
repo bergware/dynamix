@@ -240,7 +240,9 @@ echo ""
 <INLINE>
 # stop and remove Nchan script
 pkill file_manager
-sed -ri '/file_manager$/d' /var/run/nchan.pid
+if [[ -e /var/run/nchan.pid ]]; then
+  sed -ri '/file_manager$/d' /var/run/nchan.pid
+fi
 
 # Uninstall the 'source' package
 removepkg &name;
