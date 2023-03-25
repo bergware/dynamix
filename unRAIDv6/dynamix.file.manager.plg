@@ -208,7 +208,9 @@ MD5=$(md5sum &source;.txz 2>/dev/null|grep -Po '^\S+')
 if [[ $MD5 != &MD5; ]]; then
   rm -f &source;*.txz
   pkill file_manager
-  [[ -e /var/run/nchan.pid ]] &amp;&amp; sed -ri '/file_manager$/d' /var/run/nchan.pid
+  if [[ -e /var/run/nchan.pid ]]; then
+    sed -ri '/file_manager$/d' /var/run/nchan.pid
+  fi
 fi
 </INLINE>
 </FILE>
