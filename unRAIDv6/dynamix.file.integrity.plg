@@ -312,7 +312,7 @@
 </CHANGES>
 
 <!--
-Copyright 2021, Bergware International
+Copyright 2023, Bergware International
 Dynamix File Integrity - Real-time hashing and verification of files. Report on failed file content integrity (aka bit-rot).
 -->
 
@@ -555,7 +555,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2021, Bergware International"
+echo " Copyright 2023, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
