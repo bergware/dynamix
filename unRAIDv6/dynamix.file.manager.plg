@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.03.25">
+<!ENTITY version   "2023.03.26">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "b5d2e088b1467b402277d3e1835738d3">
+<!ENTITY MD5       "7cd34315bd2faa6610e4c29ea9a90aa8">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Fixed ACE editor settings menu appearance
+
+###2023.03.25
 - Minor visual enhancements
 - Fixed possible installation error
 
