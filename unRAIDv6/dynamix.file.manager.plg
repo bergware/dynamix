@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.03.26c">
+<!ENTITY version   "2023.03.31">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "6b6db0416a1d574d529c74bbbd4cdf57">
+<!ENTITY MD5       "4d151ea36b175f9881d1746c9eb14967">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Added specific ZFS operation when moving or deleting ZFS shares
+
+###2023.03.26
 - Fixed ACE editor settings menu appearance
 
 ###2023.03.25
