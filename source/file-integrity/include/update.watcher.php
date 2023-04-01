@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -36,28 +36,28 @@ $bunker = "$local/$plugin/scripts/bunker";
 $conf   = "/etc/inotifywait.conf";
 $cron   = "$path/integrity-check.cron";
 $run    = "$path/integrity-check.sh";
-$tasks  = [];
-$map    = [];
-$cmd    = $new['cmd'];
-$method = $new['method'];
+$tasks  = $map = [];
+$cmd    = $new['cmd']??'';
+$method = $new['method']??'';
 $hash   = [''=>'sha256', '-md5'=>'md5', '-b2'=>'blake2', '-b3'=>'blake3'];
 $hname  = $hash[$method];
 
 if (isset($docker[$img]) && strpos(dirname($docker[$img]),'/mnt/disk')!==false) $map[] = expand_file(basename($docker[$img]));
-if ($new['folders']) $map = array_merge($map,array_map('expand_folder',explode(',',$new['folders'])));
-if ($new['files'])   $map = array_merge($map,array_map('expand_file',explode(',',$new['files'])));
-if ($new['exclude']) $map = array_merge($map,array_map('expand_share',explode(',',$new['exclude'])));
-if ($new['apple'])   $map = array_merge($map,[expand_folder('.AppleDB'),expand_file('.DS_Store')]);
+if (isset($new['folders'])) $map = array_merge($map,array_map('expand_folder',explode(',',$new['folders'])));
+if (isset($new['files']))   $map = array_merge($map,array_map('expand_file',explode(',',$new['files'])));
+if (isset($new['exclude'])) $map = array_merge($map,array_map('expand_share',explode(',',$new['exclude'])));
+if (isset($new['apple']))   $map = array_merge($map,[expand_folder('.AppleDB'),expand_file('.DS_Store')]);
 if (count($map)>1)   {$open = '('; $close = ')';} else {$open = $close = '';}
 
 $exclude = $map ? $open.regex(implode('|',$map)).$close : '';
-$disks = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']);
+$disks = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']??'');
 
 file_put_contents($conf, "cmd=\"$cmd\"\nmethod=\"$method\"\nexclude=\"$exclude\"\ndisks=\"$disks\"\n");
-exec("$local/$plugin/scripts/rc.watcher ".($new['service'] ? 'restart' : 'stop')." &>/dev/null");
+exec("$local/$plugin/scripts/rc.watcher ".(isset($new['service']) ? 'restart' : 'stop')." &>/dev/null");
 
-foreach ($keys as $key => $value) if ($key[0]!='#' && !array_key_exists($key,$new)) unset($keys[$key]);
-
+foreach ($keys as $key => $value) {
+  if ($key[0]!='#' && !array_key_exists($key,$new)) unset($keys[$key]);
+}
 foreach ($new as $key => $value) {
   if (preg_match('/^disk[0-9]/',$key)) {
     $do = explode('-',$key);
@@ -65,10 +65,10 @@ foreach ($new as $key => $value) {
   }
 }
 $x = count($tasks);
-if ($new['schedule']>0 && $x>0) {
-  $n = $new['notify'];
-  $l = $new['log'];
-  $m = $new['method'];
+if (isset($new['schedule']) && $new['schedule']>0 && $x>0) {
+  $n = $new['notify']??'';
+  $l = $new['log']??'';
+  $m = $new['method']??'';
   switch ($new['schedule']) {
   case 1: //daily
     $time = "{$new['min']} {$new['hour']} * * *";
@@ -83,8 +83,8 @@ if ($new['schedule']>0 && $x>0) {
     $term = "\$((10#\$(date +%m)%$x))";
     break;
   }
-  if ($new['priority']) {
-    list($nice,$ionice) = explode(',',$new['priority']);
+  if (isset($new['priority'])) {
+    [$nice,$ionice] = array_pad(explode(',',$new['priority']),2,'');
     $bunker = "nice $nice ionice $ionice $bunker";
   }
   $i = 0;

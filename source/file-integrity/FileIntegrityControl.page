@@ -2,7 +2,7 @@ Menu="Integrity"
 Title="File Integrity Control"
 ---
 <?PHP
-/* Copyright 2012-2021, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,24 +13,18 @@ Title="File Integrity Control"
  */
 ?>
 <?
-$plugin = 'dynamix.file.integrity';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/FileIntegrityControl.page"))?>
-<?else:?>
-<?
-function data_disks($disk) {
-  return $disk['type']=='Data' && strpos($disk['status'],'_NP')===false;
-}
 if ($var['fsState']=="Stopped") {
   echo "<p class='notice'>"._('Array must be **Started** to use this feature').".</p>";
   echo "<p><input type='button' value='_(Done)_' onclick='done()'></p>";
   return;
 }
-$cfg = parse_plugin_cfg($plugin);
 
+function data_disks($disk) {
+  return $disk['type']=='Data' && strpos($disk['status'],'_NP')===false;
+}
+
+$plugin  = 'dynamix.file.integrity';
+$cfg     = parse_plugin_cfg($plugin);
 $folders = $cfg['exclude'] ? explode(',',$cfg['exclude']) : [];
 if ($cfg['folders']) $folders = array_merge($folders,array_map('trim',explode(',',$cfg['folders'])));
 $folders = $folders ? implode('&nbsp;&nbsp;',$folders) : _('None');
@@ -291,4 +285,3 @@ _(Include duplicate file hashes in **Find** command)_ &nbsp;<input type='checkbo
 <?endforeach;?>
 </tbody>
 </table>
-<?endif;?>

@@ -2,7 +2,7 @@ Menu="FileIntegrity"
 Title="File Integrity Settings"
 ---
 <?PHP
-/* Copyright 2012-2021, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,25 +13,13 @@ Title="File Integrity Settings"
  */
 ?>
 <?
-$plugin = 'dynamix.file.integrity';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/FileIntegritySettings.page"))?>
-<?else:?>
-<?
 if ($var['fsState']!="Started") {
   echo "<p class='notice'>"._('Array must be **Started** to use this feature').".</p>";
   echo "<p><input type='button' value='_(Done)_' onclick='done()'></p>";
   return;
 }
-function data_disks($disk) {
-  return $disk['type']=='Data' && strpos($disk['status'],'_NP')===false;
-}
-function disk($key) {
-  return substr($key,0,4)=='disk' ? $key : "";
-}
+
+$plugin  = 'dynamix.file.integrity';
 $cfg     = parse_plugin_cfg($plugin);
 $sName   = "disk-watch";
 $fName   = "/usr/local/emhttp/plugins/$plugin/scripts/$sName";
@@ -41,6 +29,13 @@ $width   = [166,300];
 $mode    = ['Disabled','Daily','Weekly','Monthly'];
 $days    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 $hash    = glob("/boot/config/plugins/$plugin/export/disk*.hash");
+
+function data_disks($disk) {
+  return $disk['type']=='Data' && strpos($disk['status'],'_NP')===false;
+}
+function disk($key) {
+  return substr($key,0,4)=='disk' ? $key : "";
+}
 
 extract(parse_ini_file('/etc/unraid-version'));
 $disabled = version_compare($version, '6.1.7', '>=') ? "" : " disabled";
@@ -353,4 +348,3 @@ foreach ($data as $disk) {
 <input type="submit" name="#default" value="_(Default)_" onclick="$('input[class^=disk]').prop('checked',false)">
 : <input type="submit" name="#apply" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()">
 </form>
-<?endif;?>

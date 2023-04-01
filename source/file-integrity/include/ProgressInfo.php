@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2021, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,18 +11,11 @@
 ?>
 <?
 $plugin = 'dynamix.file.integrity';
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
-if ($translations) {
-  // add translations
-  $_SERVER['REQUEST_URI'] = 'integrity';
-  require_once "$docroot/webGui/include/Translations.php";
-} else {
-  // legacy support (without javascript)
-  $noscript = true;
-  require_once "$docroot/plugins/$plugin/include/Legacy.php";
-}
+// add translations
+$_SERVER['REQUEST_URI'] = 'integrity';
+require_once "$docroot/webGui/include/Translations.php";
 
 function status($cmd,$name,$file) {
   global $list;
@@ -31,7 +24,7 @@ function status($cmd,$name,$file) {
   return strpos($status,"analyse")!==false ? "refresh grey-text" : (strpos($status,$cmd)!==false ? "check green-text" : "circle-o orange-text");
 }
 
-if ($_POST['disk']>0) {
+if (isset($_POST['disk']) && $_POST['disk']>0) {
   $tmp = "/var/tmp/disk{$_POST['disk']}.tmp";
   $end = "$tmp.end";
   if (file_exists($tmp)) {
@@ -42,14 +35,14 @@ if ($_POST['disk']>0) {
   }
 } else {
   $ctrl = "/var/tmp/ctrl.tmp";
-  if (!file_exists($ctrl) || (time()-filemtime($ctrl)>=$_POST['time'])) {
+  if (!file_exists($ctrl) || (time()-filemtime($ctrl)>=($_POST['time']??time()))) {
     exec("/etc/cron.daily/exportrotate -q &>/dev/null 2>&1 &");
     touch($ctrl);
   }
   $path  = "/boot/config/plugins/$plugin";
-  $list  = @parse_ini_file("$path/disks.ini");
-  $disks = parse_ini_file("state/disks.ini",true);
-  $hname = $_POST['method'];
+  $list  = (array)@parse_ini_file("$path/disks.ini");
+  $disks = (array)@parse_ini_file("state/disks.ini",true);
+  $hname = $_POST['method']??'';
   $row1  = $row2 = [];
   foreach ($disks as $disk) {
     if ($disk['type']=='Data' && strpos($disk['status'],'_NP')===false) {
@@ -60,10 +53,10 @@ if ($_POST['disk']>0) {
   }
   $x = 28-count($row1);
   echo "<tr><td style='font-style:italic'>"._('Build up-to-date')."</td>";
-  echo implode('',$row1);
+  echo implode($row1);
   echo str_repeat("<td></td>", $x);
   echo "</tr><tr id='export-status'><td style='font-style:italic'>"._('Export up-to-date')."</td>";
-  echo implode('',$row2);
+  echo implode($row2);
   echo str_repeat("<td></td>", $x);
   echo "</tr>";
 }

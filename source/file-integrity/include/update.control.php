@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2021, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,27 +11,21 @@
 ?>
 <?
 $plugin = 'dynamix.file.integrity';
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
-if ($translations) {
-  // add translations
-  $_SERVER['REQUEST_URI'] = 'integrity';
-  require_once "$docroot/webGui/include/Translations.php";
-} else {
-  // legacy support (without javascript)
-  $noscript = true;
-  require_once "$docroot/plugins/$plugin/include/Legacy.php";
-}
+// add translations
+$_SERVER['REQUEST_URI'] = 'integrity';
+require_once "$docroot/webGui/include/Translations.php";
 
 function regex($text) {
   return strtr($text,['.'=>'\.','['=>'\[',']'=>'\]','('=>'\(',')'=>'\)','{'=>'\{','}'=>'\}','/'=>'\/','+'=>'\+','-'=>'\-','*'=>'.*','&'=>'\&','?'=>'\?']);
 }
-
 function init($disk,$task) {
   file_put_contents("/var/tmp/$disk.tmp","0%#<span class='orange-text orange-button'>$task <i class='fa fa-refresh fa-spin fa-fw'></i></span>");
 }
+
 $bunker = "/usr/local/emhttp/plugins/$plugin/scripts/bunker";
+
 $path   = "/boot/config/plugins/$plugin/export";
 $apple  = [regex('.AppleDB'),regex('.DS_Store')];
 $disks  = [];
@@ -51,7 +45,7 @@ $z = $_POST['excludeonly']=="true" ? "z" : "";
 $hname = $_POST['#hname'];
 
 if ($_POST['#priority']) {
-  list($nice,$ionice) = explode(',',$_POST['#priority']);
+  [$nice,$ionice] = array_pad(explode(',',$_POST['#priority']),2,'');
   $bunker = "nice $nice ionice $ionice $bunker";
 }
 switch ($_POST['cmd']) {
