@@ -3,7 +3,7 @@ Title="Sleep Settings"
 Icon="dynamix.s3.sleep.png"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,27 +16,19 @@ Icon="dynamix.s3.sleep.png"
  */
 ?>
 <?
-$plugin = 'dynamix.s3.sleep';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/SleepSettings.page"))?>
-<?else:?>
-<?
-function cache_disks($disk) {
-  return $disk['type']=='Cache' && strpos($disk['status'],'_NP')===false;
-}
+$plugin  = 'dynamix.s3.sleep';
 $scripts = "$docroot/plugins/$plugin/scripts";
 $config  = "/etc/s3_sleep.conf";
 $cfg     = parse_plugin_cfg($plugin);
 $outer   = exec("$scripts/s3_sleep -ED");
+$days    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function cache_disks($disk) {
+  return $disk['type']=='Cache' && strpos($disk['status'],'_NP')===false;
+}
 
 exec("ifconfig -s|awk '/^(bond|eth)/{print $1}'", $sPorts);
 exec("ethtool {$cfg['port']}|awk -F':' '/Wake-on/{print $2}'",$sWakeon);
-
-
-$days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 ?>
 <script>
 function prepareSleep(form) {
@@ -325,4 +317,3 @@ _(Enable DEBUG mode)_:
 : <input type="submit" name="#apply" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()">
 
 </form>
-<?endif;?>

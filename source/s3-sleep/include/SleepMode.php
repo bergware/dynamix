@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
   *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -21,6 +21,7 @@ $postRun = $cfg['postRun'] ? "-p $docroot/plugins/dynamix.s3.sleep/scripts/postR
 // Go to sleep
 exec("echo 'Enter sleep mode'|logger --tag s3_sleep");
 exec("$docroot/plugins/dynamix.s3.sleep/scripts/s3_sleep -S $preRun $postRun $debug");
+
 // Now sleeping...
 exec("echo 'Wake-up from sleep mode'|logger --tag s3_sleep");
 ?>

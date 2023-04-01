@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -12,8 +12,9 @@
  */
 ?>
 <?
-$plugin = 'dynamix.s3.sleep';
+$plugin  = 'dynamix.s3.sleep';
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$s3sleep = "$docroot/plugins/$plugin/scripts/rc.s3sleep";
 
 if (isset ($_POST['excludeList'])) {
   $excludeList = $_POST['excludeList'];
@@ -71,7 +72,6 @@ foreach ($new as $key => $value) {
     if ($key[0]!='#') $options .= (isset($prefix[$key]) ? "-{$prefix[$key]} " : "")."$value ";
   break;}
 }
-$s3sleep = "$docroot/plugins/$plugin/scripts/rc.s3sleep";
 exec("$s3sleep stop >/dev/null");
 $options = trim($options);
 $keys['options'] = $options;

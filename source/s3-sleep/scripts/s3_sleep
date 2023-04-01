@@ -37,31 +37,36 @@
 # Version 3.0.7   Support for multi cache pool - added in Unraid 6.9
 #                 Correction for Cache pool
 #                 Added monitor option: both (default), status only, counters only
+# Version 3.0.8   Support for Unraid 6.9
+# Version 3.0.9   Fix device detection
+# Version 3.0.10  Fix list of devices outside array
+#                 Take into account custom port numbers of telnet and ssh
+# Version 3.0.11  Use sdspin to monitor disks (provided by Doron)
 #
 # Bergware International
 ####################################################################################
-version=3.0.7
+version=3.0.11
 program=$(basename $0)
 ini=/var/local/emhttp/disks.ini
 
 # Get flash device
 getFlash() {
-  flash=($(grep -PB10 '^type="Flash' $ini|grep -Po '^device="\K[^"]+'))
+  flash=($(grep -PB13 '^type="Flash' $ini|grep -Po '^device="\K[^"]+'))
 }
 
 # Get list of cache devices (if present)
 getCache() {
-  cache=($(grep -PB10 '^type="Cache' $ini|grep -Po '^device="\K[^"]+'))
+  cache=($(grep -PB13 '^type="Cache' $ini|grep -Po '^device="\K[^"]+'))
 }
 
 # Get list of array devices
 getArray() {
-  array=($(grep -PB10 '^type="(Parity|Data)' $ini|grep -Po '^device="\K[^"]+'))
+  array=($(grep -PB13 '^type="(Parity|Data)' $ini|grep -Po '^device="\K[^"]+'))
 }
 
 # Get list of all devices
 getDisks() {
-  disks=($(ls -l /dev/disk/by-id/[asu]*|awk -F/ '$0!~/part1/{print $7"="$5}'|sed 's/\(usb\|ata\|scsi|ide\)-//;s/ -> ..$//'))
+  disks=($(ls -l /dev/disk/by-id/[asun]*|awk -F/ '$0!~/part1/{print $7"="$5}'|grep -v 'nvme-eui'|sed 's/\(usb\|ata\|scsi\|ide\|nvme\)-//;s/ -> ..$//'))
 }
 
 # list devices outside of array
@@ -291,7 +296,14 @@ TTY_activity() {
 
 SSH_activity() {
   result=
-  [[ $checkSSH == yes && $(lsof -O -w -l -i -n -P|awk '/:(22|23)-.*\(ESTABLISHED\)$/'|wc -l) -gt 0 ]] && result=1
+  if [[ $checkSSH == yes ]]; then
+    local ident=/boot/config/ident.cfg
+    local telnet=$(grep -Pom1 'PORTTELNET="\K[^"]+' $ident 2>/dev/null)
+    local ssh=$(grep -Pom1 'PORTSSH="\K[^"]+' $ident 2>/dev/null)
+    [[ -z $telnet ]] && telnet=23
+    [[ -z $ssh ]] && ssh=22
+    [[ $(lsof -O -w -l -i -n -P|awk "/:($telnet|$ssh)-.*\(ESTABLISHED\)\$/"|wc -l) -gt 0 ]] && result=1
+  fi
   if [[ -n $result ]]; then
     log "Remote activity on going: telnet/ssh"
     echo $result
