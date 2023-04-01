@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "SSD Trim started"
+/sbin/fstrim -a -v
