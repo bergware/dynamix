@@ -3,8 +3,128 @@ Title="File Manager"
 Icon="icon-u-duplicate"
 Code="e963"
 ---
+<?PHP
+/* Copyright 2005-2023, Lime Technology
+ * Copyright 2012-2023, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$dfm_active = '/var/tmp/file.manager.active';
+$dfm_running = file_exists($dfm_active);
+?>
 <script>
+// Prototypes
+String.prototype.wedge = function(len){len=len||70;return this.length<=len ? this : this.slice(0,Math.round(len/2)-2)+'...'+this.slice(-1-Math.round(len/2));}
+
+// General variables
+var dfm_box = null;
+var dfm_running = false;
+var dfm_previous = '';
+
 function BrowseButton() {
   location.replace('/<?=$task?>/Browse?dir=/mnt');
 }
+function dfm_dialog() {
+  return $('span.dfm_text').length ? true : false;
+}
+function showProgress(data) {
+  if (!data) return 0;
+  let file = null;
+  let text = data.split('\n');
+  let line = text[0].split('... ');
+  let strict = /^mnt|^boot/;
+  let footer = false;
+  if (text[0]=='#cat#') {
+    let loc = [], cat = [];
+    for (let i=1,row; row=text[i]; i++) {
+      if (!row) continue;
+      row = row.split('\0');
+      loc.push(row[0]);
+      cat.push(row[1].wedge(80));
+    }
+    if (loc.length > 0) {
+      if ($('span.dfm_loc').length) $('span.dfm_loc').html(loc.join('<br>'));
+      if (dfm_dialog()) $('span.dfm_text').html(cat.join('<br>'));
+    }
+    return cat.length;
+  } else if (text.length==1) {
+    text = text[0].wedge(80);
+  } else {
+    if (strict.test(text[1])) {
+      file = text[1];
+      text = dfm_previous;
+    } else {
+      file = line[1];
+      text = text[1].split(/\s+/);
+      text = "_(Completed)_: "+text[1]+",&nbsp;&nbsp;_(Speed)_: "+text[2]+",&nbsp;&nbsp;_(ETA)_: "+text[3];
+      dfm_previous = text;
+      footer = true;
+    }
+  }
+  if (dfm_dialog() && (file==null || strict.test(file))) $('span.dfm_text').html((file?line[0]+'... /'+escapeHTML(file.wedge())+'<br>':'')+text);
+  if (footer) $('#countdown').html((dfm_dialog() ?'<a class="hand" onclick="openDialog()" title="_(File Manager)_"><i class="icon-u-duplicate"></i></a>&nbsp;' : '<i class="icon-u-duplicate"></i>&nbsp;')+text);
+  return 0;
+}
+function fileManager(action) {
+  switch (action) {
+  case 'start':
+    if (!dfm_running) {
+      if (dfm_dialog()) $('.ui-dialog button:contains("_(Proceed)_")').prop('disabled',true);
+      nchan_filemanager.start();
+    }
+    dfm_running = true;
+    break;
+  case 'stop':
+    if (dfm_running) nchan_filemanager.stop();
+    if (dfm_dialog()) $('span.dfm_text').removeClass('orange-text').html('');
+    $('#countdown').html('');
+    dfm_running = false;
+    break;
+  }
+}
+var nchan_filemanager = new NchanSubscriber('/sub/filemanager',{subscriber:'websocket'});
+nchan_filemanager.on('message', function(msg) {
+  let data = $.parseJSON(msg);
+  if (data.error) {
+    fileManager('stop');
+    if (dfm_dialog()) {
+      $('span.dfm_text').addClass('orange-text').html(data.error);
+      dfm_box.find('#target').prop('disabled',false);
+      dfm_box.find('#sparse').prop('disabled',false);
+      dfm_box.find('#exist').prop('disabled',false);
+      dfm_box.find('#owner').prop('disabled',false);
+      dfm_box.find('#group').prop('disabled',false);
+      dfm_box.find('#other').prop('disabled',false);
+    }
+  } else {
+    let cat = showProgress(data.status);
+    if (data.done==1) {
+      fileManager('stop');
+      if (dfm_dialog()) {
+        dfm_box.dialog('close');
+        setTimeout(loadList,500);
+      }
+    } else if (data.done==2) {
+      if (dfm_dialog()) {
+        dfm_box.find('#target').prop('disabled',false);
+        $('.ui-dialog button:contains("_(Proceed)_")').prop('disabled',false);
+      }
+      nchan_filemanager.stop();
+      dfm_running = false;
+      if (cat==0 && dfm_dialog()) $('span.dfm_text').html("_(No results found)_");
+    }
+  }
+});
+<?if ($dfm_running):?>
+$(function(){
+  fileManager('start');
+});
+<?endif;?>
 </script>

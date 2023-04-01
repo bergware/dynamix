@@ -18,5 +18,6 @@ $data[] = 'target="'.rawurldecode($_POST['target']??'').'"';
 $data[] = 'H="'.(empty($_POST['hdlink']) ? '' : 'H').'"';
 $data[] = 'sparse="'.(empty($_POST['sparse']) ? '' : '--sparse').'"';
 $data[] = 'exist="'.(empty($_POST['exist']) ? '--ignore-existing' : '').'"';
+$data[] = 'zfs="'.rawurldecode($_POST['zfs']??'').'"';
 file_put_contents('/var/tmp/file.manager.active',implode("\n",$data));
 ?>

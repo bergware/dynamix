@@ -114,7 +114,7 @@ function escape($name) {return escapeshellarg(validname($name));}
 function quoted($name) {return is_array($name) ? implode(' ',array_map('escape',$name)) : escape($name);}
 
 while (true) {
-  unset($action,$source,$target,$H,$sparse,$exist);
+  unset($action,$source,$target,$H,$sparse,$exist,$zfs);
   if (file_exists($active)) extract(parse_ini_file($active));
   $reply = [];
   if (isset($action)) {
@@ -128,32 +128,34 @@ while (true) {
     switch ($action) {
     case 0: // create folder
       if (!empty($pid)) {
-        $reply['status'] = _('Creating').'...';
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Creating').'...';
       } else {
-        exec("mkdir -p ".quoted($source[0].'/'.$target)." 1>$null 2>$error & echo $!",$pid);
+        $dir = $source[0].'/'.$target;
+        exec("mkdir -pm0777 ".quoted($dir)." 1>$null 2>$error & echo $!",$pid);
+        exec("chown -Rfv nobody:users ".quoted($dir));
       }
       break;
     case 1: // delete folder
-    case 5: // delete file
+    case 6: // delete file
       if (!empty($pid)) {
-        $reply['status'] = _('Removing').'... '.exec("tail -1 $status");
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Removing').'... '.exec("tail -1 $status");
       } else {
         exec("find ".quoted($source)." -name \"*\" -print -delete 1>$status 2>$null & echo \$!",$pid);
       }
       break;
     case 2: // rename folder
-    case 6: // rename file
+    case 7: // rename file
       if (!empty($pid)) {
-        $reply['status'] = _('Renaming').'...';
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Renaming').'...';
       } else {
         $path = dirname($source[0]);
         exec("mv -f ".quoted($source)." ".quoted("$path/$target")." 1>$null 2>$error & echo \$!",$pid);
       }
       break;
     case 3:  // copy folder
-    case 7:  // copy file
+    case 8:  // copy file
       if (!empty($pid)) {
-        $reply['status'] = _('Copying').'... '.shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'");
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Copying').'... '.shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'");
       } else {
         $target = validname($target,false);
         if ($target) {
@@ -164,10 +166,10 @@ while (true) {
         }
       }
       break;
-    case 4: // move folder
-    case 8: // move file
+    case 4: // move folder (rsync)
+    case 9: // move file (rsync)
       if (!empty($pid)) {
-        $reply['status'] = _('Moving').'... '.($move===false ? exec("tail -1 $status") : shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'"));
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Moving').'... '.($move===false ? exec("tail -1 $status") : shell_exec("tail -2 $status|awk -F\"\\r\" '{gsub(/^ +/,\"\",\$NF);print \$NF}'"));
       } else {
         $target = validname($target,false);
         if ($target) {
@@ -179,23 +181,36 @@ while (true) {
         }
       }
       break;
-    case 9: // change owner
+    case 5: // move folder (mv)
+    case 10: // move file (mv)
       if (!empty($pid)) {
-        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Moving').'...';
+      } else {
+        $target = validname($target,false);
+        if ($target) {
+          exec("mv -ft ".escapeshellarg($target)." ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
+        } else {
+          $reply['error'] = 'Invalid target name';
+        }
+      }
+      break;
+    case 11: // change owner
+      if (!empty($pid)) {
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
       } else {
         exec("chown -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
       }
       break;
-    case 10: // change permission
+    case 12: // change permission
       if (!empty($pid)) {
-        $reply['status'] = _('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Updating').'... '.exec("tail -2 $status|grep -Pom1 \"^.+ of '\\K[^']+\"");
       } else {
         exec("chmod -Rfv $target ".quoted($source)." 1>$status 2>$error & echo \$!",$pid);
       }
       break;
-    case 11: // search
+    case 15: // search
       if (!empty($pid)) {
-        $reply['status'] = _('Searching').'... '.exec("wc -l $status|grep -Pom1 '^[0-9]+'");
+        $reply['status'] = '<i class="fa fa-circle-o-notch fa-spin"></i> '._('Searching').'... '.exec("wc -l $status|grep -Pom1 '^[0-9]+'");
       } else {
         exec("find ".escapeshellarg($source[0])." -iname ".escapeshellarg($target)." 1>$status 2>$null & echo \$!",$pid);
       }
@@ -205,6 +220,8 @@ while (true) {
       delete_file($active,$status,$error);
       unset($pid,$move);
       break;
+    default:
+      continue;
     }
     $pid = pgrep($pid??0);
     if ($pid===false) {
@@ -213,12 +230,20 @@ while (true) {
         $move = false;
         $pid = pgrep($pid);
       } else {
-        if ($action != 11) {
+        if ($action != 15) {
           $reply['status'] = _('Done');
           $reply['done'] = 1;
         } else {
           $reply['status'] = cat($status);
           $reply['done'] = 2;
+        }
+        if ($zfs) {
+          $pools = explode("\r",$zfs);
+          foreach ($pools as $pool) {
+            unset($datasets);
+            exec("zfs list -Ho name|grep '^$pool'",$datasets);
+            foreach ($datasets as $dataset) if (exec("ls --indicator-style=none /mnt/$dataset|wc -l")==0) exec("zfs destroy $dataset 2>/dev/null");
+          }
         }
         if (file_exists($error)) $reply['error'] = str_replace("\n","<br>",trim(file_get_contents($error)));
         delete_file($active,$status,$error);

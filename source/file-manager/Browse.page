@@ -20,10 +20,12 @@ function validdir($dir) {
   return in_array(explode('/',$path)[1]??'',['mnt','boot']) ? $path : '';
 }
 function quote($text) {
-  return "'$text'";
+  return "\"$text\"";
 }
-$active  = '/var/tmp/file.manager.active';
-$running = file_exists($active);
+function jsArray($array) {
+  return implode(',',array_map('quote',$array));
+}
+$zfs     = is_executable('/usr/sbin/zfs');
 $dir     = validdir(htmlspecialchars_decode($dir));
 [$none,$root,$main,$next,$rest] = my_explode('/',$dir,5);
 $dir     = htmlspecialchars(str_replace('\\','\\\\',$dir));
@@ -46,6 +48,16 @@ if (!file_exists($editor)) file_put_contents($editor,implode("\n",['','txt','js'
 <link type="text/css" rel="stylesheet" href="<?autov("/plugins/dynamix.docker.manager/styles/style-$theme.css")?>">
 
 <style>
+div#ace_settingsmenu,table#controls,table#more-controls{margin-top:0;background-color:#f2f2f2}
+tr.ace_optionsMenuEntry td{padding:4px;color:#1c1b1b}
+tr.ace_optionsMenuEntry td select option{color:#1c1b1b;background-color:#e8e8e8}
+<?if ($theme=='black'):?>
+tr.ace_optionsMenuEntry td select{color:#1c1b1b;border-bottom:1px solid #1c1b1b;background-image:linear-gradient(66.6deg,transparent 60%,#1c1b1b 40%),linear-gradient(113.4deg, #1c1b1b 40%,transparent 60%)}
+tr.ace_optionsMenuEntry td input[type=number]{color:#1c1b1b}
+<?endif;?>
+tr.ace_optionsMenuEntry td input[type=number]::-webkit-inner-spin-button{-webkit-appearance:auto;cursor:pointer}
+tr.ace_optionsMenuEntry td input[type=number]{-moz-appearance:auto;margin:0}
+
 .loc{text-align:left!important;padding-left:0!important}
 <?if ($newos):?>
 .title span.left{text-transform:none}
@@ -76,8 +88,8 @@ div.info{position:absolute;bottom:4px;width:74%;margin-left:23%}
 div.template,div#dialogWindow,input#upload{display:none}
 span.filter{position:relative;margin-left:<?=$themes1?'12':'0'?>px;top:-<?=$themes1?'2':'8'?>px}
 span.filter i{position:absolute;left:10px;top:<?=$themes1?'4':'8'?>px;font-size:1.4rem}
-span.loc{display:inline-block}
-span.text{display:inline-block;width:75%;white-space:normal}
+span.dfm_loc{display:inline-block}
+span.dfm_text{display:inline-block;width:75%;white-space:normal}
 span.device{display:inline-block;float:left}
 span.percent{display:inline-block;width:40px}
 span.speed{display:inline-block;margin-left:10px;width:140px}
@@ -86,6 +98,8 @@ input.filter:focus{background-color:<?=$incolor?>}
 input#sparse,input#exist{margin-left:0}
 dt{width:23%}
 select.narrow{margin:0 40px 0 10px}
+select#source{min-width:none;max-width:none;border:none;background-image:none;width:660px}
+select#source option{background-color:transparent}
 .fileTree{background:<?=$bgcolor?>;width:500px;max-height:320px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset button[disabled]{cursor:default;color:#808080;background:-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 0 no-repeat,-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#404040),to(#404040)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#808080),to(#808080)) 100% 100% no-repeat;background:linear-gradient(90deg,#404040 0,#808080) 0 0 no-repeat,linear-gradient(90deg,#404040 0,#808080) 0 100% no-repeat,linear-gradient(0deg,#404040 0,#404040) 0 100% no-repeat,linear-gradient(0deg,#808080 0,#808080) 100% 100% no-repeat;background-size:100% 2px,100% 2px,2px 100%,2px 100%}
 .dropdown-menu{z-index:10001;
@@ -94,24 +108,26 @@ select.narrow{margin:0 40px 0 10px}
 <script src="<?autov("/webGui/javascript/jquery.filetree.js")?>"></script>
 <script src="<?autov("/webGui/javascript/jquery.switchbutton.js")?>"></script>
 <script>
+// Prototypes
 String.prototype.patch = function(){return this.replace('rw','x+rw').replace('r-','wx+r').replace('--','rwx');}
 String.prototype.proxy = function(){return this.replace('name','row');}
 String.prototype.fetch = function(tag){return this.replace('check',tag);}
 String.prototype.bring = function(tag){return this.replace('row',tag);}
 String.prototype.strip = function(){return this.replace(/\/$/,'');}
 String.prototype.quote = function(){return this.replace(/&#34;/g,'"');}
-String.prototype.crush = function(len){len=len||70;return this.length<=len ? this : this.slice(0,Math.round(len/2)-2)+'...'+this.slice(-1-Math.round(len/2));}
 String.prototype.alter = function(...a){var t=this;for(var i=0;i<a.length;i+=2){t=t.replace(a[i],a[i+1]);} return t;}
 String.prototype.build = function(){return this.replace(/\n(<!--!|!-->)\n/g,'');}
 
 // General variables
 var dir = "<?=$dir?>";
-var box = null;
-var running = false;
-var previous = '';
 var table = null;
 var thead = null;
+var tsize = {0:0,1:6,2:3,3:3,4:3,11:2,12:2,14:0,15:0};
 
+function htmlspecialchars(text) {
+  var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+  return text.replace(/[&<>"']/g,function(m){return map[m];});
+}
 function autoscale(value) {
   var unit = ['B','kB','MB','GB','TB','PB','EB'];
   var base = value>1?Math.floor(Math.log(value)/Math.log(1000)):0;
@@ -124,19 +140,19 @@ function folderContextMenu(id,button) {
   var opts = [];
   context.settings({button:button,right:false});
   opts.push({header:"_(Action)_"});
-  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_("Delete $Folder")?>",id.proxy());}});
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=_("Copy $Folder")?>",id.proxy());}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=_("Move $Folder")?>",id.proxy());}});
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_(Delete)_",id.proxy());}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_(Copy)_",id.proxy());}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_(Move)_",id.proxy());}});
 <?if (!$isshare):?>
-  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename Folder)_",id.proxy());}});
+  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(2,"_(Rename)_",id.proxy());}});
 <?endif?>
   opts.push({divider:true});
-  opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(9,"_(Change Owner)_",id.proxy());}});
-  opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
-  opts.push({text:"_(Calculate)_", icon:"fa-calculator", action:function(e){e.preventDefault();doAction(12,"_(Calculate Occupied Space)_",id.proxy());}});
+  opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(11,"_(Change Owner)_",id.proxy());}});
+  opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(12,"_(Change Permission)_",id.proxy());}});
+  opts.push({text:"_(Calculate)_", icon:"fa-calculator", action:function(e){e.preventDefault();doAction(14,"_(Calculate Occupied Space)_",id.proxy());}});
 <?if (!$isshare):?>
   opts.push({header:"_(Common)_"});
-  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
+  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create)_",id.proxy());}});
 <?if ($dir):?>
   opts.push({text:"_(Upload)_", icon:"fa-upload", action:function(e){e.preventDefault();$('#upload').click();}});
 <?endif?>
@@ -147,17 +163,17 @@ function fileContextMenu(id,button) {
   var opts = [];
   context.settings({button:button,right:false});
   opts.push({header:"_(Action)_"});
-  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(5,"_(Delete File)_",id.proxy());}});
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(7,"_(Copy File)_",id.proxy());}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",id.proxy());}});
-  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(6,"_(Rename File)_",id.proxy());}});
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(6,"_(Delete)_",id.proxy());}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(8,"_(Copy)_",id.proxy());}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(9,"_(Move)_",id.proxy());}});
+  opts.push({text:"_(Rename)_", icon:"fa-edit", action:function(e){e.preventDefault();doAction(7,"_(Rename)_",id.proxy());}});
   opts.push({divider:true});
-  opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(9,"_(Change Owner)_",id.proxy());}});
-  opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(10,"_(Change Permission)_",id.proxy());}});
-  opts.push({text:"_(Download)_", icon:"fa-download", action:function(e){e.preventDefault();doAction(11,"_(Download File)_",id.proxy());}});
+  opts.push({text:"_(Owner)_", icon:"fa-user-o", action:function(e){e.preventDefault();doAction(11,"_(Change Owner)_",id.proxy());}});
+  opts.push({text:"_(Permission)_", icon:"fa-address-book-o", action:function(e){e.preventDefault();doAction(12,"_(Change Permission)_",id.proxy());}});
+  opts.push({text:"_(Download)_", icon:"fa-download", action:function(e){e.preventDefault();doAction(13,"_(Download)_",id.proxy());}});
 <?if (!$isshare):?>
   opts.push({header:"_(Common)_"});
-  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create Folder)_",id.proxy());}});
+  opts.push({text:"_(Create)_", icon:"fa-folder-o", action:function(e){e.preventDefault();doAction(0,"_(Create)_",id.proxy());}});
 <?if ($dir):?>
   opts.push({text:"_(Upload)_", icon:"fa-upload", action:function(e){e.preventDefault();$('#upload').click();}});
 <?endif?>
@@ -168,20 +184,20 @@ function deviceFolderContextMenu(dev,id) {
   var opts = [];
   context.settings({button:'both',right:false});
   opts.push({header:dev.split('/')[2]});
-  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"<?=_("Delete $Folder")?>",dev);}});
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"<?=_("Copy $Folder")?>",dev);}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"<?=_("Move $Folder")?>",dev);}});
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(1,"_('Delete')_",dev);}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(3,"_('Copy')_",dev);}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(4,"_('Move')_",dev);}});
   opts.push({divider:true});
-  opts.push({text:"_(Calculate)_", icon:"fa-calculator", action:function(e){e.preventDefault();doAction(12,"_(Calculate Occupied Space)_",dev);}});
+  opts.push({text:"_(Calculate)_", icon:"fa-calculator", action:function(e){e.preventDefault();doAction(14,"_(Calculate Occupied Space)_",dev);}});
   context.attach('#device_'+id, opts);
 }
 function deviceFileContextMenu(dev,id) {
   var opts = [];
   context.settings({button:'both',right:false});
   opts.push({header:dev.split('/')[2]});
-  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(5,"_(Delete File)_",dev);}});
-  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(7,"_(Copy File)_",dev);}});
-  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(8,"_(Move File)_",dev);}});
+  opts.push({text:"_(Delete)_", icon:"fa-trash-o", action:function(e){e.preventDefault();doAction(6,"_(Delete)_",dev);}});
+  opts.push({text:"_(Copy)_", icon:"fa-copy", action:function(e){e.preventDefault();doAction(8,"_(Copy)_",dev);}});
+  opts.push({text:"_(Move)_", icon:"fa-paste", action:function(e){e.preventDefault();doAction(9,"_(Move)_",dev);}});
   context.attach('#device_'+id, opts);
 }
 function resize() {
@@ -235,61 +251,12 @@ function escapeHTML(name) {
   data.appendChild(text);
   return data.innerHTML;
 }
-function showProgress(data) {
-  if (!data) return 0;
-  var file = null;
-  var text = data.split('\n');
-  var line = text[0].split('... ');
-  var strict = /^mnt|^boot/;
-  if (text[0]=='#cat#') {
-    var loc = [], cat = [];
-    for (var i=1,row; row=text[i]; i++) {
-      if (!row) continue;
-      row = row.split('\0');
-      loc.push(row[0]);
-      cat.push(row[1].crush(80));
-    }
-    if (loc.length > 0) {
-      $('span.loc').html(loc.join('<br>'));
-      $('span.text').html(cat.join('<br>'));
-    }
-    return cat.length;
-  } else if (text.length==1) {
-    text = text[0].crush(80);
-  } else {
-    if (strict.test(text[1])) {
-      file = text[1];
-      text = previous;
-    } else {
-      file = line[1];
-      text = text[1].split(/\s+/);
-      text = "_(Completed)_: "+text[1]+",&nbsp;&nbsp;_(Speed)_: "+text[2]+",&nbsp;&nbsp;_(ETA)_: "+text[3];
-      previous = text;
-    }
-  }
-  if (file==null || strict.test(file)) $('span.text').html((file?line[0]+'... /'+escapeHTML(file.crush())+'<br>':'')+text);
-  return 0;
-}
-function fileManager(action) {
-  switch (action) {
-  case 'start':
-    if (!running) {
-      $('.ui-dialog button:contains("_(Proceed)_")').prop('disabled',true);
-      filemanager.start();
-    }
-    running = true;
-    break;
-  case 'stop':
-    if (running) {
-      filemanager.stop();
-      $('span.text').html('');
-    }
-    running = false;
-    break;
-  }
+function openDialog() {
+  $('#countdown').hide();
+  setTimeout(function(){dfm_box.dialog('open');});
 }
 function dialogStyle() {
-  $('.ui-dialog-titlebar-close').css({'background':'transparent','border':'none','font-size':'1.8rem','margin-top':'-14px','margin-right':'-18px'}).html('<i class="fa fa-times"></i>').prop('title',"_(Close)_").prop('onclick',null).off('click').click(function(){box.dialog('close');});
+  $('.ui-dialog-titlebar-close').css({'background':'transparent','border':'none','font-size':'1.8rem','margin-top':'-14px','margin-right':'-18px'}).html('<i class="fa fa-window-minimize"></i>').prop('title',"_(Minimize)_").prop('onclick',null).off('click').click(function(){$('#countdown').show();dfm_box.dialog('close');});
   $('.ui-dialog-title').css({'text-align':'center','width':'100%','font-size':'1.8rem'});
   $('.ui-dialog-content').css({'padding-top':'15px','vertical-align':'bottom'});
   $('.ui-button-text').css({'padding':'0px 5px'});
@@ -302,7 +269,7 @@ function fileExtension(file) {
   return file.indexOf('.')>=0 ? file.split('.').pop() : '';
 }
 function fileEdit(id) {
-  const known = ['','cfg','conf',<?=implode(',',array_map('quote',file($editor,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)))?>];
+  const known = ["","cfg","conf",<?=jsArray(file($editor,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES))?>];
   var source = $('#'+id.proxy()).attr('data').quote();
   var ext = fileExtension(source);
   if (ext == 'zip') {
@@ -310,15 +277,15 @@ function fileEdit(id) {
     downloadFile(source);
     return;
   }
-  box = $("#dialogWindow");
+  dfm_box = $("#dialogWindow");
   if (!known.includes(ext)) {
     // file viewer - supported file extensions: .pdf, .jpg, .png, .jpeg, .gif
-    box.html($("#templateViewFile").html().replace('{$0}',source).build());
+    dfm_box.html($("#templateViewFile").html().replace('{$0}',source).build());
     return;
   }
   // file editor dialog
-  box.html($("#templateEditFile").html().replace('{$0}',source).build());
-  box.dialog({
+  dfm_box.html($("#templateEditFile").html().replace('{$0}',source).build());
+  dfm_box.dialog({
     title: fileName(source),
     height: Math.min(window.innerHeight-80,800),
     width: Math.min(window.innerWidth,1200),
@@ -329,11 +296,11 @@ function fileEdit(id) {
     buttons: {
       "_(Save)_": function(){
         $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'save', file:encodeURIComponent(source), data:encodeURIComponent(editor.session.getValue())});
-        box.dialog('close');
+        dfm_box.dialog('close');
         setTimeout(loadList,100);
       },
       "_(Cancel)_": function(){
-        box.dialog('close');
+        dfm_box.dialog('close');
       }
     }
   });
@@ -342,138 +309,144 @@ function fileEdit(id) {
 }
 function fullWindow() {
   if ($('.ui-dialog-titlebar-close').html().indexOf('expand')>=0) {
-    box.dialog('option','height',window.innerHeight-40);
-    box.dialog('option','width',window.innerWidth);
-    box.dialog('option','position',{my:'top',at:'top',of:window});
+    dfm_box.dialog('option','height',window.innerHeight-40);
+    dfm_box.dialog('option','width',window.innerWidth);
+    dfm_box.dialog('option','position',{my:'top',at:'top',of:window});
     $('.ui-dialog-titlebar-close').html("<i class='fa fa-compress'></i>").prop("title","_(Compress)_");
   } else {
-    box.dialog('option','height',Math.min(window.innerHeight-80,800));
-    box.dialog('option','width',Math.min(window.innerWidth,1200));
-    box.dialog('option','position',{my:'center',at:'center',of:window});
+    dfm_box.dialog('option','height',Math.min(window.innerHeight-80,800));
+    dfm_box.dialog('option','width',Math.min(window.innerWidth,1200));
+    dfm_box.dialog('option','position',{my:'center',at:'center',of:window});
     $('.ui-dialog-titlebar-close').html("<i class='fa fa-expand'></i>").prop("title","_(Expand)_");
   }
   editor.resize();
 }
-
-var filemanager = new NchanSubscriber('/sub/filemanager',{subscriber:'websocket'});
-filemanager.on('message', function(msg) {
-  var data = $.parseJSON(msg);
-  if (data.error) {
-    fileManager('stop');
-    $('span.text').addClass('orange-text').html(data.error);
-    box.find('#target').prop('disabled',false);
-    box.find('#sparse').prop('disabled',false);
-    box.find('#exist').prop('disabled',false);
-    box.find('#owner').prop('disabled',false);
-    box.find('#group').prop('disabled',false);
-    box.find('#other').prop('disabled',false);
-  } else {
-    var cat = showProgress(data.status);
-    if (data.done==1) {
-      box.dialog('close');
-      fileManager('stop');
-      setTimeout(loadList,500);
-    } else if (data.done==2) {
-      box.find('#target').prop('disabled',false);
-      $('.ui-dialog button:contains("_(Proceed)_")').prop('disabled',false);
-      filemanager.stop();
-      running = false;
-      if (cat==0) $('span.text').html("_(No results found)_");
+function createSelect(source) {
+  var select = dfm_box.find('#source');
+  if (Array.isArray(source)) {
+    for (var i=0,object; object=source[i]; i++) {
+      if (i < 10) {
+        select.html(select.html()+'<option'+(i==0?' selected':'')+'>'+object+'</option>');
+      } else {
+        select.html(select.html()+'<option>&lt;_(more)_&gt; ...</option>');
+        break;
+      }
     }
+  } else {
+    select.html('<option selected>'+source+'</option>');
   }
-});
-<?if ($running):
-extract(parse_ini_file($active));
+}
+<?if ($dfm_running):
+extract(parse_ini_file($dfm_active));
 $bulk = count(explode("\r",$source));?>
 function showDialog() {
-  box = $("#dialogWindow");
+  dfm_box = $("#dialogWindow");
   switch (<?=$action?>) {
 <?if ($bulk==1):?>
   case 1: // delete folder
-    box.html($("#templateDeleteFolder").html());
-    box.find('#source').html("<?=$source?>");
+    dfm_box.html($("#templateDeleteFolder").html());
+    dfm_box.find('#source').html("<?=$source?>");
     var height = 330;
     break;
   case 3: // copy folder
-    box.html($("#templateCopyFolder").html());
-    box.find('#source').html("<?=$source?>");
-    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.html($("#templateCopyFolder").html());
+    dfm_box.find('#source').html("<?=$source?>");
+    dfm_box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.find('#sparse').prop('checked',<?=$sparse?'true':'false'?>);
+    dfm_box.find('#exist').prop('checked',<?=$exist?'false':'true'?>);
     var height = 630;
     break;
-  case 4: // move folder
-    box.html($("#templateMoveFolder").html());
-    box.find('#source').html("<?=$source?>");
-    box.find('#target').val("<?=$target?>").prop('disabled',true);
+  case 4: // move folder (rsync)
+  case 5: // move folder (mv)
+    dfm_box.html($("#templateMoveFolder").html());
+    dfm_box.find('#source').html("<?=$source?>");
+    dfm_box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.find('#sparse').prop('checked',<?=$sparse?'true':'false'?>);
+    dfm_box.find('#exist').prop('checked',<?=$exist?'false':'true'?>);
     var height = 630;
     break;
-  case 5: // delete file
-    box.html($("#templateDeleteFile").html());
-    box.find('#source').html("<?=$source?>");
+  case 6: // delete file
+    dfm_box.html($("#templateDeleteFile").html());
+    dfm_box.find('#source').html("<?=$source?>");
     var height = 330;
     break;
-  case 7: // copy file
-    box.html($("#templateCopyFile").html());
-    box.find('#source').html("<?=$source?>");
-    box.find('#target').val("<?=$target?>").prop('disabled',true);
+  case 8: // copy file
+    dfm_box.html($("#templateCopyFile").html());
+    dfm_box.find('#source').html("<?=$source?>");
+    dfm_box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.find('#sparse').prop('checked',<?=$sparse?'true':'false'?>);
+    dfm_box.find('#exist').prop('checked',<?=$exist?'false':'true'?>);
     var height = 630;
     break;
-  case 8: // move file
-    box.html($("#templateMoveFile").html());
-    box.find('#source').html("<?=$source?>");
-    box.find('#target').val("<?=$target?>").prop('disabled',true);
+  case 9: // move file (rsync)
+  case 10: // move file (mv)
+    dfm_box.html($("#templateMoveFile").html());
+    dfm_box.find('#source').html("<?=$source?>");
+    dfm_box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.find('#sparse').prop('checked',<?=$sparse?'true':'false'?>);
+    dfm_box.find('#exist').prop('checked',<?=$exist?'false':'true'?>);
     var height = 630;
     break;
-  case 9: // change owner
-    box.html($("#templateChangeOwner").html());
-    box.find('#source').html("<?=$source?>");
-    box.find('#target').prop('disabled',true);
+  case 11: // change owner
+    dfm_box.html($("#templateChangeOwner").html());
+    createSelect("<?=$source?>");
+    dfm_box.find('#target').prop('disabled',true);
     var height = 330;
     break;
-  case 10: // change permission
-    box.html($("#templateChangePermission").html());
-    box.find('#source').html("<?=$source?>");
-    box.find('#owner').prop('disabled',true);
-    box.find('#group').prop('disabled',true);
-    box.find('#other').prop('disabled',true);
+  case 12: // change permission
+    dfm_box.html($("#templateChangePermission").html());
+    createSelect("<?=$source?>");
+    dfm_box.find('#owner').prop('disabled',true);
+    dfm_box.find('#group').prop('disabled',true);
+    dfm_box.find('#other').prop('disabled',true);
     var height = 330;
     break;
 <?else:?>
   case 1: // delete object
-    box.html($("#templateDeleteObject").html());
-    box.find('#source').html("_(Objects to delete)_: <?=$bulk?>");
+    dfm_box.html($("#templateDeleteObject").html());
+    dfm_box.find('#source').html("_(Objects to delete)_: <?=$bulk?>");
     var height = 330;
     break;
   case 3: // copy object
-    box.html($("#templateCopyObject").html());
-    box.find('#source').html("_(Objects to copy)_: <?=$bulk?>");
-    box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.html($("#templateCopyObject").html());
+    dfm_box.find('#source').html("_(Objects to copy)_: <?=$bulk?>");
+    dfm_box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.find('#sparse').prop('checked',<?=$sparse?'true':'false'?>);
+    dfm_box.find('#exist').prop('checked',<?=$exist?'false':'true'?>);
     var height = 630;
     break;
-  case 4: // move object
-    box.html($("#templateCopyObject").html());
-    box.find('#source').html("_(Objects to move)_: <?=$bulk?>");
-    box.find('#target').val("<?=$target?>").prop('disabled',true);
+  case 4: // move object (rsync)
+  case 5: // move object (mv)
+    dfm_box.html($("#templateCopyObject").html());
+    dfm_box.find('#source').html("_(Objects to move)_: <?=$bulk?>");
+    dfm_box.find('#target').val("<?=$target?>").prop('disabled',true);
+    dfm_box.find('#sparse').prop('checked',<?=$sparse?'true':'false'?>);
+    dfm_box.find('#exist').prop('checked',<?=$exist?'false':'true'?>);
     var height = 630;
     break;
-  case 9: // change owner
-    box.html($("#templateChangeOwner").html());
-    box.find('#source').html("_(Objects to change)_: <?=$bulk?>");
-    box.find('#target').prop('disabled',true);
+  case 11: // change owner
+    dfm_box.html($("#templateChangeOwner").html());
+    createSelect([<?=jsArray(array_slice(explode("\r",$source),0,10))?>]);
+    dfm_box.find('#source').html("_(Objects to change)_: <?=$bulk?>");
+    dfm_box.find('#target').prop('disabled',true);
     var height = 330;
     break;
-  case 10: // change permission
-    box.html($("#templateChangePermission").html());
-    box.find('#source').html("_(Objects to change)_: <?=$bulk?>");
-    box.find('#owner').prop('disabled',true);
-    box.find('#group').prop('disabled',true);
-    box.find('#other').prop('disabled',true);
+  case 12: // change permission
+    dfm_box.html($("#templateChangePermission").html());
+    createSelect([<?=jsArray(array_slice(explode("\r",$source),0,10))?>]);
+    dfm_box.find('#owner').prop('disabled',true);
+    dfm_box.find('#group').prop('disabled',true);
+    dfm_box.find('#other').prop('disabled',true);
     var height = 330;
     break;
 <?endif;?>
   }
-  box.find('#sparse').prop('disabled',true);
-  box.find('#exist').prop('disabled',true);
-  box.dialog({
+  dfm_box.find('#sparse').prop('disabled',true);
+  dfm_box.find('#exist').prop('disabled',true);
+  dfm_box.find('span.sparse').css({'opacity':'0.5'});
+  dfm_box.find('span.exist').css({'opacity':'0.5'});
+  setTimeout(function(){$('button:first').focus();});
+  dfm_box.dialog({
     title: "<?=$title?>",
     resizable: false,
     width: 900,
@@ -486,19 +459,18 @@ function showDialog() {
         return;
       },
       "_(Cancel)_": function(){
-        box.dialog('close');
+        dfm_box.dialog('close');
         $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
         fileManager('stop');
       }
     }
   });
-  fileManager('start');
   dialogStyle();
 }
 <?endif;?>
 var filemonitor = new NchanSubscriber('/sub/filemonitor',{subscriber:'websocket'});
 filemonitor.on('message', function(state) {
-  if (state==1 && !running && !timers.filemonitor) timers.filemonitor = setTimeout(function(){if (running) clearTimeout(timers.filemonitor); else refresh();},1500);
+  if (state==1 && !dfm_running && !timers.filemonitor) timers.filemonitor = setTimeout(function(){if (dfm_running) clearTimeout(timers.filemonitor); else refresh();},1500);
 });
 setTimeout(function(){filemonitor.start();},5000);
 
@@ -506,6 +478,19 @@ function doAction(action,title,id) {
   var link   = id.substr(0,1)=='/';
   var source = link ? id : data($('#'+id));
   var path   = source.substr(1).split('/');
+  var zfs    = '';
+<?if ($zfs):?>
+  if ([1,4].includes(action) && path[0]=='mnt') {
+    switch (path.length) {
+    case 3:
+      if (path[2]=='') zfs = path[1]+'/';
+      break;
+    case 4:
+      if (path[3]=='') zfs = path[1]+'/'+path[2];
+      break;
+    }
+  }
+<?endif;?>
   var access = ['mnt','boot'];
   if (!access.includes(path[0])) return;
   var user   = /^(user0?|rootshare)$/.test(path[1]);
@@ -515,104 +500,101 @@ function doAction(action,title,id) {
   var match  = ud||user ? '' : '^(?!.*(user0?|rootshare)).*$';
   var name   = path.pop()||path.pop();
   var hdlink = "<?=$var['fuse_directio']==1?'1':''?>";
-  box = $("#dialogWindow");
+  dfm_box = $("#dialogWindow");
   switch (action) {
   case 0: // create folder
-    box.html($("#templateCreateFolder").html());
+    dfm_box.html($("#templateCreateFolder").html());
     source = dir;
     var height = 330;
     break;
   case 1: // delete folder
-    box.html($("#templateDeleteFolder").html());
-    box.find('#source').html(source.strip());
+    dfm_box.html($("#templateDeleteFolder").html());
+    dfm_box.find('#source').html(source.strip());
     var height = 330;
     break;
   case 2: // rename folder
-    box.html($("#templateRenameFolder").html());
-    box.find('#source').html(name);
-    box.find('#target').val(name);
+    dfm_box.html($("#templateRenameFolder").html());
+    dfm_box.find('#source').html(name);
+    dfm_box.find('#target').val(name);
     var height = 330;
     break;
   case 3: // copy folder
-    box.html($("#templateCopyFolder").html());
-    box.find('#source').html(source.strip());
-    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+    dfm_box.html($("#templateCopyFolder").html());
+    dfm_box.find('#source').html(source.strip());
+    dfm_box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      box.find('#target').val(path+auto).change();
+      dfm_box.find('#target').val(path+auto).change();
     });
     var height = 630;
     break;
   case 4: // move folder
-    box.html($("#templateMoveFolder").html());
-    box.find('#source').html(source.strip());
-    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+    dfm_box.html($("#templateMoveFolder").html());
+    dfm_box.find('#source').html(source.strip());
+    dfm_box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
       var auto = bits.length>3 ? '' : share;
-      box.find('#target').val(path+auto).change();
+      dfm_box.find('#target').val(path+auto).change();
     });
     var height = 630;
     break;
-  case 5: // delete file
-    box.html($("#templateDeleteFile").html());
-    box.find('#source').html(source);
+  case 6: // delete file
+    dfm_box.html($("#templateDeleteFile").html());
+    dfm_box.find('#source').html(source);
     var height = 330;
     break;
-  case 6: // rename file
-    box.html($("#templateRenameFile").html());
-    box.find('#source').html(name);
-    box.find('#target').val(name);
+  case 7: // rename file
+    dfm_box.html($("#templateRenameFile").html());
+    dfm_box.find('#source').html(name);
+    dfm_box.find('#target').val(name);
     var height = 330;
     break;
-  case 7: // copy file
-    box.html($("#templateCopyFile").html());
-    box.find('#source').html(source);
-    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
-      var bits = path.substr(1).split('/');
-      var auto = bits.length>3 ? '' : share;
-      box.find('#target').val(path+auto).change();
+  case 8: // copy file
+    dfm_box.html($("#templateCopyFile").html());
+    dfm_box.find('#source').html(source);
+    dfm_box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+      dfm_box.find('#target').val(path).change();
     });
     var height = 630;
     break;
-  case 8: // move file
-    box.html($("#templateMoveFile").html());
-    box.find('#source').html(source);
-    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
-      var bits = path.substr(1).split('/');
-      var auto = bits.length>3 ? '' : share;
-      box.find('#target').val(path+auto).change();
+  case 9: // move file
+    dfm_box.html($("#templateMoveFile").html());
+    dfm_box.find('#source').html(source);
+    dfm_box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).fileTreeAttach(null,null,function(path){
+      dfm_box.find('#target').val(path).change();
     });
     var height = 630;
     break;
-  case 9: // change owner
-    box.html($("#templateChangeOwner").html());
+  case 11: // change owner
+    dfm_box.html($("#templateChangeOwner").html());
     var owner = $('#'+id.bring('owner')).text();
-    box.find('#source').html(source.strip());
-    box.find('#target').val(owner);
+    createSelect(source.strip());
+    dfm_box.find('#target').val(owner);
     var height = 330;
     break;
-  case 10: // change permission
-    box.html($("#templateChangePermission").html());
+  case 12: // change permission
+    dfm_box.html($("#templateChangePermission").html());
     var perm = $('#'+id.bring('perm')).text();
-    box.find('#source').html(source.strip());
-    box.find('#owner').val('u-'+perm.substr(1,2).patch());
-    box.find('#group').val('g-'+perm.substr(4,2).patch());
-    box.find('#other').val('o-'+perm.substr(7,2).patch());
+    createSelect(source.strip());
+    dfm_box.find('#owner').val('u-'+perm.substr(1,2).patch());
+    dfm_box.find('#group').val('g-'+perm.substr(4,2).patch());
+    dfm_box.find('#other').val('o-'+perm.substr(7,2).patch());
     var height = 330;
     break;
-  case 11: // download file
+  case 13: // download file
     downloadFile(source,name);
     return;
-  case 12: // calculate occupied space
+  case 14: // calculate occupied space
     timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},500);
-    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(source)},function(text){
+    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(htmlspecialchars(source))},function(text){
       clearTimeout(timers.calc);
       $('div.spinner.fixed').hide('slow');
       swal({title:"_(Calculate Occupied Space)_",text:text,html:true,confirmButtonText:"_(Ok)_"});
     });
     return;
   }
-  box.dialog({
+  setTimeout(function(){if (dfm_box.find('#target').length) dfm_box.find('#target').focus().click(); else $('button:first').focus();});
+  dfm_box.dialog({
     title: title,
     resizable: false,
     width: 900,
@@ -622,58 +604,71 @@ function doAction(action,title,id) {
     hide: {effect:'fade', duration:250},
     buttons: {
       "_(Proceed)_": function(){
-        if (running) return;
-        var target = box.find('#target');
+        if (dfm_running) return;
+        var target = dfm_box.find('#target');
         if (target.length) {
           target = target.val();
           switch (action) {
           case 0: // create folder
           case 2: // rename folder
-          case 6: // rename file
+          case 7: // rename file
             var valid = /^[^\/]*$/; // no slashes allowed
             break;
-          case 9: // change owner
-            target += (target=='root' ? ':root' : ':users');
-            var valid = /.+/;
+          case 4: // move folder
+          case 9: // move file
+            // disallow mixing of disk and user shares
+            var valid = ud ? /^\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/);
+            // check if 'mv' can be used
+            if (!user && path.length > 2) {
+              var mv = '/'+path[0]+'/'+path[1]+'/'+path[2];
+              if (target.substr(0,mv.length) == mv) action++;
+            }
             break;
-          case 10: // change permission
-            target = [];
-            target.push(box.find('#owner').val());
-            target.push(box.find('#group').val());
-            target.push(box.find('#other').val());
-            target = target.join(',')+',ugo+X';
+          case 11: // change owner
             var valid = /.+/;
+            target += (target=='root' ? ':root' : ':users');
+            break;
+          case 12: // change permission
+            var valid = /.+/;
+            target = [];
+            target.push(dfm_box.find('#owner').val());
+            target.push(dfm_box.find('#group').val());
+            target.push(dfm_box.find('#other').val());
+            target = target.join(',')+',ugo+X';
             break;
           default:
-            var valid = ud ? /^\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
+            // disallow mixing of disk and user shares
+            var valid = ud ? /^\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/);
             break;
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
         } else target = '';
-        $('span.text').removeClass('orange-text').html("_(Running)_...");
-        box.find('#target').prop('disabled',true);
-        box.find('#sparse').prop('disabled',true);
-        box.find('#exist').prop('disabled',true);
-        if (action==10) {
-          box.find('#owner').prop('disabled',true);
-          box.find('#group').prop('disabled',true);
-          box.find('#other').prop('disabled',true);
+        $('span.dfm_text').removeClass('orange-text').html("_(Running)_...");
+        dfm_box.find('#target').prop('disabled',true);
+        dfm_box.find('#sparse').prop('disabled',true);
+        dfm_box.find('#exist').prop('disabled',true);
+        dfm_box.find('span.sparse').css({'opacity':'0.5'});
+        dfm_box.find('span.exist').css({'opacity':'0.5'});
+        if (action==11) {
+          dfm_box.find('#owner').prop('disabled',true);
+          dfm_box.find('#group').prop('disabled',true);
+          dfm_box.find('#other').prop('disabled',true);
         }
         fileManager('start');
-        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,sparse:box.find('#sparse').val(),exist:box.find('#exist').val()});
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source),target:encodeURIComponent(target),hdlink:hdlink,sparse:dfm_box.find('#sparse').val(),exist:dfm_box.find('#exist').val(),zfs:encodeURIComponent(zfs)});
       },
       "_(Cancel)_": function(){
-        box.dialog('close');
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        if (dfm_running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
         fileManager('stop');
+        dfm_box.dialog('close');
       }
     }
   });
   dialogStyle();
 }
 function doActions(action,title) {
-  var source = [], type = [], owner = [], perm = [];
-  if (action > 0 && action != 11) {
+  var source = [], type = [], owner = [], perm = [], zfs = [];
+  if (action > 0 && action != 15) {
     $('i[id^="check_"]').each(function(){
       if ($(this).prop('id')!='check_0' && $(this).hasClass('fa-check-square-o')) {
         var id = $(this).prop('id');
@@ -694,103 +689,132 @@ function doActions(action,title) {
     var match  = ud||user ? '' : '^(?!.*(user0?|rootshare)).*$';
     var name   = path.pop()||path.pop();
     var hdlink = "<?=$var['fuse_directio']==1?'1':''?>";
+    var u      = false;
+    var d      = false;
     if (bulk) {
-      var u = false, d = false;
       for (var i=0,s; s=source[i]; i++) {
-        var p = s.split('/');
-        if (/^user0?$/.test(p[2])) u = true; else d = true;
+        s = s.strip();
+        source[i] = s;
+        var p = s.substr(1).split('/');
+        if (/^user0?$/.test(p[1])) u = true; else d = true;
+<?if ($zfs):?>
+        if ([1,4].includes(action) && p[0]=='mnt' && type[i]=='d') {
+          switch (p.length) {
+          case 2:
+            zfs.push(p[1]+'/');
+            break;
+          case 3:
+            zfs.push(p[1]+'/'+p[2]);
+            break;
+          }
+        }
       }
-      if (u && d) {errorSource(); return;} // disallow mixing of disk and user shares
+    } else {
+      var p = source[0].substr(1).strip().split('/');
+      if ([1,4].includes(action) && p[0]=='mnt' && type[0]=='d') {
+        switch (p.length) {
+        case 2:
+          zfs.push(p[1]+'/');
+          break;
+        case 3:
+          zfs.push(p[1]+'/'+p[2]);
+          break;
+        }
+<?endif;?>
+      }
     }
+    if (u && d) {errorSource(); return;} // disallow mixing of disk and user shares
   }
-  box = $("#dialogWindow");
+  dfm_box = $("#dialogWindow");
   switch (action) {
   case 0: // create folder
-    box.html($("#templateCreateFolder").html());
+    dfm_box.html($("#templateCreateFolder").html());
     source[0] = dir;
     var height = 330;
     break;
   case 1: // delete object
-    box.html($("#templateDeleteObject").html());
-    box.find('#source').html(bulk ? "_(Objects to delete)_: "+source.length : source[0].strip());
+    dfm_box.html($("#templateDeleteObject").html());
+    createSelect(source);
     var height = 330;
     break;
   case 2: // rename object
     if (!bulk) {
-      box.html($("#templateRenameObject").html());
-      box.find('#source').html(name);
-      box.find('#target').val(name);
+      dfm_box.html($("#templateRenameObject").html());
+      dfm_box.find('#source').html(name);
+      dfm_box.find('#target').val(name);
       var height = 330;
     } else {
-      box.html($("#templateMoveObject").html());
-      box.find('#source').html("_(Objects to move)_: "+source.length);
-      box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).attr('data-pickfilter','HIDE_FILES_FILTER');
-      box.find('#target').fileTreeAttach(null,null,function(path){
+      dfm_box.html($("#templateMoveObject").html());
+      createSelect(source);
+      dfm_box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match).attr('data-pickfilter','HIDE_FILES_FILTER');
+      dfm_box.find('#target').fileTreeAttach(null,null,function(path){
         var bits = path.substr(1).split('/');
         var auto = bits.length>3 ? '' : share;
-        box.find('#target').val(path+auto).change();
+        dfm_box.find('#target').val(path+auto).change();
       });
       action = 4; // change to move operation
       var height = 630;
     }
     break;
   case 3: // copy object
-    box.html($("#templateCopyObject").html());
-    box.find('#source').html(bulk ? "_(Objects to copy)_: "+source.length : source[0].strip());
-    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
-    if (bulk || type[0]=='d') box.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
-    box.find('#target').fileTreeAttach(null,null,function(path){
+    dfm_box.html($("#templateCopyObject").html());
+    createSelect(source);
+    dfm_box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
+    if (bulk || type[0]=='d') dfm_box.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
+    dfm_box.find('#target').fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
-      var auto = bits.length>3 ? '' : share;
-      box.find('#target').val(path+auto).change();
+      var auto = bulk || bits.length>3 ? '' : (type[0]=='d' ? share : '');
+      dfm_box.find('#target').val(path+auto).change();
     });
     var height = 630;
     break;
   case 4: // move object
-    box.html($("#templateMoveObject").html());
-    box.find('#source').html(bulk ? "_(Objects to move)_: "+source.length : source[0].strip());
-    box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
-    if (bulk || type[0]=='d') box.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
-    box.find('#target').fileTreeAttach(null,null,function(path){
+    dfm_box.html($("#templateMoveObject").html());
+    createSelect(source);
+    dfm_box.find('#target').attr('data-pickroot',root).attr('data-picktop',root).attr('data-pickmatch',match);
+    if (bulk || type[0]=='d') dfm_box.find('#target').attr('data-pickfilter','HIDE_FILES_FILTER');
+    dfm_box.find('#target').fileTreeAttach(null,null,function(path){
       var bits = path.substr(1).split('/');
-      var auto = bits.length>3 ? '' : share;
-      box.find('#target').val(path+auto).change();
+      var auto = bulk || bits.length>3 ? '' : (type[0]=='d' ? share : '');
+      dfm_box.find('#target').val(path+auto).change();
     });
     var height = 630;
     break;
-  case 9: // change owner
-    box.html($("#templateChangeOwner").html());
-    box.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
-    if (!bulk) box.find('#target').val(owner[0]);
+  case 11: // change owner
+    dfm_box.html($("#templateChangeOwner").html());
+    createSelect(source);
+    if (!bulk) dfm_box.find('#target').val(owner[0]);
     var height = 330;
     break;
-  case 10: // change permission
-    box.html($("#templateChangePermission").html());
-    box.find('#source').html(bulk ? "_(Objects to change)_: "+source.length : source[0].strip());
+  case 12: // change permission
+    dfm_box.html($("#templateChangePermission").html());
+    createSelect(source);
     if (!bulk) {
-      box.find('#owner').val('u-'+perm[0].substr(1,2).patch());
-      box.find('#group').val('g-'+perm[0].substr(4,2).patch());
-      box.find('#other').val('o-'+perm[0].substr(7,2).patch());
+      dfm_box.find('#owner').val('u-'+perm[0].substr(1,2).patch());
+      dfm_box.find('#group').val('g-'+perm[0].substr(4,2).patch());
+      dfm_box.find('#other').val('o-'+perm[0].substr(7,2).patch());
     }
     var height = 330;
     break;
-  case 11: // search
-    source[0] = dir;
-    box.html($("#templateSearch").html());
-    box.find('span.loc').html('&nbsp;').css({'line-height':'normal'});
-    box.find('span.text').html('').css({'line-height':'normal'});
-    var height = 630;
-    break;
-  case 12: // calculate occupied space
+  case 14: // calculate occupied space
     timers.calc = setTimeout(function(){$('div.spinner.fixed').show('slow');},500);
-    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(source.join('\n'))},function(text){
+    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'calc', source:encodeURIComponent(htmlspecialchars(source.join('\n')))},function(text){
       clearTimeout(timers.calc);
       $('div.spinner.fixed').hide('slow');
       swal({title:"_(Calculate Occupied Space)_",text:text,html:true,confirmButtonText:"_(Ok)_"});
     });
     return;
+  case 15: // search
+    source[0] = dir;
+    dfm_box.html($("#templateSearch").html());
+    dfm_box.find('span.dfm_loc').html('&nbsp;').css({'line-height':'normal'});
+    dfm_box.find('span.dfm_text').html('').css({'line-height':'normal'});
+    var height = 630;
+    break;
   }
-  box.dialog({
+  dfm_box.find('select#source').attr('size',Math.min(tsize[action],source.length));
+  setTimeout(function(){if (dfm_box.find('#target').length) dfm_box.find('#target').focus().click(); else $('button:first').focus();});
+  dfm_box.dialog({
     title: title,
     resizable: false,
     width: 900,
@@ -800,8 +824,8 @@ function doActions(action,title) {
     hide: {effect:'fade', duration:250},
     buttons: {
       "_(Proceed)_": function(){
-        if (running) return;
-        var target = box.find('#target');
+        if (dfm_running) return;
+        var target = dfm_box.find('#target');
         if (target.length) {
           target = target.val();
           switch (action) {
@@ -810,61 +834,74 @@ function doActions(action,title) {
           case 2: // rename object
             var valid = /^[^\/]*$/; // no slashes allowed
             break;
-          case 9: // change owner
+          case 4: // move object
+            // disallow mixing of disk and user shares
+            var valid = ud ? /\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/);
+            // check if 'mv' can be used
+            if (!user && path.length > 2) {
+              var mv = '/'+path[0]+'/'+path[1]+'/'+path[2];
+              if (target.substr(0,mv.length) == mv) action++;
+            }
+            break;
+          case 11: // change owner
+            var valid = /.+/;
             target += (target=='root' ? ':root' : ':users');
-            var valid = /.+/;
             bulk = false;
             break;
-          case 10: // change permission
+          case 12: // change permission
+            var valid = /.+/;
             target = [];
-            target.push(box.find('#owner').val());
-            target.push(box.find('#group').val());
-            target.push(box.find('#other').val());
+            target.push(dfm_box.find('#owner').val());
+            target.push(dfm_box.find('#group').val());
+            target.push(dfm_box.find('#other').val());
             target = target.join(',')+',ugo+X';
-            var valid = /.+/;
             bulk = false;
             break;
-          case 11: // search
+          case 15: // search
             var valid = /.+/;
             bulk = false;
             break;
           default:
-            var valid = ud ? /\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/); // disallow mixing of disk and user shares
+            // disallow mixing of disk and user shares
+            var valid = ud ? /\/mnt\/.+/ : (user ? /^\/mnt\/(user0?|rootshare)\/.+/ : /^\/mnt\/(?!.*(user0?|rootshare)).+$|^\/boot\/.+/);
             break;
           }
           if (!target || !valid.test(target)) {errorTarget(); return;}
         } else target = '';
         if (bulk && target.length>0 && target.substr(-1)!='/') target += '/';
-        box.find('#target').prop('disabled',true);
-        box.find('#sparse').prop('disabled',true);
-        box.find('#exist').prop('disabled',true);
-        if (action==10) {
-          box.find('#owner').prop('disabled',true);
-          box.find('#group').prop('disabled',true);
-          box.find('#other').prop('disabled',true);
+        dfm_box.find('#target').prop('disabled',true);
+        dfm_box.find('#sparse').prop('disabled',true);
+        dfm_box.find('#exist').prop('disabled',true);
+        dfm_box.find('span.sparse').css({'opacity':'0.5'});
+        dfm_box.find('span.exist').css({'opacity':'0.5'});
+        if (action==12) {
+          dfm_box.find('#owner').prop('disabled',true);
+          dfm_box.find('#group').prop('disabled',true);
+          dfm_box.find('#other').prop('disabled',true);
         }
-        if (action==11) $('span.loc').html('&nbsp;');
-        $('span.text').removeClass('orange-text').html("_(Running)_...");
+        if (action==15) $('span.dfm_loc').html('&nbsp;');
+        $('span.dfm_text').removeClass('orange-text').html("_(Running)_...");
         fileManager('start');
-        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,sparse:box.find('#sparse').val(),exist:box.find('#exist').val()});
+        $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:action,title:encodeURIComponent(title),source:encodeURIComponent(source.join('\r')),target:encodeURIComponent(target),hdlink:hdlink,sparse:dfm_box.find('#sparse').val(),exist:dfm_box.find('#exist').val(),zfs:encodeURIComponent(zfs.join('\r'))});
       },
       "_(Cancel)_": function(){
-        box.dialog('close');
-        if (running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
+        if (dfm_running) $.post('/plugins/dynamix.file.manager/include/FileManager.php',{action:99},function(){setTimeout(loadList,500);});
         fileManager('stop');
+        dfm_box.dialog('close');
       }
     }
   });
   dialogStyle();
 }
-function stop() {
+function stopUpload(file,error) {
   window.onbeforeunload = null;
-  $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'stop'});
+  $.post('/plugins/dynamix.file.manager/include/Browse.php',{file:encodeURIComponent(htmlspecialchars(file)),mode:'stop'});
   $('#uploadButton').val("_(Upload)_").prop('onclick',null).off('click').click(function(){$('#upload').click();});
   $('#uploadStatus').html('');
   $('#upload').val('');
-  running = false;
+  dfm_running = false;
   loadList();
+  if (error) setTimeout(function(){swal({title:"_(Upload Error)_",text:"_(File is removed)_",html:true,confirmButtonText:"_(Ok)_"});},200);
 }
 function downloadFile(source) {
   var a = document.createElement('a');
@@ -877,13 +914,14 @@ function downloadFile(source) {
 }
 function uploadFile(files,index,start,time) {
   var file = files[index];
-  var slice = 3145728; // 3M
+  var slice = 2097152; // 2M
   var next = start + slice;
   var blob = file.slice(start, next);
   reader.onloadend = function(e){
     if (e.target.readyState !== FileReader.DONE) return;
-    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'upload', file:encodeURIComponent(dir+'/'+file.name), start:start, data:window.btoa(e.target.result), cancel:cancel},function(reply){
-      if (reply=='stop') {stop(); return;}
+    $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'upload', file:encodeURIComponent(dir+'/'+htmlspecialchars(file.name)), start:start, data:window.btoa(e.target.result), cancel:cancel},function(reply){
+      if (reply=='stop') {stopUpload(file.name); return;}
+      if (reply=='error') {stopUpload(file.name,true); return;}
       if (next < file.size) {
         var total = 0;
         for (var i=0,f; f=files[i]; i++) {
@@ -897,7 +935,7 @@ function uploadFile(files,index,start,time) {
         uploadFile(files,index,next,time);
       } else if (index < files.length-1) {
         uploadFile(files,index+1,0,time);
-      } else {stop(); return;}
+      } else {stopUpload(file.name); return;}
     });
   };
   reader.readAsBinaryString(blob);
@@ -910,7 +948,7 @@ function startUpload(files) {
   reader = new FileReader();
   window.onbeforeunload = function(e){return '';};
   $('#uploadButton').val("_(Cancel)_").prop('onclick',null).off('click').click(function(){cancel=1;});
-  running = true;
+  dfm_running = true;
   const d = new Date();
   uploadFile(files,0,0,d.getTime());
 }
@@ -966,28 +1004,29 @@ $(function(){
     $.cookie('col',sort[0]);
     $.cookie('dir',sort[1]);
   });
-  loadList();
 <?if ($display['resize']):?>
   resize();
   $(window).bind('resize',function(){resize();});
 <?endif;?>
-<?if ($running):?>
+  loadList();
+<?if ($dfm_running):?>
   showDialog();
 <?endif;?>
+$('#countdown').hide();
 });
 </script>
 <div class="autoheight">
 <table class="indexer tablesorter shift"><thead><tr><th><?if($dir){?><i id="check_0" class="fa fa-fw fa-square-o" onclick="selectAll()"></i><?}?></th><th>_(Type)_</th><th class='sorter-text'>_(Name)_</th><th>_(Owner)_</th><th>_(Permission)_</th><th>_(Size)_</th><th>_(Last Modified)_</th><th style="width:200px">_(Location)_</th><th>_(Action)_</th></tr></thead></table>
 </div>
 <input type="button" value="_(Done)_" onclick="done('Browse')">
-<input type="button" value="_(Search)_" onclick="doActions(11,this.value)">
+<input type="button" value="_(Search)_" onclick="doActions(15,this.value)">
 <input type="button" value="_(Delete)_" class="extra" onclick="doActions(1,this.value)" disabled>
 <input type="button" value="_(Copy)_" class="extra" onclick="doActions(3,this.value)" disabled>
 <input type="button" value="_(Move)_" class="extra" onclick="doActions(4,this.value)" disabled>
 <input type="button" value="_(Rename)_" class="rename" onclick="doActions(2,this.value)" disabled>
-<input type="button" value="_(Owner)_" class="extra" onclick="doActions(9,this.value)" disabled>
-<input type="button" value="_(Permission)_" class="extra" onclick="doActions(10,this.value)" disabled>
-<input type="button" value="_(Calculate)_" class="extra" onclick="doActions(12,this.value)" disabled>
+<input type="button" value="_(Owner)_" class="extra" onclick="doActions(11,this.value)" disabled>
+<input type="button" value="_(Permission)_" class="extra" onclick="doActions(12,this.value)" disabled>
+<input type="button" value="_(Calculate)_" class="extra" onclick="doActions(14,this.value)" disabled>
 <input type="button" value="_(Create)_" onclick="doActions(0,this.value)"<?if(!$dir||$isshare){?> disabled<?}?>>
 <input type="button" value="_(Upload)_" id="uploadButton" onclick="$('#upload').click()"<?if (!$dir||$isshare){?> disabled<?}?>><span id="uploadStatus"></span>
 
@@ -995,17 +1034,6 @@ $(function(){
 <div id="dialogWindow"></div>
 
 <div markdown="1" id="templateCreateFolder" class="template">
-<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="format-detection" content="telephone=no">
-<meta name="viewport" content="width=1300">
-<meta name="robots" content="noindex, nofollow">
-<meta name="referrer" content="same-origin">
-<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
-</head>
-<body>
 &nbsp;
 : &nbsp;
 
@@ -1013,34 +1041,19 @@ _(New folder name)_:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="">
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This creates a folder at the current level)_</div>
-</body>
-</html>
 </div>
 
 <div markdown="1" id="templateDeleteFolder" class="template">
-<html <?=$display['rtl']?>lang="<?=strtok($locale,'_')?:'en'?>">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="format-detection" content="telephone=no">
-<meta name="viewport" content="width=1300">
-<meta name="robots" content="noindex, nofollow">
-<meta name="referrer" content="same-origin">
-<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
-</head>
-<body>
 <?=_("$Folder name")?>:
 : <span id="source"></span>
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i><?=_("This deletes the $folder and all its content")?></div>
-</body>
-</html>
 </div>
 
 <div markdown="1" id="templateRenameFolder" class="template">
@@ -1054,7 +1067,7 @@ _(New folder name)_:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="">
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This renames the folder to the new name)_</div>
 </div>
@@ -1069,11 +1082,11 @@ _(New folder name)_:
 <?=_("Target $folder")?>:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
 
-<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"> _(Use sparse option)_
+<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"><span class="sparse">_(Use sparse option)_</span>
 : &nbsp;
 
-<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"> _(Overwrite existing files)_
-: <span class="text"></span>
+<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"><span class="exist">_(Overwrite existing files)_</span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i><?=_("This copies the $folder and all its content to another $folder")?></div>
 </div>
@@ -1088,11 +1101,11 @@ _(New folder name)_:
 <?=_("Target $folder")?>:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="HIDE_FILES_FILTER" data-pickmatch="" data-pickroot="" data-picktop="">
 
-<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"> _(Use sparse option)_
+<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"><span class="sparse">_(Use sparse option)_</span>
 : &nbsp;
 
-<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"> _(Overwrite existing files)_
-: <span class="text"></span>
+<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"><span class="exist">_(Overwrite existing files)_</span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i><?=_("This moves the $folder and all its content to another $folder")?></div>
 </div>
@@ -1102,7 +1115,7 @@ _(File name)_:
 : <span id="source"></span>
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This deletes the selected file)_</div>
 </div>
@@ -1118,7 +1131,7 @@ _(New file name)_:
 : <input type="text" id="target" autocomplete="off" value="">
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This renames the selected file)_</div>
 </div>
@@ -1133,11 +1146,11 @@ _(Source file)_:
 _(Target file)_:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
-<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"> _(Use sparse option)_
+<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"><span class="sparse">_(Use sparse option)_</span>
 : &nbsp;
 
-<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"> _(Overwrite existing files)_
-: <span class="text"></span>
+<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"><span class="exist">_(Overwrite existing files)_</span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This copies the selected file)_</div>
 </div>
@@ -1152,21 +1165,21 @@ _(Source file)_:
 _(Target file)_:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
-<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"> _(Use sparse option)_
+<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"><span class="sparse">_(Use sparse option)_</span>
 : &nbsp;
 
-<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"> _(Overwrite existing files)_
-: <span class="text"></span>
+<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"><span class="exist">_(Overwrite existing files)_</span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This moves the selected file)_</div>
 </div>
 
 <div markdown="1" id="templateDeleteObject" class="template">
 _(Source)_:
-: <span id="source"></span>
+: <select id="source"></select>
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This deletes all selected sources)_</div>
 </div>
@@ -1186,7 +1199,7 @@ _(Target)_:
 
 <div markdown="1" id="templateCopyObject" class="template">
 _(Source)_:
-: <span id="source"></span>
+: <select id="source"></select>
 
 &nbsp;
 : _(copy to)_ ...
@@ -1194,18 +1207,18 @@ _(Source)_:
 _(Target)_:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
-<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"> _(Use sparse option)_
+<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"><span class="sparse">_(Use sparse option)_</span>
 : &nbsp;
 
-<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"> _(Overwrite existing files)_
-: <span class="text"></span>
+<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"><span class="exist">_(Overwrite existing files)_</span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This copies all the selected sources)_</div>
 </div>
 
 <div markdown="1" id="templateMoveObject" class="template">
 _(Source)_:
-: <span id="source"></span>
+: <select id="source"></select>
 
 &nbsp;
 : _(move to)_ ...
@@ -1213,18 +1226,18 @@ _(Source)_:
 _(Target)_:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="" data-pickcloseonfile="true" data-pickfolders="true" data-pickfilter="" data-pickmatch="" data-pickroot="" data-picktop="">
 
-<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"> _(Use sparse option)_
+<input type="checkbox" id="sparse" value="" onchange="this.value=this.checked?'1':''"><span class="sparse">_(Use sparse option)_</span>
 : &nbsp;
 
-<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"> _(Overwrite existing files)_
-: <span class="text"></span>
+<input type="checkbox" id="exist" value="" onchange="this.value=this.checked?'1':''"><span class="exist">_(Overwrite existing files)_</span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This moves all the selected sources)_</div>
 </div>
 
 <div markdown="1" id="templateChangeOwner" class="template">
 _(Source)_:
-: <span id="source"></span>
+: <select id="source"></select>
 
 &nbsp;
 : _(change owner)_ ...
@@ -1236,14 +1249,14 @@ _(New owner)_:
 ?></select>
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This changes the owner of the source recursively)_</div>
 </div>
 
 <div markdown="1" id="templateChangePermission" class="template">
 _(Source)_:
-: <span id="source"></span>
+: <select id="source"></select>
 
 &nbsp;
 : _(change permission)_ ...
@@ -1267,7 +1280,7 @@ _(New permission)_:
   </select>
 
 &nbsp;
-: <span class="text"></span>
+: <span class="dfm_text"></span>
 
 <div class="info"><i class="fa fa-warning"></i>_(This changes the permission of the source recursively)_</div>
 </div>
@@ -1276,14 +1289,14 @@ _(New permission)_:
 _(Search string)_:
 : <input type="text" id="target" autocomplete="off" spellcheck="false" value="">
 
-<span class="loc">&nbsp;</span>
-: <span class="text"></span>
+<span class="dfm_loc">&nbsp;</span>
+: <span class="dfm_text"></span>
 
 </div>
 
 <div markdown="1" id="templateEditFile" class="template">
 <!--!
-<style>div#editor{position:absolute;top:0;bottom:0;left:0;right:0;font-size:1.3rem;font-family:bitstream;line-height:1.5}</style>
+<style>div#editor{position:absolute;top:0;bottom:0;left:0;right:0}</style>
 <div id="editor"></div>
 <script src="<?autov('/plugins/dynamix.file.manager/javascript/ace/ace.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.file.manager/javascript/ace/ext-modelist.js')?>"></script>
@@ -1292,14 +1305,15 @@ function getMode(file){
   var modelist = require('ace/ext/modelist');
   return modelist.getModeForPath(file).mode;
 }
-var editor = ace.edit('editor');
-<?if (in_array($theme,['black','gray'])):?>
-editor.setTheme('ace/theme/tomorrow_night');
-<?else:?>
-editor.setTheme('ace/theme/tomorrow');
-<?endif;?>
 var source = "{$0}";
+var editor = ace.edit('editor');
 editor.session.setMode(getMode(source));
+editor.setOptions({
+  showPrintMargin:false,
+  fontSize:13,
+  fontFamily:'bitstream',
+  theme:'ace/theme/<?if (in_array($theme,['black','gray'])):?>tomorrow_night<?else:?>tomorrow<?endif;?>'
+});
 timers.editor = setTimeout(function(){$('div.spinner.fixed').show();},500);
 $.post('/plugins/dynamix.file.manager/include/Browse.php',{mode:'edit', file:encodeURIComponent(source)},function(data){
   clearTimeout(timers.editor);

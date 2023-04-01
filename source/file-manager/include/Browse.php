@@ -18,22 +18,30 @@ require_once "$docroot/webGui/include/Translations.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
 if (isset($_POST['mode'])) {
-  $local = '/var/tmp/local.tmp';
   switch ($_POST['mode']) {
   case 'upload':
     $file = validname(htmlspecialchars_decode(rawurldecode($_POST['file'])));
     if (!$file) die('stop');
+    $local = "/var/tmp/".basename($file).".tmp";
     if ($_POST['start']==0) {
       $my = pathinfo($file); $n = 0;
       while (file_exists($file)) $file = $my['dirname'].'/'.preg_replace('/ \(\d+\)$/','',$my['filename']).' ('.++$n.')'.($my['extension'] ? '.'.$my['extension'] : '');
       file_put_contents($local,$file);
+      // create file with proper permissions and owner
+      touch($file);
+      chgrp($file,'users');
+      chown($file,'nobody');
+      chmod($file,0666);
     }
     $file = file_get_contents($local);
     if ($_POST['cancel']==1) {
       delete_file($file);
       die('stop');
     }
-    file_put_contents($file,base64_decode($_POST['data']),FILE_APPEND);
+    if (file_put_contents($file,base64_decode($_POST['data']),FILE_APPEND)===false) {
+      delete_file($file);
+      die('error');
+    }
     die();
   case 'calc':
     extract(parse_plugin_cfg('dynamix',true));
@@ -64,7 +72,8 @@ if (isset($_POST['mode'])) {
     if ($file = validname(rawurldecode($_POST['file']))) file_put_contents($file,rawurldecode($_POST['data']));
     die();
   case 'stop':
-    delete_file($local);
+    $file = htmlspecialchars_decode(rawurldecode($_POST['file']));
+    delete_file("/var/tmp/$file.tmp");
     die();
   }
 }
