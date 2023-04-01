@@ -5,7 +5,7 @@ Icon="dynamix.active.streams.png"
 Tabs="true"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,17 +17,9 @@ Tabs="true"
 ?>
 <?
 $plugin = 'dynamix.active.streams';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/ActiveStreams.page"))?>
-<?else:?>
-<?
-$plex = $pid = $ipv4 = $ipv6 = $mounts = "";
+$plex = $ppid = $ipv4 = $ipv6 = $mounts = "";
 if (is_file('/var/run/dockerd.pid')) {
-  $plex = exec("docker ps --format='{{.Names}}'|grep -Pim1 '^(plex|plexmediaserver|pms)$'");
-  if ($plex) {
+  if ($plex = exec("docker ps --format='{{.Names}}'|grep -Pim1 '^(plex|plexmediaserver|pms)$'")) {
     $ppid = exec("docker inspect --format='{{.State.Pid}}' $plex 2>/dev/null");
     $ipv4 = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $plex 2>/dev/null");
     $ipv6 = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.GlobalIPv6Address}}{{end}}' $plex 2>/dev/null");
@@ -51,4 +43,3 @@ $(streamList);
 <tbody id="streams"></tbody>
 </table>
 <input type="button" value="_(Done)_" onclick="done()">
-<?endif;?>

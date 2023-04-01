@@ -1,10 +1,10 @@
 Menu="SMB:2"
 Title="Workgroup Settings"
+Tag="sitemap"
 Cond="($var['shareSMBEnabled']=='yes')"
 ---
 <?PHP
-/* Copyright 2005-2020, Lime Technology
- * Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -15,26 +15,31 @@ Cond="($var['shareSMBEnabled']=='yes')"
  */
 ?>
 <?
-$plugin = 'dynamix.local.master';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
+$plugin  = 'dynamix.local.master';
+$netbios = $var['USE_NETBIOS']=='yes';
+$wsd     = $var['USE_WSD']=='yes';
 ?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/SMBWorkGroup.page"))?>
-<?else:?>
 <script>
 function setMonitor(form) {
-  $.get('/plugins/<?=$plugin?>/include/LocalMaster.php',{monitor:form.monitor.value});
-}
-function getMaster() {
-  $.get('/plugins/<?=$plugin?>/include/LocalMaster.php',{smb:true},function(data) {
-    $('#elected').html(data);
-<?if ($update):?>
-    setTimeout(getMaster,5000);
+<?if ($netbios):?>
+  var monitor = form.monitor.value;
+<?else:?>
+  var monitor = 0;
 <?endif;?>
+  $.get('/plugins/<?=$plugin?>/include/LocalMaster.php',{monitor:monitor});
+}
+<?if ($netbios):?>
+function getMaster() {
+  $.get('/plugins/<?=$plugin?>/include/LocalMaster.php',{smb:1},function(data) {
+    $('#elected').html(data);
+    setTimeout(getMaster,10000);
   });
 }
-$(getMaster);
+$(function(){
+  // get and display current master
+  getMaster();
+});
+<?endif;?>
 </script>
 
 <form markdown="1" name="WorkGroup" method="POST" action="/update.htm" target="progressFrame" onsubmit="setMonitor(this)">
@@ -45,6 +50,7 @@ _(Workgroup)_:
 > Enter your local network Workgroup name. Usually this is "WORKGROUP".
 :end
 
+<?if ($netbios):?>
 _(Local master)_:
 : <select name="localMaster"<?if ($var['fsState']=="Started"):?> disabled<?endif;?>>
   <?=mk_option($var['localMaster'], "no", _('No'))?>
@@ -58,13 +64,13 @@ _(Local master)_:
 
 _(Monitor local master election)_:
 : <select name="monitor"<?if ($var['fsState']=="Started"):?> disabled<?endif;?>>
-  <?=mk_option($display['monitor'], "0", _("Disabled"))?>
-  <?=mk_option($display['monitor'], "1", _("Enabled"))?>
+  <?=mk_option($display['monitor']??'', "0", _("Disabled"))?>
+  <?=mk_option($display['monitor']??'', "1", _("Enabled"))?>
   </select>
 
 :smb_master_election_plug:
 > Enable or disable background monitoring of the local master election.
-> The result of the monitoring is displayed in the header at the top-right position.
+> The result of the monitoring is displayed in the header at the top-left position.
 :end
 
 _(Current elected master)_:
@@ -74,7 +80,11 @@ _(Current elected master)_:
 > Shows in real-time the current elected local master browser.
 :end
 
+<?elseif ($wsd):?>
+_(Current elected master)_:
+: <img src='/plugins/dynamix.local.master/icons/localmaster.png' class='icon'> _(Not used with Web Services on Devices (WSD))_
+
+<?endif;?>
 &nbsp;
 : <input type="submit" name="changeShare" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()"><?if ($var['fsState']=="Started"):?>*_(Array must be **Stopped** to change)_*<?endif;?>
 </form>
-<?endif;?>

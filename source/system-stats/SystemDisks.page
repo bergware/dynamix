@@ -3,7 +3,7 @@ Title="Disk Stats"
 Tag="bar-chart"
 ---
 <?PHP
-/* Copyright 2012-2022, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -15,21 +15,13 @@ Tag="bar-chart"
  */
 ?>
 <?
-$plugin = 'dynamix.system.stats';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/SystemDisks.page"))?>
-<?else:?>
-<?
 if ($var['fsState']=="Stopped"):
   echo "<div class='notice'>"._('Array must be **Started** to view disk stats').".</div>";
   return;
 endif;
 
-$cfg = parse_plugin_cfg($plugin);
-
+$plugin = 'dynamix.system.stats';
+$cfg    = parse_plugin_cfg($plugin);
 $stats  = "/plugins/$plugin/include/HardwareStats.php";
 $graph  = $cfg['graph'];
 $frame  = $cfg['frame'];
@@ -48,11 +40,11 @@ $y      = 2;
 $rows   = 0;
 
 foreach ($disks as $disk) {
-  if (($disk['fsStatus']!='Mounted' && $disk['type']!='Parity') || strpos($disk['status'],'_NP')!==false) continue;
+  if ((($disk['fsStatus']??'')!='Mounted' && $disk['type']!='Parity') || strpos($disk['status']??'','_NP')!==false) continue;
   switch ($disk['type']) {
   case 'Parity':
     if ($disk['size']*1024 > $parity) $parity = $disk['size']*1024;
-  break;
+    break;
   case 'Data':
     $arraysize += $disk['size']*1024;
     $arrayfree += $disk['fsFree']*1024;
@@ -104,7 +96,6 @@ function bar_color($val) {
 <script>
 var graph = <?=$graph?>;
 var frame = <?=$frame?>;
-var systime,rtstime,cputime,ramtime,comtime,hddtime;
 var syschart,cpuchart,ramchart,comchart,hddchart;
 var interval = {1:60, 2:120, 3:300, 7:600, 14:1200, 21:1800, 31:3600, 3653:7200};
 
@@ -128,18 +119,18 @@ function setChart() {
 }
 function modeller(period) {
   graph = period;
-  clearTimeout(rtstime);
+  clearTimeout(timers.rtstime);
 <?if (strpos($show,'cpu')!==false):?>
-  clearTimeout(cputime); setTimeout(cpu,0);
+  clearTimeout(timers.cputime); setTimeout(cpu,0);
 <?endif;?>
 <?if (strpos($show,'ram')!==false):?>
-  clearTimeout(ramtime); setTimeout(ram,0);
+  clearTimeout(timers.ramtime); setTimeout(ram,0);
 <?endif;?>
 <?if (strpos($show,'com')!==false):?>
-  clearTimeout(comtime); setTimeout(com,0);
+  clearTimeout(timers.comtime); setTimeout(com,0);
 <?endif;?>
 <?if (strpos($show,'hdd')!==false):?>
-  clearTimeout(hddtime); setTimeout(hdd,0);
+  clearTimeout(timers.hddtime); setTimeout(hdd,0);
 <?endif;?>
   setChart();
 }
@@ -186,7 +177,7 @@ function realtime() {
   var timestamp = datetime.getTime();
   $.post('<?=$stats?>',{cmd:'rts',port:'<?=$port?>'},function(string) {
     var value, shift, i;
-    if (graph==0) rtstime = setTimeout(realtime,1000);
+    if (graph==0) timers.rtstime = setTimeout(realtime,1000);
     value = string.split(' ');
 <?if (strpos($show,'cpu')!==false):?>
     shift = cpuchart.series[0].length==0 || cpuchart.series[0].data.length>frame;
@@ -212,7 +203,7 @@ function realtime() {
 }
 <?endif;?>
 function systemStats() {
-  clearTimeout(systime);
+  clearTimeout(timers.systime);
   if (graph>0) {
 <?if (strpos($show,'cpu')!==false):?>
     setTimeout(cpu,0);
@@ -232,16 +223,16 @@ function diskStats() {
   setTimeout(function(){sys(0);},0);
   if (graph>0) {
 <?if (strpos($show,'cpu')!==false):?>
-    clearTimeout(cputime);
+    clearTimeout(timers.cputime);
 <?endif;?>
 <?if (strpos($show,'ram')!==false):?>
-    clearTimeout(ramtime);
+    clearTimeout(timers.ramtime);
 <?endif;?>
 <?if (strpos($show,'com')!==false):?>
-    clearTimeout(comtime);
+    clearTimeout(timers.comtime);
 <?endif;?>
 <?if (strpos($show,'hdd')!==false):?>
-    clearTimeout(hddtime);
+    clearTimeout(timers.hddtime);
 <?endif;?>
   }
 }
@@ -249,7 +240,7 @@ function sys(delay) {
   var series = [], i = 0;
   if (delay!=0) delay = 1200;
   $.post('<?=$stats?>',{cmd:'sys',startMode:'<?=$var["startMode"]?>',pools:'<?=implode(",",$pools)?>'},function(string) {
-    if ($('#tab1').is(':checked')) systime = setTimeout(function(){sys(0);},<?=max(30000,abs($display['refresh']))?>);
+    if ($('#tab1').is(':checked')) timers.systime = setTimeout(function(){sys(0);},30000);
     if (!syschart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; syschart.addSeries(series, false);});
     } else {
@@ -274,7 +265,7 @@ function sys(delay) {
 function cpu() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'cpu',graph:graph},function(string) {
-    if (graph>0 && $('#tab2').is(':checked')) cputime = setTimeout(cpu,interval[graph]*1000);
+    if (graph>0 && $('#tab2').is(':checked')) timers.cputime = setTimeout(cpu,interval[graph]*1000);
     if (!cpuchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; cpuchart.addSeries(series, false);});
     } else {
@@ -288,7 +279,7 @@ function cpu() {
 function ram() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'ram',graph:graph},function(string) {
-    if (graph>0 && $('#tab2').is(':checked')) ramtime = setTimeout(ram,interval[graph]*1000);
+    if (graph>0 && $('#tab2').is(':checked')) timers.ramtime = setTimeout(ram,interval[graph]*1000);
     if (!ramchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; ramchart.addSeries(series, false);});
     } else {
@@ -302,7 +293,7 @@ function ram() {
 function com() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'com',port:'<?=$port?>',graph:graph},function(string) {
-    if (graph>0 && $('#tab2').is(':checked')) comtime = setTimeout(com,interval[graph]*1000);
+    if (graph>0 && $('#tab2').is(':checked')) timers.comtime = setTimeout(com,interval[graph]*1000);
     if (!comchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; comchart.addSeries(series, false);});
     } else {
@@ -316,7 +307,7 @@ function com() {
 function hdd() {
   var series = [], i = 0;
   $.post('<?=$stats?>',{cmd:'hdd',graph:graph},function(string) {
-    if (graph>0 && $('#tab2').is(':checked')) hddtime = setTimeout(hdd,interval[graph]*1000);
+    if (graph>0 && $('#tab2').is(':checked')) timers.hddtime = setTimeout(hdd,interval[graph]*1000);
     if (!hddchart.series.length) {
       $.each($.parseJSON(string), function(k,v) {series.name = k; series.data = v; hddchart.addSeries(series, false);});
     } else {
@@ -511,23 +502,22 @@ $(function() {
 <?endif;?>
 });
 </script>
-<div class="mybar whitebar left" style="width:<?=$totalpercent?>%;"><span id="totalarray" class="mybar <?=bar_color($arraypercent)?> align-left" style="width:0"></span></div>
-<div class="mybar graybar right" style="width:<?=$totaldisk?>%"></div>
-<div class="left"><img src="<?="/plugins/$plugin/images"?>/array.png" class="left"><strong><?=my_scale($arraysize,$unit,-1,-1)." $unit"?></strong><br><small>_(Total Array Size)_</small></div>
-<div class="left"><span id="stats1" class="mybar <?=bar_color($arraypercent)?> inside"></span><span id="stats2"><strong> <?=my_scale($arrayused,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$arraypercent?>%</strong><br/><small>_(Total Space Used)_</small></span></div>
-<div class="left"><span class="mybar whitebar inside"></span><span id="stats3"><strong><?=my_scale($arrayfree,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$freepercent?>%</strong><br/><small>_(Available for Data)_</small></span></div>
-<div class="right"><span class="mybar graybar inside"></span><strong> <?=my_scale($parity,$unit,-1,-1)." $unit"?></strong><br><small>_(Used for Parity)_</small></div>
+<div class="mybar whitebar leftbar" style="width:<?=$totalpercent?>%;"><span id="totalarray" class="mybar <?=bar_color($arraypercent)?> align-left" style="width:0"></span></div>
+<div class="mybar graybar rightbar" style="width:<?=$totaldisk?>%"></div>
+<div class="leftbar"><img src="<?="/plugins/$plugin/images"?>/array.png" class="left"><strong><?=my_scale($arraysize,$unit,-1,-1)." $unit"?></strong><br><small>_(Total Array Size)_</small></div>
+<div class="leftbar"><span id="stats1" class="mybar <?=bar_color($arraypercent)?> inside"></span><span id="stats2"><strong> <?=my_scale($arrayused,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$arraypercent?>%</strong><br/><small>_(Total Space Used)_</small></span></div>
+<div class="leftbar"><span class="mybar whitebar inside"></span><span id="stats3"><strong><?=my_scale($arrayfree,$unit,null,-1)." $unit"?> <img src="<?="/plugins/$plugin/images"?>/arrow.png" class="top"> <?=$freepercent?>%</strong><br/><small>_(Available for Data)_</small></span></div>
+<div class="rightbar"><span class="mybar graybar inside"></span><strong> <?=my_scale($parity,$unit,-1,-1)." $unit"?></strong><br><small>_(Used for Parity)_</small></div>
 <?if ($critical):?>
-<div class="right"><span class="mybar redbar inside"></span><strong>_(Above)_ <?=$display['critical']?>%</strong><br><small>_(Low on Space)_</small></div>
+<div class="rightbar"><span class="mybar redbar inside"></span><strong>_(Above)_ <?=$display['critical']?>%</strong><br><small>_(Low on Space)_</small></div>
 <?endif;?>
 <?if ($warning):?>
-<div class="right"><span class="mybar orangebar inside"></span><strong>_(Above)_ <?=$display['warning']?>%</strong><br><small>_(High on Usage)_</small></div>
+<div class="rightbar"><span class="mybar orangebar inside"></span><strong>_(Above)_ <?=$display['warning']?>%</strong><br><small>_(High on Usage)_</small></div>
 <?endif;?>
 <?if ($critical || $warning):?>
-<div class="right"><span class="mybar greenbar inside"></span><strong>_(Below)_ <?=$warning?$display['warning']:$display['critical']?>%</strong><br><small>_(Normal Usage)_</small></div>
+<div class="rightbar"><span class="mybar greenbar inside"></span><strong>_(Below)_ <?=$warning?$display['warning']:$display['critical']?>%</strong><br><small>_(Normal Usage)_</small></div>
 <?endif;?>
 <span id="sys" class="graph1"></span>
 <?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>
 <p><input type="button" value="_(Done)_" onclick="done()"></p>
-<?endif;?>
 <?endif;?>

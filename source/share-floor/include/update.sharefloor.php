@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2022, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,7 +13,7 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Wrappers.php";
 
-if ($_POST['mode']>0) {
+if (($_POST['mode']??0)>0) {
   $hour = isset($_POST['hour']) ? $_POST['hour'] : '*';
   $min  = isset($_POST['min'])  ? $_POST['min']  : '*';
   $dotm = isset($_POST['dotm']) ? $_POST['dotm'] : '*';

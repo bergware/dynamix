@@ -3,7 +3,7 @@ Link="nav-user"
 Nchan="system_temp"
 ---
 <?PHP
-/* Copyright 2012-2022, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,11 +17,7 @@ Nchan="system_temp"
 ?>
 <?
 $plugin = 'dynamix.system.temp';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-if (!$translations):
-  require_once "$docroot/plugins/$plugin/include/Legacy.php";
-  eval('?>'.parse_file("$docroot/plugins/$plugin/TempButton.page"));
-else:?>
+?>
 <script>
 <?if (exec("pgrep system_temp")):?>
 // nchan updates
@@ -55,4 +51,3 @@ function systemTemp() {
 setTimeout(systemTemp,100);
 <?endif;?>
 </script>
-<?endif;?>

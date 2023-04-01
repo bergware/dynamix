@@ -1,6 +1,6 @@
 #!/usr/bin/php -q
 <?PHP
-/* Copyright 2012-2022, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,7 +16,7 @@ $pow = ['B','KB','MB','GB','TB','PB','EB','ZB','YB'];
 
 function update($data) {
   $ch = curl_init();
-  curl_setopt_array($ch,[CURLOPT_UNIX_SOCKET_PATH => '/var/run/emhttpd.socket', CURLOPT_URL => 'http://localhost/update', CURLOPT_HEADER => false, CURLOPT_POST => true, CURLOPT_POSTFIELDS => $data, CURLOPT_RETURNTRANSFER => true]);
+  curl_setopt_array($ch,[CURLOPT_UNIX_SOCKET_PATH=>'/var/run/emhttpd.socket', CURLOPT_URL=>'http://localhost/update', CURLOPT_HEADER=>false, CURLOPT_POST=>true, CURLOPT_POSTFIELDS=>$data, CURLOPT_RETURNTRANSFER=>true]);
   curl_exec($ch);
   curl_close($ch);
 }
@@ -28,7 +28,8 @@ function scale($value, &$unit) {
 }
 foreach (glob('/mnt/user/*',GLOB_NOSORT|GLOB_ONLYDIR) as $dir) {
   $name = basename($dir);
-  unset($max); exec("find ".escapeshellarg($dir)." -type 'f' ! -iname *.img -size +{$min}c -printf '%s\n'",$max);
+  unset($max);
+  exec("find ".escapeshellarg($dir)." -type 'f' ! -iname *.img -size +{$min}c -printf '%s\n'",$max);
   rsort($max,SORT_NUMERIC);
   $new = scale($max[0] ? pow(2,round(log($max[0])/log(2)))*1.2 : $min,$unit);
   $val = $new*pow(1000,array_search($unit,$pow)-1);
@@ -43,5 +44,5 @@ foreach (glob('/mnt/user/*',GLOB_NOSORT|GLOB_ONLYDIR) as $dir) {
     syslog(LOG_INFO,"Share '$name' updated to new floor level: $new $unit");
   }
 }
-exit(0);
+exit;
 ?>

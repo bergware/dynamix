@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,5 +10,5 @@
  */
 ?>
 <?
-exec("kill ".$_GET['pid']);
+if (isset($_GET['pid'])) exec("kill ".$_GET['pid']);
 ?>

@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -12,37 +12,29 @@
 ?>
 <?
 $plugin = 'dynamix.system.stats';
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
-if ($translations) {
-  // add translations
-  $_SERVER['REQUEST_URI'] = 'stats';
-  require_once "$docroot/webGui/include/Translations.php";
-} else {
-  // legacy support (without javascript)
-  $noscript = true;
-  require_once "$docroot/plugins/$plugin/include/Legacy.php";
-}
-
+// add translations
+$_SERVER['REQUEST_URI'] = 'stats';
+require_once "$docroot/webGui/include/Translations.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
 function bar_color($val) {
   global $display;
-  $critical = $display['critical'];
-  $warning = $display['warning'];
+  $critical = $display['critical']??0;
+  $warning = $display['warning']??0;
   if ($val>=$critical && $critical>0) return "redbar";
   if ($val>=$warning && $warning>0) return "orangebar";
   return "greenbar";
 }
 
-switch ($_POST['cmd']) {
+switch ($_POST['cmd']??'') {
 case 'sum':
-  $plugin = $_POST['plugin'];
-  $normal = $_POST['startMode']=='Normal';
+  $plugin = $_POST['plugin']??'';
+  $normal = ($_POST['startMode']??'')=='Normal';
   $disks = (array)parse_ini_file("state/disks.ini",true);
   extract(parse_plugin_cfg('dynamix',true));
-  $arraysize=0; $arrayfree=0;
+  $arraysize = $arrayfree = 0;
   foreach ($disks as $disk) {
     if ($disk['type']!='Data') continue;
     $arraysize += $disk['size']*1024;
@@ -60,8 +52,8 @@ case 'sum':
   echo implode(';',$data);
   exit;
 case 'sys':
-  $normal = $_POST['startMode']=='Normal';
-  $pools = explode(',',$_POST['pools']);
+  $normal = ($_POST['startMode']??'')=='Normal';
+  $pools = explode(',',$_POST['pools']??'');
   $series = $normal ? ['Critical','Warning','Normal'] : ['Critical','Warning','Normal','Maintenance'];
   $disks = (array)parse_ini_file("state/disks.ini", true); $var = [];
   require_once 'webGui/include/CustomMerge.php';
@@ -70,21 +62,21 @@ case 'sys':
   $json = [];
   foreach ($disks as $disk) {
     $size = 0;
-    if ($disk['fsStatus']!='Mounted' && $disk['type']!='Parity') continue;
+    if (($disk['fsStatus']??'')!='Mounted' && $disk['type']!='Parity') continue;
     switch ($disk['type']) {
     case 'Data':
     case 'Flash':
       $size = $disk['size'];
     break;
     case 'Cache':
-      if (in_array($disk['name'],$pools)) $size = $disk['fsSize']>0 ? $disk['fsSize'] : $disk['size'];
+      if (in_array($disk['name'],$pools)) $size = isset($disk['fsSize']) ? $disk['fsSize'] : $disk['size'];
     break;}
     if ($size>0) {
       if ($normal) {
         $free = $disk['fsFree'];
         $percent = 100-round(100*$free/$size);
-        $critical = !empty($disk['critical']) ? $disk['critical'] : $display['critical'];
-        $warning = !empty($disk['warning']) ? $disk['warning'] : $display['warning'];
+        $critical = !empty($disk['critical']) ? $disk['critical'] : $display['critical'] ?? 0;
+        $warning = !empty($disk['warning']) ? $disk['warning'] : $display['warning'] ?? 0;
         $point[0] = $critical>0 ? $percent-$critical : 0;
         $point[1] = $warning>0 ? $percent-$warning : 0;
         if ($point[0]>0) {$point[1] = $warning>0 ? $critical-$warning : 0;} else {$point[0] = 0;}
@@ -108,7 +100,7 @@ case 'rts':
   $cpu = '$2=="all"';
   $hdd = '$2=="tps"';
   $ram = '$2=="kbmemfree"';
-  $com = '$2=="'.$_POST['port'].'"';
+  $com = '$2=="'.($_POST['port']??'').'"';
   exec("sar 1 1 -u -b -r -n DEV|grep -a '^A'|tr -d '\\0'|awk '$cpu {u=$3;n=$4;s=$5;}; $hdd {getline;r=$5;w=$6;}; $ram {getline;f=$2;c=$6+$7;d=$4;}; $com {x=$5;y=$6;} END{print u,n,s{$nl}r,w{$nl}f,c,d{$nl}x,y}'",$data);
   echo implode(' ', $data);
   exit;
@@ -128,7 +120,7 @@ case 'com':
   $series = ['Receive','Transmit'];
   $data = '$7,$8';
   $case = '-- -n DEV';
-  $mask = ' && $4=="'.$_POST['port'].'" && $7<100000000000 && $8<100000000000';
+  $mask = ' && $4=="'.($_POST['port']??'').'" && $7<100000000000 && $8<100000000000';
   break;
 case 'hdd':
   $series = ['Read','Write'];
@@ -143,7 +135,7 @@ $json = [];
 $select = [1=>60, 2=>120, 3=>300, 7=>600, 14=>1200, 21=>1800, 31=>3600, 3653=>7200];
 $logs = glob('/var/sa/sa*',GLOB_NOSORT);
 $days = count($logs);
-$graph = $_POST['graph'];
+$graph = $_POST['graph']??0;
 if ($graph>0) {
   $interval = $select[$graph];
   if ($days<=28) {
@@ -154,7 +146,7 @@ if ($graph>0) {
     }
   }
   $valid = '$2~/^[0-9]/ && $3>='.((floor(time()/86400)-$graph)*86400).$mask;
-  usort($logs, create_function('$a,$b', 'return filemtime($a)-filemtime($b);'));
+  usort($logs, function($a,$b){return filemtime($a)-filemtime($b);});
   foreach ($logs as $log) {
     if ($days<=$graph) exec("sadf -d -U $interval $log $case|awk -F';' '$valid {print $3,$data}'",$input);
     $days--;

@@ -4,7 +4,7 @@ Icon="power.png"
 Code="f011"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,26 +16,20 @@ Code="f011"
 ?>
 <?
 $plugin = 'dynamix.system.buttons';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/PowerButton.page"))?>
-<?else:?>
-<?
 $unraid = parse_ini_file('/etc/unraid-version');
 $direct = version_compare($unraid['version'],'6.1.9','>');
-$force = $direct || file_exists('/var/log/plugins/powerdown-x86_64.plg') ? 'true' : 'false';
-$label = $display['theme']=='gray' || $display['theme']=='azure';
+$attr   = version_compare($unraid['version'],'6.11.9','>') ? '.' : '#';
+$force  = $direct || file_exists('/var/log/plugins/powerdown-x86_64.plg') ? 'true' : 'false';
+$label  = in_array($display['theme'],['gray','azure']);
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <script>
 $(function() {
 <?if ($label):?>
-  $('#nav-item.PowerButton a').html('Buttons');
+  $('<?=$attr?>nav-item.PowerButton a').html('Buttons');
 <?endif;?>
   var opts = [{header:'_(Buttons)_', image:'/plugins/<?=$plugin?>/icons/buttons.png'}];
-  $('#nav-item.PowerButton a').prop('onclick', null).attr('id','nav-power');
+  $('<?=$attr?>nav-item.PowerButton a').prop('onclick', null).attr('id','nav-power');
   context.init({preventDoubleContext:false});
 <?if ($var['mdState']=='STARTED'):?>
   opts.push({text:'_(Stop Array)_',icon:'fa-dot-circle-o',action:function(e){e.preventDefault();StopArray();}});
@@ -175,5 +169,4 @@ function StartArrayNow() {
 <input type='hidden' name='csrf_token' value='<?=$var['csrf_token']?>'>
 <input type='hidden' name='cmd' value=''>
 </form>
-<?endif;?>
 <?endif;?>

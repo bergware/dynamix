@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -12,19 +12,25 @@
 ?>
 <?
 $plugin = 'dynamix.system.info';
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
-if ($translations) {
-  // add translations
-  $_SERVER['REQUEST_URI'] = 'systemprofiler';
-  require_once "$docroot/webGui/include/Translations.php";
-} else {
-  // legacy support (without javascript)
-  $noscript = true;
-  require_once "$docroot/plugins/$plugin/include/Legacy.php";
+// add translations
+$_SERVER['REQUEST_URI'] = 'systemprofiler';
+require_once "$docroot/webGui/include/Translations.php";
+
+function dmidecode($key,$n,$all=true) {
+  $entries = array_filter(explode($key,shell_exec("dmidecode -qt$n")));
+  $properties = [];
+  foreach ($entries as $entry) {
+    $property = [];
+    foreach (explode("\n",$entry) as $line) if (strpos($line,': ')!==false) {
+      [$key,$value] = array_pad(explode(': ',trim($line)),2,'');
+      $property[$key] = $value;
+    }
+    $properties[] = $property;
+  }
+  return $all ? $properties : $properties[0]??null;
 }
-
 function grep($key, $speed){
   global $raid6;
   $match = '';
@@ -34,27 +40,21 @@ function grep($key, $speed){
   $size = count($line);
   return $speed ? $line[$size-2].' '.$line[$size-1] : $line[2].' '.str_replace(',','',$line[3]);
 }
-$output = array();
-switch ($_POST['cmd']) {
+function si($size) {
+  return str_replace(['kB','B'],['KB','iB'],$size);
+}
+
+$output = [];
+switch ($_POST['cmd']??'') {
 case 'overview':
+  $board = dmidecode('Base Board Information',2,0);
+  $cpu = dmidecode('Processor Information',4,0);
+  $cpumodel = str_ireplace(["Processor","(C)","(R)","(TM)"],["","&#169;","&#174;","&#8482;"],$cpu['Version'] ?? exec("grep -Pom1 'model name\s+:\s*\K.+' /proc/cpuinfo"));
   echo "<tr><td style='font-weight:bold'>"._('System Overview')."</td><td></td></tr>";
-  echo "<tr><td>"._('Unraid system').":</td><td>"._('Unraid server')." ".$_POST['regTy'].", version ".$_POST['version']."</td></tr>";
-  echo "<tr><td>Model:</td><td>".$_POST['model']."</td></tr>";
-  echo "<tr><td>"._('Motherboard').":</td><td>".exec("dmidecode -qt2|awk -F: '/^\tManufacturer:/{m=\$2};/^\tProduct Name:/{p=\$2} END{print m\" -\"p}'")."</td></tr>";
-  echo "<tr><td>"._('Processor').":</td><td>";
-  $cpu = explode('#',exec("dmidecode -qt4|awk -F: '/^\tVersion:/{v=\$2};/^\tCurrent Speed:/{s=\$2} END{print v\"#\"s}'"));
-  $cpumodel = str_ireplace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&trade;"),$cpu[0]);
-  if (strpos($cpumodel,'@')===false) {
-    $cpuspeed = explode(' ',trim($cpu[1]));
-    if ($cpuspeed[0]>=1000 && $cpuspeed[1]=='MHz') {
-      $cpuspeed[0] /= 1000;
-      $cpuspeed[1] = 'GHz';
-    }
-    echo "$cpumodel @ {$cpuspeed[0]} {$cpuspeed[1]}";
-  } else {
-    echo $cpumodel;
-  }
-  echo "</td></tr>";
+  echo "<tr><td>"._('Unraid system').":</td><td>"._('Unraid server')." ".($_POST['regTy']??'').", version ".($_POST['version']??'')."</td></tr>";
+  echo "<tr><td>Model:</td><td>".($_POST['model']??'')."</td></tr>";
+  echo "<tr><td>"._('Motherboard').":</td><td>".($board['Manufacturer']??'')." ".($board['Product Name']??'').", "._('Version').": ".($board['Version']??_('unknown')).", "._('s/n').": ".($board['Serial Number']??_('unknown'))."</td></tr>";
+  echo "<tr><td>"._('Processor').":</td><td>".$cpumodel.(strpos($cpumodel,'@')===false && !empty($cpu['Current Speed']) ? " @ {$cpu['Current Speed']}" : "")."</td></tr>";
   echo "<tr><td>"._('HVM').":</td><td>";
   exec('modprobe -a kvm_intel kvm_amd 2>/dev/null');
   $strLoadedModules = shell_exec("lsmod | grep '^kvm_\(amd\|intel\)'");
@@ -78,55 +78,73 @@ case 'overview':
   }
   echo "</td></tr>";
   echo "<tr><td>"._('Cache').":</td>";
-  $empty = true;
-  $cache = explode('#',exec("dmidecode -qt7|awk -F: '/^\tSocket Designation:/{c=c\$2\";\"};/^\tInstalled Size:/{s=s\$2\";\"};/^\tMaximum Size:/{m=m\$2\";\"} END{print c\"#\"s\"#\"m}'"));
-  $socket = array_map('trim',explode(';',$cache[0]));
-  $volume = array_map('trim',explode(';',$cache[1]));
-  $limit  = array_map('trim',explode(';',$cache[2]));
-  $name = array();
-  for ($i=0; $i<count($socket); $i++) {
-    if ($volume[$i] && $volume[$i]!='0 kB' && !in_array($socket[$i],$name)) {
-      if ($i>0) echo "<tr><td></td>";
-      echo "<td>{$socket[$i]} = {$volume[$i]} (max. capacity {$limit[$i]})</td></tr>";
-      $name[] = $socket[$i];
-      $empty = false;
-    }
+  $cache_devices = dmidecode('Cache Information',7);
+  $i = 0;
+  foreach ($cache_devices as $device) {
+   if ($i++) echo "<tr><td></td>";
+    echo "<td>".$device['Socket Designation']." = ".si($device['Installed Size'])." (max. capacity ".si($device['Maximum Size']).")<td></tr>";
   }
-  if ($empty) echo "</tr>";
-  echo "<tr><td>"._('Memory').":</td>";
-  $memory = explode('#',exec("dmidecode -qt17|awk -F: '/^\tLocator:/{b=b\$2\";\"};/^\tSize: [0-9]+ MB\$/{t+=\$2;c=c\$2\";\"};/^\tSize: [0-9]+ GB\$/{t+=\$2*1024;c=c\$2\";\"};/^\tSize: No/{c=c\";\"};/^\tSpeed:/{v=v\$2\";\"} END{print t\"#\"b\"#\"c\"#\"v}'"));
-  $maximum = exec("dmidecode -qt16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB\$/{t+=\$2*1024} END{print t}'");
-  $available = $memory[0];
-  if ($available >= 1024) {
-    $available /= 1024;
-    $maximum /= 1024;
-    $unit = 'GB';
-  } else $unit = 'MB';
-  if ($maximum < $available) {$maximum = pow(2,ceil(log($available)/log(2))); $star = "*";} else $star = "";
-  echo "<td>$available $unit ("._('max. installable capacity')." $maximum $unit)$star</td></tr>";
-  $bank = array_map('trim',explode(';', $memory[1]));
-  $size = array_map('trim',explode(';', $memory[2]));
-  $speed = array_map('trim',explode(';', $memory[3]));
-  for ($i=0; $i<count($bank); $i++) if ($bank[$i] && $size[$i]) echo "<tr><td></td><td>{$bank[$i]} = {$size[$i]}, {$speed[$i]}</td></tr>";
+  $sizes = ['MB','GB','TB'];
+  $memory_type = $ecc = '';
+  $memory_installed = $memory_maximum = 0;
+  $memory_devices = dmidecode('Memory Device',17);
+  $modules = 0;
+  foreach ($memory_devices as $device) {
+    if (empty($device['Type']) || $device['Type']=='Unknown') continue;
+    [$size, $unit] = array_pad(explode(' ',$device['Size']),2,'');
+    $base = array_search($unit,$sizes);
+    if ($base!==false) $memory_installed += $size*pow(1024,$base);
+    if (!$memory_type) $memory_type = $device['Type'];
+    $modules++;
+  }
+  $memory_array = dmidecode('Physical Memory Array',16);
+  foreach ($memory_array as $device) {
+    [$size, $unit] = array_pad(explode(' ',$device['Maximum Capacity']),2,'');
+    $base = array_search($unit,$sizes);
+    if ($base>=1) $memory_maximum += $size*pow(1024,$base);
+    if (!$ecc && isset($device['Error Correction Type']) && $device['Error Correction Type']!='None') $ecc = ($device['Error Correction Type']??'')." ";
+  }
+  if ($memory_installed >= 1024) {
+    $memory_installed = round($memory_installed/1024);
+    $memory_maximum = round($memory_maximum/1024);
+    $unit = 'GiB';
+  } else $unit = 'MiB';
+
+  // If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
+  $low = $memory_maximum < $memory_installed;
+  if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
+  echo "<tr><td>"._('Memory').":</td><td>$memory_installed $unit $memory_type $ecc("._('max. installable capacity')." $memory_maximum $unit".($low?'*':'').")</td></tr>";
+  foreach ($memory_devices as $device) {
+    if (empty($device['Type']) || $device['Type']=='Unknown') continue;
+    $size = si($device['Size']??'0');
+    echo "<tr class='ram'><td></td><td>".$device['Locator'].": ".($device['Manufacturer']??'')." ".($device['Part Number']??'').", $size ".($device['Type']??'')." @ ".($device['Configured Memory Speed']??'')."</td></tr>";
+  }
   $i = 0;
   echo "<tr><td>"._('Network').":</td>";
-  exec("ifconfig -s -a|grep -Po '^(bond|eth)\d+ '",$sPorts);
+  exec("ls --indicator-style=none /sys/class/net|grep -Po '^(bond|eth)\d+$'",$sPorts);
   foreach ($sPorts as $port) {
-    $mtu = file_get_contents("/sys/class/net/$port/mtu");
+    $int = "/sys/class/net/$port";
+    $mtu = file_get_contents("$int/mtu");
+    $link = @file_get_contents("$int/carrier")==1;
     if ($i++) echo "<tr><td></td>";
-    if ($port=='bond0') {
-      $mode = exec("grep -Pom1 '^Bonding Mode: \K.+' /proc/net/bonding/bond0").", mtu $mtu";
-      echo "<td>$port: $mode</td></tr>";
-    } else if ($port=='lo') {
-      echo str_replace('yes','loopback',exec("ethtool lo|grep -Pom1 '^\s+Link detected: \K.+'"));
+    if (substr($port,0,4)=='bond') {
+      if ($link) {
+        $mode = str_replace('Bonding Mode: ','',file("/proc/net/bonding/$port",FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)[1]);
+        echo "<td>$port: $mode</td></tr>";
+      } else {
+        echo "<td>$port: "._("bond down")."</td></tr>";
+      }
     } else {
-      unset($info);
-      exec("ethtool $port|grep -Po '^\s+(Speed|Duplex|Link\sdetected): \K[^U\\n]+'",$info);
-      echo (array_pop($info)=='yes' && $info[0]) ? "<td>$port: {$info[0]}, ".strtolower($info[1])." duplex, mtu $mtu</td></tr>" : "<td>$port: not connected</td></tr>";
+      if ($link) {
+        $speed = file_get_contents("$int/speed");
+        $duplex = file_get_contents("$int/duplex");
+        echo "<td>$port: $speed Mbps, $duplex duplex, mtu $mtu</td></tr>";
+      } else {
+        echo "<td>$port: "._("interface down")."</td></tr>";
+      }
     }
   }
-  if ($i==0) echo _("Not available");
-  echo "</td></tr>";
+  if ($i==0) echo "<td>"._("Not available")."</td></tr>";
   echo "<tr><td>"._('Kernel').":</td><td>".exec("uname -srm")."</td></tr>";
   echo "<tr><td>"._('OpenSSL').":</td><td>".exec("openssl version|cut -d' ' -f2")."</td></tr>";
   echo "<tr><td>"._('P + Q algorithm').":</td>";
@@ -134,13 +152,6 @@ case 'overview':
   $p = grep("\.\.\.\. xor()",false);
   $q = grep('using algorithm ',true);
   echo "<td>$p + $q</td></tr>";
-  echo "<tr><td>"._('Uptime').":</td>";
-  $time = strtok(exec("cat /proc/uptime"), ".");
-  $days = sprintf("%2d", $time/86400);
-  $hours = sprintf("%2d", $time/3600%24);
-  $min = sprintf("%2d", $time/60%60);
-  $sec = sprintf("%2d", $time%60);
-  echo "<td>"._("$days days, $hours hours, $min minutes, $sec seconds",2)."</td></tr>";
   return;
 case 'bios':
   exec("dmidecode -qt0|grep -v '^Invalid entry'",$output);

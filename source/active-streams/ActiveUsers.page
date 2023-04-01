@@ -2,7 +2,7 @@ Menu="ActiveStreams"
 Title="User Names"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -14,12 +14,7 @@ Title="User Names"
 ?>
 <?
 $plugin = 'dynamix.active.streams';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
 ?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/ActiveUsers.page"))?>
-<?else:?>
 <style>
 td.host{width:86%}
 table.share_status tbody tr:nth-child(even){background-color:transparent}
@@ -67,4 +62,3 @@ $(function() {
 <tbody id="names"></tbody>
 </table>
 </form>
-<?endif;?>

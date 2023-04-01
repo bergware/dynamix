@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2022, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -33,58 +33,59 @@ function list_fan() {
   return $out;
 }
 
-switch ($_GET['op']) {
+switch ($_GET['op']??'') {
 case 'detect':
-if (is_file($_GET['pwm'])) {
-  $pwm = $_GET['pwm'];
-  $default_method = file_get_contents($pwm."_enable");
-  $default_rpm    = file_get_contents($pwm);
-  file_put_contents($pwm."_enable", "1");
-  file_put_contents($pwm, "150");
-  sleep(3);
-  $init_fans = list_fan();
-  file_put_contents($pwm, "255");
-  sleep(3);
-  $final_fans = list_fan();
-  file_put_contents($pwm, $default_rpm);
-  file_put_contents($pwm."_enable", $default_method);
-  for ($i=0; $i < count($final_fans); $i++) {
-    if (($final_fans[$i]['rpm'] - $init_fans[$i]['rpm'])>0) {
-      echo $init_fans[$i]['sensor'];
-      break;
+  $pwm = $_GET['pwm']??'';
+  if (is_file($pwm)) {
+    $default_method = file_get_contents($pwm."_enable");
+    $default_rpm    = file_get_contents($pwm);
+    file_put_contents($pwm."_enable", "1");
+    file_put_contents($pwm, "150");
+    sleep(3);
+    $init_fans = list_fan();
+    file_put_contents($pwm, "255");
+    sleep(3);
+    $final_fans = list_fan();
+    file_put_contents($pwm, $default_rpm);
+    file_put_contents($pwm."_enable", $default_method);
+    for ($i=0; $i < count($final_fans); $i++) {
+      if (($final_fans[$i]['rpm'] - $init_fans[$i]['rpm'])>0) {
+        echo $init_fans[$i]['sensor'];
+        break;
+      }
     }
   }
-}
-break;
+  break;
 case 'pwm':
-if (is_file($_GET['pwm']) && is_file($_GET['fan'])) {
-  $autofan = "$docroot/plugins/$plugin/scripts/rc.autofan";
-  exec("$autofan stop >/dev/null");
-  $pwm = $_GET['pwm'];
-  $fan = $_GET['fan'];
-  $fan_min = explode("_", $_GET['fan'])[0]."_min";
-  $default_method = file_get_contents($pwm."_enable");
-  $default_pwm = file_get_contents($pwm);
-  $default_fan_min = file_get_contents($fan_min);
-  file_put_contents($pwm."_enable", "1");
-  file_put_contents($fan_min, "0");
-  file_put_contents($pwm, "0");
-  sleep(5);
-  $min_rpm = file_get_contents($fan);
-  foreach (range(0, 20) as $i) {
-    $val=$i*5;
-    file_put_contents($pwm, $val);
-    sleep(2);
-    if ((file_get_contents($fan) - $min_rpm) > 15) {
-      # Debounce
-      for ($i=0; $i <= 10; $i++) if (file_get_contents($fan) == 0) {$is_lowest = false; break;} else {$is_lowest = true; sleep(1);};
-      if ($is_lowest) {echo $val; break;}
+  $pwm = $_GET['pwm']??'';
+  $fan = $_GET['fan']??'';
+  if (is_file($pwm) && is_file($fan)) {
+    $autofan = "$docroot/plugins/$plugin/scripts/rc.autofan";
+    exec("$autofan stop >/dev/null");
+    $fan_min = explode("_", $fan)[0]."_min";
+    $default_method = file_get_contents($pwm."_enable");
+    $default_pwm = file_get_contents($pwm);
+    $default_fan_min = file_get_contents($fan_min);
+    file_put_contents($pwm."_enable", "1");
+    file_put_contents($fan_min, "0");
+    file_put_contents($pwm, "0");
+    sleep(5);
+    $min_rpm = file_get_contents($fan);
+    foreach (range(0, 20) as $i) {
+      $val=$i*5;
+      file_put_contents($pwm, $val);
+      sleep(2);
+      if ((file_get_contents($fan) - $min_rpm) > 15) {
+        # Debounce
+        for ($i=0; $i <= 10; $i++) if (file_get_contents($fan) == 0) {$is_lowest = false; break;} else {$is_lowest = true; sleep(1);};
+        if ($is_lowest) {echo $val; break;}
+      }
     }
+    file_put_contents($pwm, $default_pwm);
+    file_put_contents($fan_min, $default_fan_min);
+    file_put_contents($pwm."_enable", $default_method);
+    exec("$autofan start >/dev/null");
   }
-  file_put_contents($pwm, $default_pwm);
-  file_put_contents($fan_min, $default_fan_min);
-  file_put_contents($pwm."_enable", $default_method);
-  exec("$autofan start >/dev/null");
+  break;
 }
-break;}
 ?>

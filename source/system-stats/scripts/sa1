@@ -4,11 +4,6 @@
 # Adapted by Bergware International for use in unRAID OS
 # Moved /usr/lib64/sa/sa1 --> /usr/local/emhttp/plugins/dynamix.system.stats/scripts/sa1
 #
-#@(#) sysstat-12.0.2
-#@(#) sa1: Collect and store binary data in system activity data file.
-#
-# Set default value for some variables.
-# Used only if $SYSCONFIG_DIR/sysstat doesn't exist!
 
 HISTORY=0
 SADC_OPTIONS=""

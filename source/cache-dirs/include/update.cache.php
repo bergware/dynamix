@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2018, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -45,10 +45,10 @@ foreach ($new as $key => $value) {
 }
 
 exec("$cachedirs stop >/dev/null");
-if ($adaptive == 1) {
-  if ($depth > 0) $options .= "-d ".$depth;
+if (isset($adaptive) && $adaptive==1) {
+  if (isset($depth) && $depth>0) $options .= "-d ".$depth;
 } else {
-  $options .= "-D ".($depth ?: 9999);
+  $options .= "-D ".($depth ?? 9999);
 }
 $options = trim($options);
 $keys['options'] = $options;

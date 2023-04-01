@@ -1,6 +1,6 @@
 #!/usr/bin/php -q
 <?PHP
-/* Copyright 2012-2022, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -21,7 +21,7 @@ extract(parse_plugin_cfg('dynamix',true));
 
 // add translations
 $_SERVER['REQUEST_URI'] = 'tempsettings';
-$login_locale = $display['locale'];
+$login_locale = $display['locale']??'';
 require_once "$docroot/webGui/include/Translations.php";
 
 // remember current language
@@ -68,8 +68,8 @@ while (true) {
   $temp = [];
   // check for language changes
   extract(parse_plugin_cfg('dynamix',true));
-  if ($display['locale'] != $locale_init) {
-    $locale_init = $display['locale'];
+  if (($display['locale']??'') != $locale_init) {
+    $locale_init = $display['locale']??'';
     update_translation($locale_init);
   }
   $sensors = explode(' ',exec("sensors -A|awk 'BEGIN{cpu=\"\";mb=\"\";fan=\"\"}{if (/^CPU Temp/) cpu=\$3*1; if (/^MB Temp/) mb=\$3*1; if (/^Array Fan/) fan=fan\" \"\$3*1} END{print cpu,mb fan}'"));

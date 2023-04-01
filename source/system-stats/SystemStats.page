@@ -4,7 +4,7 @@ Tag="area-chart"
 Cond="(exec(\"awk -F= '/^show=/{print $2}' /boot/config/plugins/dynamix.system.stats/dynamix.system.stats.cfg 2>/dev/null\")!='\"\"')"
 ---
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -16,26 +16,17 @@ Cond="(exec(\"awk -F= '/^show=/{print $2}' /boot/config/plugins/dynamix.system.s
  */
 ?>
 <?
-$plugin = 'dynamix.system.stats';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/SystemStats.page"))?>
-<?else:?>
-<?
 if ($var['fsState']=="Stopped"):
   echo "<div class='notice'>"._('Array must be **Started** to view system stats').".</div>";
   return;
 endif;
 
 $cols++;
-$tag = $cols==1 ? 'graph2' : 'graph3';
-$cpu = strpos($show,'cpu')!==false;
-$ram = strpos($show,'ram')!==false;
-$com = strpos($show,'com')!==false;
-$hdd = strpos($show,'hdd')!==false;
-
+$tag  = $cols==1 ? 'graph2' : 'graph3';
+$cpu  = strpos($show,'cpu')!==false;
+$ram  = strpos($show,'ram')!==false;
+$com  = strpos($show,'com')!==false;
+$hdd  = strpos($show,'hdd')!==false;
 $cell = 1;
 $last = ' last';
 $tag1 = $tag.((!$ram && !$com && !$hdd) ? $last : '');
@@ -99,5 +90,4 @@ $.removeCookie('one',{path:'/'});
 <?endif;?>
 <?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>
 <p><input type="button" value="_(Done)_" onclick="done()"></p>
-<?endif;?>
 <?endif;?>

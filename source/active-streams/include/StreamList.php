@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2012-2020, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,26 +11,19 @@
 ?>
 <?
 $plugin = 'dynamix.active.streams';
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-$translations = file_exists("$docroot/webGui/include/Translations.php");
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
-if ($translations) {
-  // add translations
-  $_SERVER['REQUEST_URI'] = 'activestreams';
-  require_once "$docroot/webGui/include/Translations.php";
-} else {
-  // legacy support (without javascript)
-  $noscript = true;
-  require_once "$docroot/plugins/$plugin/include/Legacy.php";
-}
+// add translations
+$_SERVER['REQUEST_URI'] = 'activestreams';
+require_once "$docroot/webGui/include/Translations.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
-$plex   = $_POST['plex'];
-$ppid   = $_POST['pid'];
-$ipv4   = $_POST['ipv4'] ? "-i@{$_POST['ipv4']}" : "";
-$ipv6   = $_POST['ipv6'] ? "-i@[{$_POST['ipv6']}]" : "";
+$plex   = $_POST['plex']??'';
+$ppid   = $_POST['pid']??'';
+$ipv4   = isset($_POST['ipv4']) ? "-i@{$_POST['ipv4']}" : "";
+$ipv6   = isset($_POST['ipv6']) ? "-i@[{$_POST['ipv6']}]" : "";
 $filter = $plex ? "^(smbd|$plex)" : "^smbd";
-$mounts = explode('|',urldecode($_POST['mounts']));
+$mounts = explode('|',urldecode($_POST['mounts']??''));
 $cfg    = array_map('trim',parse_plugin_cfg($plugin));
 
 extract(parse_plugin_cfg("dynamix",true));
@@ -46,7 +39,7 @@ function playtime($time) {
   $days = floor($time/86400);
   $time -= $days*86400;
   $hour = floor($time/3600);
-  $mins = $time/60%60;
+  $mins = floor($time/60)%60;
   $secs = $time%60;
   return ($days ? $days.'-':'').$hour.':'.($mins>9 ? '':'0').$mins.':'.($secs>9 ? '':'0').$secs;
 }
@@ -74,7 +67,7 @@ foreach ($smb as $row) {
     $asset[] = ['pid'=>$pid, 'file'=>str_replace('   ','/',substr($file,0,-27)), 'date'=>substr($file,-20)];
   }
 }
-if ($plex) {
+if ($plex && $ppid) {
   exec("nsenter -t $ppid -n lsof -OwlPn $ipv4 $ipv6 -sTCP:ESTABLISHED|awk 'NR>1 && \$9~/:443$/{print \$2,substr(\$9,index(\$9,\"->\")+2)}'",$lsof);
   $lsof = array_unique(array_map('strip_port',$lsof));
   foreach ($lsof as $row) {

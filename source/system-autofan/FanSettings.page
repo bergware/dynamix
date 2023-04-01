@@ -3,7 +3,7 @@ Title="Fan Auto Control"
 Icon="dynamix.system.autofan.png"
 ---
 <?PHP
-/* Copyright 2012-2022, Bergware International.
+/* Copyright 2012-2023, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,13 +20,7 @@ Icon="dynamix.system.autofan.png"
 ?>
 <?
 $plugin = "dynamix.system.autofan";
-$translations = file_exists("$docroot/webGui/include/Translations.php");
-require_once "$docroot/plugins/$plugin/include/Legacy.php";
-?>
-<?if (!$translations):?>
-<?eval('?>'.parse_file("$docroot/plugins/$plugin/FanSettings.page"))?>
-<?else:?>
-<?
+
 function parse_autofan_cfg($plugin,$index) {
   global $docroot;
   $ram = "$docroot/plugins/$plugin/default.cfg";
@@ -64,13 +58,13 @@ function list_pwm() {
   return $out;
 }
 function parity_disks($disk) {
-  return $disk['type']=='Parity' && strpos($disk['status'],'_NP')===false;
+  return $disk['type']=='Parity' && strpos($disk['status']??'','_NP')===false;
 }
 function data_disks($disk) {
-  return $disk['type']=='Data' && strpos($disk['status'],'_NP')===false;
+  return $disk['type']=='Data' && strpos($disk['status']??'','_NP')===false;
 }
 function cache_disks($disk) {
-  return $disk['type']=='Cache' && strpos($disk['status'],'_NP')===false;
+  return $disk['type']=='Cache' && strpos($disk['status']??'','_NP')===false;
 }
 ?>
 <script>
@@ -147,43 +141,43 @@ $(function() {
 
 _(Fan control function)_:
 : <select name="service">
-  <?=mk_option($cfg['service'], "0", _("Disabled"))?>
-  <?=mk_option($cfg['service'], "1", _("Enabled"))?>
+  <?=mk_option($cfg['service']??'', "0", _("Disabled"))?>
+  <?=mk_option($cfg['service']??'', "1", _("Enabled"))?>
   </select>
 
 _(PWM controller)_:
 : <select name="controller" onchange="changePWM(this.selectedIndex,this.value)">
-  <?=mk_option($_POST['controller']??$cfg['controller'], "", _("None"))?>
+  <?=mk_option($_POST['controller']??$cfg['controller']??'', "", _("None"))?>
   <?foreach (list_pwm() as $pwm):?>
-  <?=mk_option($_POST['controller']??$cfg['controller'], $pwm['sensor'], "{$pwm['chip']} - {$pwm['name']}")?>
+  <?=mk_option($_POST['controller']??$cfg['controller']??'', $pwm['sensor'], "{$pwm['chip']} - {$pwm['name']}")?>
   <?endforeach;?>
   </select>
 
 _(PWM fan)_:
-: <input type="text" name="fan" value="<?=$cfg['fan']?>" placeholder="_(Click DETECT)_"><input type="button" id="fan" value="_(Detect)_" onclick="detectFan()" style="margin:0">
+: <input type="text" name="fan" value="<?=$cfg['fan']??''?>" placeholder="_(Click DETECT)_"><input type="button" id="fan" value="_(Detect)_" onclick="detectFan()" style="margin:0">
 
 _(Minimum PWM value)_:
-: <input type="text" name="pwm" value="<?=$cfg['pwm']?>" placeholder=""><input type="button" id="pwm" value="_(Detect)_" onclick="detectFanLow()" style="margin:0" <?=$cfg['fan']?'':'disabled'?>>
+: <input type="text" name="pwm" value="<?=$cfg['pwm']??''?>" placeholder=""><input type="button" id="pwm" value="_(Detect)_" onclick="detectFanLow()" style="margin:0" <?=isset($cfg['fan'])?'':'disabled'?>>
 
 _(Low temperature threshold)_ (&deg;<?=$display['unit']?>):
-: <input type="number" name="low" min="0" max="200" value="<?=temp_val($cfg['low'])?>">
+: <input type="number" name="low" min="0" max="200" value="<?=temp_val($cfg['low'])??''?>">
 
 _(High temperature threshold)_ (&deg;<?=$display['unit']?>):
-: <input type="number" name="high" min="0" max="200" value="<?=temp_val($cfg['high'])?>">
+: <input type="number" name="high" min="0" max="200" value="<?=temp_val($cfg['high'])??''?>">
 
 _(Refresh interval)_ (_(minutes)_):
-: <input type="text" name="interval" value="<?=$cfg['interval']?>">
+: <input type="text" name="interval" value="<?=$cfg['interval']??''?>">
 
 _(Exclude drives)_:
 : <select id="s1" name="exclude" style="display:none" multiple>
   <?foreach (array_filter($disks,'parity_disks') as $disk):?>
-  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
+  <?=mk_option_check($cfg['exclude']??'',$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
   <?endforeach;?>
   <?foreach (array_filter($disks,'data_disks') as $disk):?>
-  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
+  <?=mk_option_check($cfg['exclude']??'',$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
   <?endforeach;?>
   <?foreach (array_filter($disks,'cache_disks') as $disk):?>
-  <?=mk_option_check($cfg['exclude'],$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
+  <?=mk_option_check($cfg['exclude']??'',$disk['device'],sprintf('%s (%s)',_(my_disk($disk['name']),3),$disk['device']))?>
   <?endforeach;?>
   </select>
 
@@ -195,4 +189,3 @@ _(Exclude drives)_:
 <input type="hidden" name="index" value="">
 <input type="hidden" name="controller" value="">
 </form>
-<?endif;?>
