@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.03.31a">
+<!ENTITY version   "2023.04.02">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cbc94cc90e234459b9f80814df7ed562">
+<!ENTITY MD5       "f7e075302a6b777f0c5fec1ea6e006d6">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,11 @@
 ##&name;
 
 ###&version;
+- Added dialog window of background operation can be opened from any page
+- Fixed location detection in size calculation
+- Minor bug fixes
+
+###2023.03.31
 - Added specific ZFS operation when moving or deleting ZFS shares
 
 ###2023.03.26
