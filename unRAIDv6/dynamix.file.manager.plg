@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.04.03">
+<!ENTITY version   "2023.04.06">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "1cf8c4a740ec4aea470d1f48f450a224">
+<!ENTITY MD5       "ad475fbe197244f992f3f29094da4874">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,12 @@
 ##&name;
 
 ###&version;
+- Added multi selection for search function
+- Added search function to folder menu
+- Added search function can be minimized and followed in footer
+- Several minor fixes
+
+###2023.04.03
 - Fixed regression error
 
 ###2023.04.02
