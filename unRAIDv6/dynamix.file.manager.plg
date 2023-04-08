@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.04.07c">
+<!ENTITY version   "2023.04.08">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "2f7126899ea121af868ce69629d6de0b">
+<!ENTITY MD5       "e37b5b80b72c0265d7c930d23a0e1c42">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Fixed various regression bugs
+
+###2023.04.07
 - Improved "Smart Move" operation
 - Fixed search location sometimes missing
 - Added items count in search results
