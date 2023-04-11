@@ -442,7 +442,7 @@ touch -t $(date -d "@$(($(date +%s)-86400))" +%Y%m%d%H%M.%S) $tmpfile.0
 day=0; new=0; old=0
 for disk in $disks; do
   hdd=${disk:5}
-  [[ -n $gui && -z $(hdparm -C /dev/$(dev $hdd) 2>/dev/null|grep -o active) ]] && continue
+  [[ -n $gui ]] && ! sdspin $(dev $hdd) && continue
   [[ -n $gui && -f /var/tmp/${hdd}.tmp ]] && continue #skip disk monitoring if user is watching progressbar
   sed -ri "s/(^$hdd=.*)/\1,analyse/" $path/disks.ini
   find $disk -type f -name "*" -newer $tmpfile.0 -exec getfattr -n user.$hash --absolute-names "{}" 1>/dev/null 2>$tmpfile +
