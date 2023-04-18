@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.share.floor">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.04.18b">
+<!ENTITY version   "2023.04.18c">
 <!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "9b51acd7f8d002172acfd316b29c9242">
+<!ENTITY MD5       "5eb5022ccea2e6661e0cccbf8daf6551">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
