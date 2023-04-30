@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.share.floor">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.04.18c">
+<!ENTITY version   "2023.04.30">
 <!ENTITY launch    "Settings/Scheduler">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "5eb5022ccea2e6661e0cccbf8daf6551">
+<!ENTITY MD5       "f36af592549a7c28e06a39e750896d88">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -16,6 +16,9 @@
 ##&name;
 
 ###&version;
+- fixed conflict with parity scheduler settings
+
+### 2023.04.18
 - fixed PHP errors
 
 ###2023.04.17
