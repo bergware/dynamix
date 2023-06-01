@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.manager">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.04.25">
+<!ENTITY version   "2023.06.01">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "78f1f0872bcbd0e7b1c5a1d2fc903879">
+<!ENTITY MD5       "0ccdbeedbe25386d3b0c5793e721ee9f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.10.0">
@@ -15,6 +15,9 @@
 ##&name;
 
 ###&version;
+- Fixed user string not displayed in file tree
+
+###2023.04.25
 - Made compatible with latest Unraid 6.12 version
 
 ###2023.04.11
