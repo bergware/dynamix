@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.09.01">
+<!ENTITY version   "2023.09.01a">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cfd2ca676c97eb3bb69aa04946610a27">
+<!ENTITY MD5       "8d7811479c83966b406ab49c86601818">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -17,7 +17,8 @@
 
 ###&version;
 - set watcher per disk
-= fix watcher stop
+- fix watcher stop
+- use sdparm instead of hdparm
 
 ###2023.03.26
 - fixed regression error in control execution 
