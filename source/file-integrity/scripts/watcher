@@ -20,7 +20,7 @@ fi
 # Torqu3Wr3nch: Update code to handle only file.partial moves caused by the Unraid Mover. 
 pipe=/var/run/hash.pipe.$4
 [[ -p $pipe ]] || mkfifo $pipe
-inotifywait -dsrqo $pipe -e close_write,move_to --exclude "$exclude" --format '%w%f' "/mnt/$4"
+inotifywait -dsrqo $pipe -e close_write,moved_to --exclude "$exclude" --format '%w%f' "/mnt/$4"
 
 # listener
 while read -r file; do
