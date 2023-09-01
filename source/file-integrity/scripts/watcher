@@ -23,8 +23,9 @@ busy=$(($(awk '$3~/md/{++c}END{print c}' /proc/diskstats)*512))
 jobs=$(($(nproc)*2))
 
 # setup named pipe and speaker
+# TODO(Torqu3Wr3nch): Update code to handle only file.partial moves caused by the Unraid Mover. 
 [[ -p $pipe ]] || mkfifo $pipe
-inotifywait -dsrqo $pipe -e close_write --exclude "$exclude" --format '%w%f' $disks
+inotifywait -dsrqo $pipe -e close_write,moved_to --exclude "$exclude" --format '%w%f' $disks
 
 # delay execution
 diskio(){
