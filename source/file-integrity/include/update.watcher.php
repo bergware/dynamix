@@ -43,10 +43,10 @@ $hash   = [''=>'sha256', '-md5'=>'md5', '-b2'=>'blake2', '-b3'=>'blake3'];
 $hname  = $hash[$method];
 
 if (isset($docker[$img]) && strpos(dirname($docker[$img]),'/mnt/disk')!==false) $map[] = expand_file(basename($docker[$img]));
-if (isset($new['folders'])) $map = array_merge($map,array_map('expand_folder',explode(',',$new['folders'])));
-if (isset($new['files']))   $map = array_merge($map,array_map('expand_file',explode(',',$new['files'])));
-if (isset($new['exclude'])) $map = array_merge($map,array_map('expand_share',explode(',',$new['exclude'])));
-if (isset($new['apple']))   $map = array_merge($map,[expand_folder('.AppleDB'),expand_file('.DS_Store')]);
+if (!empty($new['folders'])) $map = array_merge($map,array_map('expand_folder',explode(',',$new['folders'])));
+if (!empty($new['files']))   $map = array_merge($map,array_map('expand_file',explode(',',$new['files'])));
+if (!empty($new['exclude'])) $map = array_merge($map,array_map('expand_share',explode(',',$new['exclude'])));
+if (!empty($new['apple']))   $map = array_merge($map,[expand_folder('.AppleDB'),expand_file('.DS_Store')]);
 if (count($map)>1)   {$open = '('; $close = ')';} else {$open = $close = '';}
 
 $exclude = $map ? $open.regex(implode('|',$map)).$close : '';
