@@ -53,7 +53,7 @@ $exclude = $map ? $open.regex(implode('|',$map)).$close : '';
 $disks = str_replace(['disk',','],['/mnt/disk',' '],$new['disks']??'');
 
 file_put_contents($conf, "cmd=\"$cmd\"\nmethod=\"$method\"\nexclude=\"$exclude\"\ndisks=\"$disks\"\n");
-exec("$local/$plugin/scripts/rc.watcher ".(isset($new['service']) ? 'restart' : 'stop')." &>/dev/null");
+exec("$local/$plugin/scripts/rc.watcher ".(empty($new['service']) ? 'stop' : 'restart')." &>/dev/null");
 
 foreach ($keys as $key => $value) {
   if ($key[0]!='#' && !array_key_exists($key,$new)) unset($keys[$key]);
