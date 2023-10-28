@@ -2,11 +2,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.date.time">
 <!ENTITY author "Bergware">
-<!ENTITY version "2023.02.05">
+<!ENTITY version "2023.10.28">
 <!ENTITY launch "Settings/DateTime">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5 "6cb4183b0b527169224b98c865f2ee7f">
+<!ENTITY MD5 "eb04aebda376579fd5ef419d43f805b3">
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0" support="http://lime-technology.com/forum/index.php?topic=36543.0">
 
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- prepared for Unraid 6.13
+
+###2023.02.05
 - set minimum Unraid version to 6.9 (supports multi-language)
 - added support for upcoming Unraid version 6.12 
 
