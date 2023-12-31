@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.servers.redirect">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.12.31j">
+<!ENTITY version   "2023.12.31k">
 <!ENTITY launch    "Tools/Servers">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "2a92c7aa732240627b8047132a880625">
+<!ENTITY MD5       "5d1cf4746ed293b889aff6d63ab5d31b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
