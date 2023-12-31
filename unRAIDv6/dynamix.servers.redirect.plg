@@ -45,7 +45,7 @@ fi
 <FILE Run="/bin/bash">
 <INLINE>
 # Add server pages
-/usr/local/emhttp/plugins/&plugin;/scripts/servers
+/usr/local/emhttp/plugins/&name;/scripts/servers
 
 echo ""
 echo "-----------------------------------------------------------"
