@@ -3,11 +3,11 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.servers.redirect">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.12.31o">
+<!ENTITY version   "2024.01.01">
 <!ENTITY launch    "Tools/Servers">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "60d9d3368aa81b272fdea95bb923f776">
+<!ENTITY MD5       "e6d54cc88db0b91c37f8726fbed1543f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -20,7 +20,7 @@
 </CHANGES>
 
 <!--
-Copyright 2023, Bergware International
+Copyright 2024, Bergware International
 Dynamix Servers Redirect - shortcut to other servers
 -->
 
@@ -51,7 +51,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " Plugin &name; is installed."
 echo " This plugin requires Dynamix webGui to operate"
-echo " Copyright 2023, Bergware International"
+echo " Copyright 2024, Bergware International"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
