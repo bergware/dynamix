@@ -101,7 +101,7 @@ case 'rts':
   $hdd = '$2=="tps"';
   $ram = '$2=="kbmemfree"';
   $com = '$2=="'.($_POST['port']??'').'"';
-  exec("sar 1 1 -u -b -r -n DEV|grep -a '^A'|tr -d '\\0'|awk '$cpu {u=$3;n=$4;s=$5;}; $hdd {getline;r=$5;w=$6;}; $ram {getline;f=$2;c=$6+$7;d=$4;}; $com {x=$5;y=$6;} END{print u,n,s{$nl}r,w{$nl}f,c,d{$nl}x,y}'",$data);
+  exec("sar 1 1 -u -b -r -n DEV|grep -a '^A'|tr -d '\\0'|awk '$cpu {u=$3;n=$4;s=$5;}; $hdd {getline;r=$6;w=$7;}; $ram {getline;f=$2;c=$6+$7;d=$4;}; $com {x=$5;y=$6;} END{print u,n,s{$nl}r,w{$nl}f,c,d{$nl}x,y}'",$data);
   echo implode(' ', $data);
   exit;
 case 'cpu':
@@ -124,9 +124,9 @@ case 'com':
   break;
 case 'hdd':
   $series = ['Read','Write'];
-  $data = '$7,$8';
+  $data = '$8,$9';
   $case = '-- -b';
-  $mask = ' && $7<100000000000 && $8<100000000000';
+  $mask = ' && $8<100000000000 && $9<100000000000';
   break;
 }
 $input = [];
