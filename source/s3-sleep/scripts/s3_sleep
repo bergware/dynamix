@@ -239,9 +239,11 @@ HDD_activity() {
     [[ -f /dev/shm/2 ]] && cp -f /dev/shm/2 /dev/shm/1 || touch /dev/shm/1
     awk '/(sd[a-z]*|nvme[0-9]n1) /{print $3,$6+$10}' /proc/diskstats >/dev/shm/2
     for dev in ${array[@]}; do
-      [[ $monitor -ne 2 ]] && active=$(sdspin /dev/$dev) || active=
+      [[ $monitor -ne 2 ]] && $(sdspin /dev/$dev) 
+      # sdspin exit codes: 0=spun up, 1=error, 2=spun down
+      sdspinExitCode=$?
       [[ $monitor -ne 1 ]] && diskio=($(grep -Pho "^$dev \K\d+" /dev/shm/1 /dev/shm/2)) || diskio=
-      if [[ -n $active || ${diskio[0]} != ${diskio[1]} ]]; then
+      if [[ $sdspinExitCode -eq 0 || ${diskio[0]} != ${diskio[1]} ]]; then
         result=1
         break;
       fi
