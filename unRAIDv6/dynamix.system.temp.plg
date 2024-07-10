@@ -7,7 +7,6 @@
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "92d8ce80503e2c8023fb2696727616cf">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -169,7 +168,7 @@ fi
 <!-- SOURCE PACKAGE -->
 <FILE Name="&flash;/&name;.txz" Run="upgradepkg --install-new --reinstall">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
-<MD5>&MD5;</MD5>
+<MD5>92d8ce80503e2c8023fb2696727616cf</MD5>
 </FILE>
 
 <!-- SENSORS-DETECT SCRIPT -->
