@@ -3,11 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.04b">
+<!ENTITY version   "2024.07.10">
 <!ENTITY launch    "Settings/TempSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
-<!ENTITY MD5       "92d8ce80503e2c8023fb2696727616cf">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
@@ -16,6 +15,9 @@
 ##&name;
 
 ###&version;
+- bugfix for Unraid version 7.0.0
+
+###2023.02.04b
 - set minimum Unraid version to 6.9 (supports multi-language)
 - added support for upcoming Unraid version 6.12 
 
@@ -146,10 +148,12 @@ if [[ $MD5 != &MD5; ]]; then
   rm -f &flash;/&name;*.txz
 fi
 
-# Remove sensors-detect script (Unraid 6.7 and earlier)
+# Remove sensors-detect script (Unraid 6.7.3 and earlier)
 source /etc/unraid-version
-version=${version:2:2}
-if [[ $((${version/./}*1)) -lt 8 ]]; then
+TARGET_V="6.7.2"
+COMPARE="$version                                       
+$TARGET_V"
+if [ "$TARGET_V" == "$(echo "$COMPARE" | sort -V | tail -1)" ]; then
   rm -f /usr/sbin/sensors-detect
 fi
 
@@ -164,7 +168,7 @@ fi
 <!-- SOURCE PACKAGE -->
 <FILE Name="&flash;/&name;.txz" Run="upgradepkg --install-new --reinstall">
 <URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
-<MD5>&MD5;</MD5>
+<MD5>92d8ce80503e2c8023fb2696727616cf</MD5>
 </FILE>
 
 <!-- SENSORS-DETECT SCRIPT -->
