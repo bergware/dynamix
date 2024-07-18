@@ -49,6 +49,7 @@ span.green-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px 
 span.orange-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #FF9900;}
 span.red-button{padding:1px 4px;margin-right:6px;border-radius:4px;border:1px solid #CC0000;}
 .blue-text{color:#00529B;}
+table.share_status.fixed tr>td+td{min-width:39px;font-size:1.1rem;text-align:center;padding:0}
 </style>
 <script>
 function prepareWatch(form) {
