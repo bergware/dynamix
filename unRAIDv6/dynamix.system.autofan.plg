@@ -130,7 +130,7 @@ if [[ ! -e $cfg ]]; then
 fi
 
 # Start service
-enable=$(grep -Po '^service="\K[^"]+' $cfg)
+enable=$(grep -Poh '^service="\K[^"]+' &source;*.cfg 2> /dev/null | grep -m 1 1 || echo "0")
 if [[ $enable -eq 1 ]]; then
   at -M -f /tmp/start_service now 2>/dev/null
 fi
