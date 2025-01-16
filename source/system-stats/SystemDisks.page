@@ -63,11 +63,13 @@ foreach ($disks as $disk) {
   }
 }
 
-$arrayused = $arraysize-$arrayfree;
-$totalpercent = 100-round(100*$parity/($arraysize+$parity));
-$totaldisk = 100-$totalpercent-$gap;
-$freepercent = $var['startMode']=='Normal' ? round(100*$arrayfree/$arraysize) : 100;
-$arraypercent = 100-$freepercent;
+if ($arraysize > 0) {
+  $arrayused = $arraysize-$arrayfree;
+  $totalpercent = 100-round(100*$parity/($arraysize+$parity));
+  $totaldisk = 100-$totalpercent-$gap;
+  $freepercent = $var['startMode']=='Normal' ? round(100*$arrayfree/$arraysize) : 100;
+  $arraypercent = 100-$freepercent;
+}
 
 if ($display['time']=="%R") {
   $hour = '%H:%M';
@@ -502,6 +504,7 @@ $(function() {
 <?endif;?>
 });
 </script>
+<?if ($arraysize>0):?>
 <div class="mybar whitebar leftbar" style="width:<?=$totalpercent?>%;"><span id="totalarray" class="mybar <?=bar_color($arraypercent)?> align-left" style="width:0"></span></div>
 <div class="mybar graybar rightbar" style="width:<?=$totaldisk?>%"></div>
 <div class="leftbar"><img src="<?="/plugins/$plugin/images"?>/array.png" class="left"><strong><?=my_scale($arraysize,$unit,-1,-1)." $unit"?></strong><br><small>_(Total Array Size)_</small></div>
@@ -516,6 +519,7 @@ $(function() {
 <?endif;?>
 <?if ($critical || $warning):?>
 <div class="rightbar"><span class="mybar greenbar inside"></span><strong>_(Below)_ <?=$warning?$display['warning']:$display['critical']?>%</strong><br><small>_(Normal Usage)_</small></div>
+<?endif;?>
 <?endif;?>
 <span id="sys" class="graph1"></span>
 <?if (!empty($cfg['stats']) && substr($cfg['stats'],0,5)!='Tasks'):?>
