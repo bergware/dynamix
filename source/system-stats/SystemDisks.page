@@ -35,7 +35,7 @@ $index  = $text=='left' ? 2 : 0;
 $parity = $arraysize = $arrayfree = 0;
 $series = $sizes = [];
 $gap    = 0.18;
-$height = 52;
+$height = 50;
 $y      = 2;
 $rows   = 0;
 
@@ -409,7 +409,7 @@ $(function() {
     credits:{enabled:false}
   });
   syschart = new Highcharts.Chart({
-    chart:{renderTo:'sys',events:{load:sys},type:'bar',height:<?=$rows*$height?>,width:getWidth(true),zoomType:null},
+    chart:{renderTo:'sys',events:{load:sys},type:'bar',height:<?=($rows*$height)+75?>,width:getWidth(true),zoomType:null},
     colors:[{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#941C00'],[1,'#DE1100']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#CE7C10'],[1,'#F0B400']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#17BF0B'],[1,'#127A05']]},{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'#D9D9D9'],[1,'#949494']]}],
     plotOptions:{series:{stacking:'normal',animation:{duration:1000},pointPadding:0.2,groupPadding:0,
     dataLabels:{enabled:true,color:'#fff',align:'<?=$text?>',verticalAlign:'top',x:<?=$offset?>,y:<?=$y?>,style:{opacity:0},formatter:function(){if (this.series.index==<?=$index?>) return this.total+' %';}}}},
