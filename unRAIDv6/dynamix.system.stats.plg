@@ -2,18 +2,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.system.stats">
 <!ENTITY author "Bergware">
-<!ENTITY version "2024.01.05">
+<!ENTITY version "2025.01.18">
 <!ENTITY launch "Settings/StatSettings">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5 "308dd7b4aa1454c1a19aac2df826454f">
+<!ENTITY MD5 "db0ae8fd0d57b9259df887aaa2e28b0f">
 ]>
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0" icon="area-chart" support="http://lime-technology.com/forum/index.php?topic=36543.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.12.0" icon="area-chart" support="http://lime-technology.com/forum/index.php?topic=36543.0">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- fixed Unraid 7 when no array is used
+- fixed bar height in disk overview
+- Minimum Unraid version 6.12
+
+###2024.01.05
 - fixed read / write counters
 - updated included sysstat version to 12.7.5
 
