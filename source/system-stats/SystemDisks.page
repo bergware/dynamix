@@ -93,7 +93,6 @@ function bar_color($val) {
   return "greenbar";
 }
 ?>
-<link type="text/css" rel="stylesheet" href="<?=autov("/plugins/$plugin/styles/disk.stats.css")?>">
 <script src="<?=autov("/plugins/$plugin/javascript/jquery.highcharts.js")?>"></script>
 <script>
 var graph = <?=$graph?>;
@@ -113,7 +112,7 @@ function autoscale(value,text,size,kilo) {
 <?if ($show):?>
 function setChart() {
   if (graph==0) {
-    setTimeout(realtime,0);
+    setTimeout(realtime);
     $('#reset').show(); $('#monitor').show();
   } else {
     $('#reset').hide(); $('#monitor').hide();
@@ -123,16 +122,16 @@ function modeller(period) {
   graph = period;
   clearTimeout(timers.rtstime);
 <?if (strpos($show,'cpu')!==false):?>
-  clearTimeout(timers.cputime); setTimeout(cpu,0);
+  clearTimeout(timers.cputime); setTimeout(cpu);
 <?endif;?>
 <?if (strpos($show,'ram')!==false):?>
-  clearTimeout(timers.ramtime); setTimeout(ram,0);
+  clearTimeout(timers.ramtime); setTimeout(ram);
 <?endif;?>
 <?if (strpos($show,'com')!==false):?>
-  clearTimeout(timers.comtime); setTimeout(com,0);
+  clearTimeout(timers.comtime); setTimeout(com);
 <?endif;?>
 <?if (strpos($show,'hdd')!==false):?>
-  clearTimeout(timers.hddtime); setTimeout(hdd,0);
+  clearTimeout(timers.hddtime); setTimeout(hdd);
 <?endif;?>
   setChart();
 }
@@ -208,21 +207,21 @@ function systemStats() {
   clearTimeout(timers.systime);
   if (graph>0) {
 <?if (strpos($show,'cpu')!==false):?>
-    setTimeout(cpu,0);
+    setTimeout(cpu);
 <?endif;?>
 <?if (strpos($show,'ram')!==false):?>
-    setTimeout(ram,0);
+    setTimeout(ram);
 <?endif;?>
 <?if (strpos($show,'com')!==false):?>
-    setTimeout(com,0);
+    setTimeout(com);
 <?endif;?>
 <?if (strpos($show,'hdd')!==false):?>
-    setTimeout(hdd,0);
+    setTimeout(hdd);
 <?endif;?>
   }
 }
 function diskStats() {
-  setTimeout(function(){sys(0);},0);
+  setTimeout(function(){sys(0);});
   if (graph>0) {
 <?if (strpos($show,'cpu')!==false):?>
     clearTimeout(timers.cputime);
@@ -416,10 +415,10 @@ $(function() {
     title:{text:_('Disk Usage')},
     subtitle:{text:_('utilization in percentage')},
 <?if ($cfg['size']):?>
-    xAxis:[{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'1.2rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
-    {opposite:true,linkedTo:0,type:'linear',labels:{style:{fontSize:'1.2rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$sizes)?>]}],
+    xAxis:[{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'1.1rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
+    {opposite:true,linkedTo:0,type:'linear',labels:{style:{fontSize:'1.1rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$sizes)?>]}],
 <?else:?>
-    xAxis:{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'1.2rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
+    xAxis:{alternateGridColor:'rgba(255,255,255,.018)',type:'linear',labels:{style:{fontSize:'1.1rem'},y:5},lineWidth:0,tickWidth:0,categories:[<?=implode(',',$series)?>]},
 <?endif;?>
     yAxis:{gridLineDashStyle:'dash',labels:{y:15},max:100,plotLines:[
 <?if ($warning):?>
