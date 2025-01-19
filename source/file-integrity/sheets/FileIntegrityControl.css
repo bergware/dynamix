@@ -1,0 +1,19 @@
+input.thin{margin:1px}
+span.running{background-color:#FF9E9E}
+span.green-button{padding:2px 6px;margin-right:6px;border-radius:4px;border:1px solid #6FA239}
+span.orange-button{padding:2px 6px;margin-right:6px;border-radius:4px;border:1px solid #FF9900}
+span.red-button{padding:2px 6px;margin-right:6px;border-radius:4px;border:1px solid #CC0000}
+.blue-text{color:#00529B}
+.usage-disk{height:auto}
+.usage-disk>span:first-child{height:auto;padding:0}
+.fa-refresh{animation: rotate 1.5s linear infinite;}
+@keyframes rotate{to{ transform: rotate(360deg);}}
+
+.share_status{white-space:nowrap;margin:20px 0;cursor:help}
+.share_status thead tr:first-child td{width:90px;font-size:1.2rem;letter-spacing:1px;text-transform:uppercase}
+.share_status tr:nth-child(1){text-align:left;padding-left:12px}
+.share_status tr>td+td{min-width:38px;max-width:38px;font-size:1.1rem;text-align:center;padding:0}
+
+.tablesorter a{cursor:pointer;color:red}
+.tablesorter thead{visibility:hidden}
+.tablesorter tbody tr{height:44px;line-height:24px;display:none}
