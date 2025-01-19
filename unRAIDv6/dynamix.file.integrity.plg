@@ -3,19 +3,23 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.09.01c">
+<!ENTITY version   "2025.01.19">
 <!ENTITY launch    "Settings/FileIntegrity">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "cb6046708a6ba71fb54705680511202b">
+<!ENTITY MD5       "3df6b7323f1c7668abc860086bbe58a8">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.12.0">
 
 <CHANGES>
 ##&name;
 
 ###&version;
+- make compatible with Unraid 7
+- minimum Unraid version 6.12
+
+###2023.09.01
 - set watcher per disk
 - fix watcher stop
 - use sdparm instead of hdparm
