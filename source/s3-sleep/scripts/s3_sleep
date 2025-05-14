@@ -61,7 +61,7 @@ getCache() {
 
 # Get list of array devices
 getArray() {
-  array=($(grep -PB13 '^type="(Parity|Data)' $ini|grep -Po '^device="\K[^"]+'))
+  array=($(grep -PB16 '^type="(Parity|Data)' $ini|grep -Po '^device="\K[^"]+'))
 }
 
 # Get list of all devices
@@ -74,6 +74,12 @@ if [[ $1 == -ED ]]; then
   getFlash
   getCache
   getArray
+
+  # log error if no array devices found
+  if [[ -z $array ]]; then
+    log "ERROR: No array devices found"
+  fi
+  
   array+=(${flash[@]});
   [[ -n $cache ]] && array+=(${cache[@]})
   getDisks
