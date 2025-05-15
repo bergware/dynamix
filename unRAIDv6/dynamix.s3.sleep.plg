@@ -5,9 +5,9 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2023.03.23">
 <!ENTITY launch    "Settings/SleepSettings">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/AravindGopala/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
-<!ENTITY MD5       "adcde452695aeba4fb205688b5ce7b40">
+<!ENTITY MD5       "bf4ca395ea765a1c1a35cb569f9dee3e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
