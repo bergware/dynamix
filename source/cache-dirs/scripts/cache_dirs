@@ -775,7 +775,7 @@ count_files() {
     for share_dir in $dir_list ; do
       dir_to_scan="$i/$share_dir"
       if [ -d "$dir_to_scan" ] ; then
-        local thisDirCount=$(find $dir_to_scan -type f $depth_arg | wc -l)
+        local thisDirCount=$(find $dir_to_scan $args $depth_arg | wc -l)
         totalCount=$((totalCount+thisDirCount))
       fi
     done
