@@ -7,6 +7,10 @@ options=/etc/$script.conf
 s3_sleep.start() {
   if [[ -z $(pgrep -f $execute) ]]; then
     $execute $(cat $options) 1>/dev/null 2>&1
+    while ! command -v sdspin >/dev/null 2>&1; do
+    echo "rc.s3_sleep: waiting for sdspin..."
+    sleep 2
+    done
     echo "$script started"
   else
     echo "$script already running!"

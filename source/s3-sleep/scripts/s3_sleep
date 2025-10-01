@@ -249,7 +249,7 @@ HDD_activity() {
       # check for activity status
       if [[ $monitor -ne 2 ]];then
         # sdspin exit codes: 0=spun up, 1=error, 2=spun down
-        sdspin /dev/$dev
+        sdspin /dev/"$dev"
         active=$?
         log "Disk: $dev status is $active"
       fi
