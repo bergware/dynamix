@@ -42,12 +42,16 @@
 # Version 3.0.10  Fix list of devices outside array
 #                 Take into account custom port numbers of telnet and ssh
 # Version 3.0.11  Use sdspin to monitor disks (provided by Doron)
+# Version 3.0.12  Fix sdspin failed to monitor disks (provided by Aravind Datla)
 #
 # Bergware International
 ####################################################################################
-version=3.0.11
+version=3.0.12
 program=$(basename $0)
 ini=/var/local/emhttp/disks.ini
+
+# Ensure PATH includes /usr/local/sbin
+export PATH=$PATH:/usr/local/sbin
 
 # Get flash device
 getFlash() {
@@ -249,8 +253,14 @@ HDD_activity() {
       # check for activity status
       if [[ $monitor -ne 2 ]];then
         # sdspin exit codes: 0=spun up, 1=error, 2=spun down
-        sdspin /dev/"$dev"
-        active=$?
+        if command -v sdspin >/dev/null 2>&1; then
+          sdspin /dev/"$dev"
+          active=$?
+        else
+          log "sdspin command not found!, assuming disk active"
+          log "PATH is $PATH"
+          active=0
+        fi
         log "Disk: $dev status is $active"
       fi
 
