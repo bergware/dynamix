@@ -261,13 +261,11 @@ HDD_activity() {
           log "PATH is $PATH"
           active=0
         fi
-        log "Disk: $dev status is $active"
       fi
 
       # check for counters
       if [[ $monitor -ne 1 ]];then
         diskio=($(grep -Pho "^$dev \K\d+" /dev/shm/1 /dev/shm/2)) || diskio=
-        log "Disk: $dev counter is [${diskio[0]},${diskio[1]}]"
       fi
 
       if [[ $active -eq 0 || ${diskio[0]} != ${diskio[1]} ]]; then
