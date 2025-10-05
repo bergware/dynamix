@@ -257,8 +257,7 @@ HDD_activity() {
           sdspin /dev/"$dev"
           active=$?
         else
-          log "sdspin command not found!, assuming disk active"
-          log "PATH is $PATH"
+          log "sdspin command not found! Assuming disk /dev/$dev is active ((PATH is $PATH))."
           active=0
         fi
       fi
@@ -274,6 +273,7 @@ HDD_activity() {
       fi
     done
   fi
+
   if [[ -n $result ]]; then
     log "Disk activity on going: $dev"
     echo $result
