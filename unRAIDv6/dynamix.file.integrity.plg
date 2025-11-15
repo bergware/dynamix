@@ -522,17 +522,17 @@ exit 0
 
 <!-- B2SUM PACKAGE (prepared by Bergware) -->
 <FILE Name="/boot/packages/b2sum-20130305-x86_64-1.txz" Run="upgradepkg --install-new" Max="6.3.9">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/b2sum-20130305-x86_64-1.txz</URL>
+<URL>https://raw.githubusercontent.com/unraid/dynamix/master/archive/b2sum-20130305-x86_64-1.txz</URL>
 </FILE>
 
 <!-- B2SUM PACKAGE (prepared by falcosc) -->
 <FILE Name="/boot/packages/b3sum-1.0.0-x86_64-1.txz" Run="upgradepkg --install-new">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/b3sum-1.0.0-x86_64-1.txz</URL>
+<URL>https://raw.githubusercontent.com/unraid/dynamix/master/archive/b3sum-1.0.0-x86_64-1.txz</URL>
 </FILE>
 
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/unraid/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 

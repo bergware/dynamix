@@ -215,13 +215,13 @@ fi
 
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/unraid/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 
 <!-- SYSSTAT PACKAGE (prepared by Bergware) -->
 <FILE Name="/boot/config/plugins/&name;/sysstat-12.7.5.txz" Run="upgradepkg --install-new" Max="6.11.9">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/sysstat-12.7.5.txz</URL>
+<URL>https://raw.githubusercontent.com/unraid/dynamix/master/archive/sysstat-12.7.5.txz</URL>
 </FILE>
 
 <!-- POST-INSTALL SCRIPT -->
