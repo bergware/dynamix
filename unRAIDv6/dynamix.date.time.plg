@@ -2,9 +2,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "dynamix.date.time">
 <!ENTITY author "Bergware">
-<!ENTITY version "2023.10.28">
+<!ENTITY version "2025.11.14">
 <!ENTITY launch "Settings/DateTime">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5 "eb04aebda376579fd5ef419d43f805b3">
 ]>
@@ -14,6 +14,9 @@
 ##&name;
 
 ###&version;
+- Migrate to Unraid github repository
+
+###2023.10.28
 - prepared for Unraid 6.13
 
 ###2023.02.05
