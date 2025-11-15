@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.factory.reset">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.04.19">
+<!ENTITY version   "2025.11.14">
 <!ENTITY launch    "Tools/FactoryReset">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
@@ -13,9 +13,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
 
 <CHANGES>
-##&name;
+##Dynamix Factory Reset
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2023.04.19
 - first release
 
 </CHANGES>

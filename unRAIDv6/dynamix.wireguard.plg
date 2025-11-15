@@ -3,8 +3,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.wireguard">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2021.06.02">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY version   "2025.11.14">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "84c75ac5ee6a68fd6c66cbdd882edb70">
 ]>
@@ -12,9 +12,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" icon="icon-wireguard" pluginURL="&pluginURL;" min="6.8.0" max="6.9.9">
 
 <CHANGES>
-##&name;
+##Dynamix Wireguard
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2021.06.02
 - fixed false IP warnings
 
 ###2021.05.10

@@ -3,9 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.file.integrity">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2025.01.19">
+<!ENTITY version   "2025.11.14">
 <!ENTITY launch    "Settings/FileIntegrity">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "3df6b7323f1c7668abc860086bbe58a8">
 ]>
@@ -13,9 +13,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.12.0">
 
 <CHANGES>
-##&name;
+##Dynamix File Integrity
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2025.01.19
 - make compatible with Unraid 7
 - minimum Unraid version 6.12
 

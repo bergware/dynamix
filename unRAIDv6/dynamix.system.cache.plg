@@ -3,8 +3,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.cache">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2016.12.28">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY version   "2025.11.14">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "9078855a96661c6e8df9fc36342f0746">
 ]>
@@ -12,9 +12,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.3.0-rc6">
 
 <CHANGES>
-##&name;
+##Dynamix System Cache
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2016.12.28
 - inhibit regular mover in continuous mode
 
 ###2016.11.01

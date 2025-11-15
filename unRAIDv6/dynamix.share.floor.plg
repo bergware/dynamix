@@ -3,9 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.share.floor">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.04.30a">
+<!ENTITY version   "2025.11.14">
 <!ENTITY launch    "Settings/Scheduler">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "b9045273c8bf71fe1b9bd6437f8f64f7">
 ]>
@@ -13,9 +13,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
 
 <CHANGES>
-##&name;
+##Dynamix Share Floor
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2023.04.30a
 - fixed conflict with parity scheduler settings
 
 ### 2023.04.18
