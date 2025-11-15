@@ -5,7 +5,7 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2025.11.14">
 <!ENTITY launch    "Tools/FactoryReset">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "86e2b8da4fea10440b35d7e086a8e295">
 ]>
@@ -41,7 +41,7 @@ fi
 
 <!-- SOURCE PACKAGE -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
-<URL>https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz</URL>
+<URL>https://raw.githubusercontent.com/unraid/dynamix/master/archive/&name;.txz</URL>
 <MD5>&MD5;</MD5>
 </FILE>
 

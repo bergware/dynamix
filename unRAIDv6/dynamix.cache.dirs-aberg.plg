@@ -138,7 +138,7 @@ fi
 </FILE>
 
 <!-- SOURCE PACKAGE -->
-<!-- dynamix: https://raw.githubusercontent.com/bergware/dynamix/master/archive/&name;.txz -->
+<!-- dynamix: https://raw.githubusercontent.com/unraid/dynamix/master/archive/&name;.txz -->
 <!-- arberg: https://github.com/arberg/dynamix/releases/download/&releaseTag;/&name;.txz -->
 <FILE Name="&source;.txz" Run="upgradepkg --install-new --reinstall">
 <URL>https://github.com/arberg/dynamix/releases/download/&releaseTag;/&name;.txz</URL>
