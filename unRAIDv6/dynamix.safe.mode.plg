@@ -3,8 +3,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.safe.mode">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.06.29">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY version   "2025.11.14">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "77e55f10cf4242e572a50f16d1f1b069">
 ]>
@@ -12,9 +12,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.9.0">
 
 <CHANGES>
-##&name;
+##Dynamix Safe Mode
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2023.06.29
 - initial release for unRAID v6
 </CHANGES>
 

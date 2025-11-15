@@ -3,8 +3,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.bleeding.edge-6.11">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2022.07.11">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY version   "2025.11.14">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "910d94463f088ede57d67506bf4c2f75">
 ]>
@@ -18,9 +18,12 @@
 </ALERT>
 
 <CHANGES>
-##&name;
+##Dynamix Bleeding Edge-6 11
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2022.07.11
 - Release based on 6.11-beta5
 
 </CHANGES>

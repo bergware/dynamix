@@ -3,8 +3,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.schedules">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.04">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY version   "2025.11.14">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "bf5e63b3056ea1369a88184afe0f35a7">
 ]>
@@ -12,9 +12,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="6.9.0">
 
 <CHANGES>
-##&name;
+##Dynamix Schedules
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2023.02.04
 - set minimum Unraid version to 6.9 (supports multi-language)
 - added support for upcoming Unraid version 6.12 
 

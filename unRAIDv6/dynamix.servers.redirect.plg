@@ -3,9 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.servers.redirect">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2024.01.01">
+<!ENTITY version   "2025.11.14">
 <!ENTITY launch    "Tools/Servers">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "e6d54cc88db0b91c37f8726fbed1543f">
 ]>
@@ -13,9 +13,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
 
 <CHANGES>
-##&name;
+##Dynamix Servers Redirect
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2024.01.01
 - initial release for Unraid
 </CHANGES>
 

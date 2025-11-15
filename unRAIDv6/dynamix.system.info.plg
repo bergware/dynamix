@@ -3,9 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.info">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2023.02.05">
+<!ENTITY version   "2025.11.14">
 <!ENTITY launch    "Tools/SystemProfiler">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY source    "/boot/config/plugins/&name;/&name;">
 <!ENTITY MD5       "9d2245c8f258277ee0e302271e652b31">
 ]>
@@ -13,9 +13,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
 
 <CHANGES>
-##&name;
+##Dynamix System Info
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2023.02.05
 - set minimum Unraid version to 6.9 (supports multi-language)
 - added support for upcoming Unraid version 6.12 
 - several fixes in overview information

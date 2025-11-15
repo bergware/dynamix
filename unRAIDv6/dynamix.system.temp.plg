@@ -3,9 +3,9 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.system.temp">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2024.07.10">
+<!ENTITY version   "2025.11.14">
 <!ENTITY launch    "Settings/TempSettings">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/bergware/dynamix/master/unRAIDv6/&name;.plg">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/unraid/dynamix/master/unRAIDv6/&name;.plg">
 <!ENTITY flash     "/boot/config/plugins/&name;">
 <!ENTITY MD5       "92d8ce80503e2c8023fb2696727616cf">
 ]>
@@ -13,9 +13,12 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.9.0">
 
 <CHANGES>
-##&name;
+##Dynamix System Temp
 
-###&version;
+###2025.11.14
+- Migrate repository to Unraid
+
+###2024.07.10
 - bugfix for Unraid version 7.0.0
 
 ###2023.02.04b;
